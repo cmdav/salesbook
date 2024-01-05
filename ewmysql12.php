@@ -253,7 +253,7 @@ class mysqlt_driver_ADOConnection extends ADOConnection
 	 * @access private 
 	 */
 
-	function _connect($host = "", $username = "", $password = "", $database = "", $persistent, $forcenew)
+	function _connect($persistent, $forcenew, $host = "", $username = "", $password = "", $database = "")
 	{
 		if (EW_USE_MYSQLI) {
 			if (!function_exists('mysqli_real_connect')) return false;
