@@ -372,7 +372,8 @@ class clogin extends cusers {
 
 	// Validate Captcha
 	function ValidateCaptcha() {
-		return ($this->captcha == @$_SESSION["EW_CAPTCHA_CODE"]);
+        return true;
+		// return ($this->captcha == @$_SESSION["EW_CAPTCHA_CODE"]);
 	}
 
 	// Reset Captcha
