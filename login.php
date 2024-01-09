@@ -743,6 +743,7 @@ flogin.ValidateRequired = false;
 <?php $login->ShowPageHeader(); ?>
 <?php
 $login->ShowMessage();
+
 ?>
 <form name="flogin" id="flogin" class="form-horizontal ewForm ewLoginForm" action="<?php echo ew_CurrentPage() ?>" method="post">
 <?php if (MS_LOGIN_WINDOW_TYPE=="default" || MS_LOGIN_WINDOW_TYPE=="") { ?>
@@ -872,6 +873,7 @@ flogin.Init();
 $(document).ready(function(){
 	$("#btnsubmit").button().click(function(){
 		if (flogin.Validate() == true ) {
+
 			alertify.success("<?php echo Language()->Phrase("AlertifyProcessing"); ?>");
 			$('#msLoginDialog').slideUp(800);
 		}
