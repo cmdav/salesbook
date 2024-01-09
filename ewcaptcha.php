@@ -5,7 +5,9 @@ session_start();
 <?php
 
 class cCaptcha {
-	var $font = EW_CAPTCHA_FONT;
+	//fix
+	var $font = "../phpfont/DejaVuSans.ttf";
+	// var $font = EW_CAPTCHA_FONT;
 	var $background_color = 'FFFFFF'; // hex string
 	var $text_color = '003359'; // hex string
 	var $noise_color = '64A0C8'; // hex string
@@ -38,8 +40,8 @@ class cCaptcha {
 	}
 
 	function Show() {
-		$code = $this->GenerateCode($this->characters);
-		$ocode = $code; // P61
+		$codes = $this->GenerateCode($this->characters);
+		$ocode = $codes; // P61
 		$code = "";
 		$len = strlen($ocode);
 		for ($i=0; $i<$len; $i++) {
@@ -74,8 +76,10 @@ class cCaptcha {
 
 		// create textbox and add text
 		$textbox = imagettfbbox($this->font_size, 0, $font_file, $code) or die('Error in imagettfbbox function');
+
 		$x = ($this->width - $textbox[4])/2;
 		$y = ($this->height - ($textbox[5] - $textbox[3]))/2;
+		//$text_color = imagecolorallocate($image, 0, 0, 255);
 		imagettftext($image, $this->font_size, 0, $x, $y, $text_color, $font_file , $code) or die('Error in imagettftext function');
 
 		// output captcha image to browser

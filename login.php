@@ -1,5 +1,7 @@
 <?php
+
 if (session_id() == "") session_start(); // Initialize Session data
+echo $_SESSION["EW_CAPTCHA_CODE"];
 ob_start(); // Turn on output buffering
 ?>
 <?php include_once "ewcfg12.php" ?>
@@ -7,6 +9,7 @@ ob_start(); // Turn on output buffering
 <?php include_once "phpfn12.php" ?>
 <?php include_once "usersinfo.php" ?>
 <?php include_once "userfn12.php" ?>
+
 <?php
 
 //
