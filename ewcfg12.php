@@ -58,7 +58,7 @@ $EW_FONT_PATH = realpath('./phpfont');
 define("EW_USE_ADODB", FALSE); // Use ADOdb
 if (!defined("EW_USE_MYSQLI"))
 	define('EW_USE_MYSQLI', extension_loaded("mysqli")); // Use MySQLi
-$EW_CONN["DB"] = array("conn" => NULL, "id" => "DB", "type" => "MYSQL", "host" => "localhost", "port" => 3306, "user" => "root", "pass" => "Elvis56", "db" => "php_stock", "qs" => "`", "qe" => "`");
+$EW_CONN["DB"] = array("conn" => NULL, "id" => "DB", "type" => "MYSQL", "host" => "localhost", "port" => 3306, "user" => "root", "pass" => "root", "db" => "salebookdb", "qs" => "`", "qe" => "`");
 $EW_CONN[0] = &$EW_CONN["DB"];
 
 // Set up database error function
@@ -583,7 +583,7 @@ $Breadcrumb = NULL;
 define("EW_ROWTYPE_PREVIEW", 11); // Preview record
 ?>
 <?php
-define("EW_CAPTCHA_FONT", "monofont");
+define("passEW_CAPTCHA_FONT", "monofont");
 ?>
 <?php
 define("EW_USE_PHPWORD", TRUE);

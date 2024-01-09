@@ -196,10 +196,18 @@ class cLanguage {
 			if (!empty($n_sign_posn) && $n_sign_posn <> CHAR_MAX) $DEFAULT_N_SIGN_POSN = $n_sign_posn;
 		} else { // Use language file
 			$ar = array("p_cs_precedes", "p_sep_by_space", "n_cs_precedes", "n_sep_by_space");
+
 			foreach ($DEFAULT_LOCALE as $key => $value) {
-				if ($this->LocalePhrase($key) <> "")
-					$DEFAULT_LOCALE[$key] = in_array($key, $ar) ? $this->LocalePhrase($key) == "1" : $this->LocalePhrase($key);
+				if ($this->LocalePhrase($key) !== "") {
+					// Check if the key is in the specified array
+					if (in_array($key, $ar)) {
+						$DEFAULT_LOCALE->$key = $this->LocalePhrase($key) == "1";
+					} else {
+						$DEFAULT_LOCALE->$key = $this->LocalePhrase($key);
+					}
+				}
 			}
+
 		}
 
 		/**
