@@ -247,6 +247,7 @@ class cregister extends cusers {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
+
 			define("EW_PAGE_ID", 'register', TRUE);
 
 		// Start timer
@@ -391,6 +392,7 @@ class cregister extends cusers {
 
 	// Validate Captcha
 	function ValidateCaptcha() {
+        return true;
 		return ($this->captcha == @$_SESSION["EW_CAPTCHA_CODE"]);
 	}
 

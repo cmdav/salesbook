@@ -1,6 +1,7 @@
 <?php
 
 if (session_id() == "") session_start(); // Initialize Session data
+if(isset($_SESSION["EW_CAPTCHA_CODE"]))
 echo $_SESSION["EW_CAPTCHA_CODE"];
 ob_start(); // Turn on output buffering
 ?>
@@ -417,16 +418,19 @@ class clogin extends cusers {
 			$this->Username = ""; // Initialize
 			$encrypted = FALSE; // v12
 			if (isset($_POST["username"])) {
+               // die('check line 421');
 				$this->Username = ew_RemoveXSS(ew_StripSlashes($_POST["username"]));
 				$sPassword = ew_RemoveXSS(ew_StripSlashes(@$_POST["password"]));
 				$this->LoginType = strtolower(ew_RemoveXSS(@$_POST["type"]));
 			} else if (EW_ALLOW_LOGIN_BY_URL && isset($_GET["username"])) {
+               // die('check line 426');
 				$this->Username = ew_RemoveXSS(ew_StripSlashes($_GET["username"]));
 				$sPassword = ew_RemoveXSS(ew_StripSlashes(@$_GET["password"]));
 				$this->LoginType = strtolower(ew_RemoveXSS(@$_GET["type"]));
 				$encrypted = !empty($_GET["encrypted"]);
 			} // v12
 			if ($this->Username <> "") {
+                // die('check line 433');
 				$bValidate = $this->ValidateForm($this->Username, $sPassword);
 				if (!$bValidate)
 					$this->setFailureMessage($gsFormError);
@@ -446,6 +450,7 @@ class clogin extends cusers {
 					// End of modification How Long User Should be Allowed Login in the Messages When Failed Login Exceeds the Maximum, by Masino Sinaga, May 12, 2012
 				}
 			} else {
+                // die('username not entered');
 				if ($Security->IsLoggedIn()) {
 					if ($this->getFailureMessage() == "")
 						$this->Page_Terminate($sLastUrl); // Return to last accessed page
@@ -466,24 +471,26 @@ class clogin extends cusers {
 			$bValidPwd = FALSE;
 			if (MS_SHOW_CAPTCHA_ON_LOGIN_PAGE) {
 
-		// CAPTCHA checking
-		if (ew_IsHttpPost()) {
-			$this->captcha = @$_POST["captcha"];
-			if (!$this->ValidateCaptcha()) { // CAPTCHA unmatched
-				$this->setFailureMessage($Language->Phrase("EnterValidateCode")); // Set message
-				$bValidate = FALSE;
-			}
-		}
-		if (!$bValidate) {
-			$this->ResetCaptcha();
-		}
+                // CAPTCHA checking
+                if (ew_IsHttpPost()) {
+                    $this->captcha = @$_POST["captcha"];
+                    if (!$this->ValidateCaptcha()) { // CAPTCHA unmatched
+                        $this->setFailureMessage($Language->Phrase("EnterValidateCode")); // Set message
+                        $bValidate = FALSE;
+                    }
+                }
+                if (!$bValidate) {
+                    $this->ResetCaptcha();
+                }
 			}
 			if ($bValidate) {
-
+               // die('user validated');
 				// Call Logging In event
 				$bValidate = $this->User_LoggingIn($this->Username, $sPassword);
+
 				if ($bValidate) {
 					$bValidPwd = $Security->ValidateUser($this->Username, $sPassword, FALSE, $encrypted); // Manual login v12
+
 					if (!$bValidPwd) {
 
 						// Password expired, force change password
@@ -496,6 +503,7 @@ class clogin extends cusers {
 
 					// Password changed date not initialized, set as today
 					} elseif ($UserProfile->EmptyPasswordChangedDate($this->Username)) {
+
 						$UserProfile->SetValue(EW_USER_PROFILE_LAST_PASSWORD_CHANGED_DATE, ew_StdCurrentDate());
 						$UserProfile->SaveProfileToDatabase($this->Username);
 					}
@@ -506,7 +514,6 @@ class clogin extends cusers {
 			}
 		}
 		if ($bValidPwd) {
-
 			// Write cookies
 			if ($this->LoginType == "a") { // Auto login
 				setcookie(EW_PROJECT_NAME . '[AutoLogin]',  "autologin", EW_COOKIE_EXPIRY_TIME); // Set autologin cookie
@@ -523,6 +530,7 @@ class clogin extends cusers {
 
 			// Begin of modification by Masino Sinaga, for saving the last login date time, November 6, 2011
 			$UserProfile->Profile[MS_USER_PROFILE_LAST_LOGIN_DATE_TIME] = ew_StdCurrentDateTime();
+
 			$UserProfile->SaveProfileToDatabase($this->Username);
 
 			// End of modification by Masino Sinaga, for saving the last login date time, November 6, 2011
@@ -664,6 +672,7 @@ if (!isset($login)) $login = new clogin();
 $login->Page_Init();
 
 // Page main
+
 $login->Page_Main();
 
 // Begin of modification Displaying Breadcrumb Links in All Pages, by Masino Sinaga, May 4, 2012
@@ -762,6 +771,10 @@ $login->ShowMessage();
 	<div class="form-group">
 		<label class="col-sm-4 control-label ewLabel" for="password"><?php echo $Language->Phrase("Password") ?></label>
 		<div class="col-sm-8"><input type="password" name="password" id="password" class="form-control ewControl" placeholder="<?php echo ew_HtmlEncode($Language->Phrase("Password")) ?>"></div>
+	</div>
+	<div class="form-group">
+		<label class="col-sm-4 control-label ewLabel" for="code">Organisation code</label>
+		<div class="col-sm-8"><input type="text" name="code" id="code" class="form-control ewControl" placeholder="<?php echo ew_HtmlEncode($Language->Phrase("code")) ?>"></div>
 	</div>
 	<div class="form-group">
 		<div class="col-sm-offset-4 col-sm-8">

@@ -4316,6 +4316,7 @@ class cAdvancedSecurity {
 // End of modification This User is Currently Being Deactivated Now, by Masino Sinaga, May 5, 2012
 	// Validate user
 	function ValidateUser(&$usr, &$pwd, $autologin, $encrypted = FALSE) {
+
 		global $Language;
 		global $UserTable, $UserTableConn;
 		global $UserProfile;
@@ -4333,6 +4334,7 @@ class cAdvancedSecurity {
 
 		// Check hard coded admin first
 		if (!$ValidateUser) {
+
 			if (EW_CASE_SENSITIVE_PASSWORD) {
 				$ValidateUser = (!$CustomValidateUser && EW_ADMIN_USER_NAME == $usr && EW_ADMIN_PASSWORD == $pwd) ||
 								($CustomValidateUser && EW_ADMIN_USER_NAME == $usr);
@@ -4353,7 +4355,9 @@ class cAdvancedSecurity {
 
 		// Check other users
 		if (!$ValidateUser) {
+
 			$sFilter = str_replace("%u", ew_AdjustSql($usr, EW_USER_TABLE_DBID), EW_USER_NAME_FILTER);
+
 			$sFilter .= " AND " . EW_USER_ACTIVATE_FILTER;
 
 			// Set up filter (SQL WHERE clause) and get return SQL
