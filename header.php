@@ -1,3 +1,13 @@
+<style>
+	h1{
+		color:white !important;
+		font-weight:bold;
+		font-size:2rem;
+	}
+	a{
+		text-decoration:none !important;
+	}
+</style>
 <?php
 
 // Compatibility with PHP Report Maker
@@ -408,20 +418,38 @@ var MS_TOOLTIP_POSITION_FOR_INPUT_ELEMENT = "Bottom";
 		<?php if (MS_SHOW_LOGO_IN_HEADER) { ?>
 		<?php if (MS_SHOW_LOGO_IN_MOBILE_LAYOUT) { ?>
 		<?php if (MS_LOGO_IMAGE_IN_MOBILE_LAYOUT != "") { ?>
-		<div class="hidden-lg hidden-md hidden-sm <?php echo MS_HEADER_LOGO_CLASS; ?>" <?php if($Language->Phrase("dir")=="rtl") { ?> style="float: right;" <?php } else { ?> style="float: left;" <?php } ?>>
-			<div><a href="." title="<?php echo $Language->ProjectPhrase("BodyTitle"); ?>"><img src="<?php echo $EW_RELATIVE_PATH ?><?php echo MS_LOGO_IMAGE_IN_MOBILE_LAYOUT; ?>" alt="<?php echo $Language->ProjectPhrase("BodyTitle"); ?>"></a></div>
+		<div class="hidden-lg hidden-md hidden-sm <?php echo MS_HEADER_LOGO_CLASS; ?>"
+		 	<?php if($Language->Phrase("dir")=="rtl") { ?> style="float: right;" 
+			<?php } else { ?>
+				 style="float: left;" <?php } 
+			?>>
+			<div><a href="." title="<?php echo $Language->ProjectPhrase("BodyTitle"); ?>">
+				<img src="<?php echo $EW_RELATIVE_PATH ?><?php echo MS_LOGO_IMAGE_IN_MOBILE_LAYOUT; ?>" alt="<?php echo $Language->ProjectPhrase("BodyTitle"); ?>"></a>
+			</div>
 		</div>
 		<?php } ?>
-		<div class="hidden-xs <?php echo MS_HEADER_LOGO_CLASS; ?>" <?php if($Language->Phrase("dir")=="rtl") { ?> style="float: right;" <?php } else { ?> style="float: left;" <?php } ?>>
-			<div><a href="." title="<?php echo $Language->ProjectPhrase("BodyTitle"); ?>"><img src="<?php echo $EW_RELATIVE_PATH ?>phpimages/stock_inventory_management_logo_transparant.png" alt=""></a></div>
+		<div class="hidden-xs <?php echo MS_HEADER_LOGO_CLASS; ?>" <?php if($Language->Phrase("dir")=="rtl") { ?> style="float: right;" <?php } 
+		 else { ?> style="float: left;" <?php } ?>>
+			<div><a href="." title="<?php echo $Language->ProjectPhrase("BodyTitle"); ?>">
+			<img src="<?php echo $EW_RELATIVE_PATH ?>phpimages/stock_inventory_management_logo_transparant.png" alt=""></a>
+		</div>
 		</div>
 		<?php } else { ?>
-		<div class="hidden-xs <?php echo MS_HEADER_LOGO_CLASS; ?>" <?php if($Language->Phrase("dir")=="rtl") { ?> style="float: right;" <?php } else { ?> style="float: left;" <?php } ?>>
-			<div><a href="." title="<?php echo $Language->ProjectPhrase("BodyTitle"); ?>"><img src="<?php echo $EW_RELATIVE_PATH ?>phpimages/stock_inventory_management_logo_transparant.png" alt=""></a></div>
+		<div class="hidden-xs <?php echo MS_HEADER_LOGO_CLASS; ?>" <?php if($Language->Phrase("dir")=="rtl") { ?> style="float: right;" 
+			<?php } else { ?> style="float: left;" <?php } ?>>
+			<div><a href="." title="<?php echo $Language->ProjectPhrase("BodyTitle"); ?>">
+			<h1>SALESBOOK </h1>
+			<!-- <img src="<?php echo $EW_RELATIVE_PATH ?>phpimages/stock_inventory_management_logo_transparant.png" alt=""> -->
+		</a>
+		</div>
 		</div>
 		<?php if (MS_LOGO_IMAGE_IN_MOBILE_LAYOUT != "") { ?>
-		<div class="hidden-xs hidden-lg hidden-md hidden-sm <?php echo MS_HEADER_LOGO_CLASS; ?>" <?php if($Language->Phrase("dir")=="rtl") { ?> style="float: right;" <?php } else { ?> style="float: left;" <?php } ?>>
-			<div><a href="." title="<?php echo $Language->ProjectPhrase("BodyTitle"); ?>"><img src="<?php echo $EW_RELATIVE_PATH ?><?php echo MS_LOGO_IMAGE_IN_MOBILE_LAYOUT; ?>" alt="<?php echo $Language->ProjectPhrase("BodyTitle"); ?>"></a></div>
+		<div class="hidden-xs hidden-lg hidden-md hidden-sm <?php echo MS_HEADER_LOGO_CLASS; ?>" 
+			<?php if($Language->Phrase("dir")=="rtl") { ?> style="float: right;" <?php } 
+			else { ?> style="float: left;" <?php } ?>>
+			<div><a href="." title="<?php echo $Language->ProjectPhrase("BodyTitle"); ?>">
+				<img src="<?php echo $EW_RELATIVE_PATH ?>
+			<?php echo MS_LOGO_IMAGE_IN_MOBILE_LAYOUT; ?>" alt="<?php echo $Language->ProjectPhrase("BodyTitle"); ?>"></a></div>
 		</div>
 		<?php } ?>
 		<?php } ?>
@@ -431,7 +459,13 @@ var MS_TOOLTIP_POSITION_FOR_INPUT_ELEMENT = "Bottom";
 			<?php if (MS_TEXT_ALIGN_IN_HEADER == "left") { ?>
 			  <div class="ewHeaderRow pull-left" style="padding-top: 8px; padding-bottom: 4px;"><strong><span style="font-family:<?php echo MS_SITE_TITLE_FONT_NAME ?>;font-size:<?php echo MS_SITE_TITLE_FONT_SIZE; ?>;color:white;text-transform:<?php echo MS_SITE_TITLE_TEXT_STYLE; ?>"><?php echo $Language->ProjectPhrase("BodyTitle") ?>&nbsp;&nbsp;</span></strong></div><br>
 			<?php } elseif (MS_TEXT_ALIGN_IN_HEADER == "right") { ?>
-			  <div class="ewHeaderRow pull-right" style="padding-top: 8px; padding-bottom: 4px;"><strong><span style="font-family:<?php echo MS_SITE_TITLE_FONT_NAME ?>;font-size:<?php echo MS_SITE_TITLE_FONT_SIZE; ?>;color:white;text-transform:<?php echo MS_SITE_TITLE_TEXT_STYLE; ?>"><?php echo $Language->ProjectPhrase("BodyTitle") ?>&nbsp;&nbsp;</span></strong></div><br>
+			  <div class="ewHeaderRow pull-right" style="padding-top: 8px; padding-bottom: 4px;"><strong><span style="font-family:<?php echo MS_SITE_TITLE_FONT_NAME ?>;font-size:<?php echo MS_SITE_TITLE_FONT_SIZE; ?>;color:white;text-transform:<?php echo MS_SITE_TITLE_TEXT_STYLE; ?>">
+			      <?php 
+				  	// echo $Language->ProjectPhrase("BodyTitle") 
+					echo "SALESBOOK" 
+				?>
+				 &nbsp;&nbsp;</span></strong>
+			 </div><br>
 			<?php } else { ?>
 			  <div align="center" style="padding-top: 8px; padding-bottom: 4px;"><strong><span style="font-family:<?php echo MS_SITE_TITLE_FONT_NAME ?>;font-size:<?php echo MS_SITE_TITLE_FONT_SIZE; ?>;color:white;text-transform:<?php echo MS_SITE_TITLE_TEXT_STYLE; ?>"><?php echo $Language->ProjectPhrase("BodyTitle") ?>&nbsp;&nbsp;</span></strong></div>
 			<?php } ?>

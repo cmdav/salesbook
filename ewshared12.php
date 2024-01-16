@@ -319,6 +319,7 @@ class cLanguage {
 	// Get project phrase
 	function ProjectPhrase($Id) {
 		if (is_object($this->Phrases)) {
+			
 			return $this->GetNodeAtt($this->Phrases->SelectSingleNode("//project/phrase[@id='" . strtolower($Id) . "']"), "value");
 		} elseif (is_array($this->Phrases)) {
 			return ew_ConvertFromUtf8(@$this->Phrases['ew-language']['project']['phrase'][strtolower($Id)]['attr']['value']);
