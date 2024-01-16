@@ -248,7 +248,7 @@ class cregister extends cusers {
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
 
-			define("EW_PAGE_ID", 'register', TRUE);
+			define("EW_PAGE_ID", 'register');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();
@@ -414,7 +414,7 @@ class cregister extends cusers {
 		$Breadcrumb->Add("register", "RegisterPage", $url, "", "", TRUE); // v11.0.4
 		$bUserExists = FALSE;
 		if (@$_POST["a_register"] <> "") {
-
+			//called by term and conditions
 			// Get action
 			$this->CurrentAction = $_POST["a_register"];
 			$this->LoadFormValues(); // Get form values
@@ -431,7 +431,7 @@ class cregister extends cusers {
 				$this->setFailureMessage($gsFormError);
 			}
 		} else {
-
+			// die("blank");
 			// $this->CurrentAction = "I"; // Display blank record // in order to display Terms and Condition page as the initial page.
 			$this->LoadDefaultValues(); // Load default values
 		}
@@ -512,14 +512,15 @@ class cregister extends cusers {
 
 				$this->CurrentFilter = $sFilter;
 				$sUserSql = $this->SQL();
-				if ($rs = $conn->Execute($sUserSql)) {
-					if (!$rs->EOF) {
-						$bUserExists = TRUE;
-						$this->RestoreFormValues(); // Restore form values
-						$this->setFailureMessage($Language->Phrase("UserExists")); // Set user exist message
-					}
-					$rs->Close();
-				}
+				//515, 596
+				// if ($rs = $conn->Execute($sUserSql)) {
+				// 	if (!$rs->EOF) {
+				// 		$bUserExists = TRUE;
+				// 		$this->RestoreFormValues(); // Restore form values
+				// 		$this->setFailureMessage($Language->Phrase("UserExists")); // Set user exist message
+				// 	}
+				// 	$rs->Close();
+				// }
 				if (!$bUserExists) {
 					$this->SendEmail = TRUE; // Send email on add success
 					if ($this->AddRow()) { // Add record
@@ -593,12 +594,12 @@ class cregister extends cusers {
 							// Get new recordset
 							$this->CurrentFilter = $this->KeyFilter();
 							$sSql = $this->SQL();
-							$rsnew = $conn->Execute($sSql);
-							$Args = array();
-							$Args["rs"] = $rsnew->fields;
-							$bEmailSent = FALSE;
-							if ($this->Email_Sending($Email, $Args))
-								$bEmailSent = $Email->Send();
+							// $rsnew = $conn->Execute($sSql);
+							// $Args = array();
+							// $Args["rs"] = $rsnew->fields;
+							// $bEmailSent = FALSE;
+							// if ($this->Email_Sending($Email, $Args))
+							// 	$bEmailSent = $Email->Send();
 
 							// Send email failed
 							if (!$bEmailSent)
@@ -1363,18 +1364,28 @@ $register->ShowMessage();
 <form name="fregister" id="fregister" class="form-horizontal ewForm ewRegisterForm" action="<?php echo ew_CurrentPage() ?>" method="post">
 <?php if (MS_REGISTER_WINDOW_TYPE=="default" || MS_REGISTER_WINDOW_TYPE=="") { ?>
 <div class="col-sm-8 col-sm-offset-2">
-<div class="panel <?php echo MS_REGISTER_FORM_PANEL_TYPE; ?>">
-<div class="panel-heading"><strong><?php echo $Language->Phrase("RegisterPage") ?></strong><?php if (@MS_SHOW_HELP_ONLINE) { ?> &nbsp;<a href='javascript:void(0);' id='helponline' onclick='msHelpDialogShow()'><span class='glyphicon glyphicon-question-sign ewIconHelp'></span></a> <?php } ?></div>
-<div class="panel-body">
-<br>
-<?php } else { ?>
-<div id="msRegisterDialog" class="modal fade">
-<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">x</span></button><h4 class="modal-title"><?php echo $Language->Phrase("RegisterPage") ?><?php if (@MS_SHOW_HELP_ONLINE) { ?> &nbsp;<a href='javascript:void(0);' id='helponline' onclick='msHelpDialogShow()'><span class='glyphicon glyphicon-question-sign ewIconHelp'></span></a> <?php } ?></h4></div>
+	<div class="panel <?php echo MS_REGISTER_FORM_PANEL_TYPE; ?>">
+		<div class="panel-heading"><strong><?php echo $Language->Phrase("RegisterPage") ?></strong>
+			<?php if (@MS_SHOW_HELP_ONLINE) { ?> &nbsp;<a href='javascript:void(0);' id='helponline' onclick='msHelpDialogShow()'>
+				<span class='glyphicon glyphicon-question-sign ewIconHelp'></span></a> <?php } ?>
+		</div>
+	<div class="panel-body">
+		<br>
+		<?php } else { ?>
+		<div id="msRegisterDialog" class="modal fade">
+			<div class="modal-dialog"><div class="modal-content">
+				<div class="modal-header"><button type="button" class="close" data-dismiss="modal">
+					<span aria-hidden="true">&times;</span><span class="sr-only">x</span></button><h4 class="modal-title">
+						<?php echo $Language->Phrase("RegisterPage") ?>
+						<?php if (@MS_SHOW_HELP_ONLINE) { ?> &nbsp;<a href='javascript:void(0);' id='helponline' onclick='msHelpDialogShow()'>
+							<span class='glyphicon glyphicon-question-sign ewIconHelp'></span></a> <?php } ?></h4>
+				</div>
 <div class="modal-body">
 <br>
 <?php } ?>
 <?php if ($register->CheckToken) { ?>
-<input type="hidden" name="<?php echo EW_TOKEN_NAME ?>" value="<?php echo $register->Token ?>">
+	//hidden 1
+<input type="text" name="<?php echo EW_TOKEN_NAME ?>" value="<?php echo $register->Token ?>">
 <?php } ?>
 <?php // Begin of modification Terms and Conditions, by Masino Sinaga, July 14, 2014 ?>
 <?php if ( ($users->CurrentAction == "F") ||
@@ -1382,12 +1393,17 @@ $register->ShowMessage();
            ($users->CurrentAction == "A") ||
            ($users->CurrentAction == "X") ||
            (MS_SHOW_TERMS_AND_CONDITIONS_ON_REGISTRATION_PAGE == FALSE) ) { ?>
-<input type="hidden" name="t" value="users">
-<input type="hidden" name="a_register" id="a_register" value="A">
+		   //hidden 2
+<input type="text" name="t" value="users">
+//hidden 3
+<input type="text" name="a_register" id="a_register" value="A">
+//hidden 4
 <?php if ($users->CurrentAction == "F") { // Confirm page ?>
-<input type="hidden" name="a_confirm" id="a_confirm" value="F">
+	//hidden 5
+<input type="text" name="a_confirm" id="a_confirm" value="F">
 <?php } elseif ($users->CurrentAction == "T") { ?>
-<input type="hidden" name="a_confirm" id="a_confirm" value="T">
+	//hidden 6
+<input type="text" name="a_confirm" id="a_confirm" value="T">
 <?php } ?>
 <?php // End of modification Terms and Conditions, by Masino Sinaga, July 14, 2014 ?>
 <div>
@@ -1404,7 +1420,8 @@ $register->ShowMessage();
 <span<?php echo $users->Username->ViewAttributes() ?>>
 <p class="form-control-static"><?php echo $users->Username->ViewValue ?></p></span>
 </span>
-<input type="hidden" data-table="users" data-field="x_Username" name="x_Username" id="x_Username" value="<?php echo ew_HtmlEncode($users->Username->FormValue) ?>">
+// hidden
+<input type="text" data-table="users" data-field="x_Username" name="x_Username" id="x_Username" value="<?php echo ew_HtmlEncode($users->Username->FormValue) ?>">
 <?php } ?>
 <?php echo $users->Username->CustomMsg ?></div></div>
 	</div>
@@ -1417,7 +1434,8 @@ $register->ShowMessage();
 			<div class="col-sm-8">
 				<div <?php echo $users->Password->CellAttributes() ?>>
 					<span id="el_users_Password">
-					<input type="password" name="x_Password" id="x_Password" size="30" maxlength="50" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>" placeholder="<?php echo $users->Password->FldCaption() ?>" onkeyup="passwordStrength(this.value, c_Password.value)" <?php echo $users->Password->EditAttributes() ?>>
+						//password 1
+					<input type="text" name="x_Password" id="x_Password" size="30" maxlength="50" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>" placeholder="<?php echo $users->Password->FldCaption() ?>" onkeyup="passwordStrength(this.value, c_Password.value)" <?php echo $users->Password->EditAttributes() ?>>
 					</span>
 					<div id="passwordDescription"><?php echo $Language->Phrase("empty"); ?></div>
 					<div class="password-meter-bg">
@@ -1431,7 +1449,9 @@ $register->ShowMessage();
 		<div id="r_Password" class="form-group">
 			<label id="elh_users_Password" for="x_Password" class="col-sm-4 control-label ewLabel"><?php echo $users->Password->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 			<div class="col-sm-8"> 
-				*****************<?php echo $users->Password->ViewValue ?><input type="hidden" name="x_Password" id="x_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
+				*****************<?php echo $users->Password->ViewValue ?>
+				//hidden 7
+				<input type="text" name="x_Password" id="x_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
 			   <?php echo $users->Password->CustomMsg ?>
 			</div>
 		</div>
@@ -1444,7 +1464,13 @@ $register->ShowMessage();
 <?php if ($users->CurrentAction <> "F") { ?>
 <span id="el_users_Password">
 <div class="input-group" id="ig_x_Password">
-<input type="password" data-password-strength="pst_x_Password" data-password-generated="pgt_x_Password" data-table="users" data-field="x_Password" name="x_Password" id="x_Password" size="30" maxlength="64" placeholder="<?php echo ew_HtmlEncode($users->Password->getPlaceHolder()) ?>"<?php echo $users->Password->EditAttributes() ?>>
+	// password 2
+<input type="text" data-password-strength="pst_x_Password" 
+	data-password-generated="pgt_x_Password" data-table="users"
+	 data-field="x_Password" name="x_Password" id="x_Password" 
+	 value="*123github*123github"
+	 size="30" maxlength="64" placeholder="<?php echo ew_HtmlEncode($users->Password->getPlaceHolder()) ?>
+	 "<?php echo $users->Password->EditAttributes() ?>>
 <span class="input-group-btn">
 	<button type="button" class="btn btn-default ewPasswordGenerator" title="<?php echo ew_HtmlTitle($Language->Phrase("GeneratePassword")) ?>" data-password-field="x_Password" data-password-confirm="c_Password" data-password-strength="pst_x_Password" data-password-generated="pgt_x_Password"><?php echo $Language->Phrase("GeneratePassword") ?></button>
 </span>
@@ -1459,7 +1485,8 @@ $register->ShowMessage();
 <span<?php echo $users->Password->ViewAttributes() ?>>
 <p class="form-control-static"><?php echo $users->Password->ViewValue ?></p></span>
 </span>
-<input type="hidden" data-table="users" data-field="x_Password" name="x_Password" id="x_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
+//hidden 8
+<input type="text" data-table="users" data-field="x_Password" name="x_Password" id="x_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
 <?php } ?>
 <?php echo $users->Password->CustomMsg ?></div></div>
 		</div>
@@ -1474,7 +1501,8 @@ $register->ShowMessage();
 			<div class="col-sm-8">
 				<div <?php echo $users->Password->CellAttributes() ?>>
 					<span id="el_users_c_Password">
-					<input type="password" name="c_Password" id="c_Password" size="30" maxlength="50" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>" placeholder="<?php echo $Language->Phrase("Confirm") ?>&nbsp;<?php echo $users->Password->FldCaption() ?>" onkeyup="passwordConfirmation(x_Password.value, this.value)" <?php echo $users->Password->EditAttributes() ?>>
+						// password 3
+					<input type="text" name="c_Password" id="c_Password" size="30" maxlength="50" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>" placeholder="<?php echo $Language->Phrase("Confirm") ?>&nbsp;<?php echo $users->Password->FldCaption() ?>" onkeyup="passwordConfirmation(x_Password.value, this.value)" <?php echo $users->Password->EditAttributes() ?>>
 					</span>
 						<div id="passconfDescription"><?php echo $Language->Phrase("match"); ?></div>
 						<div class="password-meter-bg">        
@@ -1488,7 +1516,9 @@ $register->ShowMessage();
 		<div id="r_c_Password" class="form-group">
 			<label id="elh_c_users_Password" for="c_Password" class="col-sm-4 control-label ewLabel"><?php echo $Language->Phrase("Confirm") ?> <?php echo $users->Password->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 			<div class="col-sm-8"> 
-				*****************<?php echo $users->Password->ViewValue ?><input type="hidden" name="c_Password" id="c_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
+				*****************<?php echo $users->Password->ViewValue ?>
+				//hidden 9
+				<input type="text" name="c_Password" id="c_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
 			   <?php echo $users->Password->CustomMsg ?>
 			</div>
 		</div>
@@ -1499,51 +1529,62 @@ $register->ShowMessage();
 		<div class="col-sm-8"><div<?php echo $users->Password->CellAttributes() ?>>
 <?php if ($users->CurrentAction <> "F") { ?>
 <span id="el_c_users_Password">
-<input type="password" data-field="c_Password" name="c_Password" id="c_Password" size="30" maxlength="64" placeholder="<?php echo ew_HtmlEncode($users->Password->getPlaceHolder()) ?>"<?php echo $users->Password->EditAttributes() ?>>
+	// password 4
+		<input type="text" data-field="c_Password" name="c_Password" id="c_Password" size="30" maxlength="64"
+			value="*123github*123github"
+			 placeholder="<?php echo ew_HtmlEncode($users->Password->getPlaceHolder()) ?>"<?php echo $users->Password->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el_c_users_Password">
 <span<?php echo $users->Password->ViewAttributes() ?>>
 <p class="form-control-static"><?php echo $users->Password->ViewValue ?></p></span>
 </span>
-<input type="hidden" data-table="users" data-field="c_Password" name="c_Password" id="c_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
+//hidden 10
+<input type="text" data-table="users" data-field="c_Password" name="c_Password" id="c_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
 <?php } ?>
 </div></div>
 	</div>
 	<?php } // End of Password Policy from PHPMaker built-in  ?>
 <?php } ?>
-<?php if ($users->First_Name->Visible) { // First_Name ?>
+<?php if ($users->First_Name->Visible) { // First_Name Session ?>
 	<div id="r_First_Name" class="form-group">
 		<label id="elh_users_First_Name" for="x_First_Name" class="col-sm-4 control-label ewLabel"><?php echo $users->First_Name->FldCaption() ?></label>
 		<div class="col-sm-8"><div<?php echo $users->First_Name->CellAttributes() ?>>
 <?php if ($users->CurrentAction <> "F") { ?>
 <span id="el_users_First_Name">
-<input type="text" data-table="users" data-field="x_First_Name" name="x_First_Name" id="x_First_Name" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($users->First_Name->getPlaceHolder()) ?>" value="<?php echo $users->First_Name->EditValue ?>"<?php echo $users->First_Name->EditAttributes() ?>>
+	<input type="text" data-table="users" data-field="x_First_Name" name="x_First_Name" id="x_First_Name" size="30" maxlength="50" 
+	value="test 1"
+	placeholder="<?php echo ew_HtmlEncode($users->First_Name->getPlaceHolder()) ?>" value="<?php echo $users->First_Name->EditValue ?>
+	"<?php echo $users->First_Name->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el_users_First_Name">
 <span<?php echo $users->First_Name->ViewAttributes() ?>>
 <p class="form-control-static"><?php echo $users->First_Name->ViewValue ?></p></span>
 </span>
-<input type="hidden" data-table="users" data-field="x_First_Name" name="x_First_Name" id="x_First_Name" value="<?php echo ew_HtmlEncode($users->First_Name->FormValue) ?>">
+//hidden 11
+<input type="text" data-table="users" data-field="x_First_Name" name="x_First_Name" id="x_First_Name" value="<?php echo ew_HtmlEncode($users->First_Name->FormValue) ?>">
 <?php } ?>
 <?php echo $users->First_Name->CustomMsg ?></div></div>
 	</div>
 <?php } ?>
-<?php if ($users->Last_Name->Visible) { // Last_Name ?>
+<?php if ($users->Last_Name->Visible) { // Last_Name Session ?>
 	<div id="r_Last_Name" class="form-group">
 		<label id="elh_users_Last_Name" for="x_Last_Name" class="col-sm-4 control-label ewLabel"><?php echo $users->Last_Name->FldCaption() ?></label>
 		<div class="col-sm-8"><div<?php echo $users->Last_Name->CellAttributes() ?>>
 <?php if ($users->CurrentAction <> "F") { ?>
 <span id="el_users_Last_Name">
-<input type="text" data-table="users" data-field="x_Last_Name" name="x_Last_Name" id="x_Last_Name" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($users->Last_Name->getPlaceHolder()) ?>" value="<?php echo $users->Last_Name->EditValue ?>"<?php echo $users->Last_Name->EditAttributes() ?>>
+			<input type="text" data-table="users" 
+				data-field="x_Last_Name" name="x_Last_Name"
+				 id="x_Last_Name" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($users->Last_Name->getPlaceHolder()) ?>" 
+				 value="<?php echo $users->Last_Name->EditValue ?>"<?php echo $users->Last_Name->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el_users_Last_Name">
 <span<?php echo $users->Last_Name->ViewAttributes() ?>>
 <p class="form-control-static"><?php echo $users->Last_Name->ViewValue ?></p></span>
-</span>
-<input type="hidden" data-table="users" data-field="x_Last_Name" name="x_Last_Name" id="x_Last_Name" value="<?php echo ew_HtmlEncode($users->Last_Name->FormValue) ?>">
+</span>//hidden 12
+<input type="text" data-table="users" data-field="x_Last_Name" name="x_Last_Name" id="x_Last_Name" value="<?php echo ew_HtmlEncode($users->Last_Name->FormValue) ?>">
 <?php } ?>
 <?php echo $users->Last_Name->CustomMsg ?></div></div>
 	</div>
@@ -1554,14 +1595,15 @@ $register->ShowMessage();
 		<div class="col-sm-8"><div<?php echo $users->_Email->CellAttributes() ?>>
 <?php if ($users->CurrentAction <> "F") { ?>
 <span id="el_users__Email">
-<input type="text" data-table="users" data-field="x__Email" name="x__Email" id="x__Email" size="30" maxlength="100" placeholder="<?php echo ew_HtmlEncode($users->_Email->getPlaceHolder()) ?>" value="<?php echo $users->_Email->EditValue ?>"<?php echo $users->_Email->EditAttributes() ?>>
+<input type="text" data-table="users" data-field="x__Email" name="x__Email" id="x__Email" size="30" maxlength="100"
+	 placeholder="<?php echo ew_HtmlEncode($users->_Email->getPlaceHolder()) ?>" value="<?php echo $users->_Email->EditValue ?>"<?php echo $users->_Email->EditAttributes() ?>>
 </span>
 <?php } else { ?>
 <span id="el_users__Email">
 <span<?php echo $users->_Email->ViewAttributes() ?>>
 <p class="form-control-static"><?php echo $users->_Email->ViewValue ?></p></span>
-</span>
-<input type="hidden" data-table="users" data-field="x__Email" name="x__Email" id="x__Email" value="<?php echo ew_HtmlEncode($users->_Email->FormValue) ?>">
+</span>// hidden
+<input type="text" data-table="users" data-field="x__Email" name="x__Email" id="x__Email" value="<?php echo ew_HtmlEncode($users->_Email->FormValue) ?>">
 <?php } ?>
 <?php echo $users->_Email->CustomMsg ?></div></div>
 	</div>
@@ -1577,7 +1619,8 @@ $register->ShowMessage();
 	</div>
 </div>
 <?php } else { ?>
-<input type="hidden" name="captcha" id="captcha" value="<?php echo $register->captcha ?>">
+	//hidden 13
+<input type="text" name="captcha" id="captcha" value="<?php echo $register->captcha ?>">
 <?php } ?>
 <!-- captcha html (end) -->
 <?php } ?>
@@ -1629,7 +1672,8 @@ if (@MS_USE_CONSTANTS_IN_CONFIG_FILE == FALSE) {
 <?php } ?>
 <div class="form-group" id="r_RegisterButton">
 	<div class="col-sm-10">
-		<input type="hidden" name="a_register" id="a_register" value="I">
+		//hidden 14
+		<input type="text" name="a_register" id="a_register" value="I">
 		<button class="btn btn-primary ewButton" name="btnsubmit" id="btnsubmit" type="submit"  onclick="this.form.a_register.value='I';"><?php echo $Language->Phrase("IAgree"); ?></button>
 	</div>
 </div>

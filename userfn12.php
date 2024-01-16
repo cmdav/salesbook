@@ -1110,8 +1110,9 @@ function getCurrentPageTitle($pt) {
 			$CurrentPageTitle = $Language->ProjectPhrase("BodyTitle");
 		}
 	} else {
-		$CurrentPageTitle = ($Language->TablePhrase(CurrentPage()->TableName, "tblcaption") == "") ? $Language->TablePhrase(CurrentPage()->PageObjName, "tblcaption") : $Language->TablePhrase(CurrentPage()->TableName, "tblcaption");
-		$CurrentPageTitle = $CurrentPageTitle . " &laquo; " . $Language->ProjectPhrase("BodyTitle");
+		// $CurrentPageTitle = ($Language->TablePhrase(CurrentPage()->TableName, "tblcaption") == "")
+		//  ? $Language->TablePhrase(CurrentPage()->PageObjName, "tblcaption") : $Language->TablePhrase(CurrentPage()->TableName, "tblcaption");
+		// $CurrentPageTitle = $CurrentPageTitle . " &laquo; " . $Language->ProjectPhrase("BodyTitle");
 	}
 }
 

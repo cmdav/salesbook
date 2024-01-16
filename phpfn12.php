@@ -6119,7 +6119,8 @@ function ew_FormatDateTime($ts, $namedformat) {
 // 0 False
 // -2 Use Default
 function ew_FormatCurrency($amount, $NumDigitsAfterDecimal, $IncludeLeadingDigit = -2, $UseParensForNegativeNumbers = -2, $GroupDigits = -2) {
-	extract($GLOBALS["DEFAULT_LOCALE"]);
+	extract((array)$GLOBALS["DEFAULT_LOCALE"]);
+
 
 	// Check $NumDigitsAfterDecimal
 	if ($NumDigitsAfterDecimal == -2) { // Use all values after decimal point
@@ -6221,7 +6222,7 @@ function ew_FormatCurrency($amount, $NumDigitsAfterDecimal, $IncludeLeadingDigit
 // 0 False
 // -2 Use Default
 function ew_FormatNumber($amount, $NumDigitsAfterDecimal, $IncludeLeadingDigit = -2, $UseParensForNegativeNumbers = -2, $GroupDigits = -2) {
-	extract($GLOBALS["DEFAULT_LOCALE"]);
+	extract((array)$GLOBALS["DEFAULT_LOCALE"]);;
 
 	// Check $NumDigitsAfterDecimal
 	if ($NumDigitsAfterDecimal == -2) { // Use all values after decimal point
@@ -6289,7 +6290,7 @@ function ew_FormatNumber($amount, $NumDigitsAfterDecimal, $IncludeLeadingDigit =
 // 0 False
 // -2 Use Default
 function ew_FormatPercent($amount, $NumDigitsAfterDecimal, $IncludeLeadingDigit = -2, $UseParensForNegativeNumbers = -2, $GroupDigits = -2) {
-	extract($GLOBALS["DEFAULT_LOCALE"]);
+	extract((array)$GLOBALS["DEFAULT_LOCALE"]);;
 
 	// Check $NumDigitsAfterDecimal
 	if ($NumDigitsAfterDecimal > -1)
@@ -7180,11 +7181,13 @@ class cFormObj {
 
 	// Get value for form element
 	function GetValue($name) {
+		
 		$wrkname = $this->GetIndexedName($name);
 		$value = @$_POST[$wrkname];
 		if ($this->FormName <> "") {
 			$wrkname = $this->FormName . '$' . $wrkname;
 			if (isset($_POST[$wrkname]))
+			
 				$value = $_POST[$wrkname];
 		}
 		return $value;

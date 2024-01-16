@@ -317,11 +317,11 @@ class ca_stock_categories_list extends ca_stock_categories {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'list', TRUE);
+			define("EW_PAGE_ID", 'list');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'a_stock_categories', TRUE);
+			define("EW_TABLE_NAME", 'a_stock_categories');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

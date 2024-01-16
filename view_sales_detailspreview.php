@@ -237,11 +237,11 @@ class cview_sales_details_preview extends cview_sales_details {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'preview', TRUE);
+			define("EW_PAGE_ID", 'preview');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'view_sales_details', TRUE);
+			define("EW_TABLE_NAME", 'view_sales_details');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

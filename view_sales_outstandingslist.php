@@ -318,11 +318,11 @@ class cview_sales_outstandings_list extends cview_sales_outstandings {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'list', TRUE);
+			define("EW_PAGE_ID", 'list');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'view_sales_outstandings', TRUE);
+			define("EW_TABLE_NAME", 'view_sales_outstandings');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

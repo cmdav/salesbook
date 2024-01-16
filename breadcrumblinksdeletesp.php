@@ -237,7 +237,7 @@ class cBreadcrumbLinksDeleteSP {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'BreadcrumbLinksDeleteSP', TRUE);
+			define("EW_PAGE_ID", 'BreadcrumbLinksDeleteSP');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

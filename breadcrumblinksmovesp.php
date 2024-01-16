@@ -237,7 +237,7 @@ class cBreadcrumbLinksMoveSP {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'BreadcrumbLinksMoveSP', TRUE);
+			define("EW_PAGE_ID", 'BreadcrumbLinksMoveSP');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();
