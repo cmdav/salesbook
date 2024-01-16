@@ -663,7 +663,7 @@ $help_preview->RenderListOptions();
 $help_preview->ListOptions->Render("header", "left");
 ?>
 		<?php 		
-		if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { 
+		if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { 
 		?>
 		<?php if (MS_RECORD_NUMBER_PREVIEW_LONG_CAPTION_COLUMN_TABLE) { ?>
             <td style="text-align: right;"><?php echo $Language->Phrase("LongRecNo"); ?></td>
@@ -714,7 +714,7 @@ while ($help_preview->Recordset && !$help_preview->Recordset->EOF) {
 // Render list options (body, left)
 $help_preview->ListOptions->Render("body", "left", $help_preview->RowCnt);
 ?>
-	<?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+	<?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
 		<?php
 			$verticalalign = "";
 			if (MS_RECORD_NUMBER_PREVIEW_VERTICAL_ALIGN_TOP) {
@@ -790,7 +790,7 @@ if ($help_preview->Recordset)
 <table class="table ewTable ewPreviewTable">
 	<thead><!-- Table header -->
 		<tr class="ewTableHeader">
-        <?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+        <?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
 			<?php
 			$verticalalign = "";
 			if (MS_RECORD_NUMBER_PREVIEW_VERTICAL_ALIGN_TOP) {
@@ -818,7 +818,7 @@ if ($help_preview->Recordset)
 	</thead>
 	<tbody><!-- Table body -->
 	<tr<?php echo $help_preview->RowAttributes() ?>>
-        <?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+        <?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
         <td style="text-align: right;">&nbsp;</td>
 	    <?php } ?>
 <?php if ($help->Topic->Visible) { // Topic ?>

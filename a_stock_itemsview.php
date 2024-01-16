@@ -312,11 +312,11 @@ class ca_stock_items_view extends ca_stock_items {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'view', TRUE);
+			define("EW_PAGE_ID", 'view');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'a_stock_items', TRUE);
+			define("EW_TABLE_NAME", 'a_stock_items');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

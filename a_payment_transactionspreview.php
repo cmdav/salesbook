@@ -241,11 +241,11 @@ class ca_payment_transactions_preview extends ca_payment_transactions {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'preview', TRUE);
+			define("EW_PAGE_ID", 'preview');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'a_payment_transactions', TRUE);
+			define("EW_TABLE_NAME", 'a_payment_transactions');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();
@@ -639,7 +639,7 @@ $a_payment_transactions_preview->RenderListOptions();
 $a_payment_transactions_preview->ListOptions->Render("header", "left");
 ?>
 		<?php 		
-		if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { 
+		if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { 
 		?>
 		<?php if (MS_RECORD_NUMBER_PREVIEW_LONG_CAPTION_COLUMN_TABLE) { ?>
             <td style="text-align: right;"><?php echo $Language->Phrase("LongRecNo"); ?></td>
@@ -709,7 +709,7 @@ while ($a_payment_transactions_preview->Recordset && !$a_payment_transactions_pr
 // Render list options (body, left)
 $a_payment_transactions_preview->ListOptions->Render("body", "left", $a_payment_transactions_preview->RowCnt);
 ?>
-	<?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+	<?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
 		<?php
 			$verticalalign = "";
 			if (MS_RECORD_NUMBER_PREVIEW_VERTICAL_ALIGN_TOP) {
@@ -804,7 +804,7 @@ $a_payment_transactions_preview->ListOptions->Render("body", "right", $a_payment
 ?>
 	<tfoot><!-- Table footer -->
 	<tr class="ewTableFooter">
-	<?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+	<?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
         <td style="text-align: right;">&nbsp;</td>
     <?php } ?>
 <?php
@@ -909,7 +909,7 @@ if ($a_payment_transactions_preview->Recordset)
 <table class="table ewTable ewPreviewTable">
 	<thead><!-- Table header -->
 		<tr class="ewTableHeader">
-        <?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+        <?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
 			<?php
 			$verticalalign = "";
 			if (MS_RECORD_NUMBER_PREVIEW_VERTICAL_ALIGN_TOP) {
@@ -955,7 +955,7 @@ if ($a_payment_transactions_preview->Recordset)
 	</thead>
 	<tbody><!-- Table body -->
 	<tr<?php echo $a_payment_transactions_preview->RowAttributes() ?>>
-        <?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+        <?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
         <td style="text-align: right;">&nbsp;</td>
 	    <?php } ?>
 <?php if ($a_payment_transactions->Ref_ID->Visible) { // Ref_ID ?>

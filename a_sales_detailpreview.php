@@ -649,7 +649,7 @@ $a_sales_detail_preview->RenderListOptions();
 $a_sales_detail_preview->ListOptions->Render("header", "left");
 ?>
 		<?php 		
-		if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { 
+		if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { 
 		?>
 		<?php if (MS_RECORD_NUMBER_PREVIEW_LONG_CAPTION_COLUMN_TABLE) { ?>
             <td style="text-align: right;"><?php echo $Language->Phrase("LongRecNo"); ?></td>
@@ -710,7 +710,7 @@ while ($a_sales_detail_preview->Recordset && !$a_sales_detail_preview->Recordset
 // Render list options (body, left)
 $a_sales_detail_preview->ListOptions->Render("body", "left", $a_sales_detail_preview->RowCnt);
 ?>
-	<?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+	<?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
 		<?php
 			$verticalalign = "";
 			if (MS_RECORD_NUMBER_PREVIEW_VERTICAL_ALIGN_TOP) {
@@ -784,7 +784,7 @@ $a_sales_detail_preview->ListOptions->Render("body", "right", $a_sales_detail_pr
 ?>
 	<tfoot><!-- Table footer -->
 	<tr class="ewTableFooter">
-	<?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+	<?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
         <td style="text-align: right;">&nbsp;</td>
     <?php } ?>
 <?php
@@ -870,7 +870,7 @@ if ($a_sales_detail_preview->Recordset)
 <table class="table ewTable ewPreviewTable">
 	<thead><!-- Table header -->
 		<tr class="ewTableHeader">
-        <?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+        <?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
 			<?php
 			$verticalalign = "";
 			if (MS_RECORD_NUMBER_PREVIEW_VERTICAL_ALIGN_TOP) {
@@ -907,7 +907,7 @@ if ($a_sales_detail_preview->Recordset)
 	</thead>
 	<tbody><!-- Table body -->
 	<tr<?php echo $a_sales_detail_preview->RowAttributes() ?>>
-        <?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+        <?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
         <td style="text-align: right;">&nbsp;</td>
 	    <?php } ?>
 <?php if ($a_sales_detail->Supplier_Number->Visible) { // Supplier_Number ?>

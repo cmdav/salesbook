@@ -237,11 +237,11 @@ class cview_purchases_details_preview extends cview_purchases_details {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'preview', TRUE);
+			define("EW_PAGE_ID", 'preview');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'view_purchases_details', TRUE);
+			define("EW_TABLE_NAME", 'view_purchases_details');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();
@@ -590,7 +590,7 @@ $view_purchases_details_preview->RenderListOptions();
 $view_purchases_details_preview->ListOptions->Render("header", "left");
 ?>
 		<?php 		
-		if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { 
+		if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { 
 		?>
 		<?php if (MS_RECORD_NUMBER_PREVIEW_LONG_CAPTION_COLUMN_TABLE) { ?>
             <td style="text-align: right;"><?php echo $Language->Phrase("LongRecNo"); ?></td>
@@ -654,7 +654,7 @@ while ($view_purchases_details_preview->Recordset && !$view_purchases_details_pr
 // Render list options (body, left)
 $view_purchases_details_preview->ListOptions->Render("body", "left", $view_purchases_details_preview->RowCnt);
 ?>
-	<?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+	<?php if ( defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') &&  MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
 		<?php
 			$verticalalign = "";
 			if (MS_RECORD_NUMBER_PREVIEW_VERTICAL_ALIGN_TOP) {
@@ -735,7 +735,7 @@ $view_purchases_details_preview->ListOptions->Render("body", "right", $view_purc
 ?>
 	<tfoot><!-- Table footer -->
 	<tr class="ewTableFooter">
-	<?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+	<?php if ( defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') &&  MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
         <td style="text-align: right;">&nbsp;</td>
     <?php } ?>
 <?php
@@ -827,7 +827,7 @@ if ($view_purchases_details_preview->Recordset)
 <table class="table ewTable ewPreviewTable">
 	<thead><!-- Table header -->
 		<tr class="ewTableHeader">
-        <?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+        <?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
 			<?php
 			$verticalalign = "";
 			if (MS_RECORD_NUMBER_PREVIEW_VERTICAL_ALIGN_TOP) {
@@ -867,7 +867,7 @@ if ($view_purchases_details_preview->Recordset)
 	</thead>
 	<tbody><!-- Table body -->
 	<tr<?php echo $view_purchases_details_preview->RowAttributes() ?>>
-        <?php if (MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
+        <?php if (defined('MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW') && MS_SHOW_RECORD_NUMBER_COLUMN_ON_DETAIL_PREVIEW) { ?>
         <td style="text-align: right;">&nbsp;</td>
 	    <?php } ?>
 <?php if ($view_purchases_details->Purchase_Number->Visible) { // Purchase_Number ?>

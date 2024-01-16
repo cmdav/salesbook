@@ -1299,7 +1299,7 @@ class ca_purchases_detail extends cTable {
 		}
 
 		// array_shift($this->Supplier_Number->EditValue);
-		if ($_SESSION["Detail_Purchase_Number"] <> "" && ew_CurrentPage()=="a_purchases_detailadd.php") {
+		if (isset($_SESSION["Detail_Purchase_Number"]) <> "" && ew_CurrentPage()=="a_purchases_detailadd.php") {
 			$sSql = "SELECT Supplier_Number FROM a_purchases_detail WHERE Purchase_Number = '".$_SESSION["Detail_Purchase_Number"]."'";
 			$val = ew_ExecuteScalar($sSql);
 			$_SESSION["Detail_Supplier_Number"] = $val; 
