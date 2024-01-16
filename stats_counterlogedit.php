@@ -262,11 +262,11 @@ class cstats_counterlog_edit extends cstats_counterlog {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'edit', TRUE);
+			define("EW_PAGE_ID", 'edit');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'stats_counterlog', TRUE);
+			define("EW_TABLE_NAME", 'stats_counterlog');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

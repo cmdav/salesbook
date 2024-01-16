@@ -237,7 +237,7 @@ class cFontCalibri {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'FontCalibri', TRUE);
+			define("EW_PAGE_ID", 'FontCalibri');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

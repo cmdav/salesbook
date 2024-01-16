@@ -266,11 +266,11 @@ class ca_sales_detail_add extends ca_sales_detail {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'add', TRUE);
+			define("EW_PAGE_ID", 'add');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'a_sales_detail', TRUE);
+			define("EW_TABLE_NAME", 'a_sales_detail');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

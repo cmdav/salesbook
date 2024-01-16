@@ -237,7 +237,7 @@ class cFontArial {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'FontArial', TRUE);
+			define("EW_PAGE_ID", 'FontArial');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

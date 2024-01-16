@@ -237,7 +237,7 @@ class cFontVerdana {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'FontVerdana', TRUE);
+			define("EW_PAGE_ID", 'FontVerdana');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

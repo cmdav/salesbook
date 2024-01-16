@@ -237,7 +237,7 @@ class cFont13px {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'Font13px', TRUE);
+			define("EW_PAGE_ID", 'Font13px');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

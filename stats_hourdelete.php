@@ -262,11 +262,11 @@ class cstats_hour_delete extends cstats_hour {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'delete', TRUE);
+			define("EW_PAGE_ID", 'delete');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'stats_hour', TRUE);
+			define("EW_TABLE_NAME", 'stats_hour');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

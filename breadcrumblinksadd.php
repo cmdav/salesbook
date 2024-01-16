@@ -262,11 +262,11 @@ class cbreadcrumblinks_add extends cbreadcrumblinks {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'add', TRUE);
+			define("EW_PAGE_ID", 'add');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'breadcrumblinks', TRUE);
+			define("EW_TABLE_NAME", 'breadcrumblinks');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

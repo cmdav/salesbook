@@ -237,7 +237,7 @@ class cTableWidthStyle2 {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'TableWidthStyle2', TRUE);
+			define("EW_PAGE_ID", 'TableWidthStyle2');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

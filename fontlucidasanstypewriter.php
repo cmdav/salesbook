@@ -237,7 +237,7 @@ class cFontLucidaSansTypewriter {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'FontLucidaSansTypewriter', TRUE);
+			define("EW_PAGE_ID", 'FontLucidaSansTypewriter');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

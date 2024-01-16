@@ -237,7 +237,7 @@ class cThemeSilver {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'ThemeSilver', TRUE);
+			define("EW_PAGE_ID", 'ThemeSilver');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

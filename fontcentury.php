@@ -237,7 +237,7 @@ class cFontCentury {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'FontCentury', TRUE);
+			define("EW_PAGE_ID", 'FontCentury');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

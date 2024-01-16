@@ -247,7 +247,7 @@ class cchangepwd extends cusers {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'changepwd', TRUE);
+			define("EW_PAGE_ID", 'changepwd');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

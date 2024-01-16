@@ -262,11 +262,11 @@ class ca_unit_of_measurement_delete extends ca_unit_of_measurement {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'delete', TRUE);
+			define("EW_PAGE_ID", 'delete');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'a_unit_of_measurement', TRUE);
+			define("EW_TABLE_NAME", 'a_unit_of_measurement');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

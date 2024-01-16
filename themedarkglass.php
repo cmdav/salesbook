@@ -237,7 +237,7 @@ class cThemeDarkGlass {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'ThemeDarkGlass', TRUE);
+			define("EW_PAGE_ID", 'ThemeDarkGlass');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

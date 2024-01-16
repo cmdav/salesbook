@@ -237,7 +237,7 @@ class cThemeMaroon {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'ThemeMaroon', TRUE);
+			define("EW_PAGE_ID", 'ThemeMaroon');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

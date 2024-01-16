@@ -237,7 +237,7 @@ class cActivateAccount {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'ActivateAccount', TRUE);
+			define("EW_PAGE_ID", 'ActivateAccount');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

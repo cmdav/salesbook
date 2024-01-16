@@ -248,7 +248,7 @@ class cuserpriv extends cuserlevels {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'userpriv', TRUE);
+			define("EW_PAGE_ID", 'userpriv');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

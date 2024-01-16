@@ -266,11 +266,11 @@ class ca_sales_search extends ca_sales {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'search', TRUE);
+			define("EW_PAGE_ID", 'search');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'a_sales', TRUE);
+			define("EW_TABLE_NAME", 'a_sales');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

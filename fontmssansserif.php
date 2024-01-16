@@ -237,7 +237,7 @@ class cFontMSSansSerif {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'FontMSSansSerif', TRUE);
+			define("EW_PAGE_ID", 'FontMSSansSerif');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

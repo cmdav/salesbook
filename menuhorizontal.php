@@ -237,7 +237,7 @@ class cMenuHorizontal {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'MenuHorizontal', TRUE);
+			define("EW_PAGE_ID", 'MenuHorizontal');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

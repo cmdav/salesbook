@@ -237,7 +237,7 @@ class cPrintTAC {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'PrintTAC', TRUE);
+			define("EW_PAGE_ID", 'PrintTAC');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

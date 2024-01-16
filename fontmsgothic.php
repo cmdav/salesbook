@@ -237,7 +237,7 @@ class cFontMSGothic {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'FontMSGothic', TRUE);
+			define("EW_PAGE_ID", 'FontMSGothic');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

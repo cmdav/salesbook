@@ -237,7 +237,7 @@ class cFontFuturaNormal {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'FontFuturaNormal', TRUE);
+			define("EW_PAGE_ID", 'FontFuturaNormal');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

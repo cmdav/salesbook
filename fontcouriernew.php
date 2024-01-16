@@ -237,7 +237,7 @@ class cFontCourierNew {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'FontCourierNew', TRUE);
+			define("EW_PAGE_ID", 'FontCourierNew');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

@@ -237,7 +237,7 @@ class cMenuVertical {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'MenuVertical', TRUE);
+			define("EW_PAGE_ID", 'MenuVertical');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

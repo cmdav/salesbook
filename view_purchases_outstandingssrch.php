@@ -262,11 +262,11 @@ class cview_purchases_outstandings_search extends cview_purchases_outstandings {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'search', TRUE);
+			define("EW_PAGE_ID", 'search');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'view_purchases_outstandings', TRUE);
+			define("EW_TABLE_NAME", 'view_purchases_outstandings');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();

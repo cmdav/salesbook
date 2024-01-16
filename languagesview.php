@@ -306,11 +306,11 @@ class clanguages_view extends clanguages {
 
 		// Page ID
 		if (!defined("EW_PAGE_ID"))
-			define("EW_PAGE_ID", 'view', TRUE);
+			define("EW_PAGE_ID", 'view');
 
 		// Table name (for backward compatibility)
 		if (!defined("EW_TABLE_NAME"))
-			define("EW_TABLE_NAME", 'languages', TRUE);
+			define("EW_TABLE_NAME", 'languages');
 
 		// Start timer
 		if (!isset($GLOBALS["gTimer"])) $GLOBALS["gTimer"] = new cTimer();
