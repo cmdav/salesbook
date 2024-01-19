@@ -1583,8 +1583,8 @@ $register->ShowMessage();
 <!-- captcha html (begin) -->
 <div class="form-group">
 	<div class=" col-sm-offset-4 col-sm-8 ">
-	<img src="ewcaptcha.php" alt="Security Image" style="width: 200px; height: 50px;"><br><br>
-	<input type="text" name="captcha" id="captcha" class="form-control" size="30" placeholder="<?php echo $Language->Phrase("EnterValidateCode") ?>">
+	<!-- <img src="ewcaptcha.php" alt="Security Image" style="width: 200px; height: 50px;"><br><br> -->
+	<input type="hidden" name="captcha" id="captcha" value ="22" class="form-control" size="30" placeholder="<?php echo $Language->Phrase("EnterValidateCode") ?>">
 	</div>
 </div>
 <?php } else { ?>

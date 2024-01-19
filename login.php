@@ -2,7 +2,7 @@
 
 if (session_id() == "") session_start(); // Initialize Session data
 if(isset($_SESSION["EW_CAPTCHA_CODE"]))
-echo $_SESSION["EW_CAPTCHA_CODE"];
+// echo $_SESSION["EW_CAPTCHA_CODE"];
 ob_start(); // Turn on output buffering
 ?>
 <?php include_once "ewcfg12.php" ?>
@@ -772,10 +772,10 @@ $login->ShowMessage();
 		<label class="col-sm-4 control-label ewLabel" for="password"><?php echo $Language->Phrase("Password") ?></label>
 		<div class="col-sm-8"><input type="password" name="password" id="password" class="form-control ewControl" placeholder="<?php echo ew_HtmlEncode($Language->Phrase("Password")) ?>"></div>
 	</div>
-	<div class="form-group">
+	<!-- <div class="form-group">
 		<label class="col-sm-4 control-label ewLabel" for="code">Organisation code</label>
 		<div class="col-sm-8"><input type="text" name="code" id="code" class="form-control ewControl" placeholder="<?php echo ew_HtmlEncode($Language->Phrase("code")) ?>"></div>
-	</div>
+	</div> -->
 	<div class="form-group">
 		<div class="col-sm-offset-4 col-sm-8">
 			<a id="ewLoginOptions" class="collapsed" data-toggle="collapse" data-target="#flogin_options"><?php echo $Language->Phrase("LoginOptions") ?> <span class="icon-arrow"></span></a>
@@ -796,8 +796,8 @@ $login->ShowMessage();
 <!-- captcha html (begin) -->
 <div class="form-group">
 	<div class=" col-sm-offset-4 col-sm-8 ">
-	<img src="ewcaptcha.php" alt="Security Image" style="width: 200px; height: 50px;"><br><br>
-	<input type="text" name="captcha" id="captcha" class="form-control" size="30" placeholder="<?php echo $Language->Phrase("EnterValidateCode") ?>">
+	<!-- <img src="ewcaptcha.php" alt="Security Image" style="width: 200px; height: 50px;"><br><br> -->
+	<input type="hidden" name="captcha" value ="22" id="captcha" class="form-control" size="30" placeholder="<?php echo $Language->Phrase("EnterValidateCode") ?>">
 	</div>
 </div>
 <!-- captcha html (end) -->

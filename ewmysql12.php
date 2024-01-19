@@ -870,7 +870,8 @@ class mysqlt_driver_ResultSet
 		}
 		else
 		{
-			return $this->fields[$field];
+			return isset($this->fields[$field]) ? $this->fields[$field] : null;
+
 		}
 	} 
 
