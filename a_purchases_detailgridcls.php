@@ -2032,12 +2032,16 @@ class ca_purchases_detail_grid extends ca_purchases_detail {
 	function Page_Render() {
 
 		//echo "Page Render";
-		$sSql = "SELECT COUNT(Supplier_Number) FROM a_stock_items WHERE Supplier_Number = '".$_GET["Supplier_Number"]."'";
-		$val = ew_ExecuteScalar($sSql);
-		if ($val <= 0) {
-			$val = 3;
+		$val="";
+		if(isset($_GET["Supplier_Number"])){
+
+			$sSql = "SELECT COUNT(Supplier_Number) FROM a_stock_items WHERE Supplier_Number = '".$_GET["Supplier_Number"]."'";
+			$val = ew_ExecuteScalar($sSql);
+			if ($val <= 0) {
+				$val = 3;
+			}
 		}
-		$this->GridAddRowCount = $val;
+			$this->GridAddRowCount = $val;
 	}
 
 	// Page Data Rendering event
