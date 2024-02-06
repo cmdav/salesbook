@@ -31,7 +31,7 @@ $register = NULL; // Initialize page object first
 <?php
 
 // Create page object
-if (!isset($register)) $register = new cregister();
+if (!isset($register)) $register = new cregister(); // called from main class
 
 
 // Page init
