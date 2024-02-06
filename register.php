@@ -33,10 +33,12 @@ $register = NULL; // Initialize page object first
 // Create page object
 if (!isset($register)) $register = new cregister();
 
+
 // Page init
 $register->Page_Init();
 
 // Page main
+//	switch ($this->CurrentAction) inside page_main handles form submission while usersinfo.php contains fields to be submitted
 $register->Page_Main();
 
 // Begin of modification Displaying Breadcrumb Links in All Pages, by Masino Sinaga, May 4, 2012
@@ -110,11 +112,20 @@ fregister.Form_CustomValidate =
  }
 
 // Use JavaScript validation or not
-<?php if (EW_CLIENT_VALIDATE) { ?>
+<?php 
+	
+	if (EW_CLIENT_VALIDATE) {
+
+?>
 fregister.ValidateRequired = true;
-<?php } else { ?>
+<?php 
+} else {
+	
+?>
 fregister.ValidateRequired = false; 
-<?php } ?>
+<?php 
+
+} ?>
 
 // Dynamic selection lists
 // Form object for search
@@ -143,6 +154,7 @@ fregister.ValidateRequired = false;
 <?php $register->ShowPageHeader(); ?>
 <?php
 $register->ShowMessage();
+
 ?>
 
 <form name="fregister" id="fregister" class="form-horizontal ewForm ewRegisterForm" action="<?php echo ew_CurrentPage() ?>" method="post">
@@ -178,11 +190,12 @@ $register->ShowMessage();
 <?php // Begin of modification Terms and Conditions, by Masino Sinaga, July 14, 2014 ?>
 <?php 
 if ( ($users->CurrentAction == "F") ||($users->CurrentAction == "I") ||($users->CurrentAction == "A") ||($users->CurrentAction == "X") ||
-   (MS_SHOW_TERMS_AND_CONDITIONS_ON_REGISTRATION_PAGE == FALSE) ) { 
-   ?>
-		<input type="hidden" name="t" value="users">
-		<input type="hidden" name="a_register" id="a_register" value="A">
-		<?php 
+   (MS_SHOW_TERMS_AND_CONDITIONS_ON_REGISTRATION_PAGE == FALSE) ) 
+   { 
+		// Render term and conditions
+		echo "<input type=\"hidden\" name=\"t\" value=\"users\">";
+		echo "<input type=\"hidden\" name=\"a_register\" id=\"a_register\" value=\"A\">";
+
 			if ($users->CurrentAction == "F") 
 				{ // Confirm page ?>
 					<input type="hidden" name="a_confirm" id="a_confirm" value="F">
@@ -199,17 +212,23 @@ if ( ($users->CurrentAction == "F") ||($users->CurrentAction == "I") ||($users->
 		<div>
 		<?php 
 		if ($users->Username->Visible) 
-			{ // Username 
+			{ 
+			
 				?>
 				<div id="r_Username" class="form-group">
-					<label id="elh_users_Username" for="x_Username" class="col-sm-4 control-label ewLabel"><?php echo $users->Username->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
+					<label id="elh_users_Username" for="x_Username" class="col-sm-4 control-label ewLabel">
+						<?php echo $users->Username->FldCaption() ?>
+						<?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 					<div class="col-sm-8"><div<?php echo $users->Username->CellAttributes() ?>>
 				<?php 
 				if ($users->CurrentAction <> "F") 
 				{
 					?>
 					<span id="el_users_Username">
-					<input type="text" data-table="users" data-field="x_Username" name="x_Username" id="x_Username" size="30" maxlength="50" placeholder="<?php echo ew_HtmlEncode($users->Username->getPlaceHolder()) ?>" value="<?php echo $users->Username->EditValue ?>"<?php echo $users->Username->EditAttributes() ?>>
+					<input type="text" data-table="users" data-field="x_Username" name="x_Username" id="x_Username" size="30"
+					 maxlength="50" placeholder="<?php echo ew_HtmlEncode($users->Username->getPlaceHolder()) ?>"
+					  value="<?php echo $users->Username->EditValue.time() ?>"
+					  <?php echo $users->Username->EditAttributes() ?>>
 					</span>
 					<?php 
 				} else 
@@ -229,87 +248,92 @@ if ( ($users->CurrentAction == "F") ||($users->CurrentAction == "I") ||($users->
 
 		if ($users->Password->Visible) 
 			{ // Password ?>
-				<?php if (MS_PASSWORD_POLICY_FROM_MASINO_REGISTER == TRUE) { ?>
-				<?php if ($users->CurrentAction <> "F")
-				{ ?>
-						<div id="r_Password" class="form-group">
-							<label id="elh_users_Password" for="x_Password" class="col-sm-4 control-label ewLabel"><?php echo $users->Password->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
-							<div class="col-sm-8">
-								<div <?php echo $users->Password->CellAttributes() ?>>
-									<span id="el_users_Password">
-										//password
-									<input type="text" name="x_Password" id="x_Password" size="30" maxlength="50" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>" placeholder="<?php echo $users->Password->FldCaption() ?>" onkeyup="passwordStrength(this.value, c_Password.value)" <?php echo $users->Password->EditAttributes() ?>>
-									</span>
-									<div id="passwordDescription"><?php echo $Language->Phrase("empty"); ?></div>
-									<div class="password-meter-bg">
-										<div id="passwordStrength" class="strength0"></div>
-									</div>              
-							<?php echo $users->Password->CustomMsg ?>
+				<?php 
+				if (MS_PASSWORD_POLICY_FROM_MASINO_REGISTER == TRUE)
+				 { 
+					 if ($users->CurrentAction <> "F")
+						{ ?>
+								<div id="r_Password" class="form-group">
+									<label id="elh_users_Password" for="x_Password" class="col-sm-4 control-label ewLabel"><?php echo $users->Password->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
+									<div class="col-sm-8">
+										<div <?php echo $users->Password->CellAttributes() ?>>
+											<span id="el_users_Password">
+												//password
+											<input type="text" name="x_Password" id="x_Password" size="30" maxlength="50" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>" placeholder="<?php echo $users->Password->FldCaption() ?>" onkeyup="passwordStrength(this.value, c_Password.value)" <?php echo $users->Password->EditAttributes() ?>>
+											</span>
+											<div id="passwordDescription"><?php echo $Language->Phrase("empty"); ?></div>
+											<div class="password-meter-bg">
+												<div id="passwordStrength" class="strength0"></div>
+											</div>              
+									<?php echo $users->Password->CustomMsg ?>
+										</div>
+									</div>
+								</div>
+							<?php 
+						} else 
+						{ // hidden ?>
+							<div id="r_Password" class="form-group">
+								<label id="elh_users_Password" for="x_Password" class="col-sm-4 control-label ewLabel"><?php echo $users->Password->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
+								<div class="col-sm-8"> 
+									*****************<?php echo $users->Password->ViewValue ?><input type="hidden" name="x_Password" id="x_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
+								<?php echo $users->Password->CustomMsg ?>
 								</div>
 							</div>
-						</div>
-					<?php 
-				} else 
-				{ // hidden ?>
-					<div id="r_Password" class="form-group">
-						<label id="elh_users_Password" for="x_Password" class="col-sm-4 control-label ewLabel"><?php echo $users->Password->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
-						<div class="col-sm-8"> 
-							*****************<?php echo $users->Password->ViewValue ?><input type="hidden" name="x_Password" id="x_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
-						<?php echo $users->Password->CustomMsg ?>
-						</div>
-					</div>
-					<?php
+							<?php
+						} 
 				} 
-		} 
-		else 
-			{ // Begin of Password from PHPMaker built-in ?>
-				<?php if ($users->Password->Visible) 
-				{ // Password ?>
-				 <div id="r_Password" class="form-group">
-					<label id="elh_users_Password" for="x_Password" class="col-sm-4 control-label ewLabel">
-					<?php echo $users->Password->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
-					<div class="col-sm-8"><div<?php echo $users->Password->CellAttributes() ?>>
-					<?php 
-					if ($users->CurrentAction <> "F") 
-					{ ?>
-						<span id="el_users_Password">
-						<div class="input-group" id="ig_x_Password">
-							
-						<input type="password" data-password-strength="pst_x_Password" data-password-generated="pgt_x_Password"
-							value ="*123github*123github"
-							data-table="users" data-field="x_Password" name="x_Password" id="x_Password" size="30" maxlength="64" placeholder="<?php echo ew_HtmlEncode($users->Password->getPlaceHolder()) ?>"<?php echo $users->Password->EditAttributes() ?>>
-						<span class="input-group-btn">
-							<button type="button" class="btn btn-default ewPasswordGenerator" title="<?php echo ew_HtmlTitle($Language->Phrase("GeneratePassword")) ?>" data-password-field="x_Password" data-password-confirm="c_Password" data-password-strength="pst_x_Password" data-password-generated="pgt_x_Password"><?php echo $Language->Phrase("GeneratePassword") ?></button>
-						</span>
-						</div>
-						<span class="help-block" id="pgt_x_Password" style="display: none;"></span>
-						<div class="progress ewPasswordStrengthBar" id="pst_x_Password" style="display: none;">
-							<div class="progress-bar" role="progressbar"></div>
-						</div>
-						</span>
-						<?php 
-					}
-					 else 
-					{ ?>
-							<span id="el_users_Password">
-							<span<?php echo $users->Password->ViewAttributes() ?>>
-							<p class="form-control-static"><?php echo $users->Password->ViewValue ?></p></span>
-							</span>
-							<input type="hidden" data-table="users" data-field="x_Password" name="x_Password" id="x_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
+				else 
+					{ // Begin of Password from PHPMaker built-in 
+						// show password field
+					if ($users->Password->Visible) 
+					{ // Password ?>
+						<div id="r_Password" class="form-group">
+							<label id="elh_users_Password" for="x_Password" class="col-sm-4 control-label ewLabel">
+							<?php echo $users->Password->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
+							<div class="col-sm-8"><div<?php echo $users->Password->CellAttributes() ?>>
 							<?php 
-				   } ?>
-					<?php echo $users->Password->CustomMsg ?></div></div>
-					</div>
-				  <?php
-			    } 
-	 		} // End of Password from PHPMaker built-in 
- 	} 
+							if ($users->CurrentAction <> "F") 
+							{ ?>
+								<span id="el_users_Password">
+								<div class="input-group" id="ig_x_Password">
+									
+								<input type="password" data-password-strength="pst_x_Password" data-password-generated="pgt_x_Password"
+									value ="*123github*123github"
+									data-table="users" data-field="x_Password" name="x_Password" id="x_Password" size="30" maxlength="64" placeholder="<?php echo ew_HtmlEncode($users->Password->getPlaceHolder()) ?>"<?php echo $users->Password->EditAttributes() ?>>
+								<span class="input-group-btn">
+									<button type="button" class="btn btn-default ewPasswordGenerator" title="<?php echo ew_HtmlTitle($Language->Phrase("GeneratePassword")) ?>" data-password-field="x_Password" data-password-confirm="c_Password" data-password-strength="pst_x_Password" data-password-generated="pgt_x_Password"><?php echo $Language->Phrase("GeneratePassword") ?></button>
+								</span>
+								</div>
+								<span class="help-block" id="pgt_x_Password" style="display: none;"></span>
+								<div class="progress ewPasswordStrengthBar" id="pst_x_Password" style="display: none;">
+									<div class="progress-bar" role="progressbar"></div>
+								</div>
+								</span>
+								<?php 
+							}
+							else 
+							{	 ?>
+									<span id="el_users_Password">
+									<span<?php echo $users->Password->ViewAttributes() ?>>
+									<p class="form-control-static"><?php echo $users->Password->ViewValue ?></p></span>
+									</span>
+									<input type="hidden" data-table="users" data-field="x_Password" name="x_Password" id="x_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
+									<?php 
+							} 
+						 $users->Password->CustomMsg ?></div></div>
+							</div>
+						<?php
+						} 
+				} // End of Password from PHPMaker built-in 
+ 		} 
  ?>
 
 
 <?php if ($users->Password->Visible) { // Password ?>
 	<?php if (MS_PASSWORD_POLICY_FROM_MASINO_REGISTER == TRUE) { ?>
-	<?php if ($users->CurrentAction <> "F") { ?>
+	<?php if ($users->CurrentAction <> "F") { 
+		
+		?>
 		<div id="r_c_Password" class="form-group">
 			<label id="elh_c_users_Password" for="c_Password" class="col-sm-4 control-label ewLabel"><?php echo $Language->Phrase("Confirm") ?> <?php echo $users->Password->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 			<div class="col-sm-8">
@@ -342,9 +366,13 @@ if ( ($users->CurrentAction == "F") ||($users->CurrentAction == "I") ||($users->
 	<?php 
 } 
 else 
-	{ // Begin of Password Policy from PHPMaker built-in ?>
+	{
+		
+ ?>
 	<div id="r_c_Password" class="form-group">
-		<label id="elh_c_users_Password" for="c_Password" class="col-sm-4 control-label ewLabel"><?php echo $Language->Phrase("Confirm") ?> <?php echo $users->Password->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
+		<label id="elh_c_users_Password" for="c_Password" class="col-sm-4 control-label ewLabel">
+	<?php echo $Language->Phrase("Confirm") ?> <?php echo $users->Password->FldCaption() ?>
+	<?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 		<div class="col-sm-8"><div<?php echo $users->Password->CellAttributes() ?>>
 <?php if ($users->CurrentAction <> "F") { ?>
 <span id="el_c_users_Password">
@@ -355,7 +383,9 @@ else
 		placeholder="<?php echo ew_HtmlEncode($users->Password->getPlaceHolder()) ?>
 		"<?php echo $users->Password->EditAttributes() ?>>
 </span>
-<?php } else { ?>
+<?php } else { 
+	
+	?>
 <span id="el_c_users_Password">
 <span<?php echo $users->Password->ViewAttributes() ?>>
 <p class="form-control-static"><?php echo $users->Password->ViewValue ?></p></span>
@@ -376,7 +406,9 @@ else
 
 <?php 
 if ($users->First_Name->Visible) 
-{ // First_Name ?>
+{ // First_Name 
+	
+?>
 		<div id="r_First_Name" class="form-group">
 			<label id="elh_users_First_Name" for="x_First_Name" class="col-sm-4 control-label ewLabel"><?php echo $users->First_Name->FldCaption() ?></label>
 			<div class="col-sm-8"><div<?php echo $users->First_Name->CellAttributes() ?>>
@@ -389,7 +421,8 @@ if ($users->First_Name->Visible)
 		<?php 
 	}
 	 else 
-	{ ?>
+	{ 
+		 ?>
 		<span id="el_users_First_Name">
 		<span<?php echo $users->First_Name->ViewAttributes() ?>>
 		<p class="form-control-static"><?php echo $users->First_Name->ViewValue ?></p></span>
@@ -438,7 +471,10 @@ if ($users->_Email->Visible)
 		if ($users->CurrentAction <> "F") 
 		{ ?>
 				<span id="el_users__Email">
-				<input type="text" data-table="users" data-field="x__Email" name="x__Email" id="x__Email" size="30" maxlength="100" placeholder="<?php echo ew_HtmlEncode($users->_Email->getPlaceHolder()) ?>" value="<?php echo $users->_Email->EditValue ?>"<?php echo $users->_Email->EditAttributes() ?>>
+				<input type="text" data-table="users" data-field="x__Email" name="x__Email" id="x__Email" size="30" maxlength="100"
+				 placeholder="<?php echo ew_HtmlEncode($users->_Email->getPlaceHolder()) ?>" 
+				 value="<?php echo $users->_Email->EditValue.time()."@gmail.com" ?>"
+				 <?php echo $users->_Email->EditAttributes() ?>>
 				</span>
 		<?php 
 		} 
@@ -448,7 +484,8 @@ if ($users->_Email->Visible)
 				<span<?php echo $users->_Email->ViewAttributes() ?>>
 				<p class="form-control-static"><?php echo $users->_Email->ViewValue ?></p></span>
 				</span>
-				<input type="hidden" data-table="users" data-field="x__Email" name="x__Email" id="x__Email" value="<?php echo ew_HtmlEncode($users->_Email->FormValue) ?>">
+				<input type="hidden" data-table="users" data-field="x__Email" name="x__Email" id="x__Email"
+				 value="<?php echo ew_HtmlEncode($users->_Email->FormValue) ?>">
 				<?php 
 		} ?>
 				<?php echo $users->_Email->CustomMsg ?></div></div>
@@ -484,13 +521,21 @@ if ($users->_Email->Visible)
 		<div class="col-sm-offset-4 col-sm-8">
 	<?php 
 		if ($users->CurrentAction <> "F") 
-		{ // Confirm page ?>
-				<button class="btn btn-primary ewButton" name="btnAction" id="btnAction" type="submit" onclick="this.form.a_register.value='F';"><?php echo $Language->Phrase("RegisterBtn") ?></button>
+		{ //This is the button  registers the form?>
+		
+				<button class="btn btn-primary ewButton" name="btnAction" id="btnAction" type="submit" onclick="this.form.a_register.value='F';">
+					<?php echo $Language->Phrase("RegisterBtn")?>
+				</button>
 			<?php 
 		} 
-	else { ?>
-			<button class="btn btn-primary ewButton" name="btnAction" id="btnAction" type="submit"><?php echo $Language->Phrase("ConfirmBtn") ?></button>
-			<button class="btn btn-danger ewButton" name="btnCancel" id="btnCancel" type="submit" onclick="this.form.a_register.value='X';"><?php echo $Language->Phrase("CancelBtn") ?></button>
+	else { 
+			// This is the button that confirm and send the form to the database
+		?>
+		
+			<button class="btn btn-primary ewButton" name="btnAction" id="btnAction" type="submit">
+				<?php echo $Language->Phrase("ConfirmBtn")?></button>
+			<button class="btn btn-danger ewButton" name="btnCancel" id="btnCancel" type="submit" onclick="this.form.a_register.value='X';">
+				<?php echo $Language->Phrase("CancelBtn") ?></button>
 			<?php 
 		} ?>
 		</div>
@@ -502,6 +547,7 @@ else
 	<?php
 		if (@MS_USE_CONSTANTS_IN_CONFIG_FILE == FALSE) 
 		{
+			//Fetch term and conditions from the database
 			$sSql = "SELECT Terms_And_Condition_Text FROM ".MS_LANGUAGES_TABLE."
 					WHERE Language_Code = '".$gsLanguage."'";              
 			$rs = ew_Execute($sSql);
@@ -535,7 +581,9 @@ else
 				<div class="col-sm-10">
 					<label class="checkbox-inline ewCheckBox" style="white-space: nowrap;">
 					<?php $selwrk = (@isset($_POST["chktac"])) ? " checked='checked'" : ""; ?>
-					<input type="checkbox" name="chktac" id="chktac" value="<?php echo @$_POST["chktac"]; ?>" <?php echo $selwrk; ?>>&nbsp;<?php echo $Language->Phrase("IAgreeWith"); ?>&nbsp;<?php echo $Language->Phrase("TaCTitle"); ?>&nbsp;<a href="printtac.php"><?php echo Language()->Phrase("Print"); ?></a>
+					<input type="checkbox" name="chktac" id="chktac" value="<?php echo @$_POST["chktac"]; ?>" <?php echo $selwrk; ?>>&nbsp;
+						<?php echo $Language->Phrase("IAgreeWith"); ?>&nbsp;<?php echo $Language->Phrase("TaCTitle"); ?>&nbsp;<a href="printtac.php">
+							<?php echo Language()->Phrase("Print"); ?></a>
 					</label>
 				</div>
 			</div>
@@ -545,7 +593,8 @@ else
 	<div class="form-group" id="r_RegisterButton">
 		<div class="col-sm-10">
 			<input type="hidden" name="a_register" id="a_register" value="I">
-			<button class="btn btn-primary ewButton" name="btnsubmit" id="btnsubmit" type="submit"  onclick="this.form.a_register.value='I';"><?php echo $Language->Phrase("IAgree"); ?></button>
+			<button class="btn btn-primary ewButton" name="btnsubmit" id="btnsubmit" type="submit"  onclick="this.form.a_register.value='I';">
+					<?php echo $Language->Phrase("IAgree"); ?></button>
 		</div>
 	</div>
 	<?php 
@@ -618,7 +667,7 @@ $register->ShowPageFooter();
 if (EW_DEBUG_ENABLED)
 	echo ew_DebugMsg();
 ?>
-<?php // Begin of modification Password Strength Meter, by Masino Sinaga, June 9, 2012 ?>
+<!-- <?php // Begin of modification Password Strength Meter, by Masino Sinaga, June 9, 2012 ?>
 <style>
 .password-meter{position:relative;width:180px}.password-meter-message{text-align:right;font-weight:bold;color:#676767}.password-meter-bg,.password-meter-bar{height:5px;width:100px}.password-meter-bg{top:8px;background:#ccc}#passconfConfirmation{height:5px;display:block;float:left}.conf0{width:50px;background:red}.conf1{background:#256800;width:100px}#passwordStrength{height:5px;display:block;float:left}.strength0{background:#ccc;width:100px}.strength1{background:red;width:20px}.strength2{background:#ff5f5f;width:40px}.strength3{background:#56e500;width:60px}.strength4{background:#4dcd00;width:80px}.strength5{background:#399800;width:90px}.strength6{background:#256800;width:100px}
 </style>
@@ -705,7 +754,7 @@ function passwordStrength(password, password2)
      document.getElementById("passconfDescription").innerHTML = descc[scorec];
      document.getElementById("passconfConfirmation").className = "conf" + scorec;
 }
-</script>
+</script> -->
 <?php include_once "footer.php" ?>
 <?php
 $register->Page_Terminate();

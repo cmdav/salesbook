@@ -1,33 +1,26 @@
 <?php
-
-
-
     class cregister extends cusers {
         use  RenderRowTrait,
-                showMessageTrait, 
-                pageMainTrait,
+             showMessageTrait, 
+             pageMainTrait,
              pageInitTrait,
              passwordStrengthTrait,
-                validateFormTrait,
+             validateFormTrait,
              addRowTrait,
              dbLoadTrait,
              pageTerminateTrait,
              activateEmailTrait;
-             
+
          // Page ID
          var $PageID = 'register';
-     
          // Project ID
          var $ProjectID = "{B36B93AF-B58F-461B-B767-5F08C12493E9}";
-     
          // Page object name
          var $PageObjName = 'register';
-     
          // Page name
          function PageName() {
              return ew_CurrentPage();
          }
-     
          // Page URL
          function PageUrl() {
              $PageUrl = ew_CurrentPage() . "?";

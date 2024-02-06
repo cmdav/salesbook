@@ -11,6 +11,7 @@ trait addRowTrait{
 			$this->LoadDbValues($rsold);
 		}
 		$rsnew = array();
+		
 
 		// Username
 		$this->Username->SetDbValueDef($rsnew, $this->Username->CurrentValue, "", FALSE);
@@ -27,10 +28,13 @@ trait addRowTrait{
 		// Email
 		$this->_Email->SetDbValueDef($rsnew, $this->_Email->CurrentValue, NULL, FALSE);
 
+		$this->Activated->SetDbValueDef($rsnew, "Y", "Activated", FALSE);
+
 		// Call Row Inserting event
+	
 		$rs = ($rsold == NULL) ? NULL : $rsold->fields;
 		$bInsertRow = $this->Row_Inserting($rs, $rsnew);
-
+		
 		// Check if key value entered
 		if ($bInsertRow && $this->ValidateKey && strval($rsnew['Username']) == "") {
 			$this->setFailureMessage($Language->Phrase("InvalidKeyValue"));

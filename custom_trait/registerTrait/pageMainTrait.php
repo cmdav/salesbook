@@ -105,7 +105,7 @@ trait pageMainTrait{
 			case "I": // Blank record, no action required
 				break;
 			case "A": // Add
-
+				
 				// Check for duplicate User ID
 				$sFilter = str_replace("%u", ew_AdjustSql($this->Username->CurrentValue), EW_USER_NAME_FILTER);
 
@@ -125,8 +125,8 @@ trait pageMainTrait{
 				// }
 				if (!$bUserExists) {
 					$this->SendEmail = TRUE; // Send email on add success
-					if ($this->AddRow()) { // Add record
-
+					if ($this->AddRow()) { // Add record source: is addRowTrait.php
+							
 						// Load user email
 						$sReceiverEmail = $this->_Email->CurrentValue;
 						if ($sReceiverEmail == "") { // Send to recipient directly

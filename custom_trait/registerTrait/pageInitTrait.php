@@ -1,8 +1,6 @@
 <?php
 
 trait pageInitTrait{
-
-    
 	// 
 	//  Page_Init
 	//
@@ -85,7 +83,7 @@ trait pageInitTrait{
 		if (@$_POST["ajax"] == "autofill") {
 			$results = $this->GetAutoFill(@$_POST["name"], @$_POST["q"]);
 			if ($results) {
-
+					
 				// Clean output buffer
 				if (!EW_DEBUG_ENABLED && ob_get_length())
 					ob_end_clean();
