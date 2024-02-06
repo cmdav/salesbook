@@ -282,6 +282,7 @@ class ca_customers extends cTable {
 
 	// Get SQL
 	function GetSQL($where, $orderby) {
+		
 		return ew_BuildSelectSql($this->getSqlSelect(), $this->getSqlWhere(),
 			$this->getSqlGroupBy(), $this->getSqlHaving(), $this->getSqlOrderBy(),
 			$where, $orderby);

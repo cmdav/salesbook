@@ -227,7 +227,10 @@ if ( ($users->CurrentAction == "F") ||($users->CurrentAction == "I") ||($users->
 					<span id="el_users_Username">
 					<input type="text" data-table="users" data-field="x_Username" name="x_Username" id="x_Username" size="30"
 					 maxlength="50" placeholder="<?php echo ew_HtmlEncode($users->Username->getPlaceHolder()) ?>"
-					  value="<?php echo $users->Username->EditValue.time() ?>"
+					
+					  value="<?php 
+					  //username 
+					  echo $users->Username->EditValue ?>"
 					  <?php echo $users->Username->EditAttributes() ?>>
 					</span>
 					<?php 
@@ -275,7 +278,7 @@ if ( ($users->CurrentAction == "F") ||($users->CurrentAction == "I") ||($users->
 							<div id="r_Password" class="form-group">
 								<label id="elh_users_Password" for="x_Password" class="col-sm-4 control-label ewLabel"><?php echo $users->Password->FldCaption() ?><?php echo $Language->Phrase("FieldRequiredIndicator") ?></label>
 								<div class="col-sm-8"> 
-									*****************<?php echo $users->Password->ViewValue ?><input type="hidden" name="x_Password" id="x_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
+									<?php echo $users->Password->ViewValue ?><input type="hidden" name="x_Password" id="x_Password" value="<?php echo ew_HtmlEncode($users->Password->FormValue) ?>">
 								<?php echo $users->Password->CustomMsg ?>
 								</div>
 							</div>
@@ -296,9 +299,9 @@ if ( ($users->CurrentAction == "F") ||($users->CurrentAction == "I") ||($users->
 							{ ?>
 								<span id="el_users_Password">
 								<div class="input-group" id="ig_x_Password">
-									
+								<!-- password -->
 								<input type="password" data-password-strength="pst_x_Password" data-password-generated="pgt_x_Password"
-									value ="*123github*123github"
+									value =""
 									data-table="users" data-field="x_Password" name="x_Password" id="x_Password" size="30" maxlength="64" placeholder="<?php echo ew_HtmlEncode($users->Password->getPlaceHolder()) ?>"<?php echo $users->Password->EditAttributes() ?>>
 								<span class="input-group-btn">
 									<button type="button" class="btn btn-default ewPasswordGenerator" title="<?php echo ew_HtmlTitle($Language->Phrase("GeneratePassword")) ?>" data-password-field="x_Password" data-password-confirm="c_Password" data-password-strength="pst_x_Password" data-password-generated="pgt_x_Password"><?php echo $Language->Phrase("GeneratePassword") ?></button>
@@ -376,10 +379,10 @@ else
 		<div class="col-sm-8"><div<?php echo $users->Password->CellAttributes() ?>>
 <?php if ($users->CurrentAction <> "F") { ?>
 <span id="el_c_users_Password">
-	
+	<!-- confirm password -->
 <input type="password" data-field="c_Password" name="c_Password" id="c_Password" size="30" 
 		maxlength="64" 
-		value ="*123github*123github"
+		value =" "
 		placeholder="<?php echo ew_HtmlEncode($users->Password->getPlaceHolder()) ?>
 		"<?php echo $users->Password->EditAttributes() ?>>
 </span>
@@ -471,9 +474,10 @@ if ($users->_Email->Visible)
 		if ($users->CurrentAction <> "F") 
 		{ ?>
 				<span id="el_users__Email">
+					<!-- email -->
 				<input type="text" data-table="users" data-field="x__Email" name="x__Email" id="x__Email" size="30" maxlength="100"
 				 placeholder="<?php echo ew_HtmlEncode($users->_Email->getPlaceHolder()) ?>" 
-				 value="<?php echo $users->_Email->EditValue.time()."@gmail.com" ?>"
+				 value="<?php echo $users->_Email->EditValue ?>"
 				 <?php echo $users->_Email->EditAttributes() ?>>
 				</span>
 		<?php 

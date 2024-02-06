@@ -34,25 +34,27 @@ trait pageMainTrait{
 			$this->Username = ""; // Initialize
 			$encrypted = FALSE; // v12
 			if (isset($_POST["username"])) {
-               // die('check line 421');
+				// handle authentication along side with if ($bValidate)
+               
 				$this->Username = ew_RemoveXSS(ew_StripSlashes($_POST["username"]));
-				$sPassword = ew_RemoveXSS(ew_StripSlashes(@$_POST["password"]));
+				$sPassword = ew_RemoveXSS(ew_StripSlashes(@$_POST["password"]));;
 				$this->LoginType = strtolower(ew_RemoveXSS(@$_POST["type"]));
+				
 			} else if (EW_ALLOW_LOGIN_BY_URL && isset($_GET["username"])) {
-               // die('check line 426');
+               
 				$this->Username = ew_RemoveXSS(ew_StripSlashes($_GET["username"]));
 				$sPassword = ew_RemoveXSS(ew_StripSlashes(@$_GET["password"]));
 				$this->LoginType = strtolower(ew_RemoveXSS(@$_GET["type"]));
 				$encrypted = !empty($_GET["encrypted"]);
 			} // v12
 			if ($this->Username <> "") {
-                // die('check line 433');
+                
 				$bValidate = $this->ValidateForm($this->Username, $sPassword);
 				if (!$bValidate)
 					$this->setFailureMessage($gsFormError);
-				$_SESSION[EW_SESSION_USER_LOGIN_TYPE] = $this->LoginType; // Save user login type
-				$_SESSION[EW_SESSION_USER_PROFILE_USER_NAME] = $this->Username; // Save login user name
-				$_SESSION[EW_SESSION_USER_PROFILE_LOGIN_TYPE] = $this->LoginType; // Save login type
+					$_SESSION[EW_SESSION_USER_LOGIN_TYPE] = $this->LoginType; // Save user login type
+					$_SESSION[EW_SESSION_USER_PROFILE_USER_NAME] = $this->Username; // Save login user name
+					$_SESSION[EW_SESSION_USER_PROFILE_LOGIN_TYPE] = $this->LoginType; // Save login type
 
 				// Max login attempt checking
 				if ($UserProfile->ExceedLoginRetry($this->Username)) {
@@ -100,15 +102,16 @@ trait pageMainTrait{
                 }
 			}
 			if ($bValidate) {
-               // die('user validated');
+                 //die('user validated');
 				// Call Logging In event
 				$bValidate = $this->User_LoggingIn($this->Username, $sPassword);
 
 				if ($bValidate) {
+					//validateUser is called from phpfn12.php via validateUserTrait
 					$bValidPwd = $Security->ValidateUser($this->Username, $sPassword, FALSE, $encrypted); // Manual login v12
 
 					if (!$bValidPwd) {
-
+						// die('invalid');
 						// Password expired, force change password
 						if (IsPasswordExpired()) {
 							$this->setFailureMessage($Language->Phrase("PasswordExpired"));
@@ -119,11 +122,13 @@ trait pageMainTrait{
 
 					// Password changed date not initialized, set as today
 					} elseif ($UserProfile->EmptyPasswordChangedDate($this->Username)) {
-
+						// die('cancelled e');
 						$UserProfile->SetValue(EW_USER_PROFILE_LAST_PASSWORD_CHANGED_DATE, ew_StdCurrentDate());
 						$UserProfile->SaveProfileToDatabase($this->Username);
 					}
 				} else {
+			
+					 
 					if ($this->getFailureMessage() == "")
 						$this->setFailureMessage($Language->Phrase("LoginCancelled")); // Login cancelled
 				}
@@ -153,7 +158,7 @@ trait pageMainTrait{
 			// Call loggedin event
 
 			$this->User_LoggedIn($this->Username);
-
+			
 			// Begin of modification Load Sessions for Application Settings and User Preferences, by Masino Sinaga, September 22, 2014
 			// LoadApplicationSettings();
 			// LoadUserPreferences();

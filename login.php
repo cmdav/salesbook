@@ -38,7 +38,7 @@ $login->Page_Init();
 
 // Page main
 
-$login->Page_Main();
+$login->Page_Main(); // handles the user login using if (isset($_POST["username"])) along side with if ($bValidate) 
 
 // Begin of modification Displaying Breadcrumb Links in All Pages, by Masino Sinaga, May 4, 2012
 getCurrentPageTitle(ew_CurrentPage());
@@ -136,7 +136,7 @@ $login->ShowMessage();
 	<div class="form-group">
 		<label class="col-sm-4 control-label ewLabel" for="password"><?php echo $Language->Phrase("Password") ?></label>
 		<!--password-->
-		<div class="col-sm-8"><input type="text" name="password" id="password" class="form-control ewControl" placeholder="<?php echo ew_HtmlEncode($Language->Phrase("Password")) ?>"></div>
+		<div class="col-sm-8"><input type="password" name="password" id="password" class="form-control ewControl" placeholder="<?php echo ew_HtmlEncode($Language->Phrase("Password")) ?>"></div>
 	</div>
 	<!-- <div class="form-group">
 		<label class="col-sm-4 control-label ewLabel" for="code">Organisation code</label>
@@ -279,8 +279,12 @@ if (EW_DEBUG_ENABLED)
 // document.write("page loaded");
 
 $(document).ready(function() {
-	$('#username').val('admin');
-	$('#password').val('test');
+	$('#username').val('');
+	$('#password').val('');
+
+	// $('#username').val('admin');
+	// $('#password').val('master');
+	
 });
 </script>
 <?php include_once "footer.php" ?>
