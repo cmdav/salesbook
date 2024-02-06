@@ -11,7 +11,7 @@ ob_start(); // Turn on output buffering
 <?php include_once "usersinfo.php" ?>
 <?php 
 	include_once "userfn12.php";
-	include_once "custom_trait/loginTrait/showmessageTrait.php" ;
+	include_once "custom_trait/loginTrait/showMessageTrait.php" ;
 	include_once "custom_trait/loginTrait/pageInitTrait.php" ;
 	include_once "custom_trait/loginTrait/pageMainTrait.php" ;
 	include_once "custom_trait/loginTrait/validateFormTrait.php" ;
