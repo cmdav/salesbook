@@ -1,5 +1,4 @@
 <?php
-
 if (session_id() == "") session_start(); // Initialize Session data
 if(isset($_SESSION["EW_CAPTCHA_CODE"]))
 // echo $_SESSION["EW_CAPTCHA_CODE"];
