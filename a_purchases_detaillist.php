@@ -2487,10 +2487,13 @@ class ca_purchases_detail_list extends ca_purchases_detail {
 
 	// Page Render event
 	function Page_Render() {
+		$val ="";
 
 		//echo "Page Render";
-		$sSql = "SELECT COUNT(Supplier_Number) FROM a_stock_items WHERE Supplier_Number = '".$_GET["Supplier_Number"]."'";
-		$val = ew_ExecuteScalar($sSql);
+		if (isset($_GET["Supplier_Number"])) {
+			$sSql = "SELECT COUNT(Supplier_Number) FROM a_stock_items WHERE Supplier_Number = '".$_GET["Supplier_Number"]."'";
+			$val = ew_ExecuteScalar($sSql);
+		}
 		if ($val <= 0) {
 			$val = 3;
 		}
