@@ -1305,14 +1305,15 @@ class ca_sales_detail extends cTable {
 		}
 
 		// array_shift($this->Supplier_Number->EditValue);
-		if ($_SESSION["Detail_Sales_Number"] <> "" && ew_CurrentPage()=="a_sales_detailadd.php") {
+		if (isset($_SESSION["Detail_Sales_Number"]) && $_SESSION["Detail_Sales_Number"] !== "" && ew_CurrentPage()=="a_sales_detailadd.php") {
 			$sSql = "SELECT Supplier_Number FROM a_sales_detail WHERE Sales_Number = '".$_SESSION["Detail_Sales_Number"]."'";
 			$val = ew_ExecuteScalar($sSql);
 			$_SESSION["Detail_Supplier_Number"] = $val; 
 			$this->Supplier_Number->CurrentValue = $val;
-
+		
 			//$this->Supplier_Number->Disabled = TRUE;
 		}
+		
 	}
 
 	// User ID Filtering event
