@@ -1,7 +1,7 @@
 
 **Project Description**
 
-This repo contain the api written in Laravel and the frontend in Vue
+This repo contain the api written in Laravel and the frontend in Vue. This an inventory management system.It helps you to keep track of your business stock item
 
 **Project Limitation**
 
@@ -19,7 +19,7 @@ Vue
 
 To run this project you need
 
-Php 8.2
+Php 8.1
 
 Mysql database
 
@@ -48,7 +48,7 @@ Apache server or any other server
 
 1.Navigate to the frontend folder
 
-2. npm install
+2.npm install
 
 3.npm run serve
 
