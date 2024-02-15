@@ -1,7 +1,7 @@
 
 **Project Description**
 
-This is a simple project that allows register users to create, read, update and delete a task. This repo contain the api written in Laravel and the frontend in Vue
+This repo contain the api written in Laravel and the frontend in Vue
 
 **Project Limitation**
 
@@ -19,7 +19,7 @@ Vue
 
 To run this project you need
 
-Php 8.1
+Php 8.2
 
 Mysql database
 
@@ -55,35 +55,7 @@ Apache server or any other server
 4.open the generated url on the browser
 
 
-**Default login Credentials**
 
-email:test2@gmail.com
-
-password:test*1234
-
-**API Documentation**
-https://documenter.getpostman.com/view/23939553/2s9Yyti2HS
-
-**Register Page**
-
-![image](https://github.com/eaimiesylv/spinCrud/assets/50324524/301e432b-3818-40b5-bbd6-e16c94a571f9)
-
-**Login Page**
-
-![image](https://github.com/eaimiesylv/spinCrud/assets/50324524/1f2f56b3-d3d3-4477-be8b-9cd42c043e16)
-
-**Dashboard**
-
-![image](https://github.com/eaimiesylv/spinCrud/assets/50324524/100e264b-7ba4-4b74-966e-2836f82b5db8)
-
-**Create Task**
-![image](https://github.com/eaimiesylv/spinCrud/assets/50324524/75e72371-41ee-4a25-a378-d8f70e29cfac)
-
-**Edit Task**
-![image](https://github.com/eaimiesylv/spinCrud/assets/50324524/a4ed939b-d5b5-46fe-a978-c867314d847c)
-
-**Read Task**
-![image](https://github.com/eaimiesylv/spinCrud/assets/50324524/8497edf6-76b5-4860-b950-856f261f409d)
 
 
 
