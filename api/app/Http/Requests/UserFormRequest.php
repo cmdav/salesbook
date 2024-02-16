@@ -13,8 +13,12 @@ class UserFormRequest extends FormRequest
     public function rules(Request $request): array
     {
         return [
-            'email'=>'required|email|max:55|unique:users',
-            'name' => 'required|string|max:55',
+            'first_name' => 'required|string|max:55',
+            'last_name' => 'required|string|max:55',
+            'middle_name' => 'nullable|string|max:55',
+            'institution_id' => 'integer|string|max:55',
+            'dob' => 'required|date|date_format:Y-m-d',
+            'email' => 'required|email|max:55|unique:users',
             'password' => 'required|string|min:2|max:60'
         
         ];
