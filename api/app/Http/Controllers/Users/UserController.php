@@ -5,6 +5,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserFormRequest;
 use App\Services\UserService\UserService;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewUserHasRegisterEmail;
 
 class UserController extends Controller
 {
@@ -20,7 +22,10 @@ class UserController extends Controller
     public function store(UserFormRequest $request)
     { 	
         
-            return $this->userService->createUser($request->all());
+           
+            $user = $this->userService->createUser($request->all());
+            
+            Mail::to($user->email)->send(new NewUserHasRegisterEmail($user));
         
     }
    

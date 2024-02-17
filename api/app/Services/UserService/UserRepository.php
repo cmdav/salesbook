@@ -3,6 +3,7 @@
 namespace App\Services\UserService;
 use App\Models\User;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -27,6 +28,8 @@ class UserRepository
              return User::Create($data);
              
         } catch (QueryException $exception) {
+
+            Log::channel('insertion_errors')->error('Error creating user: ' . $exception->getMessage());
 
             return response()->json(['message' => 'Insertion failed.'], 500);
         }

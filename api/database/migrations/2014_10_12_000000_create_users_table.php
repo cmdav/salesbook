@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('last_name', 55);
             $table->string('middle_name', 55);
             $table->integer('type_id')->default(1);
-            $table->integer('institution_id');
+            $table->integer('organization_id');
             $table->date('dob', 10);
             $table->string('email', 55)->unique();
             $table->timestamp('email_verified_at')->nullable();
