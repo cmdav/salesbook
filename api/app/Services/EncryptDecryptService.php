@@ -12,13 +12,14 @@ class EncryptDecryptService
 
             return Crypt::encryptString($value);
 
-        } catch (DecryptException $e) {
+        } catch (EncryptException $e) {
             
             return null; 
         }
     }
 	public static function decryptValue($value)
     {
+      
         try {
 
             return Crypt::decryptString($value);

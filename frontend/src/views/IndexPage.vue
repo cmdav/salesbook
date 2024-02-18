@@ -15,13 +15,17 @@
              
               <ReusableForm :fields="formFields"/>
              
-           </div>  
-           <div class="d-flex justify-content-between mt-3">
-
-              <button type="submit" class="btn btn-primary" :disabled="loading">{{ loading ? 'Please wait...' : 'Submit' }}</button>
-
-              <router-link to="/register">Create an account</router-link>
+           </div> 
+           <div class="row mt-3">
+            <div class="col-12 mb-2">
+              <button type="submit" class="btn btn-primary w-100" :disabled="loading">{{ loading ? 'Please wait...' : 'Login' }}</button>
             </div>
+            <div class="col-12">
+              <router-link to="/register" class="d-block text-center">Click here to create an account</router-link>
+            </div>
+          </div>
+ 
+          
        </form>
       
     </div>

@@ -15,7 +15,8 @@ return new class extends Migration
             $table->uuid('id',32)->primary();
             $table->string('first_name', 55);
             $table->string('last_name', 55);
-            $table->string('middle_name', 55);
+            $table->string('middle_name', 55)->nullable();
+            $table->string('phone_number', 12);
             $table->integer('type_id')->default(1);
             $table->integer('organization_id');
             $table->date('dob', 10);

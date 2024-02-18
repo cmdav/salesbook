@@ -22,7 +22,14 @@ class UserService
         return $this->userRepository->createUser($all);
        
     }
+    public function authenticateUser($email)
+    {
+       
+        return $this->userRepository->getUserByEmail($email);
+        
     
+    }
+
     
    
    

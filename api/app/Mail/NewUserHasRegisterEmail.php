@@ -21,8 +21,9 @@ class NewUserHasRegisterEmail extends Mailable
     public function __construct($user)
     {
         $this->user = $user;
-        $encryptedEmail = EncryptDecryptService::encryptvalue($user->email);
-        $this->frontendUrl = env('FRONTEND_URL')."/email_verification/".$encryptedEmail;
+        $value = $user->email."..".$user->updated_at;
+        $encryptedEmail = EncryptDecryptService::encryptvalue($value);
+        $this->frontendUrl = env('FRONTEND_URL')."/email-verification/".$encryptedEmail;
 
 
     }

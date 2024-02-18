@@ -16,9 +16,10 @@ class UserFormRequest extends FormRequest
             'first_name' => 'required|string|max:55',
             'last_name' => 'required|string|max:55',
             'middle_name' => 'nullable|string|max:55',
-            'organization_id' => 'integer|string|max:55',
+            'organization_id' => 'required|integer',
             'dob' => 'required|date|date_format:Y-m-d',
             'email' => 'required|email|max:55|unique:users',
+           // 'email' => 'required|email|max:55',
             'password' => 'required|string|confirmed|min:2|max:60'
         
         ];

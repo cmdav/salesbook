@@ -41,14 +41,15 @@ const useAuthStore = defineStore({
             try {
               const response = await api.post('users', payLoad);
         
-              if (response && response.status === 201) {
-                    
-                    return { success: true, response: 'registration successful' };
+              if (response && response.status === 200) {
+                   
+                    return { success: true, response: response.data.message};
               } else {
+                
                     return { success: false, response: 'registration error' };
               }
             } catch (error) {
-                  console.log(error);
+                  console.log(error)
                  return { success: false, response: error};
             }
           },

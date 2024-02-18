@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\UserFormRequest;
 use App\Services\UserService\UserService;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\JsonResponse;
 use App\Mail\NewUserHasRegisterEmail;
 
 class UserController extends Controller
@@ -24,8 +25,16 @@ class UserController extends Controller
         
            
             $user = $this->userService->createUser($request->all());
+            if($user){
+               
+               // Mail::to($user['email'])->send(new NewUserHasRegisterEmail($user));
+
+                return response()->json(['message' => 'Verify your account using the verification link sent to your email.']);
+
+            }
+            return response()->json(['message' => 'Try again.'], 500);
             
-            Mail::to($user->email)->send(new NewUserHasRegisterEmail($user));
+           
         
     }
    
