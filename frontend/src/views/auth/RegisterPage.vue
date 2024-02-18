@@ -52,37 +52,22 @@ const isOk = ref(false)
 
 const formFields = ref([
  
-  { type: 'text', label: 'First name', databaseField: 'first_name', required: true, value:'test name' },
+  { type: 'text', label: 'First name', databaseField: 'first_name', required: true, value:'' },
   { type: 'text', label: 'Middle name', databaseField: 'middle_name', required: false, value:'' },
-  { type: 'text', label: 'Last name', databaseField: 'last_name', required: true, value:'test last name' },
-  { type: 'text', label: 'Phone number', databaseField: 'phone_number', required: true ,value:'09123456789'},
-  { type: 'date', label: 'Date of Birth', databaseField: 'dob', required: true ,value:'2023-02-02'},
-  { type: 'email', label: 'Email', databaseField: 'email', required: true ,value:'okomemmanuel1@gmail.com'},
-  { type: 'number', label: 'Organizational Code', databaseField: 'organization_id', required: true ,value:'1234'},
-  { type: 'password', label: 'password', databaseField: 'password', required: true ,value:'123'},
-  { type: 'password', label: 'password', databaseField: 'password_confirmation', required: true ,value:'123'},
+  { type: 'text', label: 'Last name', databaseField: 'last_name', required: true, value:'' },
+  { type: 'text', label: 'Phone number', databaseField: 'phone_number', required: true ,value:''},
+  { type: 'date', label: 'Date of Birth', databaseField: 'dob', required: true ,value:''},
+  { type: 'email', label: 'Email', databaseField: 'email', required: true ,value:''},
+  { type: 'number', label: 'Organizational Code', databaseField: 'organization_code', required: true ,value:''},
+  { type: 'password', label: 'password', databaseField: 'password', required: true ,value:''},
+  { type: 'password', label: 'password', databaseField: 'password_confirmation', required: true ,value:''},
  
 
 
 
 ]);
 
-// const formFields = ref([
- 
-//   { type: 'text', label: 'First name', databaseField: 'first_name', required: true, placeholder:'Enter first name' },
-//   { type: 'text', label: 'Middle name', databaseField: 'middle_name', required: false, placeholder:'Enter middle name' },
-//   { type: 'text', label: 'Last name', databaseField: 'last_name', required: true, placeholder:'Enter last name' },
-//   { type: 'text', label: 'Phone number', databaseField: 'phone_number', required: true ,placeholder:'Enter phone number'},
-//   { type: 'date', label: 'Date of Birth', databaseField: 'dob', required: true ,placeholder:'dob'},
-//   { type: 'email', label: 'Email', databaseField: 'email', required: true ,placeholder:'Enter your email address'},
-//   { type: 'number', label: 'Organization', databaseField: 'organization_id', required: true ,placeholder:'Organization code'},
-//   { type: 'password', label: 'password', databaseField: 'password', required: true ,placeholder:'Enter Password'},
-//   { type: 'password', label: 'password', databaseField: 'password_confirmation', required: true ,placeholder:'Enter Password'},
- 
 
-
-
-// ]);
 
 const register = async () => {
   try {
@@ -101,6 +86,7 @@ const register = async () => {
       success_msg.value = response;
     } else {
       error.value = true;
+      error_msg.value = '';
       error_msg.value = response.response?.data?.message || response.message;
       console.log(error_msg.value)
 

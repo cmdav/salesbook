@@ -15,6 +15,13 @@ class UserRepository
         return  User::where('email', $email)->first();
 
     }
+    public function getUserByEmailAndOrganizationCode(array $request){
+
+        return  User::where([
+                             ['email', $request['email']], ['organization_code', $request['organization_code']]
+                            ])->first();
+
+    }
     public function authenticateUser(array $request)
     {
         return $this->getUserByEmail($request['email']);

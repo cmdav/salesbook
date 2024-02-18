@@ -27,6 +27,7 @@ class User extends Authenticatable
         'phone_number',
         'type',
         'organization_id',
+        'organization_code',
         'email',
         'dob',
         'password',

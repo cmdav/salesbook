@@ -21,6 +21,10 @@ class AuthFormRequest extends FormRequest
                 'max:55',
                 Rule::exists('users', 'email')
             ],
+            'organization_code' => [
+                'required',
+                'integer'
+            ],
             'password' => 'required|string|min:2|max:60'
         
         ];
@@ -29,6 +33,7 @@ class AuthFormRequest extends FormRequest
     {
         return [
             'email.exists' => 'Invalid credentials',
+            'organization_code.exists' => 'Invalid credentials',
         ];
     }
 

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Dashboard from '../views/UserDashboard.vue'
-import IndexPage from '../views/auth/IndexPage.vue'
+import LoginPage from '../views/auth/LoginPage.vue'
 import useAuthStore from '../store';
 
 
@@ -11,7 +11,7 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: IndexPage
+    component: LoginPage
   },
   {
     path: '/register',

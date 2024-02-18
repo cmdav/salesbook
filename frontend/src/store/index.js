@@ -19,16 +19,16 @@ const useAuthStore = defineStore({
         }
     },
     actions: {
-        async login({ email, password }) {
+        async login(payLoad) {
             try {
-              const response = await api.post('login', { email, password });
+              const response = await api.post('login', payLoad);
         
               if (response && response.status === 200) {
                     this.token = response.data[0];
                     this.user = response.data[1];
                     this.updateLocalStorage();
-                    console.log(this.user)
-                    return { success: true, response: 'Login successful' };
+                   
+                    return { success: true, response: response };
               } else {
                     return { success: false, response: 'Invalid credentials' };
               }

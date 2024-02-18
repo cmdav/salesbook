@@ -48,8 +48,9 @@ const router = useRouter();
 
 const formFields = ref([
  
-{ type: 'email', label: 'Email', databaseField: 'email', required: true ,placeholder:'Enter your email address', value:'test2@gmail.com'},
-{ type: 'password', label: 'password', databaseField: 'password', required: true ,placeholder:'Enter Password', value:'test*1234'},
+{ type: 'email', label: 'Email', databaseField: 'email', required: true ,placeholder:'Enter your email address', value:''},
+{ type: 'password', label: 'password', databaseField: 'password', required: true ,placeholder:'Enter Password', value:''},
+{ type: 'number', label: 'Organization Code', databaseField: 'organization_code', required: true ,placeholder:'Enter your organizational code', value:''},
 
 
 ]);
@@ -66,9 +67,11 @@ const login = async () => {
     const { success, response } = await useAuthStore().login(payLoad);
 
     if (success) {
+      console.log(response);
       router.push('/dashboard');
     } else {
       error.value = true;
+      error_msg.value = '';
       error_msg.value = response.response?.data?.message || response.message;
 
     }

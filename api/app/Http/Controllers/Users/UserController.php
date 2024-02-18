@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\JsonResponse;
 use App\Mail\NewUserHasRegisterEmail;
 
+use Illuminate\Support\Facades\DB;
+use Exception;
+
 class UserController extends Controller
 {
     
@@ -24,15 +27,27 @@ class UserController extends Controller
     { 	
         
            
+        DB::beginTransaction(); 
+
+        try {
+          
             $user = $this->userService->createUser($request->all());
-            if($user){
-               
-                Mail::to($user['email'])->send(new NewUserHasRegisterEmail($user));
-
-                return response()->json(['message' => 'Verify your account using the verification link sent to your email.'], 200);
-
+        
+            if (!$user) {
+                return response()->json(['message' => 'User creation failed.'], 500);
             }
-            return response()->json(['message' => 'Try again.'], 500);
+        
+            Mail::to($user['email'])->send(new NewUserHasRegisterEmail($user));
+        
+            DB::commit(); 
+        
+            return response()->json(['message' => 'Verify your account using the verification link sent to your email.'], 200);
+        } catch (Exception $e) {
+
+            DB::rollBack(); 
+
+            return response()->json(['message' => 'User was created, but we failed to send a verification email. Please contact support.'], 500);
+        }
             
            
         
