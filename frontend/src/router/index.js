@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Dashboard from '../views/UserDashboard.vue'
-import IndexPage from '../views/IndexPage.vue'
+import IndexPage from '../views/auth/IndexPage.vue'
 import useAuthStore from '../store';
 
 
@@ -17,7 +17,7 @@ const routes = [
     path: '/register',
     name: 'register',
     component: function () {
-      return import( '../views/RegisterPage.vue')
+      return import( '../views/auth/RegisterPage.vue')
      }
 
   },
@@ -34,7 +34,15 @@ const routes = [
     path: '/forbidden',
     name: 'forbidden',
     component: function () {
-     return import( '../views/NotLogin.vue')
+     return import( '../views/auth/401Page.vue')
+    }
+  },
+  
+  {
+    path: '/email-verification/:token',
+    name: 'email-verification',
+    component: function () {
+     return import( '../views/auth/VerifyEmailPage.vue')
     }
   },
   {
@@ -49,7 +57,7 @@ const routes = [
     path: '/:catchAll(.*)',
     name: 'not-found',
     component: function () {
-      return import( '../views/404Page.vue')
+      return import( '../views/auth/404Page.vue')
      }
   }
 ]

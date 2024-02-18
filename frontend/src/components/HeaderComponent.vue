@@ -2,7 +2,7 @@
 
 <template>
        
-     <h6>Hello {{ user.name }}</h6>
+     <h6>Hello {{ user.first_name}}</h6>
      <header>
           <i class="fas fa-bars"  @click="toggleNav"></i>
           <div class="input-group">

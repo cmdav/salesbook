@@ -35,7 +35,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import useAuthStore from '../store';
+import useAuthStore from '../../store';
 import ReusableForm from "@/components/base/ReusableForm.vue";
 
 // const email = ref('');

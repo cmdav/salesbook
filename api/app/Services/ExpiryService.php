@@ -8,7 +8,7 @@ class ExpiryService
     public static function hasLinkExpiry($created_time)
     {
        
-        $expiresAt = Carbon::parse($created_time)->addMinutes(15);
+        $expiresAt = Carbon::parse($created_time)->addMinutes(20);
         
         $now = Carbon::now();
 

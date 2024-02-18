@@ -62,7 +62,7 @@ class EmailVerificationController extends Controller
         
         if (!$user) {
 
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json(['message' => 'Invalid hash '], 404);
         }
 
         if(ExpiryService::hasLinkExpiry($user->updated_at)){

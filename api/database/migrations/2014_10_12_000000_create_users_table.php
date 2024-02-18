@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('middle_name', 55)->nullable();
             $table->string('phone_number', 12);
             $table->integer('type_id')->default(1);
-            $table->integer('organization_id');
+            $table->integer('organization_id')->default(0);
+            $table->integer('organization_code')->default(0);
             $table->date('dob', 10);
             $table->string('email', 55)->unique();
             $table->timestamp('email_verified_at')->nullable();

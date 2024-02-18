@@ -27,9 +27,9 @@ class UserController extends Controller
             $user = $this->userService->createUser($request->all());
             if($user){
                
-               // Mail::to($user['email'])->send(new NewUserHasRegisterEmail($user));
+                Mail::to($user['email'])->send(new NewUserHasRegisterEmail($user));
 
-                return response()->json(['message' => 'Verify your account using the verification link sent to your email.']);
+                return response()->json(['message' => 'Verify your account using the verification link sent to your email.'], 200);
 
             }
             return response()->json(['message' => 'Try again.'], 500);
