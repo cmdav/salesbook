@@ -17,9 +17,10 @@ return new class extends Migration
             $table->string('last_name', 55);
             $table->string('middle_name', 55)->nullable();
             $table->string('phone_number', 12);
-            $table->integer('type_id')->default(1);
-            $table->integer('organization_id')->default(0);
-            $table->integer('organization_code')->default(0);
+            $table->integer('type_id')->default(0)->comment('1 for company 0, 2 for supplier');
+            $table->uuid('organization_id')->nullable();
+            $table->integer('organization_code')->nullable();
+            $table->string('active', 10)->default('active')->comment('active, suspended');
             $table->date('dob', 10);
             $table->string('email', 55)->unique();
             $table->timestamp('email_verified_at')->nullable();

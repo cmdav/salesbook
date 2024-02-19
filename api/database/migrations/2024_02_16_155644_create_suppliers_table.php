@@ -12,7 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('suppliers', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id',32)->primary();
+            $table->string('user_id', 55);
+            $table->string('bank_name');
+            $table->string('account_number');
+            $table->string('account_name');
+            $table->string('state');
+            $table->string('address');
+            $table->date('dob')->nullable();
             $table->timestamps();
         });
     }

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Institution;
+use App\Models\SupplierOrganization;
 use Illuminate\Http\Request;
 
-class InstitutionController extends Controller
+class SupplierOrganizationController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class InstitutionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Institution $institution)
+    public function show(SupplierOrganization $supplierOrganization)
     {
         //
     }
@@ -42,7 +42,7 @@ class InstitutionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Institution $institution)
+    public function edit(SupplierOrganization $supplierOrganization)
     {
         //
     }
@@ -50,7 +50,7 @@ class InstitutionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Institution $institution)
+    public function update(Request $request, SupplierOrganization $supplierOrganization)
     {
         //
     }
@@ -58,7 +58,7 @@ class InstitutionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Institution $institution)
+    public function destroy(SupplierOrganization $supplierOrganization)
     {
         //
     }

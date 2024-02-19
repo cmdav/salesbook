@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Discount;
+use App\Models\ProductSubCategory;
 use Illuminate\Http\Request;
 
-class DiscountController extends Controller
+class ProductSubCategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class DiscountController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Discount $discount)
+    public function show(ProductSubCategory $productSubCategory)
     {
         //
     }
@@ -42,7 +42,7 @@ class DiscountController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Discount $discount)
+    public function edit(ProductSubCategory $productSubCategory)
     {
         //
     }
@@ -50,7 +50,7 @@ class DiscountController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Discount $discount)
+    public function update(Request $request, ProductSubCategory $productSubCategory)
     {
         //
     }
@@ -58,7 +58,7 @@ class DiscountController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Discount $discount)
+    public function destroy(ProductSubCategory $productSubCategory)
     {
         //
     }

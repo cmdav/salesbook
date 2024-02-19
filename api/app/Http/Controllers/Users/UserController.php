@@ -25,7 +25,7 @@ class UserController extends Controller
    
     public function store(UserFormRequest $request)
     { 	
-        
+      
            
         DB::beginTransaction(); 
 
@@ -46,7 +46,7 @@ class UserController extends Controller
 
             DB::rollBack(); 
 
-            return response()->json(['message' => 'User was created, but we failed to send a verification email. Please contact support.'], 500);
+            return response()->json(['message' => 'Could not send verification email. Please try again .'], 500);
         }
             
            
