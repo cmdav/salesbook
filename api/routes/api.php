@@ -25,6 +25,28 @@ Route::middleware('auth:sanctum')->group(function() {
 
         route::post('log-out', App\Http\Controllers\Auth\LogOutController::class);
 
-        route::resource('tasks', App\Http\Controllers\Task\TaskController::class)->only('index','show','store','update','destroy');
+       
     });
+
+    route::resource('currencys', App\Http\Controllers\Inventory\CurrencyController::class);
+    route::resource('measurements', App\Http\Controllers\Inventory\MeasurementController::class);
+    route::resource('organizations', App\Http\Controllers\Inventory\OrganizationController::class);
+    route::resource('sales', App\Http\Controllers\Inventory\SaleController::class);
+    route::resource('stores', App\Http\Controllers\Inventory\StoreController::class);
+    
+    route::resource('product-categories', App\Http\Controllers\Product\ProductCategoryController::class);
+    route::resource('products', App\Http\Controllers\Product\ProductController::class);
+    route::resource('products-sub-categories', App\Http\Controllers\Product\ProductSubCategoryController::class);
+    
+    route::resource('supplier-organizations', App\Http\Controllers\Supply\SupplierOrganizationController::class);
+    route::resource('supplier-products', App\Http\Controllers\Supply\SupplierProductController::class);
+   
+
+    route::resource('customers', App\Http\Controllers\Users\CustomerController::class);
+    route::resource('suppliers', App\Http\Controllers\Users\SupplierController::class);
+    
+
+
+
+
 });

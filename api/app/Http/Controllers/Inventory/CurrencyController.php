@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Inventory;
+use App\Http\Controllers\Controller;
 
 use App\Models\Currency;
 use Illuminate\Http\Request;
