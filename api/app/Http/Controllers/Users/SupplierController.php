@@ -8,59 +8,40 @@ use Illuminate\Http\Request;
 
 class SupplierController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $organizationService;
+
+    public function __construct(OrganizationService $organizationService)
+    {
+        $this->organizationService = $organizationService;
+    }
     public function index()
     {
-        //
+        $organization = $this->organizationService->getAllOrganization();
+        return response()->json($organization);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $organization = $this->organizationService->createOrganization($request->all());
+        return response()->json($organization, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Supplier $supplier)
+    public function show($id)
     {
-        //
+        $organization = $this->organizationService->getOrganizationById($id);
+        return response()->json($organization);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Supplier $supplier)
+    public function update($id, Request $request)
     {
-        //
+       
+        $organization = $this->organizationService->updateOrganization($id, $request->all());
+        return response()->json($organization);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Supplier $supplier)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Supplier $supplier)
-    {
-        //
+        $this->organizationService->deleteOrganization($id);
+        return response()->json(null, 204);
     }
 }
