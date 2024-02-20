@@ -17,7 +17,15 @@ class SupplierFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'user_id' =>function () {
+                return \App\Models\User::where('type_id', 1)->inRandomOrder()->first();   
+            },
+            'bank_name' => $this->faker->company,
+            'account_number' => $this->faker->randomNumber(8),
+            'account_name' => $this->faker->name,
+            'state' => $this->faker->state,
+            'address' => $this->faker->address,
+            'dob' => $this->faker->dateTimeBetween('-70 years', '-18 years')->format('Y-m-d'),
         ];
     }
 }

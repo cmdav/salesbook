@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('supplier_organizations', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
-            $table->uuid('supplier_id', 32);
-            $table->uuid('organisation_id', 32);
+            $table->uuid('supplier_id', 32)->index();
+            $table->uuid('organization_id', 32)->index();
+            $table->boolean('status')->default(0)->comment('0 pending, 1 active');
             $table->timestamps();
         });
     }

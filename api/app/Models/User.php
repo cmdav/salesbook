@@ -54,9 +54,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-    public function getTypeAttribute($value)
+    public function getTypeIdAttribute($value)
     {
+        
         switch ($value) {
+        
             case 0:
                 return 'customer';
             case 1:
@@ -71,8 +73,10 @@ class User extends Authenticatable
         parent::boot();
 
         static::creating(function ($user) {
-           
-            if (isset($user->organization_code)) {
+
+            $request = app('request');
+            
+            if (isset($user->organization_code) && $request->has('password')) {
                
                 $organization = Organization::where('organization_code', $user->organization_code)->first();
 

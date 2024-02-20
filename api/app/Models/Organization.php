@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Traits\SetCreatedBy;
+use Illuminate\Support\Facades\Auth;
 
 class Organization extends Model
 {
@@ -22,13 +23,17 @@ class Organization extends Model
     protected static function boot() {
 
         parent::boot();
+        
 
         static::creating(function ($organization) {
-            do {
-                $token = rand(100000, 999999); 
-            } while (Organization::where('organization_code', $token)->exists());
+            if (Auth::check()) {
+               
+                do {
+                    $token = rand(100000, 999999); 
+                } while (Organization::where('organization_code', $token)->exists());
 
-            $organization->organization_code = $token;
+                $organization->organization_code = $token;
+            }
         });
     }
 

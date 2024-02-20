@@ -9,4 +9,10 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 class SupplierOrganization extends Model
 {
     use  HasUuids, HasFactory;
+
+    protected $fillable=[
+        'supplier_id',
+        'organization_id',
+        
+    ];  
 }

@@ -29,7 +29,9 @@ class UserFactory extends Factory
             'last_name' => $this->faker->name(),
             'phone_number' => $this->faker->numberBetween(81012345670, 81012345690),
             'type_id' =>$this->faker->numberBetween(0, 2),
-            'organization_id' => $this->faker->numberBetween(1, 5),
+            'organization_id' =>function () {
+                return \App\Models\Organization::first()->id;   
+            },
             'dob' => $this->faker->date(),
             'email' =>$this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),

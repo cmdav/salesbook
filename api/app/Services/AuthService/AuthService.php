@@ -43,7 +43,7 @@ class AuthService
             return [
                 'token' => $user->createToken('api-token')->plainTextToken,
                 'user' => [
-                    'type' => $user->type, 
+                    'type' => $user->type_id, 
                 ],
                 'message' => "Success", 
                 'status' => '200', 

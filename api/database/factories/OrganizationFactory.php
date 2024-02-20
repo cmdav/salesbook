@@ -17,7 +17,12 @@ class OrganizationFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+
+            'organization_name' => $this->faker->company,
+            'organization_url' => "http://google.com",
+            'organization_code' => 123456,
+            'organization_logo' => $this->faker->imageUrl(640, 480, 'business'),
+            'created_by' => '1'
         ];
     }
 }

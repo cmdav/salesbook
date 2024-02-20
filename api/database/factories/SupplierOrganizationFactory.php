@@ -16,8 +16,17 @@ class SupplierOrganizationFactory extends Factory
      */
     public function definition(): array
     {
-        return [
-            //
-        ];
+        
+            
+            return [
+
+                'supplier_id' => function () {
+                    return \App\Models\User::where('type_id', 1)->inRandomOrder()->first();   
+                },
+                'organization_id' =>function () {
+                    return \App\Models\Organization::first()->id;   
+                },
+            ];
+        
     }
 }
