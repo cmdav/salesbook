@@ -1,13 +1,21 @@
 <?php
 
 namespace App\Services\Supply\SupplierOrganizationService;
-
+// use App\Services\UserService\UserRepository; 
 use App\Models\SupplierOrganization;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
 class SupplierOrganizationRepository 
 {
+
+    // protected $userRepository;
+
+    // public function __construct(UserRepository $userRepository)
+    // {
+    //     $this->userRepository = $userRepository;
+    // }
+
     public function index()
     {
        
@@ -16,8 +24,9 @@ class SupplierOrganizationRepository
     }
     public function create(array $data)
     {
+        
         try {
-            
+
             return SupplierOrganization::create($data);
 
         } catch (QueryException $exception) {
@@ -52,4 +61,5 @@ class SupplierOrganizationRepository
         }
         return null;
     }
+
 }

@@ -16,6 +16,11 @@ class UserRepository
         return  User::where('email', $email)->first();
 
     }
+    public function getUserByToken($token){
+
+        return  User::where('token', $token)->first();
+
+    }
     public function getUserByEmailAndOrganizationCode(array $request){
 
         return  User::where([
@@ -40,6 +45,10 @@ class UserRepository
             throw new ModelNotFoundException('The provided organization code does not exist.');
         }
     }
+    public function updateUserByEmailAndToken($token){
 
+        return  User::where('token', $token)->first();
+
+    }
    
 }

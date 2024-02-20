@@ -8,9 +8,12 @@ Route::group(['prefix'=>'v1'], function(){
     
     route::post('login', App\Http\Controllers\Auth\AuthController::class);
 
-    route::resource('email-verification', App\Http\Controllers\Email\EmailVerificationController::class)->only('store','update');//post to resend email, put to update email
 
-    route::post('forgot-password', App\Http\Controllers\Email\ForgotPasswordController::class); //send reset link
+    route::post('send-user-email', App\Http\Controllers\Email\SendUserEmailController::class);//reset, resend,invitation
+
+    route::put('email-verification/{hash}', App\Http\Controllers\Email\EmailVerificationController::class);
+
+   // route::post('forgot-password', App\Http\Controllers\Email\ForgotPasswordController::class); //send reset link
     
     route::resource('users', App\Http\Controllers\Users\UserController::class)->only('store');
 

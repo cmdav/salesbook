@@ -26,12 +26,13 @@ class User extends Authenticatable
         'last_name',
         'middle_name',
         'phone_number',
-        'type',
+        'type_id',
         'organization_id',
         'organization_code',
         'email',
         'dob',
         'password',
+        'token'
     ];
 
     /**
@@ -75,6 +76,8 @@ class User extends Authenticatable
         static::creating(function ($user) {
 
             $request = app('request');
+
+            $user->token = \Str::uuid()->toString();
             
             if (isset($user->organization_code) && $request->has('password')) {
                

@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Services\EncryptDecryptService;
+use App\Services\EmailDataService;
 
 
 class NewUserHasRegisterEmail extends Mailable
@@ -18,14 +19,17 @@ class NewUserHasRegisterEmail extends Mailable
     public $user;
     public $frontendUrl;
 
-    public function __construct($user)
+    public function __construct($user, $type)
     {
         $this->user = $user;
-        $value = $user->email."..".$user->updated_at;
-        $encryptedEmail = EncryptDecryptService::encryptvalue($value);
-        $this->frontendUrl = env('FRONTEND_URL')."/email-verification/".$encryptedEmail;
+        $encryptedToken = EncryptDecryptService::encryptvalue($user->token);
+        $this->frontendUrl = env('FRONTEND_URL')."/email-verification/".$encryptedToken;
 
+        // $data = EmailDataService::getEmailData($userType);
+        // $url=$data['frontend_url']."/".$hash;
+        //  $this->emailData = array_merge($data, array('frontend_url'=>$url));
 
+       
     }
 
     /**

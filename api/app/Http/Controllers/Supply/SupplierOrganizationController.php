@@ -21,7 +21,7 @@ class SupplierOrganizationController extends Controller
         return response()->json($organization);
     }
 
-    public function store(Request $request)
+    public function store(SupplierOrganizationFormRequest $request)
     {
         
         $organization = $this->supplierOrganizationService->createSupplierOrganization($request->all());

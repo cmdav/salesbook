@@ -52,6 +52,12 @@ return [
     */
 
     'channels' => [
+        'email_errors' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/email_errors.log'),
+            'level' => 'error',
+            'days' => 14,
+        ],
 		  'insertion_errors' => [
             'driver' => 'daily',
             'path' => storage_path('logs/insertion_errors.log'),

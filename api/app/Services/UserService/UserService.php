@@ -29,6 +29,13 @@ class UserService
         
     
     }
+    public function getUserByToken($token)
+    {
+       
+        return $this->userRepository->getUserByToken($token);
+        
+    
+    }
 
     
    
