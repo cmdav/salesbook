@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
-
+use App\Http\Requests\OrganizationFormRequest;
+use App\Services\Inventory\OrganizationService\OrganizationService;
 use App\Models\Measurement;
 use Illuminate\Http\Request;
 

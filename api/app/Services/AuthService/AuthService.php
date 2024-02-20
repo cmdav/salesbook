@@ -40,7 +40,14 @@ class AuthService
        
         if($this->passwordValidation($request['password'], $user->password)){
 
-           return   [$user->createToken('api-token')->plainTextToken, $user];
+            return [
+                'token' => $user->createToken('api-token')->plainTextToken,
+                'user' => [
+                    'type' => $user->type, 
+                ],
+                'message' => "Success", 
+                'status' => '200', 
+            ];
 
         }else{
 

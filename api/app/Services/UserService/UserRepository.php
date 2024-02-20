@@ -3,6 +3,7 @@
 namespace App\Services\UserService;
 use App\Models\User;
 use Illuminate\Database\QueryException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 
 
@@ -36,9 +37,7 @@ class UserRepository
              
         } catch (QueryException $exception) {
 
-            Log::channel('insertion_errors')->error('Error creating user: ' . $exception->getMessage());
-
-            return response()->json(['message' => 'Insertion failed.'], 500);
+            throw new ModelNotFoundException('The provided organization code does not exist.');
         }
     }
 

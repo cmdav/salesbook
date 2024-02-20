@@ -1,46 +1,54 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
+namespace App\Services\Supply\SupplierService;
 
-use App\Models\Organization;
+use App\Models\Supplier;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
-class OrganizationRepository 
+class SupplierRepository 
 {
     public function index()
     {
        
-        return Organization::latest()->paginate(20);
+        return Supplier::latest()->paginate(20);
 
     }
     public function create(array $data)
     {
-       
-        return Organization::create($data);
+        try {
+            
+            return Supplier::create($data);
+
+        } catch (QueryException $exception) {
+            Log::channel('insertion_errors')->error('Error creating user: ' . $exception->getMessage());
+
+            return response()->json(['message' => 'Insertion failed.'], 500);
+        } 
+        
     }
 
     public function findById($id)
     {
-        return Organization::find($id);
+        return Supplier::find($id);
     }
 
     public function update($id, array $data)
     {
-        $organization = $this->findById($id);
+        $Supplier = $this->findById($id);
       
-        if ($organization) {
+        if ($Supplier) {
 
-            $organization->update($data);
+            $Supplier->update($data);
         }
-        return $organization;
+        return $Supplier;
     }
 
     public function delete($id)
     {
-        $organization = $this->findById($id);
-        if ($organization) {
-            return $organization->delete();
+        $Supplier = $this->findById($id);
+        if ($Supplier) {
+            return $Supplier->delete();
         }
         return null;
     }

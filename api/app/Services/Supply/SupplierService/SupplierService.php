@@ -1,42 +1,42 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
-use App\Services\Inventory\OrganizationService\OrganizationRepository;
+namespace App\Services\Supply\SupplierService;
+use App\Services\Supply\SupplierService\SupplierRepository;
 
 
-class OrganizationService 
+class SupplierService 
 {
-    protected $organizationRepository;
+    protected $SupplierRepository;
 
-    public function __construct(OrganizationRepository $organizationRepository)
+    public function __construct(SupplierRepository $SupplierRepository)
     {
-        $this->organizationRepository = $organizationRepository;
+        $this->SupplierRepository = $SupplierRepository;
     }
 
-    public function createOrganization(array $data)
+    public function createSupplier(array $data)
     {
        
-        return $this->organizationRepository->create($data);
+        return $this->SupplierRepository->create($data);
     }
 
-    public function getAllOrganization()
+    public function getAllSupplier()
     {
        
-        return $this->organizationRepository->index();
+        return $this->SupplierRepository->index();
     }
 
-    public function getOrganizationById($id)
+    public function getSupplierById($id)
     {
-        return $this->organizationRepository->findById($id);
+        return $this->SupplierRepository->findById($id);
     }
 
-    public function updateOrganization($id, array $data)
+    public function updateSupplier($id, array $data)
     {
-        return $this->organizationRepository->update($id, $data);
+        return $this->SupplierRepository->update($id, $data);
     }
 
-    public function deleteOrganization($id)
+    public function deleteSupplier($id)
     {
-        return $this->organizationRepository->delete($id);
+        return $this->SupplierRepository->delete($id);
     }
 }

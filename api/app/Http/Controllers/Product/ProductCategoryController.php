@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Product;
 use App\Http\Controllers\Controller;
-
+use App\Http\Requests\OrganizationFormRequest;
+use App\Services\Products\OrganizationService\OrganizationService;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 

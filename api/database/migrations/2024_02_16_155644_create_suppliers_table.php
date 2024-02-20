@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
-            $table->string('user_id', 55);
-            $table->string('bank_name');
-            $table->string('account_number');
-            $table->string('account_name');
-            $table->string('state');
-            $table->string('address');
+            $table->uuid('user_id', 55);
+            $table->string('bank_name', 55);
+            $table->integer('account_number');
+            $table->string('account_name', 55);
+            $table->string('state', 100);
+            $table->string('address', 255);
             $table->date('dob')->nullable();
             $table->timestamps();
         });

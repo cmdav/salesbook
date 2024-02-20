@@ -22,8 +22,8 @@ class UserFormRequest extends FormRequest
             'password' => [
                 'required',
                 'string',
-                'min:8', 
-                'max:30', 
+                'min:8', // minimum 8 characters
+                'max:30', // maximum 30 characters
                 'confirmed',
                 'regex:/[a-z]/',      // must contain at least one lowercase letter
                 'regex:/[A-Z]/',      // must contain at least one uppercase letter

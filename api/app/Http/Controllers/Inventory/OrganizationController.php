@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
 use App\Services\Inventory\OrganizationService\OrganizationService;
-use Illuminate\Http\Request;
+
+use App\Http\Requests\OrganizationFormRequest;
+use Illuminate\Support\Facades\Storage;
 
 class OrganizationController extends Controller
 {
@@ -19,10 +21,22 @@ class OrganizationController extends Controller
         return response()->json($organization);
     }
 
-    public function store(Request $request)
+    public function store(OrganizationFormRequest $request)
     {
-        $organization = $this->organizationService->createOrganization($request->all());
+        $data = $request->all();
+
+        if ($request->hasFile('organization_logo')) {
+            $data['organization_logo'] = $this->uploadOrganizationLogo($request->file('organization_logo'));
+        }
+
+        $organization = $this->organizationService->createOrganization($data);
         return response()->json($organization, 201);
+    }
+    private function uploadOrganizationLogo($file): string
+    {
+        $filename = time() . '.' . $file->getClientOriginalExtension(); // Create a unique filename
+        $path = $file->storeAs('public/organizations', $filename); // Store the file in the storage/app/public/organizations directory
+        return Storage::url($path); // Return the URL to access the uploaded file
     }
 
     public function show($id)

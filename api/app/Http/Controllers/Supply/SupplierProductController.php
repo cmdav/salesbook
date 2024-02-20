@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Supply;
 use App\Http\Controllers\Controller;
-
+use App\Http\Requests\OrganizationFormRequest;
+use App\Services\Supply\OrganizationService\OrganizationService;
 use App\Models\SupplierProduct;
 use Illuminate\Http\Request;
 

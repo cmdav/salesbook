@@ -16,8 +16,16 @@ class OrganizationRepository
     }
     public function create(array $data)
     {
-       
-        return Organization::create($data);
+        try {
+            
+            return SupplierOrganization::create($data);
+
+        } catch (QueryException $exception) {
+            Log::channel('insertion_errors')->error('Error creating user: ' . $exception->getMessage());
+
+            return response()->json(['message' => 'Insertion failed.'], 500);
+        } 
+      
     }
 
     public function findById($id)

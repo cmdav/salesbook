@@ -15,8 +15,8 @@ return new class extends Migration
             $table->uuid('id',32)->primary();
             $table->string('organization_name', 55);
             $table->string('organization_url', 55)->nullable();
-            $table->integer('organization_code');
-            $table->string('organization_logo', 20);
+            $table->integer('organization_code')->unique()->index();
+            $table->string('organization_logo', 100);
             $table->uuid('created_by', 32);
             $table->timestamps();
         });

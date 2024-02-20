@@ -5,6 +5,8 @@ namespace App\Services\Inventory\OrganizationService;
 use App\Models\Organization;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+
 
 class OrganizationRepository 
 {
@@ -16,8 +18,15 @@ class OrganizationRepository
     }
     public function create(array $data)
     {
-       
-        return Organization::create($data);
+        try {
+
+            return Organization::create($data);
+            
+        } catch (QueryException $exception) {
+            Log::channel('insertion_errors')->error('Error creating user: ' . $exception->getMessage());
+
+            return response()->json(['message' => 'Insertion failed.'], 500);
+        }
     }
 
     public function findById($id)

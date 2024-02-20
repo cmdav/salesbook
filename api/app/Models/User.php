@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class User extends Authenticatable
 {
@@ -53,4 +54,36 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+    public function getTypeAttribute($value)
+    {
+        switch ($value) {
+            case 0:
+                return 'customer';
+            case 1:
+                return 'supplier';
+            case 2:
+                return 'company';
+            default:
+                return 'customer'; 
+        }
+    }
+    protected static function boot() {
+        parent::boot();
+
+        static::creating(function ($user) {
+           
+            if (isset($user->organization_code)) {
+               
+                $organization = Organization::where('organization_code', $user->organization_code)->first();
+
+                if (!$organization) {
+                  
+                    throw new ModelNotFoundException('The provided organization code does not exist.');
+                }
+
+              
+                $user->organization_id = $organization->id;
+            }
+        });
+    }
 }

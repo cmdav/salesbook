@@ -2,46 +2,47 @@
 
 namespace App\Http\Controllers\Users;
 use App\Http\Controllers\Controller;
-
+use App\Services\Supply\SupplierService\SupplierService;
+use App\Http\Requests\SupplierFormRequest;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class SupplierController extends Controller
 {
-    protected $organizationService;
+    protected $supplierService;
 
-    public function __construct(OrganizationService $organizationService)
+    public function __construct(SupplierService $supplierService)
     {
-        $this->organizationService = $organizationService;
+        $this->supplierService = $supplierService;
     }
     public function index()
     {
-        $organization = $this->organizationService->getAllOrganization();
-        return response()->json($organization);
+        $supplier = $this->supplierService->getAllSupplier();
+        return response()->json($supplier);
     }
 
-    public function store(Request $request)
+    public function store(SupplierFormRequest $request)
     {
-        $organization = $this->organizationService->createOrganization($request->all());
-        return response()->json($organization, 201);
+        $supplier = $this->supplierService->createSupplier($request->all());
+        return response()->json($supplier, 201);
     }
 
     public function show($id)
     {
-        $organization = $this->organizationService->getOrganizationById($id);
-        return response()->json($organization);
+        $supplier = $this->supplierService->getSupplierById($id);
+        return response()->json($supplier);
     }
 
     public function update($id, Request $request)
     {
        
-        $organization = $this->organizationService->updateOrganization($id, $request->all());
-        return response()->json($organization);
+        $supplier = $this->supplierService->updateSupplier($id, $request->all());
+        return response()->json($supplier);
     }
 
     public function destroy($id)
     {
-        $this->organizationService->deleteOrganization($id);
+        $this->supplierService->deleteSupplier($id);
         return response()->json(null, 204);
     }
 }

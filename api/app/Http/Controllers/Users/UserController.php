@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use App\Mail\NewUserHasRegisterEmail;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
 
 class UserController extends Controller
@@ -32,6 +33,7 @@ class UserController extends Controller
         try {
           
             $user = $this->userService->createUser($request->all());
+            
         
             if (!$user) {
                 return response()->json(['message' => 'User creation failed.'], 500);
@@ -42,6 +44,12 @@ class UserController extends Controller
             DB::commit(); 
         
             return response()->json(['message' => 'Verify your account using the verification link sent to your email.'], 200);
+        }catch (ModelNotFoundException $e) {
+
+            DB::rollBack();
+
+            return response()->json(['message' => 'Validation Error.','errors' => ['organization_code' => ['Invalid organization code provided.']]], 422); // 422 Unprocessable Entity
+
         } catch (Exception $e) {
 
             DB::rollBack(); 
