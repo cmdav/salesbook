@@ -36,6 +36,10 @@ class UserService
         
     
     }
+    public function updateUserToken(\App\Models\User $user, $newToken)
+    {
+        return $this->userRepository->updateUserToken($user, $newToken);
+    }
 
     
    

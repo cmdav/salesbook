@@ -45,10 +45,12 @@ class UserRepository
             throw new ModelNotFoundException('The provided organization code does not exist.');
         }
     }
-    public function updateUserByEmailAndToken($token){
-
-        return  User::where('token', $token)->first();
-
+    public function updateUserToken(User $user, $newToken){
+        // Update the user's token
+        $user->token = $newToken;
+        $user->save(); // Persist the changes to the database
+    
+        return $user; // Return the updated user
     }
    
 }

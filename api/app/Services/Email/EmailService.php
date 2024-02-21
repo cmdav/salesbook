@@ -19,7 +19,7 @@ class EmailService
        }
        catch (Exception $e) {
 
-            Log::channel('email_errors')->error('Error sending email: ' . $exception->getMessage());
+            Log::channel('email_errors')->error('Error sending email: ' . $e->getMessage());
             return false;
         }
        

@@ -42,7 +42,7 @@ class UserController extends Controller
                 return response()->json(['message' => 'User creation failed.'], 500);
             }
             //1 registration email
-             $this->emailService->sendEmail($user, 'register');
+             $this->emailService->sendEmail($user, 'register', " ");
     
         
             DB::commit(); 
