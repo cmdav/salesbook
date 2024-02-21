@@ -74,11 +74,12 @@ class User extends Authenticatable
         parent::boot();
 
         static::creating(function ($user) {
+         
 
             $request = app('request');
 
             $user->token = \Str::uuid()->toString();
-            
+            //select the organization a user is to be assigned to and update the organization id value
             if (isset($user->organization_code) && $request->has('password')) {
                
                 $organization = Organization::where('organization_code', $user->organization_code)->first();
@@ -90,6 +91,32 @@ class User extends Authenticatable
 
               
                 $user->organization_id = $organization->id;
+            }
+
+             
+        });
+        static::created(function ($user) {
+            // Now this is in the created method, we are sure the user now has an ID.
+            if ($user->type_id == 1 && isset($user->organization_id)) { 
+                // Only proceed if user is a 'supplier' and has an organization assigned
+                try {
+                    // Since the user is already created, we can check for existing association
+                    $exists = SupplierOrganization::where([
+                        'supplier_id' => $user->id,
+                        'organization_id' => $user->organization_id,
+                    ])->exists();
+    
+                    // If the association doesn't exist, create it
+                    if (!$exists) {
+                        SupplierOrganization::create([
+                            'supplier_id' => $user->id,
+                            'organization_id' => $user->organization_id,
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error("Failed to associate user {$user->id} with organization {$user->organization_id}: " . $e->getMessage());
+                    // You can handle the exception as required for your application
+                }
             }
         });
     }

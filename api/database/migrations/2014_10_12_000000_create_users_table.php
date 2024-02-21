@@ -16,12 +16,12 @@ return new class extends Migration
             $table->string('first_name', 55);
             $table->string('last_name', 55);
             $table->string('middle_name', 55)->nullable();
-            $table->string('phone_number', 12);
+            $table->string('phone_number', 12)->nullable();
             $table->integer('type_id')->default(0)->comment('0 => customer, 1=>supplier, 2=>company');
             $table->uuid('organization_id')->nullable();
             $table->integer('organization_code')->nullable();
             $table->string('active', 10)->default('active')->comment('active, suspended');
-            $table->date('dob', 10);
+            $table->date('dob', 10)->nullable();
             $table->string('email', 55)->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->uuid('token')->unique();

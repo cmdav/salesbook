@@ -10,6 +10,7 @@ class EmailService
 {
     public static function sendEmail($user, $type, $otherDetail=null)
     {
+        
        try{
             
            

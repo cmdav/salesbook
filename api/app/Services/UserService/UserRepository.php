@@ -36,13 +36,16 @@ class UserRepository
 
     public function createUser(array $data)
     {
-        try {
       
-             return User::Create($data);
-             
+        try {
+          
+            return User::updateOrCreate(
+                ['email' => $data['email']], 
+                $data 
+            );
         } catch (QueryException $exception) {
-
-            throw new ModelNotFoundException('The provided organization code does not exist.');
+            Log::channel('insertion_errors')->error('Error creating or updating user: ' . $exception->getMessage());
+            throw new ModelNotFoundException('Insertion or update error.');
         }
     }
     public function updateUserToken(User $user, $newToken){

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\UserService\UserService;
 use App\Services\Email\EmailService;
 use App\Services\Inventory\OrganizationService\OrganizationService;
+use App\Services\Supply\SupplierOrganizationService\SupplierOrganizationService;
 use App\Http\Requests\EmailFormRequest;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -19,19 +20,27 @@ class SendUserEmailController extends Controller
 
     protected OrganizationService $organizationService;
 
+    protected SupplierOrganizationService $supplierOrganizationService;
+
     protected $email;
 
    
 
     protected $organization_code;
 
-    public function __invoke(EmailFormRequest $request,UserService $userService, EmailService $emailService, OrganizationService $organizationService)
+    public function __invoke(EmailFormRequest $request,
+                            UserService $userService,
+                            EmailService $emailService, 
+                            OrganizationService $organizationService,
+                            SupplierOrganizationService $supplierOrganizationService
+                        )
     {
         
         $this->userService = $userService;
         $this->emailService = $emailService; 
         $this->email = $request->email;
         $this->organizationService = $organizationService;
+        $this->supplierOrganizationService = $supplierOrganizationService;
         $this->reqs = $request;
        
 
@@ -46,7 +55,7 @@ class SendUserEmailController extends Controller
          else if($request->type === 'invitation'){
 
             $this->organization_code = $request->organization_code;
-            return  $this->InvitationEmail($request->organization_id);
+            return  $this->InvitationEmail($request->organization_id,$request->first_name,$request->last_name);
          }
        
       
@@ -103,7 +112,7 @@ class SendUserEmailController extends Controller
     }
     
     
-    private function invitationEmail($organization_id){
+    private function invitationEmail($organization_id, $first_name, $last_name){
     
         
         $organizationInfo =$this->organizationService->getOrganizationById($organization_id);
@@ -119,9 +128,28 @@ class SendUserEmailController extends Controller
       
         if(!$user){
            // proceed
-            if ($this->emailService->sendEmail($this->email, "new-supplier",  $data )) {
+           
+           $newUser= $this->userService->createUser([
 
+                'email'=>$this->email,
+                'type_id' => 1,
+                'first_name'=>$first_name,
+                'last_name'=>$last_name,
+                'password'=>'none',
+                'organization_id'=>$organization_id
+            ]);
+
+            $this->supplierOrganizationService->createSupplierOrganization([
+
+                'supplier_id' =>$newUser->id,
+                'organization_id'=>$organization_id,
+              
+            ]);
           
+           
+            if ($this->emailService->sendEmail($newUser, "new-supplier",  $data )) {
+
+              
                 return response()->json(['message' => 'Invitation email has been sent to this supplier.']);
     
             } else {

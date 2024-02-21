@@ -24,7 +24,7 @@ class SupplierOrganizationRepository
     }
     public function create(array $data)
     {
-        
+       
         try {
 
             return SupplierOrganization::create($data);

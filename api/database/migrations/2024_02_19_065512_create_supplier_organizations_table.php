@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id',32)->primary();
             $table->uuid('supplier_id', 32)->index();
             $table->uuid('organization_id', 32)->index();
-            $table->boolean('status')->default(0)->comment('0 pending, 1 active');
+            $table->integer('status')->default(0)->comment('0 pending, 1 active');
             $table->timestamps();
         });
     }
