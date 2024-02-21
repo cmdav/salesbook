@@ -18,15 +18,18 @@ class UserFormRequest extends FormRequest
         'last_name' => 'required|string|max:55',
         'middle_name' => 'nullable|string|max:55',
         'dob' => 'nullable|date|date_format:Y-m-d',
+        'phone_number'=>'required|string',
         'type_id' => 'required|integer',
         'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
     ];
 
-    // customer
-    if ($request->input('type_id') == 0) { 
+     //company
+     if ($request->input('type_id') == 2) { 
 
         $rules['organization_code'] = 'required|integer';
+      
     }
+   
     //supplier and company    
     if ($request->input('type_id') > 0) { 
             
@@ -41,17 +44,24 @@ class UserFormRequest extends FormRequest
             'regex:/[0-9]/',      // must contain at least one digit
             'regex:/[@$!%*#?&]/', // must contain a special character
         ];
+      
     }
         //supplier
     if ($request->input('type_id') == 1) { 
             
-            
+        $rules['email'] = [
+            'required',
+            'email',
+            Rule::exists('users')->where(function ($query) use ($request) {
+                $query->where('organization_id', $request->input('organization_id'));
+            }),
+        ];
+         $rules['organization_id'] = 'required|uuid';
         }
-    //company
-    if ($request->input('type_id') == 2) { 
-        
-        $rules['organization_code'] = 'required|integer';
-      
+     //customer
+    if ($request->input('type_id') == 0) { 
+
+        $rules['organization_code'] = 'nullable';
     }
     
 

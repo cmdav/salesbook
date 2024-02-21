@@ -24,7 +24,7 @@ class AuthService
     public function authenticateUser(array $request)
     {
        // get user detail using their email
-        $user = $this->userRepository->getUserByEmailAndOrganizationCode($request);
+        $user = $this->userRepository->authenticateUser($request);
        
         if (!$user) {
             

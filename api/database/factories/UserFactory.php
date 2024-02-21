@@ -32,6 +32,7 @@ class UserFactory extends Factory
             'organization_id' =>function () {
                 return \App\Models\Organization::first()->id;   
             },
+            'token'=> Str::uuid(),
             'dob' => $this->faker->date(),
             'email' =>$this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),

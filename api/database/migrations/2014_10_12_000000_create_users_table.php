@@ -24,8 +24,8 @@ return new class extends Migration
             $table->date('dob', 10)->nullable();
             $table->string('email', 55)->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->uuid('token')->unique();
-            $table->string('password',60);
+            $table->uuid('token')->nullable();
+            $table->string('password',60)->default('p');
             $table->rememberToken();
             $table->timestamps();
         });

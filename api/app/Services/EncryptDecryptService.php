@@ -22,7 +22,7 @@ class EncryptDecryptService
       
         try {
 
-            return Crypt::decryptString($value);
+           return json_decode(Crypt::decryptString($value), true);
             
         } catch (DecryptException $e) {
             

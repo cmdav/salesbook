@@ -13,6 +13,7 @@ class SupplierOrganization extends Model
     protected $fillable=[
         'supplier_id',
         'organization_id',
+        'status'
         
     ];  
 }

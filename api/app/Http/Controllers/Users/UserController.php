@@ -28,7 +28,7 @@ class UserController extends Controller
    
     public function store(UserFormRequest $request)
     { 	
-      
+       $response ='Registration successful.';
           
         DB::beginTransaction(); 
 
@@ -42,12 +42,15 @@ class UserController extends Controller
                 return response()->json(['message' => 'User creation failed.'], 500);
             }
             //1 registration email
-             $this->emailService->sendEmail($user, 'register', " ");
+            if($request->type == 2){
+                $this->emailService->sendEmail($user, 'register', $user->token);
+                $response ='Verify your account using the verification link sent to your email.';
+            }
     
         
             DB::commit(); 
         
-            return response()->json(['message' => 'Verify your account using the verification link sent to your email.'], 200);
+            return response()->json(['message' => $response], 200);
             
         }catch (ModelNotFoundException $e) {
 

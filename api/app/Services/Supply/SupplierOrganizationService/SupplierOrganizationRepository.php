@@ -27,7 +27,13 @@ class SupplierOrganizationRepository
        
         try {
 
-            return SupplierOrganization::create($data);
+            return SupplierOrganization::updateOrCreate(
+                [
+                    'supplier_id' => $data['supplier_id'],
+                    'organization_id' => $data['organization_id']
+                ],
+                $data
+            );
 
         } catch (QueryException $exception) {
             Log::channel('insertion_errors')->error('Error creating user: ' . $exception->getMessage());
@@ -60,6 +66,19 @@ class SupplierOrganizationRepository
             return $SupplierOrganization->delete();
         }
         return null;
+    }
+    public function updateSupplierStatus($organization_id, $supplier_id)
+    {
+        $SupplierOrganization = SupplierOrganization::where([['supplier_id', $supplier_id],['organization_id', $organization_id]])->first();
+       
+        if ($SupplierOrganization) {
+            
+            $SupplierOrganization->update([
+                'status'=>1
+            ]);
+           
+        }
+        return $SupplierOrganization;
     }
 
 }

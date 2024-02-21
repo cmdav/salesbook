@@ -40,6 +40,10 @@ class UserService
     {
         return $this->userRepository->updateUserToken($user, $newToken);
     }
+    public function  updateUserByToken($token, $newPassword)
+    {
+        return $this->userRepository->updateUserByToken($token, $newPassword);
+    }
 
     
    

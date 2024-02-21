@@ -125,9 +125,9 @@ class SendUserEmailController extends Controller
        
         $user = $this->userService->authenticateUser($this->email);
        
-      
-        if(!$user){
-           // proceed
+        //new user;
+        if (!$user || is_null($user->email_verified_at)) {
+          
            
            $newUser= $this->userService->createUser([
 
@@ -138,13 +138,8 @@ class SendUserEmailController extends Controller
                 'password'=>'none',
                 'organization_id'=>$organization_id
             ]);
-
-            $this->supplierOrganizationService->createSupplierOrganization([
-
-                'supplier_id' =>$newUser->id,
-                'organization_id'=>$organization_id,
-              
-            ]);
+            
+           
           
            
             if ($this->emailService->sendEmail($newUser, "new-supplier",  $data )) {
@@ -158,16 +153,22 @@ class SendUserEmailController extends Controller
             }
         }// existing user
         else{
-           
-            if ($this->emailService->sendEmail($user, 'old-supplier',  $data)) {
+                $this->supplierOrganizationService->createSupplierOrganization([
 
-          
-                return response()->json(['message' => 'Invitation email has been sent to this supplier.']);
-    
-            } else {
+                    'supplier_id' =>$user->id,
+                    'organization_id'=>$organization_id,
+                
+                ]);
             
-                return response()->json(['message' => 'Network error.'], 500);
-            }
+                if ($this->emailService->sendEmail($user, 'old-supplier',  $data)) {
+
+            
+                    return response()->json(['message' => 'Invitation email has been sent to this supplier.']);
+        
+                } else {
+                
+                    return response()->json(['message' => 'Network error.'], 500);
+                }
         }
         
     

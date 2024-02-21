@@ -5,6 +5,8 @@ use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
+
 
 
 
@@ -18,9 +20,10 @@ class UserRepository
     }
     public function getUserByToken($token){
 
-        return  User::where('token', $token)->first();
+        return  User::where('token', $token)->select('id','first_name','last_name','organization_id','type_id','phone_number','email')->first();
 
     }
+    
     public function getUserByEmailAndOrganizationCode(array $request){
 
         return  User::where([
@@ -49,11 +52,27 @@ class UserRepository
         }
     }
     public function updateUserToken(User $user, $newToken){
-        // Update the user's token
-        $user->token = $newToken;
-        $user->save(); // Persist the changes to the database
     
-        return $user; // Return the updated user
+        $user->token = $newToken;
+        $user->save(); 
+    
+        return $user; 
     }
+    public function updateUserByToken($token, $newPassword){
+    
+        $user = User::where('token', $token)->first();
+
+        if (!$user) {
+
+            return null;
+        }
+        $user->password = Hash::make($newPassword); 
+        // Save the changes to the user model
+        $user->save(); 
+    
+        return $user; 
+    }
+    
+
    
 }

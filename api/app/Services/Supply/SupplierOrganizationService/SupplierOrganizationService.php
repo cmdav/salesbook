@@ -39,4 +39,8 @@ class SupplierOrganizationService
     {
         return $this->SupplierOrganizationRepository->delete($id);
     }
+    public function updateSupplierStatus($organization_id, $supplier_id){
+
+        return $this->SupplierOrganizationRepository->updateSupplierStatus($organization_id, $supplier_id);
+    }
 }
