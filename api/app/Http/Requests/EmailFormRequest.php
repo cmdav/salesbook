@@ -21,7 +21,8 @@ class EmailFormRequest extends FormRequest
     
         if ($request->input('type') === 'invitation') {
 
-            $rules['organization_id'] = 'required|uuid';
+            $rules['organization_id'] = 'required|uuid|exists:organizations,id';
+
 
         } elseif ($request->input('type') !== 'invitation') {
 

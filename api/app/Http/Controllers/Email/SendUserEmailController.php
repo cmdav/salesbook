@@ -110,10 +110,10 @@ class SendUserEmailController extends Controller
 
         $data=[
             'organization_name'=>$organizationInfo->organization_name,
-            'organization_id'=>$organizationInfo->organization_id
+            'organization_id'=>$organization_id
         ];
         
-
+       
         $user = $this->userService->authenticateUser($this->email);
        
       

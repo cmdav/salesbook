@@ -24,9 +24,9 @@ class NewUserHasRegisterEmail extends Mailable
     public $title;
 
 
-    public function __construct($user, $type, $otherDetail="")
+    public function __construct($user, $type, $otherDetail)
     {
-        dd($otherDetail);
+      
         $this->user = $user;
         $data=[
             'token'=>$user->token,
@@ -57,26 +57,13 @@ class NewUserHasRegisterEmail extends Mailable
             $this->title = "Reset Password";
           
           }
-          else if($type == "new-supplier"){
-           
-            $this->frontendUrl = env('FRONTEND_URL')."/new-supplier/".$encryptedToken;
-           $this->first_paragraph = "This is to inform you that {$otherDetail['organization_name']} has invited you to be part of their supplier.";
-            $this->second_paragraph="Click the button to accept the invitation";
-            $this->btn_label = "Join Company";
-            $this->title = "Invitaton from {$otherDetail['organization_name']}";
-        
-           
-          }
-          else if($type == "old-supplier"){
-          
-            $this->frontendUrl = env('FRONTEND_URL')."/old-supplier/".$encryptedToken;  
+          else if ($type == "new-supplier" || $type == "old-supplier") {
+            $this->frontendUrl = env('FRONTEND_URL') . "/{$type}/" . $encryptedToken;
             $this->first_paragraph = "This is to inform you that {$otherDetail['organization_name']} has invited you to be part of their supplier.";
-            $this->second_paragraph="Click the button to accept the invitation";
+            $this->second_paragraph = "Click the button to accept the invitation";
             $this->btn_label = "Join Company";
-            $this->title = "Invitaton from {$otherDetail['organization_name']}";
-         
-           
-          }
+            $this->title = "Invitation from {$otherDetail['organization_name']}";
+        }
 
        
     }

@@ -8,12 +8,12 @@ use Exception;
 
 class EmailService
 {
-    public static function sendEmail($user, $type)
+    public static function sendEmail($user, $type, $otherDetail=null)
     {
        try{
             
            
-            Mail::to($user['email'])->send(new NewUserHasRegisterEmail($user, $type));
+            Mail::to($user['email'])->send(new NewUserHasRegisterEmail($user, $type, $otherDetail));
 
             return true;
        }
