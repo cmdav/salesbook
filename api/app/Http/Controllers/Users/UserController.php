@@ -35,7 +35,10 @@ class UserController extends Controller
     }
     public function show($id){
 
-        return  $this->userService->findById($id);
+        if($user =$this->userService->findById($id)){
+            return response()->json($user);
+        }
+        return response()->json(['message'=>'user not found'], 404);
     }
     public function store(UserFormRequest $request)
     { 	

@@ -18,7 +18,7 @@ class UserFormRequest extends FormRequest
         'last_name' => 'required|string|max:55',
         'middle_name' => 'nullable|string|max:55',
         'dob' => 'nullable|date|date_format:Y-m-d',
-        'phone_number'=>'required|string',
+        'phone_number'=>'required|string|unique:users',
         'type_id' => 'required|integer',
         'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
     ];

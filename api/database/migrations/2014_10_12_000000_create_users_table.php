@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('first_name', 55);
             $table->string('last_name', 55);
             $table->string('middle_name', 55)->nullable();
-            $table->string('phone_number', 12)->nullable();
+            $table->string('phone_number', 12)->unique();
             $table->integer('type_id')->default(0)->comment('0 => customer, 1=>supplier, 2=>company');
             $table->uuid('organization_id')->nullable();
             $table->integer('organization_code')->nullable();

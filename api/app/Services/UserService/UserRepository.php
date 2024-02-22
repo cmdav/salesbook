@@ -15,31 +15,65 @@ class UserRepository
 {
     protected function transformUsers(object $user): array
     {
-        return [
+        $transformed = [
             "user_id" => $user->id,
-            "first_name" =>  $user->first_name,
-            "last_name" =>   $user->last_name,
-            "phone_number" =>  $user->phone_number,
-            "email" =>  $user->email,
-           "bank_name" => optional($user->supplier)->bank_name ?? null,
-            "account_name" => optional($user->supplier)->account_name ?? null,
-            "account_number" => optional($user->supplier)->account_number ?? null,
-            "state" => optional($user->supplier)->state ?? null,
-            "address" => optional($user->supplier)->address ?? null,
-            //"created_at" => $user->created_at->format('d-m-y H:i:s'),
+            "first_name" => $user->first_name,
+            "last_name" => $user->last_name,
+            "phone_number" => $user->phone_number,
+            "email" => $user->email,
         ];
+    
+        // Add supplier information only if type_id is 1
+        if ($user->type_id == 1) {
+            $transformed += [
+                "bank_name" => optional($user->supplier)->bank_name,
+                "account_name" => optional($user->supplier)->account_name,
+                "account_number" => optional($user->supplier)->account_number,
+                "state" => optional($user->supplier)->state,
+                "address" => optional($user->supplier)->address,
+            ];
+        }
+    
+        return $transformed;
     }
     public function findById($user_id){
+        $query = User::select('id', 'first_name', 'last_name', 'organization_id', 'type_id', 'phone_number', 'email')
+             ->where('id', $user_id);
+            $user = $query->when(User::where('id', $user_id)->value('type_id') == 1, function ($query) {
+            return $query->with(['supplier:id,user_id,bank_name,account_name,account_number,state,address']);
+            })->first();
 
-        $user = User::select('id', 'first_name', 'last_name', 'organization_id', 'type_id', 'phone_number', 'email')
-        ->where('type_id', 1) 
-        ->where('id',  $user_id)
-        ->with(['supplier:id,user_id,bank_name,account_name,account_number,state,address'])
-        ->first();
-        if ($user) {
+            if ($user) {
             return $this->transformUsers($user);
-        }
-        return null;
+            }
+
+            return false;
+    }
+    public function searchUser($searchCriteria)
+    {
+       
+       
+            $user = User::where(function($query) use ($searchCriteria) {
+                $query->where('email', $searchCriteria)
+                    ->orWhere('phone_number', $searchCriteria);
+            })->first(); 
+
+           
+            if ($user) {
+           
+                if ($user->type_id == 1) {
+                   
+                    $user->load(['supplier' => function($query) {
+                        $query->select('id', 'user_id', 'bank_name', 'account_name', 'account_number', 'state', 'address');
+                    }]);
+                }
+                return $this->transformUsers($user);
+            }
+
+            
+            return false;
+
+      
     }
     public function getUser($type){
 
