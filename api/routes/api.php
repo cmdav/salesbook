@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function() {
         //app users
         route::resource('customers', App\Http\Controllers\Users\CustomerController::class);
         route::resource('suppliers', App\Http\Controllers\Users\SupplierController::class);
+        route::resource('users', App\Http\Controllers\Users\UserController::class)->only('index','show');
     });
     
 

@@ -25,7 +25,18 @@ class UserController extends Controller
 
         $this->emailService = $emailService; 
     }
-   
+    public function index(Request $request){
+
+        $validatedData = $request->validate([
+            'type' => 'required|in:supplier,customer'
+        ]);
+
+       return  $this->userService->getUser($validatedData['type']);
+    }
+    public function show($id){
+
+        return  $this->userService->findById($id);
+    }
     public function store(UserFormRequest $request)
     { 	
        $response ='Registration successful.';
@@ -42,7 +53,7 @@ class UserController extends Controller
                 return response()->json(['message' => 'User creation failed.'], 500);
             }
             //1 registration email
-            if($request->type == 2){
+            if($request->type_id == 2){
                 $this->emailService->sendEmail($user, 'register', $user->token);
                 $response ='Verify your account using the verification link sent to your email.';
             }

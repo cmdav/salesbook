@@ -33,8 +33,8 @@ class DatabaseSeeder extends Seeder
             'type_id' => 2,
     
         ]);
-        // \App\Models\User::factory(20)->create();
-        //  \App\Models\SupplierOrganization::factory(5)->create();
-        //  \App\Models\Supplier::factory(5)->create();
+        \App\Models\User::factory(30)->create();
+         \App\Models\SupplierOrganization::factory(5)->create();
+        \App\Models\Supplier::factory(30)->create();
     }
 }

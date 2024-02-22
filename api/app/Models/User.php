@@ -102,4 +102,27 @@ class User extends Authenticatable
             }
         });
     }
+    public function supplier(){
+
+        return $this->hasOne(Supplier::class);
+    }
+    public function supplierOrganization(){
+
+        return $this->hasMany(SupplierOrganization::class, "supplier_id","id");
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
