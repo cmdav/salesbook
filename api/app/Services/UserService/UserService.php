@@ -21,8 +21,13 @@ class UserService
 
     public function getUser($type)
     {
+
+        if($type === 'profile'){
+            return $this->userRepository->authUser();
+        }
         return $this->userRepository->getUser($type);
     }
+   
     public function findById($id)
     {
         return $this->userRepository->findById($id);

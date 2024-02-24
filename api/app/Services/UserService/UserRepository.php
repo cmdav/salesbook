@@ -21,6 +21,7 @@ class UserRepository
             "last_name" => $user->last_name,
             "phone_number" => $user->phone_number,
             "email" => $user->email,
+			 "organization_id" => $user->organization_id,
         ];
     
         // Add supplier information only if type_id is 1
@@ -36,7 +37,7 @@ class UserRepository
     
         return $transformed;
     }
-    public function findById($user_id){
+    private function returnUserDetail($user_id){
         $query = User::select('id', 'first_name', 'last_name', 'organization_id', 'type_id', 'phone_number', 'email')
              ->where('id', $user_id);
             $user = $query->when(User::where('id', $user_id)->value('type_id') == 1, function ($query) {
@@ -48,6 +49,13 @@ class UserRepository
             }
 
             return false;
+    }
+    public function findById($user_id){
+        return $this->returnUserDetail($user_id);
+    }
+    public function authUser(){
+        $user_id =Auth::user()->id;
+        return $this->returnUserDetail($user_id);
     }
     public function searchUser($searchCriteria)
     {
