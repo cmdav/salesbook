@@ -6,14 +6,17 @@ use App\Http\Requests\ProductFormRequest;
 use App\Services\Products\ProductService\ProductService;
 use App\Models\product;
 use Illuminate\Http\Request;
+use App\Services\FileUploadService;
 
 class ProductController extends Controller
 {
      protected $productService;
+     protected $fileUploadService;
 
-    public function __construct(ProductService $productService)
+    public function __construct(ProductService $productService, FileUploadService $fileUploadService)
     {
         $this->productService = $productService;
+        $this->fileUploadService = $fileUploadService;
     }
     public function index()
     {
@@ -23,7 +26,12 @@ class ProductController extends Controller
 
     public function store(ProductFormRequest $request)
     {
-        $product = $this->productService->createProduct($request->all());
+        $data = $request->all();
+
+        if ($request->hasFile('product_image')) {
+            $data['product_image'] = $this->fileUploadService->uploadImage($request->file('product_image'),'products');
+        }
+        $product = $this->productService->createProduct($data);
         return response()->json($product, 201);
     }
 

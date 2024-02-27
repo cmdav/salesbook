@@ -22,4 +22,9 @@ class product extends Model
     public function measurement(){
         return $this->belongsTo(Measurement::class, 'measurement_id','id');
     }
+    public function getProductImageAttribute($value): string
+    {
+        
+        return url('/') . $value;
+    }
 }
