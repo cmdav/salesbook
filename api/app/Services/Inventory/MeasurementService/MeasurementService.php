@@ -1,42 +1,42 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
-use App\Services\Inventory\OrganizationService\OrganizationRepository;
+namespace App\Services\Inventory\MeasurementService;
+use App\Services\Inventory\MeasurementService\MeasurementRepository;
 
 
-class OrganizationService 
+class MeasurementService 
 {
-    protected $organizationRepository;
+    protected $measurementRepository;
 
-    public function __construct(OrganizationRepository $organizationRepository)
+    public function __construct(MeasurementRepository $measurementRepository)
     {
-        $this->organizationRepository = $organizationRepository;
+        $this->measurementRepository = $measurementRepository;
     }
 
-    public function createOrganization(array $data)
+    public function createMeasurement(array $data)
     {
        
-        return $this->organizationRepository->create($data);
+        return $this->measurementRepository->create($data);
     }
 
-    public function getAllOrganization()
+    public function getAllMeasurement()
     {
-       
-        return $this->organizationRepository->index();
+     
+        return $this->measurementRepository->index();
     }
 
-    public function getOrganizationById($id)
+    public function getMeasurementById($id)
     {
-        return $this->organizationRepository->findById($id);
+        return $this->measurementRepository->findById($id);
     }
 
-    public function updateOrganization($id, array $data)
+    public function updateMeasurement($id, array $data)
     {
-        return $this->organizationRepository->update($id, $data);
+        return $this->measurementRepository->update($id, $data);
     }
 
-    public function deleteOrganization($id)
+    public function deleteMeasurement($id)
     {
-        return $this->organizationRepository->delete($id);
+        return $this->measurementRepository->delete($id);
     }
 }

@@ -27,7 +27,7 @@ class UserFactory extends Factory
             'first_name' => $this->faker->name(),
             'middle_name' => $this->faker->name(),
             'last_name' => $this->faker->name(),
-            'phone_number' => $this->faker->numberBetween(81012345670, 81012345690),
+            'phone_number' => $this->faker->numberBetween(21012345670, 81012345690),
             'type_id' =>$this->faker->numberBetween(0, 2),
             'organization_id' =>function () {
                 return \App\Models\Organization::first()->id;   

@@ -14,11 +14,12 @@ return new class extends Migration
         Schema::create('stores', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
             $table->uuid('supplier_id', 32);
-            $table->uuid('product_id', 32);
+            $table->uuid('product_assigned_category_id', 32);
             $table->integer('discount');
             $table->string('batch_no', 32);
             $table->integer('supplier_price');
             $table->date('expired_date');
+            $table->uuid('store_owner', 32);
             $table->uuid('created_by', 32);
 
             $table->timestamps();

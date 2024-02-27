@@ -33,8 +33,24 @@ class DatabaseSeeder extends Seeder
             'type_id' => 2,
     
         ]);
+
         \App\Models\User::factory(30)->create();
          \App\Models\SupplierOrganization::factory(5)->create();
         \App\Models\Supplier::factory(30)->create();
+      
+        $measurements = [
+            ["name" => "litre", "unit" => "l"],
+            ["name" => "weight", "unit" => "kg"],
+            ["name" => "height", "unit" => "h"]
+        ];
+        
+        foreach ($measurements as $measurement) {
+            \App\Models\Measurement::factory()->create([
+                'measurement_name' => $measurement['name'],
+                'unit' => $measurement['unit'],
+                'created_by'=>'admin'
+            ]);
+        }
+        
     }
 }

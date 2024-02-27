@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('measurements', function (Blueprint $table) {
-            $table->uuid('id',32)->primary();
-            $table->string('measurement_name',30)->unique();
-            $table->string('unit',5)->unique();
-            $table->uuid('created_by', 32);
+        Schema::create('product_assigned_categories', function (Blueprint $table) {
+            $table->id();
+            $table->uuid('product_id',32);
+            $table->uuid('product_sub_category_id',32);
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('measurements');
+        Schema::dropIfExists('product_assigned_categories');
     }
 };

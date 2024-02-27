@@ -17,7 +17,8 @@ class MeasurementFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'measurement_name' => "liter",
+            'unit' => "l", 
         ];
     }
 }

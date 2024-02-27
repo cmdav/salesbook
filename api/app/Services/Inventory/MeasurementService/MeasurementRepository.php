@@ -1,46 +1,46 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
+namespace App\Services\Inventory\MeasurementService;
 
-use App\Models\Organization;
+use App\Models\Measurement;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
-class OrganizationRepository 
+class MeasurementRepository 
 {
     public function index()
     {
        
-        return Organization::latest()->paginate(20);
+        return Measurement::select('measurement_name','unit')->latest()->get();
 
     }
     public function create(array $data)
     {
        
-        return Organization::create($data);
+        return Measurement::create($data);
     }
 
     public function findById($id)
     {
-        return Organization::find($id);
+        return Measurement::find($id);
     }
 
     public function update($id, array $data)
     {
-        $organization = $this->findById($id);
+       $measurement = $this->findById($id);
       
-        if ($organization) {
+        if ($measurement) {
 
-            $organization->update($data);
+           $measurement->update($data);
         }
-        return $organization;
+        return $measurement;
     }
 
     public function delete($id)
     {
-        $organization = $this->findById($id);
-        if ($organization) {
-            return $organization->delete();
+       $measurement = $this->findById($id);
+        if ($measurement) {
+            return $measurement->delete();
         }
         return null;
     }

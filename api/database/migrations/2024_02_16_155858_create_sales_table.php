@@ -18,6 +18,7 @@ return new class extends Migration
             $table->uuid('customer_id',32);
             $table->integer('price');
             $table->integer('quantity');
+            $table->uuid('sales_owner', 32);
             $table->uuid('created_by', 32);
            
             $table->timestamps();

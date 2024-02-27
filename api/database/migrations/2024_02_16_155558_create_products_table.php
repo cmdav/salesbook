@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
             $table->string('product_name', 50);
-            $table->uuid('product_category_id', 32);
-            $table->uuid('product_sub_category_id', 32);
+            $table->string('product_description', 200);
+            $table->string('product_logo', 50);
+            $table->uuid('currency_id',32);
+            $table->uuid('measurement_id',32);
             $table->uuid('created_by', 32);
             $table->timestamps();
         });

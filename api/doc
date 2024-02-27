@@ -1,0 +1,32 @@
+1. product sub product_category
+
+    list all the sub product categories on the system
+
+2. product
+    all product in the system
+
+3.product_category
+
+    hold the product sub category
+
+4.product  assigned category
+
+    hold product id and it category
+
+5. supplier product
+
+    keep reference of which supplier is selling a product
+
+
+store
+
+sales
+
+supplier organization
+
+
+
+supplier product
+
+
+supplier product

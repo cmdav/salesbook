@@ -2,47 +2,48 @@
 
 namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\OrganizationFormRequest;
-use App\Services\Inventory\OrganizationService\OrganizationService;
+use App\Http\Requests\MeasurementFormRequest;
+use App\Services\Inventory\MeasurementService\MeasurementService;
 use App\Models\Measurement;
 use Illuminate\Http\Request;
 
 class MeasurementController extends Controller
 {
-      protected $organizationService;
+      protected $measurementService;
 
-    public function __construct(OrganizationService $organizationService)
+    public function __construct(MeasurementService $measurementService)
     {
-        $this->organizationService = $organizationService;
+       $this->measurementService = $measurementService;
     }
     public function index()
     {
-        $organization = $this->organizationService->getAllOrganization();
-        return response()->json($organization);
+       
+        $measurement =$this->measurementService->getAllMeasurement();
+        return response()->json($measurement);
     }
 
     public function store(Request $request)
     {
-        $organization = $this->organizationService->createOrganization($request->all());
-        return response()->json($organization, 201);
+        $measurement =$this->measurementService->createMeasurement($request->all());
+        return response()->json($measurement, 201);
     }
 
     public function show($id)
     {
-        $organization = $this->organizationService->getOrganizationById($id);
-        return response()->json($organization);
+        $measurement =$this->measurementService->getMeasurementById($id);
+        return response()->json($measurement);
     }
 
     public function update($id, Request $request)
     {
        
-        $organization = $this->organizationService->updateOrganization($id, $request->all());
-        return response()->json($organization);
+        $measurement =$this->measurementService->updateMeasurement($id, $request->all());
+        return response()->json($measurement);
     }
 
     public function destroy($id)
     {
-        $this->organizationService->deleteOrganization($id);
+       $this->measurementService->deleteMeasurement($id);
         return response()->json(null, 204);
     }
 }
