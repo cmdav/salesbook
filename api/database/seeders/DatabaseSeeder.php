@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\User::factory(30)->create();
          \App\Models\SupplierOrganization::factory(5)->create();
         \App\Models\Supplier::factory(30)->create();
-      
+        // create measurement
         $measurements = [
             ["name" => "litre", "unit" => "l"],
             ["name" => "weight", "unit" => "kg"],
@@ -51,6 +51,22 @@ class DatabaseSeeder extends Seeder
                 'created_by'=>'admin'
             ]);
         }
+        ///////////create currency
+        $currencies = [
+            ["name" => "dollar", "symbol" => "$"],
+           
+        ];
+        
+        foreach ($currencies as $currency) {
+            \App\Models\Currency::factory()->create([
+                'currency_name' => $currency['name'],
+                'currency_symbol' => $currency['symbol'],
+                'created_by'=>'admin'
+            ]);
+        }
+        
+      ////// create product
+      \App\Models\Product::factory(30)->create();
         
     }
 }

@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class MeasurementController extends Controller
 {
-      protected $measurementService;
+    protected $measurementService;
 
     public function __construct(MeasurementService $measurementService)
     {
@@ -22,7 +22,7 @@ class MeasurementController extends Controller
         return response()->json($measurement);
     }
 
-    public function store(Request $request)
+    public function store(MeasurementFormRequest $request)
     {
         $measurement =$this->measurementService->createMeasurement($request->all());
         return response()->json($measurement, 201);

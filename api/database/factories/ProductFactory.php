@@ -17,7 +17,14 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+
+            'product_name' => $this->faker->words(3, true),
+            'product_description' => $this->faker->sentence(),
+            'product_image' => $this->faker->imageUrl(640, 480, 'products', true),
+            'measurement_id' =>function () {
+                return \App\Models\Measurement::first()->id;   
+            },
+            'created_by'=>'admin'
         ];
     }
 }

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id',32)->primary();
             $table->uuid('supplier_id', 32);
             $table->uuid('product_assigned_category_id', 32);
+            $table->uuid('currency', 32);
             $table->integer('discount');
             $table->string('batch_no', 32);
             $table->integer('supplier_price');

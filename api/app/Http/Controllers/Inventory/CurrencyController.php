@@ -2,47 +2,47 @@
 
 namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\OrganizationFormRequest;
-use App\Services\Inventory\OrganizationService\OrganizationService;
+use App\Http\Requests\CurrencyFormRequest;
+use App\Services\Inventory\CurrencyService\CurrencyService;
 use App\Models\Currency;
 use Illuminate\Http\Request;
 
 class CurrencyController extends Controller
 {
-      protected $organizationService;
+      protected $currencyService;
 
-    public function __construct(OrganizationService $organizationService)
+    public function __construct(currencyService $currencyService)
     {
-        $this->organizationService = $organizationService;
+        $this->currencyService = $currencyService;
     }
     public function index()
     {
-        $organization = $this->organizationService->getAllOrganization();
-        return response()->json($organization);
+        $currency = $this->currencyService->getAllcurrency();
+        return response()->json($currency);
     }
 
-    public function store(Request $request)
+    public function store(CurrencyFormRequest $request)
     {
-        $organization = $this->organizationService->createOrganization($request->all());
-        return response()->json($organization, 201);
+        $currency = $this->currencyService->createcurrency($request->all());
+        return response()->json($currency, 201);
     }
 
     public function show($id)
     {
-        $organization = $this->organizationService->getOrganizationById($id);
-        return response()->json($organization);
+        $currency = $this->currencyService->getcurrencyById($id);
+        return response()->json($currency);
     }
 
     public function update($id, Request $request)
     {
        
-        $organization = $this->organizationService->updateOrganization($id, $request->all());
-        return response()->json($organization);
+        $currency = $this->currencyService->updateCurrency($id, $request->all());
+        return response()->json($currency);
     }
 
     public function destroy($id)
     {
-        $this->organizationService->deleteOrganization($id);
+        $this->currencyService->deleteCurrency($id);
         return response()->json(null, 204);
     }
 }

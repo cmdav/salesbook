@@ -1,47 +1,69 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
+namespace App\Services\Products\ProductService;
 
-use App\Models\Organization;
+use App\Models\Product;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
-class OrganizationRepository 
+class ProductRepository 
 {
     public function index()
     {
        
-        return Organization::latest()->paginate(20);
+        $product =Product::latest()->with('measurement:id,measurement_name,unit')->paginate(20);
+
+        $product->getCollection()->transform(function($product){
+
+            return $this->transformProduct($product);
+        });
+        return $product;
 
     }
     public function create(array $data)
     {
        
-        return Organization::create($data);
+        return Product::create($data);
     }
 
     public function findById($id)
     {
-        return Organization::find($id);
+         $product =Product::with('measurement:id,measurement_name,unit')->find($id);
+         return $this->transformProduct($product);
     }
 
     public function update($id, array $data)
     {
-        $organization = $this->findById($id);
+       $product = $this->findById($id);
       
-        if ($organization) {
+        if ($Product) {
 
-            $organization->update($data);
+           $product->update($data);
         }
-        return $organization;
+        return$product;
     }
 
     public function delete($id)
     {
-        $organization = $this->findById($id);
-        if ($organization) {
-            return $organization->delete();
+       $product = $this->findById($id);
+        if ($Product) {
+            return$product->delete();
         }
         return null;
+    }
+
+    public function transformProduct($product){
+
+        return [
+
+            "id"=> $product->id,
+            "product_name"=>$product->product_name,
+            "product_description"=> $product->product_description,
+            "product_image"=> $product->product_image,
+            "measurement_name" => optional($product->measurement)->measurement_name,
+            "unit" => optional($product->measurement)->unit,
+           
+
+        ];
     }
 }

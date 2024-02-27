@@ -2,47 +2,47 @@
 
 namespace App\Http\Controllers\Product;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\OrganizationFormRequest;
-use App\Services\Products\OrganizationService\OrganizationService;
+use App\Http\Requests\ProductFormRequest;
+use App\Services\Products\ProductService\ProductService;
 use App\Models\product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-     protected $organizationService;
+     protected $productService;
 
-    public function __construct(OrganizationService $organizationService)
+    public function __construct(ProductService $productService)
     {
-        $this->organizationService = $organizationService;
+        $this->productService = $productService;
     }
     public function index()
     {
-        $organization = $this->organizationService->getAllOrganization();
-        return response()->json($organization);
+        $product = $this->productService->getAllProduct();
+        return response()->json($product);
     }
 
-    public function store(Request $request)
+    public function store(ProductFormRequest $request)
     {
-        $organization = $this->organizationService->createOrganization($request->all());
-        return response()->json($organization, 201);
+        $product = $this->productService->createProduct($request->all());
+        return response()->json($product, 201);
     }
 
     public function show($id)
     {
-        $organization = $this->organizationService->getOrganizationById($id);
-        return response()->json($organization);
+        $product = $this->productService->getProductById($id);
+        return response()->json($product);
     }
 
     public function update($id, Request $request)
     {
        
-        $organization = $this->organizationService->updateOrganization($id, $request->all());
-        return response()->json($organization);
+        $product = $this->productService->updateProduct($id, $request->all());
+        return response()->json($product);
     }
 
     public function destroy($id)
     {
-        $this->organizationService->deleteOrganization($id);
+        $this->productService->deleteProduct($id);
         return response()->json(null, 204);
     }
 }

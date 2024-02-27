@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('currencies', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
-            $table->string('currency_name', 15);
-            $table->string('currency_symbol', 5);
+            $table->string('currency_name', 15)->unique();
+            $table->string('currency_symbol', 5)->unique();
             $table->uuid('created_by', 32);
             $table->timestamps();
         });

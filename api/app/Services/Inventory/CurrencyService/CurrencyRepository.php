@@ -1,46 +1,46 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
+namespace App\Services\Inventory\CurrencyService;
 
-use App\Models\Organization;
+use App\Models\Currency;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
-class OrganizationRepository 
+class CurrencyRepository 
 {
     public function index()
     {
        
-        return Organization::latest()->paginate(20);
+        return Currency::select("id", "currency_name","currency_symbol")->latest()->get();
 
     }
     public function create(array $data)
     {
        
-        return Organization::create($data);
+        return Currency::create($data);
     }
 
     public function findById($id)
     {
-        return Organization::find($id);
+        return Currency::find($id);
     }
 
     public function update($id, array $data)
     {
-        $organization = $this->findById($id);
+        $Currency = $this->findById($id);
       
-        if ($organization) {
+        if ($Currency) {
 
-            $organization->update($data);
+            $Currency->update($data);
         }
-        return $organization;
+        return $Currency;
     }
 
     public function delete($id)
     {
-        $organization = $this->findById($id);
-        if ($organization) {
-            return $organization->delete();
+        $Currency = $this->findById($id);
+        if ($Currency) {
+            return $Currency->delete();
         }
         return null;
     }

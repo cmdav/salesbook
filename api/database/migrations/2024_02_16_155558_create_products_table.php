@@ -15,8 +15,7 @@ return new class extends Migration
             $table->uuid('id',32)->primary();
             $table->string('product_name', 50);
             $table->string('product_description', 200);
-            $table->string('product_logo', 50);
-            $table->uuid('currency_id',32);
+            $table->string('product_image', 150);
             $table->uuid('measurement_id',32);
             $table->uuid('created_by', 32);
             $table->timestamps();

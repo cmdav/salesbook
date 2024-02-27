@@ -1,42 +1,42 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
-use App\Services\Inventory\OrganizationService\OrganizationRepository;
+namespace App\Services\Inventory\CurrencyService;
+use App\Services\Inventory\CurrencyService\CurrencyRepository;
 
 
-class OrganizationService 
+class CurrencyService 
 {
-    protected $organizationRepository;
+    protected $currencyRepository;
 
-    public function __construct(OrganizationRepository $organizationRepository)
+    public function __construct(CurrencyRepository $currencyRepository)
     {
-        $this->organizationRepository = $organizationRepository;
+        $this->currencyRepository = $currencyRepository;
     }
 
-    public function createOrganization(array $data)
+    public function createCurrency(array $data)
     {
        
-        return $this->organizationRepository->create($data);
+        return $this->currencyRepository->create($data);
     }
 
-    public function getAllOrganization()
+    public function getAllCurrency()
     {
        
-        return $this->organizationRepository->index();
+        return $this->currencyRepository->index();
     }
 
-    public function getOrganizationById($id)
+    public function getCurrencyById($id)
     {
-        return $this->organizationRepository->findById($id);
+        return $this->currencyRepository->findById($id);
     }
 
-    public function updateOrganization($id, array $data)
+    public function updateCurrency($id, array $data)
     {
-        return $this->organizationRepository->update($id, $data);
+        return $this->currencyRepository->update($id, $data);
     }
 
-    public function deleteOrganization($id)
+    public function deleteCurrency($id)
     {
-        return $this->organizationRepository->delete($id);
+        return $this->currencyRepository->delete($id);
     }
 }

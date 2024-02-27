@@ -1,42 +1,42 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
-use App\Services\Inventory\OrganizationService\OrganizationRepository;
+namespace App\Services\Products\ProductService;
+use App\Services\Products\ProductService\ProductRepository;
 
 
-class OrganizationService 
+class ProductService 
 {
-    protected $organizationRepository;
+    protected $productRepository;
 
-    public function __construct(OrganizationRepository $organizationRepository)
+    public function __construct(ProductRepository $productRepository)
     {
-        $this->organizationRepository = $organizationRepository;
+        $this->productRepository = $productRepository;
     }
 
-    public function createOrganization(array $data)
+    public function createProduct(array $data)
     {
        
-        return $this->organizationRepository->create($data);
+        return $this->productRepository->create($data);
     }
 
-    public function getAllOrganization()
+    public function getAllProduct()
     {
        
-        return $this->organizationRepository->index();
+        return $this->productRepository->index();
     }
 
-    public function getOrganizationById($id)
+    public function getProductById($id)
     {
-        return $this->organizationRepository->findById($id);
+        return $this->productRepository->findById($id);
     }
 
-    public function updateOrganization($id, array $data)
+    public function updateProduct($id, array $data)
     {
-        return $this->organizationRepository->update($id, $data);
+        return $this->productRepository->update($id, $data);
     }
 
-    public function deleteOrganization($id)
+    public function deleteProduct($id)
     {
-        return $this->organizationRepository->delete($id);
+        return $this->productRepository->delete($id);
     }
 }
