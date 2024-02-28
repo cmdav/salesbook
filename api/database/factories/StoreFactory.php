@@ -20,9 +20,6 @@ class StoreFactory extends Factory
             'supplier_product_id'  =>function () {
                 return \App\Models\SupplierProduct::first()->id;   
             },
-            'product_id' =>function () {
-                return \App\Models\Product::first()->id;   
-            },
             'currency'  =>function () {
                 return \App\Models\Currency::first()->id;   
             },

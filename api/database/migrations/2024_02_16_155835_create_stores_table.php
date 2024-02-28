@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('stores', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
             $table->uuid('supplier_product_id');
-            $table->uuid('product_id'); 
             $table->uuid('currency'); 
             $table->integer('discount')->default(0); 
             $table->string('batch_no', 50); 
@@ -22,8 +21,8 @@ return new class extends Migration
             $table->integer('supplier_price');
             $table->date('expired_date')->nullable();
             $table->uuid('store_owner'); 
-            $table->uuid('created_by');
-
+            $table->uuid('created_by')->nullable();
+             $table->uuid('updated_by')->nullable();
             $table->timestamps();
         });
     }
