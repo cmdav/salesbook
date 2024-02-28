@@ -18,4 +18,6 @@ class SupplierProduct extends Model
         'created_by',
         'supplier_id'
     ];
+
+    
 }

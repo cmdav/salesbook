@@ -14,6 +14,11 @@ class SupplierProductRepository
         return SupplierProduct::latest()->paginate(20);
 
     }
+    public function listAllSupplierProduct()
+    {
+       
+        return SupplierProduct::select('id', 'product_name','product_description')->latest()->get();
+    }
     public function create(array $data)
     {
        

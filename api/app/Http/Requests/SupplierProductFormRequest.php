@@ -17,7 +17,7 @@ class SupplierProductFormRequest extends FormRequest
             'product_description' => 'required|string|max:200',
             'product_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'product_id' => 'required|uuid',
-            'product_id' => 'required|uuid',
+            'supplier_id' => 'required|uuid',
         ];
     }
    
