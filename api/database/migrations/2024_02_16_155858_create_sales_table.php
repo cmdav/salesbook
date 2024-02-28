@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
-            $table->uuid('store_id',32);
-            $table->uuid('organization_id',32);
-            $table->uuid('customer_id',32);
+            $table->uuid('store_id'); 
+            $table->uuid('organization_id'); 
+            $table->uuid('customer_id'); 
             $table->integer('price');
             $table->integer('quantity');
-            $table->uuid('sales_owner', 32);
-            $table->uuid('created_by', 32);
+            $table->uuid('sales_owner'); 
+            $table->uuid('created_by');
            
             $table->timestamps();
         });

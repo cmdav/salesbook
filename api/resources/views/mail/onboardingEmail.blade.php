@@ -1,7 +1,7 @@
 <html>
 <body style="background-color:#EDF2F7; overflow:scroll">
 	<div style="text-align:center;display:flex;width:250px;margin:0 auto;padding-top:2em;padding-bottom:1em;">
-		<!--<h2 style="margin-top:3px"><img src="https://backend.excapture.com/images/log.png" width="35px"  height="35px" alt="Excapture"></h2>-->
+		<h2 style="margin-top:3px"><img src="{{ $url }}/images/log.png" width="35px" height="35px"></h2>
 		<h2 style="text-align:center;color:black;font-size:2.2em;">{{ config('app.name') }}</h2>
 	</div>
 	<div style="background-color:#fff;width:70%;margin:0 auto;padding:2em;color:black;">
@@ -26,7 +26,7 @@
 		
 		<p>
 			Best regards<br>
-			
+			{{ config('app.name') }}
 		</p>
 		
 

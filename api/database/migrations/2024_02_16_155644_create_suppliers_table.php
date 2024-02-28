@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
-            $table->uuid('user_id', 55);
+            $table->uuid('user_id');
             $table->string('bank_name', 55);
             $table->integer('account_number');
             $table->string('account_name', 55);

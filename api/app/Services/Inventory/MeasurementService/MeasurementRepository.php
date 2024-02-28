@@ -11,7 +11,7 @@ class MeasurementRepository
     public function index()
     {
        
-        return Measurement::select('measurement_name','unit')->latest()->get();
+        return Measurement::select('id','measurement_name','unit')->latest()->get();
 
     }
     public function create(array $data)

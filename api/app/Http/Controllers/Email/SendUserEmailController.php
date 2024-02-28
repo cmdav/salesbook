@@ -128,29 +128,32 @@ class SendUserEmailController extends Controller
         //new user;
         if (!$user || is_null($user->email_verified_at)) {
           
-           
-           $newUser= $this->userService->createUser([
-
-                'email'=>$this->email,
-                'type_id' => 1,
-                'first_name'=>$first_name,
-                'last_name'=>$last_name,
-                'password'=>'none',
-                'organization_id'=>$organization_id
-            ]);
+            try {
+                if (!$user || is_null($user->email_verified_at)) {
+                    $newUser = $this->userService->createUser([
+                        'email' => $this->email,
+                        'type_id' => 1,
+                        'first_name' => $first_name,
+                        'last_name' => $last_name,
+                        'password' => 'none',
+                        'organization_id' => $organization_id
+                    ]);
             
-           
-          
-           
-            if ($this->emailService->sendEmail($newUser, "new-supplier",  $data )) {
-
-              
-                return response()->json(['message' => 'Invitation email has been sent to this supplier.']);
-    
-            } else {
+                    $this->supplierOrganizationService->createSupplierOrganization([
+                        'supplier_id' => $newUser->id,
+                        'organization_id' => $organization_id,
+                    ]);
             
-                return response()->json(['message' => 'Network error.'], 500);
+                    if ($this->emailService->sendEmail($newUser, "new-supplier", $data)) {
+                        return response()->json(['message' => 'Invitation email has been sent to this supplier.']);
+                    } else {
+                        return response()->json(['message' => 'Network error.'], 500);
+                    }
+                }
+            } catch (\Exception $e) {
+                return response()->json(['message' => $e->getMessage()], 500);
             }
+            
         }// existing user
         else{
                 $this->supplierOrganizationService->createSupplierOrganization([

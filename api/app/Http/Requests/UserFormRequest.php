@@ -14,16 +14,26 @@ class UserFormRequest extends FormRequest
 {
     // Default rules
     $rules = [
-        'first_name' => 'required|string|max:55',
-        'last_name' => 'required|string|max:55',
-        'middle_name' => 'nullable|string|max:55',
+       
         'dob' => 'nullable|date|date_format:Y-m-d',
         'phone_number'=>'required|string|unique:users',
         'type_id' => 'required|integer',
         'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
     ];
+    // register company customer
+    if ($request->input('role_id') == 1) { 
 
-     //company
+        $rules['contact_person'] = 'required|string|max:55';
+        $rules['company_name'] = 'required|string|max:55';
+      
+    }else{
+
+        $rules['first_name'] = 'required|string|max:55';
+        $rules['last_name'] = 'required|string|max:55';
+        $rules['middle_name'] = 'required|string|max:55';
+
+    }
+     //2 company 1 for supplier 0 for customer
      if ($request->input('type_id') == 2) { 
 
         $rules['organization_code'] = 'required|integer';
@@ -62,6 +72,7 @@ class UserFormRequest extends FormRequest
     if ($request->input('type_id') == 0) { 
 
         $rules['organization_code'] = 'nullable';
+        $rules['organization_id'] = 'required|uuid';
     }
     
 

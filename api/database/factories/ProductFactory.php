@@ -24,6 +24,9 @@ class ProductFactory extends Factory
             'measurement_id' =>function () {
                 return \App\Models\Measurement::first()->id;   
             },
+            'sub_category_id' =>function () {
+                return \App\Models\ProductSubCategory::first()->id;   
+            },
             'created_by'=>'admin'
         ];
     }

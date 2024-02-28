@@ -2,47 +2,47 @@
 
 namespace App\Http\Controllers\Product;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\OrganizationFormRequest;
-use App\Services\Products\OrganizationService\OrganizationService;
+use App\Http\Requests\ProductSubcategoryFormRequest;
+use App\Services\Products\ProductSubCategoryService\ProductSubCategoryService;
 use App\Models\ProductSubCategory;
 use Illuminate\Http\Request;
 
 class ProductSubCategoryController extends Controller
 {
-      protected $organizationService;
+      protected $productSubCategoryService;
 
-    public function __construct(OrganizationService $organizationService)
+    public function __construct(ProductSubCategoryService $productSubCategoryService)
     {
-        $this->organizationService = $organizationService;
+       $this->productSubCategoryService = $productSubCategoryService;
     }
     public function index()
     {
-        $organization = $this->organizationService->getAllOrganization();
-        return response()->json($organization);
+        $productSubCategory =$this->productSubCategoryService->getAllProductSubCategory();
+        return response()->json($productSubCategory);
     }
 
-    public function store(Request $request)
+    public function store(ProductSubcategoryFormRequest $request)
     {
-        $organization = $this->organizationService->createOrganization($request->all());
-        return response()->json($organization, 201);
+        $productSubCategory =$this->productSubCategoryService->createProductSubCategory($request->all());
+        return response()->json($productSubCategory, 201);
     }
 
     public function show($id)
     {
-        $organization = $this->organizationService->getOrganizationById($id);
-        return response()->json($organization);
+        $productSubCategory =$this->productSubCategoryService->getProductSubCategoryById($id);
+        return response()->json($productSubCategory);
     }
 
     public function update($id, Request $request)
     {
        
-        $organization = $this->organizationService->updateOrganization($id, $request->all());
-        return response()->json($organization);
+        $productSubCategory =$this->productSubCategoryService->updateProductSubCategory($id, $request->all());
+        return response()->json($productSubCategory);
     }
 
     public function destroy($id)
     {
-        $this->organizationService->deleteOrganization($id);
+       $this->productSubCategoryService->deleteProductSubCategory($id);
         return response()->json(null, 204);
     }
 }

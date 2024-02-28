@@ -10,6 +10,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Services\EncryptDecryptService;
 use App\Services\EmailDataService;
+use Illuminate\Support\Facades\Request;
 
 
 class NewUserHasRegisterEmail extends Mailable
@@ -22,6 +23,7 @@ class NewUserHasRegisterEmail extends Mailable
     public $second_paragraph;
     public $btn_label;
     public $title;
+    public $url;
 
 
     public function __construct($user, $type, $otherDetail)
@@ -33,11 +35,12 @@ class NewUserHasRegisterEmail extends Mailable
              'type'=>$type,
              'otherDetail'=>$otherDetail,
         ];
+        $this->url = Request::root();
         $jsonData = json_encode($data);
         $encryptedToken = EncryptDecryptService::encryptvalue($jsonData);
        
          
-       
+        
         if ($type === 'resend' || $type === 'register') {
            
             

@@ -34,7 +34,20 @@ class DatabaseSeeder extends Seeder
     
         ]);
 
-        \App\Models\User::factory(30)->create();
+        \App\Models\User::factory()->create([
+            'first_name' => 'Test',
+            'email' => 'supplier@gmail.com',
+            'password'=>'test123',
+            'organization_code'=>'123457',
+            'type_id' => 1,
+    
+        ]);
+        \App\Models\User::factory(25)->create([
+        
+            'role_id' => 1,
+    
+        ]);
+        \App\Models\User::factory(25)->create();
          \App\Models\SupplierOrganization::factory(5)->create();
         \App\Models\Supplier::factory(30)->create();
         // create measurement
@@ -51,7 +64,7 @@ class DatabaseSeeder extends Seeder
                 'created_by'=>'admin'
             ]);
         }
-        ///////////create currency
+        //create currency
         $currencies = [
             ["name" => "dollar", "symbol" => "$"],
            
@@ -65,8 +78,17 @@ class DatabaseSeeder extends Seeder
             ]);
         }
         
-      ////// create product
+      //create product
+      \App\Models\ProductCategory::factory(5)->create();
+      \App\Models\ProductSubCategory::factory(30)->create();
       \App\Models\Product::factory(30)->create();
+      \App\Models\SupplierProduct::factory(3)->create();
+      \App\Models\Store::factory()->count(10)->create();
+      \App\Models\Inventory::factory(3)->create();
+      
+
+     
+     
         
     }
 }

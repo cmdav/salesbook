@@ -24,6 +24,11 @@ class ProductService
        
         return $this->productRepository->index();
     }
+    public function listAllProduct()
+    {
+       
+        return $this->productRepository->listAllProduct();
+    }
 
     public function getProductById($id)
     {

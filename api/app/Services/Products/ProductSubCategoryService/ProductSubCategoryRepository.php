@@ -1,47 +1,66 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
+namespace App\Services\Products\ProductSubCategoryService;
 
-use App\Models\Organization;
+use App\Models\ProductSubCategory;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
-class OrganizationRepository 
+class ProductSubCategoryRepository 
 {
     public function index()
     {
        
-        return Organization::latest()->paginate(20);
+        $productSubCategory = ProductSubCategory::select('id','category_id', 'sub_category_name')
+                                    ->with('category:id,category_name')->latest()->paginate(20);
+                            $productSubCategory->getCollection()->transform(function($productSubCategory){
+                                return $this->transformProductService($productSubCategory);
+                            });     
+                        return $productSubCategory;                 
+
+    }
+    public function onlySubProductCategory()
+    {
+       
+        return ProductSubCategory::select('id', 'sub_category_name')->get();               
 
     }
     public function create(array $data)
     {
        
-        return Organization::create($data);
+        return ProductSubCategory::create($data);
     }
 
     public function findById($id)
     {
-        return Organization::find($id);
+        return ProductSubCategory::find($id);
     }
 
     public function update($id, array $data)
     {
-        $organization = $this->findById($id);
+        $productSubCategory = $this->findById($id);
       
-        if ($organization) {
+        if ($productSubCategory) {
 
-            $organization->update($data);
+            $productSubCategory->update($data);
         }
-        return $organization;
+        return $productSubCategory;
     }
 
     public function delete($id)
     {
-        $organization = $this->findById($id);
-        if ($organization) {
-            return $organization->delete();
+        $productSubCategory = $this->findById($id);
+        if ($productSubCategory) {
+            return $productSubCategory->delete();
         }
         return null;
+    }
+    private function transformProductService($productSubCategory){
+
+        return [
+             'sub_category_id' => $productSubCategory->id,
+            'sub_category_name' => $productSubCategory->sub_category_name,
+            'category_name' => optional($productSubCategory->category)->category_name,
+        ];
     }
 }

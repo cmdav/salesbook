@@ -17,7 +17,11 @@ class ProductSubCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'sub_category_name' => $this->faker->words(3, true),
+            'category_id'=>function () {
+                return \App\Models\ProductCategory::first()->id;   
+            },
+            'created_by'=>'admin'
         ];
     }
 }

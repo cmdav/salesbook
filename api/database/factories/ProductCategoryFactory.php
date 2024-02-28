@@ -17,7 +17,8 @@ class ProductCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'category_name' => $this->faker->word,
+            'created_by'=> 'admin'
         ];
     }
 }

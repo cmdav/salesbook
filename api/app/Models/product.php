@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Traits\SetCreatedBy;
 
-class product extends Model
+class Product extends Model
 {
     use  SetCreatedBy, HasUuids, HasFactory;
     
@@ -16,6 +16,7 @@ class product extends Model
         'product_description',
         'product_image',
         'measurement_id',
+        'sub_category_id',
         'created_by'
     ];
 
@@ -27,4 +28,11 @@ class product extends Model
         
         return url('/') . $value;
     }
+    public function subCategory()
+    {
+        
+        return $this->belongsTo(ProductSubCategory::class, 'sub_category_id','id');
+
+    }
+
 }

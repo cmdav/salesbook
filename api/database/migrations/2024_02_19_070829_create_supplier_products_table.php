@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('supplier_products', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
-            $table->uuid('product_assigned_category_id', 32);
-            $table->string('logo', 32)->nullabe();
-            $table->string('description', 52)->nullabe();
+            $table->uuid('product_id'); 
+            $table->uuid('supplier_id'); 
+            $table->string('product_name', 255)->nullable();
+            $table->string('product_image', 225)->nullable();
+            $table->text('product_description')->nullable(); 
             $table->uuid('created_by', 32);
             $table->timestamps();
         });

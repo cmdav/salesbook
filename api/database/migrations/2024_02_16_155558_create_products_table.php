@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
             $table->string('product_name', 50);
-            $table->string('product_description', 200);
-            $table->string('product_image', 150);
-            $table->uuid('measurement_id',32);
-            $table->uuid('created_by', 32);
+            $table->text('product_description')->nullable(); 
+            $table->string('product_image', 255)->nullable();
+            $table->uuid('measurement_id');
+            $table->uuid('sub_category_id');
+            $table->uuid('created_by');
             $table->timestamps();
         });
     }

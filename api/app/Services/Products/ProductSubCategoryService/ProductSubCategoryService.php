@@ -1,42 +1,47 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
-use App\Services\Inventory\OrganizationService\OrganizationRepository;
+namespace App\Services\Products\ProductSubCategoryService;
+use App\Services\Products\ProductSubCategoryService\ProductSubCategoryRepository;
 
 
-class OrganizationService 
+class ProductSubCategoryService 
 {
-    protected $organizationRepository;
+    protected $productSubCategoryRepository;
 
-    public function __construct(OrganizationRepository $organizationRepository)
+    public function __construct(ProductSubCategoryRepository $productSubCategoryRepository)
     {
-        $this->organizationRepository = $organizationRepository;
+        $this->productSubCategoryRepository = $productSubCategoryRepository;
     }
 
-    public function createOrganization(array $data)
+    public function createProductSubCategory(array $data)
     {
        
-        return $this->organizationRepository->create($data);
+        return $this->productSubCategoryRepository->create($data);
     }
 
-    public function getAllOrganization()
+    public function getAllProductSubCategory()
     {
        
-        return $this->organizationRepository->index();
+        return $this->productSubCategoryRepository->index();
+    }
+    public function onlySubProductCategory(){
+        
+
+        return $this->productSubCategoryRepository->onlySubProductCategory();
     }
 
-    public function getOrganizationById($id)
+    public function getProductSubCategoryById($id)
     {
-        return $this->organizationRepository->findById($id);
+        return $this->productSubCategoryRepository->findById($id);
     }
 
-    public function updateOrganization($id, array $data)
+    public function updateProductSubCategory($id, array $data)
     {
-        return $this->organizationRepository->update($id, $data);
+        return $this->productSubCategoryRepository->update($id, $data);
     }
 
-    public function deleteOrganization($id)
+    public function deleteProductSubCategory($id)
     {
-        return $this->organizationRepository->delete($id);
+        return $this->productSubCategoryRepository->delete($id);
     }
 }

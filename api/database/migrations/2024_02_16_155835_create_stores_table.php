@@ -13,15 +13,16 @@ return new class extends Migration
     {
         Schema::create('stores', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
-            $table->uuid('supplier_id', 32);
-            $table->uuid('product_assigned_category_id', 32);
-            $table->uuid('currency', 32);
-            $table->integer('discount');
-            $table->string('batch_no', 32);
+            $table->uuid('supplier_product_id');
+            $table->uuid('product_id'); 
+            $table->uuid('currency'); 
+            $table->integer('discount')->default(0); 
+            $table->string('batch_no', 50); 
+            $table->string('product_identifier', 50); 
             $table->integer('supplier_price');
-            $table->date('expired_date');
-            $table->uuid('store_owner', 32);
-            $table->uuid('created_by', 32);
+            $table->date('expired_date')->nullable();
+            $table->uuid('store_owner'); 
+            $table->uuid('created_by');
 
             $table->timestamps();
         });

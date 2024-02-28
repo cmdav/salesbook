@@ -1,46 +1,46 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
+namespace App\Services\Products\ProductCategoryService;
 
-use App\Models\Organization;
+use App\Models\ProductCategory;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
-class OrganizationRepository 
+class ProductCategoryRepository 
 {
     public function index()
     {
        
-        return Organization::latest()->paginate(20);
+        return ProductCategory::select('id','category_name')->latest()->get();
 
     }
     public function create(array $data)
     {
        
-        return Organization::create($data);
+        return ProductCategory::create($data);
     }
 
     public function findById($id)
     {
-        return Organization::find($id);
+        return ProductCategory::find($id);
     }
 
     public function update($id, array $data)
     {
-        $organization = $this->findById($id);
+        $productCategory = $this->findById($id);
       
-        if ($organization) {
+        if ($productCategory) {
 
-            $organization->update($data);
+            $productCategory->update($data);
         }
-        return $organization;
+        return $productCategory;
     }
 
     public function delete($id)
     {
-        $organization = $this->findById($id);
-        if ($organization) {
-            return $organization->delete();
+        $productCategory = $this->findById($id);
+        if ($productCategory) {
+            return $productCategory->delete();
         }
         return null;
     }

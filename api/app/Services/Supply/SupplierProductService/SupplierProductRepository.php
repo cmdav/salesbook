@@ -1,46 +1,46 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
+namespace App\Services\Supply\SupplierProductService;
 
-use App\Models\Organization;
+use App\Models\SupplierProduct;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
-class OrganizationRepository 
+class SupplierProductRepository 
 {
     public function index()
     {
        
-        return Organization::latest()->paginate(20);
+        return SupplierProduct::latest()->paginate(20);
 
     }
     public function create(array $data)
     {
        
-        return Organization::create($data);
+        return SupplierProduct::create($data);
     }
 
     public function findById($id)
     {
-        return Organization::find($id);
+        return SupplierProduct::find($id);
     }
 
     public function update($id, array $data)
     {
-        $organization = $this->findById($id);
+        $supplierProduct = $this->findById($id);
       
-        if ($organization) {
+        if ($supplierProduct) {
 
-            $organization->update($data);
+            $supplierProduct->update($data);
         }
-        return $organization;
+        return $supplierProduct;
     }
 
     public function delete($id)
     {
-        $organization = $this->findById($id);
-        if ($organization) {
-            return $organization->delete();
+        $supplierProduct = $this->findById($id);
+        if ($supplierProduct) {
+            return $supplierProduct->delete();
         }
         return null;
     }

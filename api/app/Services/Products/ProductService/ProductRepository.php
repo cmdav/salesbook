@@ -11,13 +11,21 @@ class ProductRepository
     public function index()
     {
        
-        $product =Product::latest()->with('measurement:id,measurement_name,unit')->paginate(20);
+        $product =Product::latest()->with('measurement:id,measurement_name,unit', 'subCategory.category')->paginate(20);
+        //return $product;
 
         $product->getCollection()->transform(function($product){
 
             return $this->transformProduct($product);
         });
         return $product;
+
+    }
+    public function listAllProduct()
+    {
+       
+        return Product::select('id','product_name')->get();
+       
 
     }
     public function create(array $data)
@@ -28,7 +36,7 @@ class ProductRepository
 
     public function findById($id)
     {
-         $product =Product::with('measurement:id,measurement_name,unit')->find($id);
+         $product =Product::with('measurement:id,measurement_name,unit,sub_category')->find($id);
          return $this->transformProduct($product);
     }
 
@@ -62,6 +70,8 @@ class ProductRepository
             "product_image"=> $product->product_image,
             "measurement_name" => optional($product->measurement)->measurement_name,
             "unit" => optional($product->measurement)->unit,
+            "product_category" =>   optional($product->subCategory)->category->category_name,
+            "product_sub_category"=> optional($product->subCategory)->sub_category_name,
            
 
         ];
