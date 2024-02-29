@@ -2,47 +2,47 @@
 
 namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\OrganizationFormRequest;
-use App\Services\Inventory\OrganizationService\OrganizationService;
+use App\Http\Requests\SaleFormRequest;
+use App\Services\Inventory\SaleService\SaleService;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 
 class SaleController extends Controller
 {
-    protected $organizationService;
+    protected $saleService;
 
-    public function __construct(OrganizationService $organizationService)
+    public function __construct(SaleService $saleService)
     {
-        $this->organizationService = $organizationService;
+        $this->saleService = $saleService;
     }
     public function index()
     {
-        $organization = $this->organizationService->getAllOrganization();
-        return response()->json($organization);
+        $sale = $this->saleService->getAllSale();
+        return response()->json($sale);
     }
 
     public function store(Request $request)
     {
-        $organization = $this->organizationService->createOrganization($request->all());
-        return response()->json($organization, 201);
+        $sale = $this->saleService->createSale($request->all());
+        return response()->json($sale, 201);
     }
 
     public function show($id)
     {
-        $organization = $this->organizationService->getOrganizationById($id);
-        return response()->json($organization);
+        $sale = $this->saleService->getSaleById($id);
+        return response()->json($sale);
     }
 
     public function update($id, Request $request)
     {
        
-        $organization = $this->organizationService->updateOrganization($id, $request->all());
-        return response()->json($organization);
+        $sale = $this->saleService->updateSale($id, $request->all());
+        return response()->json($sale);
     }
 
     public function destroy($id)
     {
-        $this->organizationService->deleteOrganization($id);
+        $this->saleService->deleteSale($id);
         return response()->json(null, 204);
     }
 }

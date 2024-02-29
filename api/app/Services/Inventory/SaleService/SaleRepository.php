@@ -1,46 +1,46 @@
 <?php
 
-namespace App\Services\Inventory\OrganizationService;
+namespace App\Services\Inventory\SaleService;
 
-use App\Models\Organization;
+use App\Models\Sale;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
-class OrganizationRepository 
+class SaleRepository 
 {
     public function index()
     {
        
-        return Organization::latest()->paginate(20);
+        return Sale::latest()->paginate(20);
 
     }
     public function create(array $data)
     {
        
-        return Organization::create($data);
+        return Sale::create($data);
     }
 
     public function findById($id)
     {
-        return Organization::find($id);
+        return Sale::find($id);
     }
 
     public function update($id, array $data)
     {
-        $organization = $this->findById($id);
+        $sale = $this->findById($id);
       
-        if ($organization) {
+        if ($sale) {
 
-            $organization->update($data);
+            $sale->update($data);
         }
-        return $organization;
+        return $sale;
     }
 
     public function delete($id)
     {
-        $organization = $this->findById($id);
-        if ($organization) {
-            return $organization->delete();
+        $sale = $this->findById($id);
+        if ($sale) {
+            return $sale->delete();
         }
         return null;
     }
