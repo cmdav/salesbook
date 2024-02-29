@@ -14,22 +14,13 @@ class InventoryFormRequest extends FormRequest
     {
         return [
     
-            'bank_name' => ['required', 'string', 'max:55'],
-            'account_number' => ['required', 'integer', 'digits_between:10,10'],
-            'account_name' => ['required', 'string', 'max:255'],
-            'state' => ['nullable', 'string', 'max:55'],
-            'address' => ['nullable', 'string', 'max:255'],
-            'dob' => ['nullable', 'date'],
+            'product_id' => 'required|uuid',
+            'store_id' => 'nullable|uuid',
+            'quantity_available' => 'required|integer',
         ];
 
     }
-    public function messages(){
-
-        return [
-
-            'account_number'=>'Account number must be 10 digit'
-        ];
-    }
+   
   
 
 }

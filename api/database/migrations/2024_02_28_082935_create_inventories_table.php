@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('product_id'); 
             $table->uuid('store_id')->nullable();
             $table->integer('quantity_available')->default(0); 
-            $table->uuid('last_updated_by'); 
+            $table->uuid('last_updated_by')->nullable(); 
             $table->uuid('created_by'); 
             $table->timestamps(); 
         });

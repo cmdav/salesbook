@@ -10,5 +10,11 @@ use App\Traits\SetCreatedBy;
 class Inventory extends Model
 {
     use   SetCreatedBy, HasUuids, HasFactory;
-    protected $fillable = ['product_id','store_id','quantity_available','last_updated_by','created_by'];
+    protected $fillable = [
+            'product_id',
+            'store_id',
+            'quantity_available',
+            'last_updated_by',
+            'created_by'
+        ];
 }

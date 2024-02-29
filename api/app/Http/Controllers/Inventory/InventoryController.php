@@ -1,65 +1,48 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Inventory;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\InventoryFormRequest;
+use App\Services\Inventory\InventoryService\InventoryService;
 use App\Models\Inventory;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $inventoryService;
+
+    public function __construct(InventoryService $inventoryService)
+    {
+       $this->inventoryService = $inventoryService;
+    }
     public function index()
     {
-        //
+        $inventory =$this->inventoryService->getAllInventory();
+        return response()->json($inventory);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(InventoryFormRequest $request)
     {
-        //
+        $inventory =$this->inventoryService->createInventory($request->all());
+        return response()->json($inventory, 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function show($id)
     {
-        //
+        $inventory =$this->inventoryService->getInventoryById($id);
+        return response()->json($inventory);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Inventory $inventory)
+    public function update($id, Request $request)
     {
-        //
+       
+        $Inventory =$this->inventoryService->updateInventory($id, $request->all());
+        return response()->json($Inventory);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Inventory $inventory)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Inventory $inventory)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Inventory $inventory)
-    {
-        //
+       $this->inventoryService->deleteInventory($id);
+        return response()->json(null, 204);
     }
 }
