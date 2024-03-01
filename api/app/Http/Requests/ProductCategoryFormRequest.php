@@ -7,7 +7,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-class UserFormRequest extends FormRequest
+class ProductCategoryFormRequest extends FormRequest
 {
     
     public function rules(Request $request): array

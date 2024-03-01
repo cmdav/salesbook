@@ -21,7 +21,7 @@ class ProductCategoryController extends Controller
         return response()->json($productCategory);
     }
 
-    public function store(Request $request)
+    public function store(ProductCategoryFormRequest $request)
     {
         $productCategory = $this->productCategoryService->createProductCategory($request->all());
         return response()->json($productCategory, 201);

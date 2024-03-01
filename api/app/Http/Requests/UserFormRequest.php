@@ -16,7 +16,7 @@ class UserFormRequest extends FormRequest
     $rules = [
        
         'dob' => 'nullable|date|date_format:Y-m-d',
-        'phone_number'=>'required|string|unique:users',
+        'phone_number'=>'nullable|string',
         'type_id' => 'required|integer',
         'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
     ];
@@ -30,13 +30,14 @@ class UserFormRequest extends FormRequest
 
         $rules['first_name'] = 'required|string|max:55';
         $rules['last_name'] = 'required|string|max:55';
-        $rules['middle_name'] = 'required|string|max:55';
+        $rules['middle_name'] = 'nullable|string|max:55';
 
     }
      //2 company 1 for supplier 0 for customer
      if ($request->input('type_id') == 2) { 
 
         $rules['organization_code'] = 'required|integer';
+		 $rules['phone_number'] = 'required|string|unique:users';
       
     }
    

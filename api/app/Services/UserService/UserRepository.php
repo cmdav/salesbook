@@ -105,12 +105,13 @@ class UserRepository
             if($type == 'company_customer'){
                 
                 return  User::select('id','company_name','contact_person','type_id','phone_number','email')
-                ->where('role_id', 0)
+                ->where('role_id', 1)
                 ->where('organization_id', Auth::user()->organization_id)
                 ->latest()->paginate(20);
             }
              return  User::select('id','first_name','last_name','organization_id','type_id','phone_number','email')
                                 ->where('type_id', 0)
+                                ->where('role_id', 0)
                                 ->where('organization_id', Auth::user()->organization_id)
                                 ->latest()->paginate(20);
         }

@@ -7,6 +7,7 @@ use App\Services\Products\ProductService\ProductService;
 use App\Models\product;
 use Illuminate\Http\Request;
 use App\Services\FileUploadService;
+use thiagoalessio\TesseractOCR\TesseractOCR;
 
 class ProductController extends Controller
 {
@@ -27,6 +28,11 @@ class ProductController extends Controller
     public function store(ProductFormRequest $request)
     {
         $data = $request->all();
+        // $image = $request->file('product_image');
+        // $text = (new TesseractOCR($image->getPathname()))
+        //     ->lang('eng') // Specify the language if necessary
+        //     ->run();
+        // return response()->json(['text' => $text]);
 
         if ($request->hasFile('product_image')) {
             $data['product_image'] = $this->fileUploadService->uploadImage($request->file('product_image'),'products');
