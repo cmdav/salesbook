@@ -62,8 +62,8 @@ class UserRepository
        
        
             $user = User::where(function($query) use ($searchCriteria) {
-                $query->where('email', $searchCriteria)
-                    ->orWhere('phone_number', $searchCriteria);
+                $query->where('email', 'like', '%' . $searchCriteria . '%')
+                  ->orWhere('phone_number', 'like', '%' . $searchCriteria . '%');
             })->first(); 
 
            

@@ -7,20 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Traits\SetCreatedBy;
 
-class SupplierProduct extends Model
+class SupplyToCompany extends Model
 {
     use  SetCreatedBy,  HasUuids, HasFactory;
     protected $fillable = [
-        'product_id',
-        'product_description',
-        'product_image',
-        'product_name',
-        'created_by',
-        'supplier_id'
+       
+        'supplier_id',
+        'organization_id',
+        'supplier_product_id'
     ];
 
-    public function storeItem(){
+    public function supplier_product(){
 
-        return $this->hasMany(Store::class, 'supplier_product_id', 'id');
+        return $this->belongsTo(SupplierProduct::class,'supplier_product_id','id');
     }
+   
 }

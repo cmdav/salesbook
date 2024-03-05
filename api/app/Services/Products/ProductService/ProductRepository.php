@@ -28,6 +28,7 @@ class ProductRepository
        
 
     }
+   
     public function create(array $data)
     {
        
@@ -63,17 +64,15 @@ class ProductRepository
     public function transformProduct($product){
 
         return [
-
-            "id"=> $product->id,
-            "product_name"=>$product->product_name,
-            "product_description"=> $product->product_description,
-            "product_image"=> $product->product_image,
+            "id" => $product->id,
+            "product_name" => $product->product_name,
+            "product_description" => $product->product_description,
+            "product_image" => $product->product_image,
             "measurement_name" => optional($product->measurement)->measurement_name,
             "unit" => optional($product->measurement)->unit,
-            "product_category" =>   optional($product->subCategory)->category->category_name,
-            "product_sub_category"=> optional($product->subCategory)->sub_category_name,
-           
-
+            "product_category" => optional($product->subCategory)->category ? optional($product->subCategory->category)->category_name : null,
+            "product_sub_category" => optional($product->subCategory)->sub_category_name,
         ];
+        
     }
 }

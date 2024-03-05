@@ -24,8 +24,15 @@ class ProductFactory extends Factory
             'measurement_id' =>function () {
                 return \App\Models\Measurement::first()->id;   
             },
-            'sub_category_id' =>function () {
-                return \App\Models\ProductSubCategory::first()->id;   
+            'sub_category_id' => function () {
+                $subCategory = \App\Models\ProductSubCategory::inRandomOrder()->first() ?? factory(\App\Models\ProductSubCategory::class)->create();
+                return $subCategory->id;
+            },
+            'category_id' => function (array $attributes) {
+                // Retrieve the sub_category using the sub_category_id
+                $subCategory = \App\Models\ProductSubCategory::find($attributes['sub_category_id']);
+                // Return the category_id from the sub_category, if it exists
+                return $subCategory ? $subCategory->category_id : factory(\App\Models\ProductCategory::class)->create()->id;
             },
             'created_by'=>'admin'
         ];

@@ -19,6 +19,13 @@ class SupplierProductRepository
        
         return SupplierProduct::select('id', 'product_name','product_description')->latest()->get();
     }
+    public function productSuppliedToCompany()
+    {
+       
+        return SupplierProduct::with('storeItem')->get();
+       
+
+    }
     public function create(array $data)
     {
        

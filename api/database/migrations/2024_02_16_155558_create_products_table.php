@@ -18,7 +18,9 @@ return new class extends Migration
             $table->string('product_image', 255)->nullable();
             $table->uuid('measurement_id');
             $table->uuid('sub_category_id');
+            $table->uuid('category_id');
             $table->uuid('created_by');
+            $table->uuid('update_by')->nullable();
             $table->timestamps();
         });
     }

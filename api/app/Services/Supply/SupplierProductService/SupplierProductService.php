@@ -29,7 +29,11 @@ class SupplierProductService
        
         return $this->supplierProductRepository->listAllSupplierProduct();
     }
-
+    public function productSuppliedToCompany()
+    {
+       
+        return $this->supplierProductRepository->productSuppliedToCompany();
+    }
     public function getSupplierProductById($id)
     {
         return $this->supplierProductRepository->findById($id);

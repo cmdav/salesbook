@@ -82,11 +82,35 @@ class DatabaseSeeder extends Seeder
       \App\Models\ProductCategory::factory(5)->create();
       \App\Models\ProductSubCategory::factory(30)->create();
       \App\Models\Product::factory(30)->create();
-      \App\Models\SupplierProduct::factory(3)->create();
+
+      //custom supplier product
+      $supplierId = \App\Models\User::where('email', 'supplier@gmail.com')->first()->id;
+      \App\Models\SupplierProduct::factory(3)->create([
+          'supplier_id' => $supplierId,
+      ]);
+      
+      
+      \App\Models\Store::factory()->count(5)->create([
+        'supplier_product_id' => function () use ($supplierId) {
+            return \App\Models\SupplierProduct::where('supplier_id', $supplierId)->inRandomOrder()->first()->id ?? null;
+        },
+    ]);
+
+    \App\Models\SupplierProduct::factory(3)->create();
       \App\Models\Store::factory()->count(10)->create();
       \App\Models\Sale::factory()->count(10)->create();
       \App\Models\Inventory::factory(3)->create();
+     
       
+      \App\Models\SupplyToCompany::factory(20)->create([
+        'organization_id'  =>function () {
+                
+             return \App\Models\User::where('email','admin@gmail.com')->first()->organization_id;
+         },
+      ]);
+      \App\Models\SupplyToCompany::factory(20)->create();
+     
+     
 
      
      

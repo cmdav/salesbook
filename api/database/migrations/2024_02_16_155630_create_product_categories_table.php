@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('product_categories', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('category_name', 100);
+            $table->text('category_description')->nullable(); 
             $table->uuid('created_by');
+            $table->uuid('update_by')->nullable();
             $table->timestamps();
         });
     }

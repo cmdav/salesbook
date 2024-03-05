@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('quantity_available')->default(0); 
             $table->uuid('last_updated_by')->nullable(); 
             $table->uuid('created_by'); 
+            $table->uuid('update_by')->nullable();
             $table->timestamps(); 
         });
     }

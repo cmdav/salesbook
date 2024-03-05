@@ -20,7 +20,33 @@ class Store extends Model
         'supplier_price',
         'expired_date',
         'store_owner',
+        'quantity',
+        'store_type',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'status'
     ];
+    protected static function boot() {
+
+        parent::boot();
+        
+
+        static::created(function ($store) {
+            //supply to company
+            if ($store->store_type == 1) {
+                SupplyToCompany::updateOrCreate(
+                    [
+                        'supplier_id' => auth()->user()->id,
+                        'organization_id' => $store->store_owner,
+                        'supplier_product_id' => $store->supplier_product_id,
+                    ],
+                    [
+                        'supplier_id' => auth()->user()->id,
+                        'organization_id' => $store->store_owner,
+                        'supplier_product_id' => $store->supplier_product_id,
+                    ]
+                );
+            }
+        });
+    }
 }

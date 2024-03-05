@@ -10,6 +10,6 @@ class FileUploadService
         $path = $file->storeAs("public/$path", $filename); 
         return Storage::url($path); 
     }
-	
+    
 }
 ?>

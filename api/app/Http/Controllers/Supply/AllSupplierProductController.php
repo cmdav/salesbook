@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class AllSupplierProductController extends Controller
 {
-      protected $supplierProductService;
+    protected $supplierProductService;
      
 
     public function __invoke(SupplierProductService $supplierProductService)

@@ -21,8 +21,11 @@ return new class extends Migration
             $table->integer('supplier_price');
             $table->date('expired_date')->nullable();
             $table->uuid('store_owner'); 
+            $table->integer('store_type')->default(0)->comment("0 supplier, 1 company"); 
+            $table->integer('status')->default(0); 
+            $table->integer('quantity')->default(0); 
             $table->uuid('created_by')->nullable();
-             $table->uuid('updated_by')->nullable();
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
         });
     }

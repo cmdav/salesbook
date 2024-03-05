@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('measurements', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('measurement_name',30)->unique();
-            $table->string('unit',5)->unique();
-            $table->uuid('created_by');
-            $table->uuid('update_by')->nullable();
+        Schema::create('supplier_stores', function (Blueprint $table) {
+            $table->id();
             $table->timestamps();
         });
     }
@@ -26,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('measurements');
+        Schema::dropIfExists('supplier_stores');
     }
 };

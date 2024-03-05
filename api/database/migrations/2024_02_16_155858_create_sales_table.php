@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('quantity');
             $table->uuid('sales_owner'); 
             $table->uuid('created_by');
+            $table->uuid('update_by')->nullable();
            
             $table->timestamps();
         });

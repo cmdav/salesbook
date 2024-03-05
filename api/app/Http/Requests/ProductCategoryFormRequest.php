@@ -15,6 +15,7 @@ class ProductCategoryFormRequest extends FormRequest
         return [
             
             'category_name' => 'required|string|max:55|unique:product_categories',
+            'category_description' => 'required|string|max:200',
            
         
         ];

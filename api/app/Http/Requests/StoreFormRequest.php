@@ -14,8 +14,8 @@ class StoreFormRequest extends FormRequest
     {
         return [
           
-            'supplier_product_id' => 'required|uuid|exists:supplier_products,id',
-            'currency' => 'required|uuid|exists:currencies,id',
+            'supplier_product_id' => 'required|uuid',
+            'currency' => 'required|uuid',
             'discount' => 'required|integer|min:0|max:100',
             'batch_no' => 'required|string|max:50',
             'product_identifier' => 'required|string|max:50',
