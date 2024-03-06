@@ -45,7 +45,8 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('supplier-organizations', App\Http\Controllers\Supply\SupplierOrganizationController::class);
         route::get('all-supplier-products', App\Http\Controllers\Supply\AllSupplierProductController::class);
         route::resource('supplier-products', App\Http\Controllers\Supply\SupplierProductController::class);
-        route::get('product-supplied-to-companys', App\Http\Controllers\Supply\ProductSuppliedToCompanyController::class);
+        route::resource('product-supplied-to-companies', App\Http\Controllers\Supply\ProductSuppliedToCompanyController::class);
+        route::resource('product-requests', App\Http\Controllers\Supply\ProductRequestsController::class);
     
         //app users
         route::resource('customers', App\Http\Controllers\Users\CustomerController::class);

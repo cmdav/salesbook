@@ -13,10 +13,10 @@ class SupplyToCompanyService
         $this->supplyToCompanyRepository = $supplyToCompanyRepository;
     }
   
-    public function productSuppliedToCompany()
+    public function productSuppliedToCompany($supplierId)
     {
       
-        return $this->supplyToCompanyRepository->productSuppliedToCompany();
+        return $this->supplyToCompanyRepository->productSuppliedToCompany($supplierId);
     }
    
 }

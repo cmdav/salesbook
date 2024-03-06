@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('inventories', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('product_id'); 
+            $table->uuid('supplier_product_id'); 
             $table->uuid('store_id')->nullable();
             $table->integer('quantity_available')->default(0); 
             $table->uuid('last_updated_by')->nullable(); 
-            $table->uuid('created_by'); 
             $table->uuid('update_by')->nullable();
+            $table->uuid('created_by')->nullable();
             $table->timestamps(); 
         });
     }

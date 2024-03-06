@@ -10,8 +10,8 @@ class SupplierProductRepository
 {
     public function index()
     {
-       
-        return SupplierProduct::latest()->paginate(20);
+    
+        return SupplierProduct::latest()->orderBy('product_id')->paginate(20);
 
     }
     public function listAllSupplierProduct()

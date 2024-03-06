@@ -11,11 +11,16 @@ class ProductSuppliedToCompanyController extends Controller
     protected $supplyToCompanyService;
      
 
-    public function __invoke(SupplyToCompanyService $supplyToCompanyService)
+    public function __construct(SupplyToCompanyService $supplyToCompanyService)
     {
        
         $this->supplyToCompanyService = $supplyToCompanyService;
-        return $this->supplyToCompanyService->productSuppliedToCompany();
+       
+    }
+    public function show($supplierId){
+       
+        return $this->supplyToCompanyService->productSuppliedToCompany($supplierId);
+
     }
    
 

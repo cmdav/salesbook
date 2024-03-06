@@ -47,6 +47,38 @@ class Store extends Model
                     ]
                 );
             }
+            
+                Inventory::create([
+                    'supplier_product_id' => $store->supplier_product_id,
+                    'store_id' => $store->id, 
+                    'quantity_available' => $store->quantity,
+                    'last_updated_by' =>auth()->check() ? auth()->user()->id : 'admin',
+                    'created_by' =>auth()->check() ? auth()->user()->id : 'admin'
+
+                ]);
         });
+
+        static::updated(function ($store) {
+            // If an existing store is updated, add the difference to the inventory
+            $originalQuantity = $store->getOriginal('quantity');
+            $newQuantity = $store->quantity;
+            $quantityToAdd = $newQuantity - $originalQuantity; // Calculate the difference
+
+            $inventory = Inventory::where('store_id', $store->id)
+                                  ->where('supplier_product_id', $store->supplier_product_id)
+                                  ->first();
+
+            if ($inventory) {
+                // If inventory exists, update it
+                $inventory->quantity_available += $quantityToAdd;
+                $inventory->last_updated_by = auth()->user()->id;
+                $inventory->save();
+            } 
+        });
+    }
+
+    public function supplier_product(){
+
+        return $this->belongsTo(SupplierProduct::class,'supplier_product_id','id');
     }
 }

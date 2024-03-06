@@ -14,7 +14,7 @@ class InventoryFormRequest extends FormRequest
     {
         return [
     
-            'product_id' => 'required|uuid',
+            'supplier_product_id' => 'required|uuid',
             'store_id' => 'nullable|uuid',
             'quantity_available' => 'required|integer',
         ];

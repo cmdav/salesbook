@@ -28,7 +28,11 @@ class StoreFactory extends Factory
             'product_identifier' => $this->faker->unique()->bothify('Prod-####-???'), 
             'supplier_price' => $this->faker->numberBetween(100, 1000), 
             'expired_date' => "2022-10-02", 
-            'store_owner' => 'admin', 
+            'quantity' => 50,
+            'store_owner' => function () {
+                
+                return \App\Models\User::where('email','admin@gmail.com')->first()->id;
+            },
             'created_by' => 'admin' 
         ];
     }

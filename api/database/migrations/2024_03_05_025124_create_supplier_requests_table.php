@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('supplier_requests', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
-            $table->uuid('supplier_id');
             $table->uuid('organization_id');
             $table->uuid('supplier_product_id');
-            $table->integer('quanity');
-            $table->json('comment',15);
-            $table->uuid('order_by');
+            $table->string('batch_no')->nullable();
+            $table->integer('quantity');
+            $table->integer('status')->default(0)->comment('pending');
+            $table->text('comment',15)->nullable();
+            $table->date('expected_date_of_arrival')->nullable();
+            $table->uuid('order_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
         });

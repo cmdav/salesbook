@@ -9,11 +9,13 @@ use Illuminate\Support\Facades\Log;
 class SupplyToCompanyRepository 
 {
    
-    public function productSuppliedToCompany()
+    public function productSuppliedToCompany($supplierId)
     {
-       
+      
         $supplyToCompany =SupplyToCompany::select('supplier_id','organization_id','supplier_product_id')->
-                        with('supplier_product:id,product_name,product_image,product_description')->paginate(20);
+                        with('supplier_product:id,product_name,product_image,product_description')
+                        ->where('supplier_id', $supplierId)
+                        ->paginate(20);
 
                 $supplyToCompany->getCollection()->transform(function($supplyToCompany){
 

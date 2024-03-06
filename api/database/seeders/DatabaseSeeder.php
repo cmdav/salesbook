@@ -91,8 +91,12 @@ class DatabaseSeeder extends Seeder
       
       
       \App\Models\Store::factory()->count(5)->create([
-        'supplier_product_id' => function () use ($supplierId) {
+        'supplier_product_id' => function () use ($supplierId) { //supplierId is from 87
             return \App\Models\SupplierProduct::where('supplier_id', $supplierId)->inRandomOrder()->first()->id ?? null;
+        },
+        'store_owner' => function () {
+                
+            return \App\Models\User::where('email','supplier@gmail.com')->first()->id;
         },
     ]);
 
@@ -109,6 +113,17 @@ class DatabaseSeeder extends Seeder
          },
       ]);
       \App\Models\SupplyToCompany::factory(20)->create();
+
+      \App\Models\SupplierRequest::factory(3)->create([
+        'organization_id'  =>function () {
+                
+             return \App\Models\User::where('email','admin@gmail.com')->first()->organization_id;
+         },
+         'supplier_product_id' => function () use ($supplierId) { //$supplierId is from 87
+            return \App\Models\SupplierProduct::where('supplier_id', $supplierId)->inRandomOrder()->first()->id ?? null;
+        },
+      ]);
+      \App\Models\SupplierRequest::factory(10)->create();
      
      
 

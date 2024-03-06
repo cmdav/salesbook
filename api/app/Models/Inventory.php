@@ -11,7 +11,7 @@ class Inventory extends Model
 {
     use   SetCreatedBy, HasUuids, HasFactory;
     protected $fillable = [
-            'product_id',
+            'supplier_product_id',
             'store_id',
             'quantity_available',
             'last_updated_by',

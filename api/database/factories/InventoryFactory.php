@@ -16,12 +16,15 @@ class InventoryFactory extends Factory
      */
     public function definition(): array
     {
+        $supplierId = \App\Models\User::where('email', 'supplier@gmail.com')->first()->id;
+        
         return [
-
-          
-            'product_id' =>function () {
-                return \App\Models\Product::first()->id;   
+           
+            'supplier_product_id'  =>function () use($supplierId) {
+                return \App\Models\SupplierProduct::where('supplier_id', $supplierId)->inRandomOrder()->first()->id ?? null;
             },
+          
+           
             'store_id' =>function () {
                 return \App\Models\Store::first()->id;   
             },
