@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('organization_name', 55);
             $table->string('organization_url', 55)->nullable();
             $table->integer('organization_code')->unique()->index();
+            $table->integer('organization_type')->default(1)->comment("0 sole proprietor, 1 for business");
             $table->string('organization_logo', 100);
             $table->uuid('created_by', 32);
             $table->uuid('update_by')->nullable();

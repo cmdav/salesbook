@@ -109,7 +109,7 @@ class UserRepository
                 ->where('organization_id', Auth::user()->organization_id)
                 ->latest()->paginate(3);
             }
-             return  User::select('id','first_name','last_name','organization_id','type_id','phone_number','email')
+             return  User::select('id','first_name','last_name','organization_id','type_id','phone_number','email','company_name','contact_person','company_address')
                                 ->where('type_id', 0)
                                 ->where('role_id', 0)
                                 ->where('organization_id', Auth::user()->organization_id)

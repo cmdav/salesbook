@@ -28,7 +28,7 @@ class UserController extends Controller
     public function index(Request $request){
 
         $validatedData = $request->validate([
-            'type' => 'required|in:supplier,customer,profile,company_customer'
+            'type' => 'required|in:supplier,customer,profile,company_customer,company'
         ]);
 
        return  $this->userService->getUser($validatedData['type']);

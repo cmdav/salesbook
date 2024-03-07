@@ -15,6 +15,7 @@ class OrganizationFormRequest extends FormRequest
         return [
             
             'organization_name' => 'required|string|max:55|unique:organizations',
+            'organization_type' => 'required|integer|in:0,1',
             'organization_url' => 'nullable|string|max:55|url',
             'organization_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         

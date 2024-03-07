@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 class UserFormRequest extends FormRequest
 {
@@ -33,11 +34,31 @@ class UserFormRequest extends FormRequest
         $rules['middle_name'] = 'nullable|string|max:55';
 
     }
-     //2 company 1 for supplier 0 for customer
+     //2 company 
      if ($request->input('type_id') == 2) { 
+        $rules['organization_type'] = 'required|integer';
+        $rules['organization_code'] = [
+            'required',
+            'integer',
+            function ($attribute, $value, $fail) use ($request) {
+                $matchedOrganization = DB::table('organizations')
+                    ->where('organization_code', $value)
+                    ->where('organization_type', $request->input('organization_type'))
+                    ->exists();
+                
+                if (!$matchedOrganization) {
+                    $fail('The registered business type and code do not match.');
+                }
+            },
+        ];
+        $rules['phone_number'] = 'required|string|unique:users';
+    }
+    //1 for business 0 for sole_properietor
+    if ($request->input('organization_type') == 1) { 
 
-        $rules['organization_code'] = 'required|integer';
-		 $rules['phone_number'] = 'required|string|unique:users';
+        $rules['contact_person'] = 'required|string|max:55';
+        $rules['company_name'] = 'required|string|max:55';
+        $rules['company_address'] = 'required|string|max:55';
       
     }
    
@@ -84,6 +105,7 @@ class UserFormRequest extends FormRequest
     {
         return [
             'password.regex' => 'The :attribute must include at least one uppercase letter, one lowercase letter, one number, and one special character. Your password should be 8 to 30 characters long.',
+            'organization_code.exists' => 'The registered business type and code do not match.',
         ];
     }
 
