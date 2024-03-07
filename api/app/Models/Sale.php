@@ -26,9 +26,10 @@ class Sale extends Model
 
         static::created(function ($sale) {
             // When a sale is made, subtract the sold quantity from the inventory
+            $request = app('request');
             $inventory = Inventory::where('store_id', $sale->store_id)->first();
 
-            if ($inventory) {
+            if ($inventory && $request->has('price')) {
                 // Ensure we don't end up with negative inventory
                 $newQuantityAvailable = max($inventory->quantity_available - $sale->quantity, 0);
                 $inventory->quantity_available = $newQuantityAvailable;
@@ -39,5 +40,13 @@ class Sale extends Model
                 // This would be an unusual situation that you need to decide how to handle
             }
         });
+    }
+    public function store(){
+
+        return $this->belongsTo(Sale::class,'store_id','id');
+    }
+    public function organization(){
+
+        return $this->belongsTo(Organization::class,'organization_id','id');
     }
 }

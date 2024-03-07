@@ -15,7 +15,7 @@ class ProductRequestsRepository
     //    $productRequests =ProductRequests::select('supplier_id','organization_id','supplier_product_id')->
     //                     with('supplier_product:id,product_name,product_image,product_description')
     //                     ->where('supplier_id', $supplierId)
-    //                     ->paginate(20);
+    //                     ->paginate(3);
 
     //            $productRequests->getCollection()->transform(function($ProductRequests){
 

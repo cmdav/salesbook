@@ -13,7 +13,7 @@ class OrganizationRepository
     public function index()
     {
        
-        return Organization::latest()->paginate(20);
+        return Organization::latest()->paginate(3);
 
     }
     public function create(array $data)

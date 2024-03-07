@@ -19,7 +19,7 @@ class SupplierOrganizationRepository
     public function index()
     {
        
-        return SupplierOrganization::latest()->paginate(20);
+        return SupplierOrganization::latest()->paginate(3);
 
     }
     public function create(array $data)

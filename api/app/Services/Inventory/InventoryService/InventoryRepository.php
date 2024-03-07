@@ -11,7 +11,7 @@ class InventoryRepository
     public function index()
     {
        
-        return Inventory::latest()->paginate(20);
+        return Inventory::latest()->paginate(3);
 
     }
     public function create(array $data)

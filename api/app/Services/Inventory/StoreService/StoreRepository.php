@@ -36,7 +36,7 @@ class StoreRepository
         ])
         ->where('store_owner', auth()->user()->id)
         ->groupBy('stores.supplier_product_id')
-        ->paginate(20);
+        ->paginate(3);
 
         $store->getCollection()->transform(function($store){
 
@@ -46,7 +46,7 @@ class StoreRepository
 
     return $store;
 
-        //return Store::latest()->paginate(20);
+        //return Store::latest()->paginate(3);
 
     }
     private function transformProduct($supplyToCompany){

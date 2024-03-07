@@ -16,22 +16,29 @@ class SaleFactory extends Factory
      */
     public function definition(): array
     {
+        $supplierEmail = 'supplier@gmail.com';
+    
+        // Get the user ID for the supplier
+        $supplierUserId = \App\Models\User::where('email', $supplierEmail)->first()->id ?? null;
+        
+        // Now, get a store ID that belongs to this supplier
+        $store = \App\Models\Store::where('store_owner', $supplierUserId)->inRandomOrder()->first();
+        
         return [
-            'store_id' =>function () {
-                return \App\Models\Store::first()->id;   
-            },
-            'organization_id' =>function () {
+            'store_id' => $store ? $store->id : null,
+            'organization_id' => function () {
                 return \App\Models\Organization::first()->id;   
             },
-            'customer_id' =>function () {
-                return \App\Models\User:: where("type_id", 0)->first()->id;   
+            'customer_id' => function () {
+                return \App\Models\User::where("type_id", 0)->first()->id;   
             },
             'price' => $this->faker->numberBetween(100, 5000), 
             'quantity' => $this->faker->numberBetween(1, 100), 
-            'sales_owner'=>function () {
-                return \App\Models\User:: where("type_id", 1)->first()->id;    
+            'sales_owner' => function () use ($supplierUserId) {
+                return $supplierUserId;    
             },
             'created_by' => $this->faker->uuid(),
         ];
     }
+    
 }

@@ -11,7 +11,7 @@ class SaleRepository
     public function index()
     {
        
-        return Sale::latest()->paginate(20);
+        return Sale::with('store','organization:id,organization_name,organization_logo')->latest()->paginate(3);
 
     }
     public function create(array $data)

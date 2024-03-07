@@ -11,7 +11,7 @@ class ProductRepository
     public function index()
     {
        
-        $product =Product::latest()->with('measurement:id,measurement_name,unit', 'subCategory.category')->paginate(20);
+        $product =Product::latest()->with('measurement:id,measurement_name,unit', 'subCategory.category')->paginate(3);
         //return $product;
 
         $product->getCollection()->transform(function($product){
