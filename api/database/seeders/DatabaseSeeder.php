@@ -74,7 +74,7 @@ class DatabaseSeeder extends Seeder
       //create product
       \App\Models\ProductCategory::factory(5)->create();
       \App\Models\ProductSubCategory::factory(30)->create();
-      \App\Models\Product::factory(30)->create();
+      \App\Models\Product::factory(2)->create();
 
       //custom supplier product
       $supplierId = \App\Models\User::where('email', 'supplier@gmail.com')->first()->id;

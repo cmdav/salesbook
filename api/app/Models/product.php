@@ -17,17 +17,18 @@ class Product extends Model
         'product_image',
         'measurement_id',
         'sub_category_id',
-        'created_by'
+        'created_by',
+        'category_id'
     ];
 
     public function measurement(){
         return $this->belongsTo(Measurement::class, 'measurement_id','id');
     }
-    public function getProductImageAttribute($value): string
-    {
+    // public function getProductImageAttribute($value): string
+    // {
         
-        return url('/') . $value;
-    }
+    //    // return url('/') . $value;
+    // }
     public function subCategory()
     {
         

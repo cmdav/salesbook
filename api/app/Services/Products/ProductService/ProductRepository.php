@@ -65,12 +65,14 @@ class ProductRepository
 
         return [
             "id" => $product->id,
+            "product_image" => $product->product_image,
             "product_name" => $product->product_name,
             "product_description" => $product->product_description,
-            "product_image" => $product->product_image,
-            "measurement_name" => optional($product->measurement)->measurement_name,
-            "unit" => optional($product->measurement)->unit,
+            
+           // "measurement_name" => optional($product->measurement)->measurement_name,
+           // "unit" => optional($product->measurement)->unit,
             "product_category" => optional($product->subCategory)->category ? optional($product->subCategory->category)->category_name : null,
+            "measurement" => optional($product->measurement)->measurement_name."(". optional($product->measurement)->unit.")",
             "product_sub_category" => optional($product->subCategory)->sub_category_name,
         ];
         

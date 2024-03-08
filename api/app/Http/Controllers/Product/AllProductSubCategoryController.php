@@ -11,10 +11,11 @@ class AllProductSubCategoryController extends Controller
 {
       protected $productSubCategoryService;
 
-    public function __invoke(ProductSubCategoryService $productSubCategoryService)
+    public function __invoke(ProductSubCategoryService $productSubCategoryService, $category_id)
     {
        $this->productSubCategoryService = $productSubCategoryService;
-       return $this->productSubCategoryService->onlySubProductCategory();
+      
+       return $this->productSubCategoryService->onlySubProductCategory($category_id);
     }
    
    

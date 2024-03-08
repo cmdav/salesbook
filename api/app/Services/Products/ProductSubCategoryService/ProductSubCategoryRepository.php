@@ -19,10 +19,10 @@ class ProductSubCategoryRepository
                         return $productSubCategory;                 
 
     }
-    public function onlySubProductCategory()
+    public function onlySubProductCategory($category_id)
     {
-       
-        return ProductSubCategory::select('id', 'sub_category_name')->get();               
+     
+        return ProductSubCategory::select('id', 'sub_category_name')->where('category_id', $category_id)->get();               
 
     }
     public function create(array $data)

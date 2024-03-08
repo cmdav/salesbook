@@ -24,10 +24,10 @@ class ProductSubCategoryService
        
         return $this->productSubCategoryRepository->index();
     }
-    public function onlySubProductCategory(){
+    public function onlySubProductCategory($category_id){
         
 
-        return $this->productSubCategoryRepository->onlySubProductCategory();
+        return $this->productSubCategoryRepository->onlySubProductCategory($category_id);
     }
 
     public function getProductSubCategoryById($id)

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id',32)->primary();
             $table->string('product_name', 50);
             $table->text('product_description')->nullable(); 
-            $table->string('product_image', 255)->nullable();
+            $table->text('product_image')->nullable();
             $table->uuid('measurement_id');
             $table->uuid('sub_category_id');
             $table->uuid('category_id');
