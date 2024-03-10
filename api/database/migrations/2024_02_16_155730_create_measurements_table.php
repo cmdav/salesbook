@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('measurement_name',30)->unique();
             $table->string('unit',5)->unique();
             $table->uuid('created_by');
-            $table->uuid('update_by')->nullable();
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
         });
     }

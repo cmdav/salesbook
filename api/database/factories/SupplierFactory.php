@@ -26,6 +26,8 @@ class SupplierFactory extends Factory
             'state' => $this->faker->state,
             'address' => $this->faker->address,
             'dob' => $this->faker->dateTimeBetween('-70 years', '-18 years')->format('Y-m-d'),
+            'created_by'=>'admin',
+            'updated_by'=>'admin',
         ];
     }
 }

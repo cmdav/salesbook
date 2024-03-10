@@ -19,6 +19,8 @@ class MeasurementFactory extends Factory
         return [
             'measurement_name' => "liter",
             'unit' => "l", 
+            'created_by'=>'admin',
+            'updated_by'=>'admin',
         ];
     }
 }

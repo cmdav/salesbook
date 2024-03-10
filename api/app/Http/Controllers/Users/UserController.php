@@ -40,8 +40,11 @@ class UserController extends Controller
         }
         return response()->json(['message'=>'user not found'], 404);
     }
+   // public function store(Request $request)
+    	
     public function store(UserFormRequest $request)
     { 	
+        
        $response ='Registration successful.';
           
         DB::beginTransaction(); 

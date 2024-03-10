@@ -29,8 +29,9 @@ class SupplierRequestFactory extends Factory
             'batch_no'  =>function () {
                 return \App\Models\User::where('email','supplier@gmail.com')->first()->id;   
             },
-            'order_by' => 'admin',
-            'quantity' => 20
+            'quantity' => 20,
+            'created_by'=>'admin',
+            'updated_by'=>'admin',
         ];
     }
 }

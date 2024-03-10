@@ -15,5 +15,6 @@ class ProductCategory extends Model
 
         'category_name',
         'created_by',
+        'updated_by',
     ];
 }

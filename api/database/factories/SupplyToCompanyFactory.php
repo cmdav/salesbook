@@ -29,7 +29,8 @@ class SupplyToCompanyFactory extends Factory
             'supplier_id'  =>function () {
                 return \App\Models\User::where('email','supplier@gmail.com')->first()->id;   
             },
-            'created_by' => 'admin' 
+            'created_by'=>'admin',
+            'updated_by'=>'admin',
         ];
     }
 }

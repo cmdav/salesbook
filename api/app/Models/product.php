@@ -18,6 +18,7 @@ class Product extends Model
         'measurement_id',
         'sub_category_id',
         'created_by',
+        'updated_by',
         'category_id'
     ];
 

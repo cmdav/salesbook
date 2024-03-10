@@ -19,6 +19,7 @@ class Organization extends Model
         'organization_code', 
         'organization_logo',
         'created_by',
+        'updated_by',
     ];
     protected static function boot() {
 

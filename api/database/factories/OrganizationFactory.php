@@ -22,7 +22,8 @@ class OrganizationFactory extends Factory
             'organization_url' => "http://google.com",
             'organization_code' => 123456,
             'organization_logo' => $this->faker->imageUrl(640, 480, 'business'),
-            'created_by' => '1'
+            'created_by'=>'admin',
+            'updated_by'=>'admin',
         ];
     }
 }

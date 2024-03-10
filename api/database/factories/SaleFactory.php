@@ -37,7 +37,8 @@ class SaleFactory extends Factory
             'sales_owner' => function () use ($supplierUserId) {
                 return $supplierUserId;    
             },
-            'created_by' => $this->faker->uuid(),
+            'created_by'=>'admin',
+            'updated_by'=>'admin',
         ];
     }
     

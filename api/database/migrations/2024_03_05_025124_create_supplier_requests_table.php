@@ -20,8 +20,8 @@ return new class extends Migration
             $table->integer('status')->default(0)->comment('pending');
             $table->text('comment',15)->nullable();
             $table->date('expected_date_of_arrival')->nullable();
-            $table->uuid('order_by')->nullable();
             $table->uuid('updated_by')->nullable();
+            $table->uuid('created_by')->nullable();
             $table->timestamps();
         });
     }

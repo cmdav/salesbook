@@ -19,8 +19,8 @@ return new class extends Migration
             $table->uuid('measurement_id');
             $table->uuid('sub_category_id');
             $table->uuid('category_id');
-            $table->uuid('created_by');
-            $table->uuid('update_by')->nullable();
+            $table->uuid('created_by')->nullable();
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
         });
     }

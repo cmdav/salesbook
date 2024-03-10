@@ -16,6 +16,8 @@ return new class extends Migration
             $table->uuid('user_id',32);
             $table->date('login_time',15);
             $table->date('logout_time',15)->nullable();
+            $table->uuid('created_by')->nullable();
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
         });
     }

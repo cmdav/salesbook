@@ -21,7 +21,8 @@ class ProductSubCategoryFactory extends Factory
             'category_id'=>function () {
                 return \App\Models\ProductCategory::first()->id;   
             },
-            'created_by'=>'admin'
+            'created_by'=>'admin',
+            'updated_by'=>'admin',
         ];
     }
 }

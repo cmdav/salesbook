@@ -18,6 +18,8 @@ class Supplier extends Model
         'account_name', 
         'state', 
         'address', 
-        'dob'
+        'dob',
+        'created_by',
+        'updated_by'
     ];
 }

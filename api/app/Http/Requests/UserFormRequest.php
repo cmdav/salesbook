@@ -22,7 +22,7 @@ class UserFormRequest extends FormRequest
         'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
     ];
     // register company customer
-    if ($request->input('role_id') == 1) { 
+    if ($request->input('role_id') == 1 || $request->input('organization_type') ==1 ) { 
 
         $rules['contact_person'] = 'required|string|max:55';
         $rules['company_name'] = 'required|string|max:55';
@@ -35,24 +35,24 @@ class UserFormRequest extends FormRequest
 
     }
      //2 company 
-     if ($request->input('type_id') == 2) { 
-        $rules['organization_type'] = 'required|integer';
-        $rules['organization_code'] = [
-            'required',
-            'integer',
-            function ($attribute, $value, $fail) use ($request) {
-                $matchedOrganization = DB::table('organizations')
-                    ->where('organization_code', $value)
-                    ->where('organization_type', $request->input('organization_type'))
-                    ->exists();
+    //  if ($request->input('type_id') == 2) { 
+    //     $rules['organization_type'] = 'required|integer';
+    //     $rules['organization_code'] = [
+    //         'required',
+    //         'integer',
+    //         function ($attribute, $value, $fail) use ($request) {
+    //             $matchedOrganization = DB::table('organizations')
+    //                 ->where('organization_code', $value)
+    //                 ->where('organization_type', $request->input('organization_type'))
+    //                 ->exists();
                 
-                if (!$matchedOrganization) {
-                    $fail('The registered business type and code do not match.');
-                }
-            },
-        ];
-        $rules['phone_number'] = 'required|string|unique:users';
-    }
+    //             if (!$matchedOrganization) {
+    //                 $fail('The registered business type and code do not match.');
+    //             }
+    //         },
+    //     ];
+      //  $rules['phone_number'] = 'required|string|unique:users';
+    // }
     //1 for business 0 for sole_properietor
     if ($request->input('organization_type') == 1) { 
 

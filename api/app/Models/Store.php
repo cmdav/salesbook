@@ -12,19 +12,16 @@ class Store extends Model
     use  SetCreatedBy,  HasUuids, HasFactory;
     
     protected $fillable = [
-        'supplier_product_id',
+        'purchase_id',
         'currency',
-        'discount',
-        'batch_no',
-        'product_identifier',
-        'supplier_price',
-        'expired_date',
         'store_owner',
-        'quantity',
+        'quantity_available',
         'store_type',
+        'status',
+        'organization_id',
+        'last_updated_by',
         'created_by',
         'updated_by',
-        'status'
     ];
     protected static function boot() {
 
@@ -48,14 +45,14 @@ class Store extends Model
                 );
             }
             
-                Inventory::create([
-                    'supplier_product_id' => $store->supplier_product_id,
-                    'store_id' => $store->id, 
-                    'quantity_available' => $store->quantity,
-                    'last_updated_by' =>auth()->check() ? auth()->user()->id : 'admin',
-                    'created_by' =>auth()->check() ? auth()->user()->id : 'admin'
+                // Inventory::create([
+                //     'supplier_product_id' => $store->supplier_product_id,
+                //     'store_id' => $store->id, 
+                //     'quantity_available' => $store->quantity,
+                //     'last_updated_by' =>auth()->check() ? auth()->user()->id : 'admin',
+                //     'created_by' =>auth()->check() ? auth()->user()->id : 'admin'
 
-                ]);
+                // ]);
         });
 
         static::updated(function ($store) {

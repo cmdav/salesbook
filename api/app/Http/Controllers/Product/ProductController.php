@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Product;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductFormRequest;
 use App\Services\Products\ProductService\ProductService;
-use App\Models\product;
 use Illuminate\Http\Request;
 use App\Services\FileUploadService;
 use thiagoalessio\TesseractOCR\TesseractOCR;

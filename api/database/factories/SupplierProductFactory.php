@@ -27,7 +27,8 @@ class SupplierProductFactory extends Factory
             'supplier_id' =>function () {
                 return \App\Models\Supplier::first()->id;   
             },
-            'created_by'=>'admin'
+            'created_by'=>'admin',
+            'updated_by'=>'admin',
         ];
     }
 }

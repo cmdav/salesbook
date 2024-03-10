@@ -18,7 +18,8 @@ class ProductCategoryFactory extends Factory
     {
         return [
             'category_name' => $this->faker->word,
-            'created_by'=> 'admin'
+            'created_by'=>'admin',
+            'updated_by'=>'admin',
         ];
     }
 }

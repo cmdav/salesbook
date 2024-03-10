@@ -34,7 +34,8 @@ class ProductFactory extends Factory
                 // Return the category_id from the sub_category, if it exists
                 return $subCategory ? $subCategory->category_id : factory(\App\Models\ProductCategory::class)->create()->id;
             },
-            'created_by'=>'admin'
+            'created_by'=>'admin',
+            'updated_by'=>'admin',
         ];
     }
 }

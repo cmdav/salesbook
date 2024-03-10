@@ -76,47 +76,50 @@ class DatabaseSeeder extends Seeder
       \App\Models\ProductSubCategory::factory(30)->create();
       \App\Models\Product::factory(2)->create();
 
-      //custom supplier product
+    //   //custom supplier product
       $supplierId = \App\Models\User::where('email', 'supplier@gmail.com')->first()->id;
       
-      \App\Models\SupplierProduct::factory(3)->create([
-          'supplier_id' => $supplierId,
-      ]);
+    //   \App\Models\SupplierProduct::factory(3)->create([
+    //       'supplier_id' => $supplierId,
+    //   ]);
       
       
-      \App\Models\Store::factory()->count(5)->create([
-        'supplier_product_id' => function () use ($supplierId) { //supplierId is from 87
-            return \App\Models\SupplierProduct::where('supplier_id', $supplierId)->inRandomOrder()->first()->id ?? null;
-        },
-        'store_owner' => function () {
+    //   \App\Models\Store::factory()->count(5)->create([
+    //     'supplier_product_id' => function () use ($supplierId) { //supplierId is from 87
+    //         return \App\Models\SupplierProduct::where('supplier_id', $supplierId)->inRandomOrder()->first()->id ?? null;
+    //     },
+    //     'store_owner' => function () {
                 
-            return \App\Models\User::where('email','supplier@gmail.com')->first()->id;
-        },
-    ]);
+    //         return \App\Models\User::where('email','supplier@gmail.com')->first()->id;
+    //     },
+    // ]);
    
-
-    \App\Models\SupplierProduct::factory(3)->create();
+    
+    \App\Models\Price::factory(3)->create();
+    \App\Models\ProductType::factory(3)->create();
+    \App\Models\Purchase::factory(3)->create();
+   
     \App\Models\Store::factory()->count(10)->create();
-    \App\Models\Sale::factory()->count(10)->create();
-    \App\Models\Inventory::factory(3)->create();
-    \App\Models\SupplyToCompany::factory(20)->create([
-        'organization_id'  =>function () {
+    // \App\Models\Sale::factory()->count(10)->create();
+     // \App\Models\SupplierProduct::factory(3)->create();
+    // \App\Models\SupplyToCompany::factory(20)->create([
+    //     'organization_id'  =>function () {
                 
-             return \App\Models\User::where('email','admin@gmail.com')->first()->organization_id;
-         },
-      ]);
-    \App\Models\SupplyToCompany::factory(20)->create();
+    //          return \App\Models\User::where('email','admin@gmail.com')->first()->organization_id;
+    //      },
+    //   ]);
+    // \App\Models\SupplyToCompany::factory(20)->create();
 
-      \App\Models\SupplierRequest::factory(3)->create([
-        'organization_id'  =>function () {
+    //   \App\Models\SupplierRequest::factory(3)->create([
+    //     'organization_id'  =>function () {
                 
-             return \App\Models\User::where('email','admin@gmail.com')->first()->organization_id;
-         },
-         'supplier_product_id' => function () use ($supplierId) { //$supplierId is from 87
-            return \App\Models\SupplierProduct::where('supplier_id', $supplierId)->inRandomOrder()->first()->id ?? null;
-        },
-      ]);
-      \App\Models\SupplierRequest::factory(10)->create();
+    //          return \App\Models\User::where('email','admin@gmail.com')->first()->organization_id;
+    //      },
+    //      'supplier_product_id' => function () use ($supplierId) { //$supplierId is from 87
+    //         return \App\Models\SupplierProduct::where('supplier_id', $supplierId)->inRandomOrder()->first()->id ?? null;
+    //     },
+    //   ]);
+    //   \App\Models\SupplierRequest::factory(10)->create();
      
      
 

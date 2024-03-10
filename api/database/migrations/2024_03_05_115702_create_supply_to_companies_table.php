@@ -16,7 +16,8 @@ return new class extends Migration
             $table->uuid('supplier_id');
             $table->uuid('organization_id');
             $table->uuid('supplier_product_id');
-            $table->uuid('created_by');
+            $table->uuid('updated_by')->nullable();
+            $table->uuid('created_by')->nullable();
             $table->timestamps();
         });
     }

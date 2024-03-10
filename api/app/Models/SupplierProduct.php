@@ -16,6 +16,7 @@ class SupplierProduct extends Model
         'product_image',
         'product_name',
         'created_by',
+        'updated_by',
         'supplier_id'
     ];
 

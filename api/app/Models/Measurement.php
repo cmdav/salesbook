@@ -10,5 +10,5 @@ use App\Traits\SetCreatedBy;
 class Measurement extends Model
 {
     use   SetCreatedBy, HasUuids, HasFactory;
-    protected $fillable = ['measurement_name','unit','created_by'];
+    protected $fillable = ['measurement_name','unit','created_by', 'updated_by',];
 }

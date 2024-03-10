@@ -74,6 +74,7 @@ class ProductRepository
             "product_category" => optional($product->subCategory)->category ? optional($product->subCategory->category)->category_name : null,
             "measurement" => optional($product->measurement)->measurement_name."(". optional($product->measurement)->unit.")",
             "product_sub_category" => optional($product->subCategory)->sub_category_name,
+          
         ];
         
     }

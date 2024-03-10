@@ -17,6 +17,8 @@ class ProductSubCategory extends Model
         'sub_category_name',
         'category_id',
         'created_by',
+        'created_by',
+        'updated_by',
     ];
 
     public function category(){

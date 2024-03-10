@@ -19,6 +19,8 @@ class CurrencyFactory extends Factory
         return [
             'currency_name' => $this->faker->word,
             'currency_symbol' => $this->faker->currencyCode,
+            'created_by'=>'admin',
+            'updated_by'=>'admin',
         ];
     }
 }

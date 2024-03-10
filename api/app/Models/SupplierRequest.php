@@ -17,7 +17,8 @@ class SupplierRequest extends Model
         'batch_no',
         'quantity',
         'comment',
-        'order_by',
+        'created_by',
+        'updated_by'
     ];
 
 }

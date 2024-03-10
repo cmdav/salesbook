@@ -10,5 +10,5 @@ use App\Traits\SetCreatedBy;
 class Currency extends Model
 {
     use   SetCreatedBy, HasUuids, HasFactory;
-    protected $fillable = ['currency_name','currency_symbol','created_by'];
+    protected $fillable = ['currency_name','currency_symbol','created_by','updated_by',];
 }

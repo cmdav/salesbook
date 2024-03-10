@@ -19,6 +19,7 @@ class Sale extends Model
         'quantity',
         'sales_owner',
         'created_by',
+        'updated_by'
     ];
 
     protected static function boot() {

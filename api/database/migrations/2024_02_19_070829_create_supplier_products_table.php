@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('product_name', 255)->nullable();
             $table->string('product_image', 225)->nullable();
             $table->text('product_description')->nullable(); 
-            $table->uuid('created_by', 32);
+            $table->uuid('created_by', 32)->nullable();
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
         });
     }

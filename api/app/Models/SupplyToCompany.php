@@ -14,7 +14,9 @@ class SupplyToCompany extends Model
        
         'supplier_id',
         'organization_id',
-        'supplier_product_id'
+        'supplier_product_id',
+        'created_by',
+        'updated_by'
     ];
 
     public function supplier_product(){

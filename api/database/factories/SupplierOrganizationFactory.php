@@ -26,6 +26,8 @@ class SupplierOrganizationFactory extends Factory
                 'organization_id' =>function () {
                     return \App\Models\Organization::first()->id;   
                 },
+                'created_by'=>'admin',
+                'updated_by'=>'admin',
             ];
         
     }
