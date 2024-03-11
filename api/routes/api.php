@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('stores', App\Http\Controllers\Inventory\StoreController::class);
         //1
         route::resource('prices', App\Http\Controllers\Inventory\PriceController::class);
+        route::get('get-price-by-product-type/{id}', App\Http\Controllers\Inventory\PriceByProductTypeController::class);
         route::resource('purchases', App\Http\Controllers\Inventory\PurchaseController::class);
       
 
@@ -45,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('products', App\Http\Controllers\Product\ProductController::class);
         route::resource('product-types', App\Http\Controllers\Product\ProductTypeController::class);
         route::get('all-product-sub-categories-by-category-id/{id}', App\Http\Controllers\Product\AllProductSubCategoryController::class);
+        route::get('product-type-by-id/{id}', App\Http\Controllers\Product\ProductTypeByIdController::class);
         route::resource('product-sub-categories', App\Http\Controllers\Product\ProductSubCategoryController::class);
         // supplier
         route::resource('supplier-organizations', App\Http\Controllers\Supply\SupplierOrganizationController::class);

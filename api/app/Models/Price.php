@@ -13,8 +13,9 @@ class Price extends Model
     protected $fillable = [
         'product_type_id',
         'supplier_id',
-        'product_price',
-        'product_currency',
+        'product_type_price',
+        'system_price',
+        'currency_id',
         'discount',
         'organization_id',
         'created_by',
@@ -22,4 +23,18 @@ class Price extends Model
         'status',
         
     ];
+
+
+    public function productType(){
+
+        return $this->belongsTo(ProductType::class);
+    }
+    public function currency(){
+
+        return $this->belongsTo(Currency::class);
+    }
+    public function supplier(){
+
+        return $this->belongsTo(User::class);
+    }
 }

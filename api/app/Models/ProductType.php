@@ -16,8 +16,14 @@ class ProductType extends Model
         'product_type_image',   
         'product_type_description',
         'organization_id',
+        'selling_price',
         'supplier_id',
         'created_by',
         'updated_by',
     ];
+
+    public function suppliers(){
+
+        return $this->belongsTo(User::class, 'supplier_id', 'id');
+    }
 }

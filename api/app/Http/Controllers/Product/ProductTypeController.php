@@ -28,14 +28,9 @@ class ProductTypeController extends Controller
     public function store(ProductTypeFormRequest $request)
     {
         $data = $request->all();
-        // $image = $request->file('product_image');
-        // $text = (new TesseractOCR($image->getPathname()))
-        //     ->lang('eng') // Specify the language if necessary
-        //     ->run();
-        // return response()->json(['text' => $text]);
 
-        if ($request->hasFile('product_image')) {
-            $data['product_image'] = $this->fileUploadService->uploadImage($request->file('product_image'),'products');
+        if ($request->hasFile('product_type_image')) {
+            $data['product_type_image'] = $this->fileUploadService->uploadImage($request->file('product_type_image'),'product_type');
         }
         $productType = $this->productTypeService->create($data);
         return response()->json($productType, 201);
@@ -43,7 +38,7 @@ class ProductTypeController extends Controller
 
     public function show($id)
     {
-        $productType = $this->productTypeService->getProductById($id);
+        $productType = $this->productTypeService->show($id);
         return response()->json($productType);
     }
 

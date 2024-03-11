@@ -14,62 +14,55 @@ class PriceRepository
 {
     public function index()
     {
-       return 'price';
-        $Price = Price::with('supplier_product:id,product_name,product_image,product_description')
-        ->select('Prices.supplier_product_id')
-        ->addSelect([
-            'quantity_remain' => Inventory::selectRaw('SUM(quantity_available)')
-                ->whereColumn('supplier_product_id', 'Prices.supplier_product_id')
-                ->limit(1), // Subquery for remaining quantity in inventories
-            'pending_request' => SupplierRequest::selectRaw('SUM(quantity)')
-                ->where('status', 0)
-                ->whereColumn('supplier_product_id', 'Prices.supplier_product_id')
-                ->limit(1), // Subquery for pending requests
-            'completed_request' => SupplierRequest::selectRaw('SUM(quantity)')
-                ->where('status', 1)
-                ->whereColumn('supplier_product_id', 'Prices.supplier_product_id')
-                ->limit(1), // Subquery for completed requests
-            'total_sales' => Sale::selectRaw('SUM(sales.quantity * sales.price)')
-                ->join('Prices as s', 's.id', '=', 'sales.Price_id')
-                ->whereColumn('s.supplier_product_id', 'Prices.supplier_product_id')
-                ->limit(1) // Subquery for total sales
-        ])
-        ->where('Price_owner', auth()->user()->id)
-        ->groupBy('Prices.supplier_product_id')
-        ->paginate(3);
+        $Price = $this->queryCommon()->paginate(20);
 
-        $Price->getCollection()->transform(function($Price){
+        return $this->transformAndReturn($Price);
+    }
 
+    public function getPriceByProductType($id)
+    {
+        $Price = $this->queryCommon()->where('product_type_id', $id)->paginate(20);
+
+        return $this->transformAndReturn($Price);
+    }
+
+    private function queryCommon()
+    {
+        return Price::with(
+            'productType:id,product_type,product_type_image,product_type_description',
+            'currency:id,currency_name,currency_symbol',
+            'supplier:id,first_name,last_name,phone_number'
+        );
+    }
+
+    private function transformAndReturn($Price)
+    {
+        $Price->getCollection()->transform(function ($Price) {
             return $this->transformProduct($Price);
         });
 
-
-    return $Price;
-
-        //return Price::latest()->paginate(3);
-
+        return $Price;
     }
-    private function transformProduct($supplyToCompany){
+
+    private function transformProduct($price){
 
         return [
-            'product_name'=>optional($supplyToCompany->supplier_product)->product_name,
-            'product_image'=>optional($supplyToCompany->supplier_product)->product_image,
-            'product_description'=>optional($supplyToCompany->supplier_product)->product_description,
-            'quantity_remaining'=>$supplyToCompany->quantity_remain,
-            'pending_request'=>$supplyToCompany->pending_request,
-            'completed_request'=>$supplyToCompany->completed_request,
-            'total_sales'=>$supplyToCompany->total_sales,
+            'id'=>$price->id,
+            'product_type_id'=>optional($price->productType)->id,
+            'product_type'=>optional($price->productType)->product_type,
+            'product_type_description'=>optional($price->productType)->product_type_description,
+            'product_type_image'=>optional($price->productType)->product_type_image,
+            'product_type_price'=>$price->product_type_price,
+            'system_price'=>$price->system_price,
+            'currency'=>optional($price->currency)->currency_name."(".optional($price->currency)->currency_symbol .")",
+            'discount'=>$price->discount,
+            'status'=>$price->status,
+            'supplier_name'=>optional($price->supplier)->first_name."(".optional($price->supplier)->last_name .")",
+            'supplier_phone_number'=>optional($price->supplier)->phone_number,
         ];
 
     }
 
-
-
-
-
-
-
-    
     public function create(array $data)
     {
        

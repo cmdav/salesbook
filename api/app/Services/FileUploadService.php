@@ -12,7 +12,7 @@ class FileUploadService
         // return Storage::url($path);
         
         $fileName = uniqid() . '_' . $file->getClientOriginalName();
-         $filePath = $file->storeAs('images', $fileName, 'public');
+         $filePath = $file->storeAs($path, $fileName, 'public');
          return Storage::disk('public')->url($filePath);
     }
     

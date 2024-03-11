@@ -14,26 +14,24 @@ class ProductTypeRepository
 {
     public function index()
     {
+    
+
+        return ProductType::latest()->paginate(20);
+
+    }
+
+    public function getProductTypeByProductId($id)
+    {
        
-        $ProductType = ProductType::all();
+        $ProductType = ProductType::select('id','product_type','product_type_image','supplier_id')
+                                    ->with('suppliers')
+                                    ->where('product_id', $id)
+                                    ->paginate(20);
         
 
         return $ProductType;
 
         //return ProductType::latest()->paginate(3);
-
-    }
-    private function transformProduct($supplyToCompany){
-
-        return [
-            'product_name'=>optional($supplyToCompany->supplier_product)->product_name,
-            'product_image'=>optional($supplyToCompany->supplier_product)->product_image,
-            'product_description'=>optional($supplyToCompany->supplier_product)->product_description,
-            'quantity_remaining'=>$supplyToCompany->quantity_remain,
-            'pending_request'=>$supplyToCompany->pending_request,
-            'completed_request'=>$supplyToCompany->completed_request,
-            'total_sales'=>$supplyToCompany->total_sales,
-        ];
 
     }
     

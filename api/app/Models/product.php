@@ -23,6 +23,7 @@ class Product extends Model
     ];
 
     public function measurement(){
+       
         return $this->belongsTo(Measurement::class, 'measurement_id','id');
     }
     // public function getProductImageAttribute($value): string
@@ -34,6 +35,12 @@ class Product extends Model
     {
         
         return $this->belongsTo(ProductSubCategory::class, 'sub_category_id','id');
+
+    }
+    public function productType()
+    {
+        
+        return $this->hasMany(ProductType::class, 'product_id','id');
 
     }
 

@@ -18,9 +18,9 @@ trait SetCreatedBy
                 $model->created_by = Auth::id();
             }
             // check if the table has user_id column
-            // if (Auth::check() && Schema::hasColumn($model->getTable(), 'user_id') && empty($model->user_id)) {
-            //     $model->user_id = Auth::id();
-            // }
+            if (Auth::check() && Schema::hasColumn($model->getTable(), 'user_id') && empty($model->user_id)) {
+                $model->user_id = Auth::id();
+            }
             // check if the table has updated_by column
             if (Auth::check() && Schema::hasColumn($model->getTable(), 'updated_by') && empty($model->updated_by)) {
                 $model->updated_by = Auth::id();

@@ -17,8 +17,8 @@ class SupplyToCompanyFactory extends Factory
     public function definition(): array
     {
         return [
-            'supplier_product_id'  =>function () {
-                return \App\Models\SupplierProduct::first()->id;   
+            'supplier_product_type_id'  =>function () {
+                return \App\Models\ProductType::first()->id;   
             },
     
             'organization_id'  =>function () {

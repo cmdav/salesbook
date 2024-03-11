@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id',32)->primary();
             $table->uuid('supplier_id');
             $table->uuid('organization_id');
-            $table->uuid('supplier_product_id');
+            $table->uuid('supplier_product_type_id');
             $table->uuid('updated_by')->nullable();
             $table->uuid('created_by')->nullable();
             $table->timestamps();

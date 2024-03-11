@@ -25,9 +25,13 @@ class PriceService
         return $this->PriceRepository->index();
     }
 
-    public function getPriceById($id)
+    public function show($id)
     {
         return $this->PriceRepository->findById($id);
+    }
+    public function getPriceByProductType($id)
+    {
+        return $this->PriceRepository->getPriceByProductType($id);
     }
 
     public function updatePrice($id, array $data)

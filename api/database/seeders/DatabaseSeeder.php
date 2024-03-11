@@ -95,10 +95,11 @@ class DatabaseSeeder extends Seeder
     // ]);
    
     
-    \App\Models\Price::factory(3)->create();
+    
     \App\Models\ProductType::factory(3)->create();
+    \App\Models\Price::factory(3)->create();
     \App\Models\Purchase::factory(3)->create();
-   
+  
     \App\Models\Store::factory()->count(10)->create();
     // \App\Models\Sale::factory()->count(10)->create();
      // \App\Models\SupplierProduct::factory(3)->create();

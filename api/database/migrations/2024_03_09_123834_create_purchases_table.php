@@ -17,7 +17,6 @@ return new class extends Migration
             $table->uuid('supplier_id')->nullable();
             $table->uuid('price_id');
             $table->uuid('currency_id');
-            $table->integer('selling_price')->nullable();
             $table->integer('discount')->default(0); 
             $table->string('batch_no', 50); 
             $table->integer('quantity')->default(0); 

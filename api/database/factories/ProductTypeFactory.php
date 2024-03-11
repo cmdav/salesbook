@@ -25,7 +25,7 @@ class ProductTypeFactory extends Factory
                 return \App\Models\Product::first()->id;   
             },
             'supplier_id' =>function () {
-                return \App\Models\Supplier::first()->id;   
+                return \App\Models\User::where('email', 'supplier@gmail.com')->first()->id;   
             },
             'created_by'=>'admin',
             'updated_by'=>'admin',
