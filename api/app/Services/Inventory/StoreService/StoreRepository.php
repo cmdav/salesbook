@@ -15,28 +15,28 @@ class StoreRepository
     public function index()
     {
        
-        $store = Store::with('supplier_product:id,product_name,product_image,product_description')
-        ->select('stores.supplier_product_id')
-        ->addSelect([
-            'quantity_remain' => Inventory::selectRaw('SUM(quantity_available)')
-                ->whereColumn('supplier_product_id', 'stores.supplier_product_id')
-                ->limit(1), // Subquery for remaining quantity in inventories
-            'pending_request' => SupplierRequest::selectRaw('SUM(quantity)')
-                ->where('status', 0)
-                ->whereColumn('supplier_product_id', 'stores.supplier_product_id')
-                ->limit(1), // Subquery for pending requests
-            'completed_request' => SupplierRequest::selectRaw('SUM(quantity)')
-                ->where('status', 1)
-                ->whereColumn('supplier_product_id', 'stores.supplier_product_id')
-                ->limit(1), // Subquery for completed requests
-            'total_sales' => Sale::selectRaw('SUM(sales.quantity * sales.price)')
-                ->join('stores as s', 's.id', '=', 'sales.store_id')
-                ->whereColumn('s.supplier_product_id', 'stores.supplier_product_id')
-                ->limit(1) // Subquery for total sales
-        ])
-        ->where('store_owner', auth()->user()->id)
-        ->groupBy('stores.supplier_product_id')
-        ->paginate(3);
+        // $store = Store::with('supplier_product:id,product_name,product_image,product_description')
+        // ->select('stores.supplier_product_id')
+        // ->addSelect([
+        //     'quantity_remain' => Inventory::selectRaw('SUM(quantity_available)')
+        //         ->whereColumn('supplier_product_id', 'stores.supplier_product_id')
+        //         ->limit(1), // Subquery for remaining quantity in inventories
+        //     'pending_request' => SupplierRequest::selectRaw('SUM(quantity)')
+        //         ->where('status', 0)
+        //         ->whereColumn('supplier_product_id', 'stores.supplier_product_id')
+        //         ->limit(1), // Subquery for pending requests
+        //     'completed_request' => SupplierRequest::selectRaw('SUM(quantity)')
+        //         ->where('status', 1)
+        //         ->whereColumn('supplier_product_id', 'stores.supplier_product_id')
+        //         ->limit(1), // Subquery for completed requests
+        //     'total_sales' => Sale::selectRaw('SUM(sales.quantity * sales.price)')
+        //         ->join('stores as s', 's.id', '=', 'sales.store_id')
+        //         ->whereColumn('s.supplier_product_id', 'stores.supplier_product_id')
+        //         ->limit(1) // Subquery for total sales
+        // ])
+        // ->where('store_owner', auth()->user()->id)
+        // ->groupBy('stores.supplier_product_id')
+        // ->paginate(3);
 
         $store->getCollection()->transform(function($store){
 

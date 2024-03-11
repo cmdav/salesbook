@@ -27,4 +27,20 @@ class Purchase extends Model
         'created_by',
         'updated_by',
     ];
+    public function suppliers(){
+
+        return $this->belongsTo(User::class);
+    }
+    public function currency(){
+
+        return $this->belongsTo(Currency::class);
+    }
+    public function productType(){
+
+        return $this->belongsTo(ProductType::class);
+    }
+    public function price(){
+
+        return $this->belongsTo(price::class);
+    }
 }

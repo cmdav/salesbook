@@ -14,29 +14,8 @@ class PurchaseRepository
 {
     public function index()
     {
-       return 'purchase';
-        $Purchase = Purchase::with('supplier_product:id,product_name,product_image,product_description')
-        ->select('Purchases.supplier_product_id')
-        ->addSelect([
-            'quantity_remain' => Inventory::selectRaw('SUM(quantity_available)')
-                ->whereColumn('supplier_product_id', 'Purchases.supplier_product_id')
-                ->limit(1), // Subquery for remaining quantity in inventories
-            'pending_request' => SupplierRequest::selectRaw('SUM(quantity)')
-                ->where('status', 0)
-                ->whereColumn('supplier_product_id', 'Purchases.supplier_product_id')
-                ->limit(1), // Subquery for pending requests
-            'completed_request' => SupplierRequest::selectRaw('SUM(quantity)')
-                ->where('status', 1)
-                ->whereColumn('supplier_product_id', 'Purchases.supplier_product_id')
-                ->limit(1), // Subquery for completed requests
-            'total_sales' => Sale::selectRaw('SUM(sales.quantity * sales.price)')
-                ->join('Purchases as s', 's.id', '=', 'sales.Purchase_id')
-                ->whereColumn('s.supplier_product_id', 'Purchases.supplier_product_id')
-                ->limit(1) // Subquery for total sales
-        ])
-        ->where('Purchase_owner', auth()->user()->id)
-        ->groupBy('Purchases.supplier_product_id')
-        ->paginate(3);
+       $Purchase =Purchase::with('price','suppliers','currency','productType')->paginate(20);
+       
 
         $Purchase->getCollection()->transform(function($Purchase){
 
@@ -46,22 +25,40 @@ class PurchaseRepository
 
     return $Purchase;
 
-        //return Purchase::latest()->paginate(3);
-
+        
     }
-    private function transformProduct($supplyToCompany){
-
+    private function transformProduct($purchase){
+        // Assuming $purchase is the purchase data returned from the API
         return [
-            'product_name'=>optional($supplyToCompany->supplier_product)->product_name,
-            'product_image'=>optional($supplyToCompany->supplier_product)->product_image,
-            'product_description'=>optional($supplyToCompany->supplier_product)->product_description,
-            'quantity_remaining'=>$supplyToCompany->quantity_remain,
-            'pending_request'=>$supplyToCompany->pending_request,
-            'completed_request'=>$supplyToCompany->completed_request,
-            'total_sales'=>$supplyToCompany->total_sales,
+            'id' => $purchase->id,
+            'product_type_id' => $purchase->product_type_id,
+            'supplier_id' => $purchase->supplier_id,
+            'price_id' => $purchase->price_id,
+            'currency_id' => $purchase->currency_id,
+            'discount' => $purchase->discount,
+            'batch_no' => $purchase->batch_no,
+            'quantity' => $purchase->quantity,
+            'product_identifier' => $purchase->product_identifier,
+            'expired_date' => $purchase->expired_date,
+            'purchase_owner' => $purchase->purchase_owner,
+            'status' => $purchase->status,
+            // 'created_by' => $purchase->created_by,
+            // 'updated_by' => $purchase->updated_by,
+            // 'created_at' => $purchase->created_at,
+            // 'updated_at' => $purchase->updated_at,
+            'product_type_price' => optional($purchase->price)->product_type_price,
+            'system_price' => optional($purchase->price)->system_price,
+            'price_discount' => optional($purchase->price)->discount, 
+            'price_status' => optional($purchase->price)->status,
+            'organization_id' => optional($purchase->price)->organization_id,
+            'currency_name' => optional($purchase->currency)->currency_name,
+            'currency_symbol' => optional($purchase->currency)->currency_symbol,
+            'product_type' => optional($purchase->productType)->product_type,
+            'product_type_image' => optional($purchase->productType)->product_type_image,
+            'product_type_description' => optional($purchase->productType)->product_type_description,
         ];
-
     }
+    
 
 
 

@@ -14,12 +14,17 @@ class PurchaseFormRequest extends FormRequest
     {
         return [
     
-            'store_id' => 'required|uuid',
-            'organization_id' => 'required|uuid',
-            'customer_id' => 'required|uuid',
-            'price' => 'required|integer',
+            'product_type_id' => 'required|uuid',
+            'supplier_id' => 'nullable|uuid',
+            'price_id' => 'required|uuid',
+            'currency_id' => 'required|uuid',
+            'discount' => 'required|integer',
+            'batch_no' => 'required|string|max:50',
             'quantity' => 'required|integer',
-            'sales_owner' => 'required|uuid',
+            'product_identifier' => 'nullable|string|max:50',
+            'expired_date' => 'nullable|date',
+            'purchase_owner' => 'required|uuid',
+           
            
         ];
 
@@ -28,7 +33,7 @@ class PurchaseFormRequest extends FormRequest
 
         return [
 
-            'account_number'=>'Account number must be 10 digit'
+          
         ];
     }
   

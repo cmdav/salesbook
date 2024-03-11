@@ -21,7 +21,7 @@ class PriceController extends Controller
         return response()->json($price);
     }
 
-    public function store(Request $request)
+    public function store(PriceFormRequest $request)
     {
         $price =$this->priceService->createPrice($request->all());
         return response()->json($price, 201);

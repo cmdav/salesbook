@@ -14,12 +14,13 @@ class PriceFormRequest extends FormRequest
     {
         return [
     
-            'store_id' => 'required|uuid',
-            'organization_id' => 'required|uuid',
-            'customer_id' => 'required|uuid',
-            'price' => 'required|integer',
-            'quantity' => 'required|integer',
-            'sales_owner' => 'required|uuid',
+            'product_type_id' => 'required|uuid',
+            'supplier_id' => 'nullable|uuid',
+            'product_type_price' => 'nullable|integer',
+            'system_price' => 'nullable|integer',
+            'currency_id' => 'required|uuid',
+            'discount' => 'required|integer',
+            'organization_id' => 'nullable|uuid',
            
         ];
 

@@ -18,7 +18,7 @@ class PurchaseFactory extends Factory
     {
         return [
             'supplier_id'  =>function () {
-                return \App\Models\User::first()->id;   
+                return \App\Models\User::where('email','admin@gmail.com')->first()->id;
             },
             'product_type_id' =>function () {
                 return \App\Models\ProductType::first()->id;   

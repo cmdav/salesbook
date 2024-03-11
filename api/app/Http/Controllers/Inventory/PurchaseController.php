@@ -22,7 +22,7 @@ class PurchaseController extends Controller
         return response()->json($purchase);
     }
 
-    public function Purchase(PurchaseFormRequest $request)
+    public function store(PurchaseFormRequest $request)
     {
         $purchase =$this->purchaseService->createPurchase($request->all());
         return response()->json($purchase, 201);
