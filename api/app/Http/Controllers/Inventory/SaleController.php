@@ -6,6 +6,7 @@ use App\Http\Requests\SaleFormRequest;
 use App\Services\Inventory\SaleService\SaleService;
 use App\Models\Sale;
 use Illuminate\Http\Request;
+use Exception;
 
 class SaleController extends Controller
 {
@@ -23,8 +24,12 @@ class SaleController extends Controller
 
     public function store(SaleFormRequest $request)
     {
-        $sale = $this->saleService->createSale($request->all());
-        return response()->json($sale, 201);
+        try {
+            $sale = $this->saleService->createSale($request->validated());
+            return response()->json($sale, 201);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function show($id)

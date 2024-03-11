@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Traits\SetCreatedBy;
+use Illuminate\Support\Facades\DB; 
+use Exception;
 
 class Sale extends Model
 {
@@ -13,9 +15,8 @@ class Sale extends Model
 
     protected $fillable = [
         'store_id',
-        'organization_id',
         'customer_id',
-        'price',
+        'price_sold_at',
         'quantity',
         'sales_owner',
         'created_by',
@@ -26,25 +27,33 @@ class Sale extends Model
         parent::boot();
 
         static::created(function ($sale) {
-            // When a sale is made, subtract the sold quantity from the inventory
-            $request = app('request');
-            $inventory = Inventory::where('store_id', $sale->store_id)->first();
 
-            if ($inventory && $request->has('price')) {
-                // Ensure we don't end up with negative inventory
-                $newQuantityAvailable = max($inventory->quantity_available - $sale->quantity, 0);
-                $inventory->quantity_available = $newQuantityAvailable;
-                $inventory->last_updated_by = auth()->user()->id; // Assuming you have user authentication
-                $inventory->save();
-            } else {
-                // Log error or handle case where no inventory exists for this store_id
-                // This would be an unusual situation that you need to decide how to handle
-            }
+            DB::transaction(function () use ($sale) {
+                // access the store using it relationship
+                $store = $sale->store;
+
+                if (!$store) {
+                  
+                    throw new Exception("The error return for sales model state that item does not exist.");
+                }
+
+                // Check if store has enough quantity
+                if ($store->quantity_available < $sale->quantity) {
+                    throw new Exception("The error return for sales model state not enough item in store.");
+                }
+
+                // Subtract the sale quantity from the store's available quantity
+                $store->quantity_available -= $sale->quantity;
+
+                // Save the updated store
+                $store->save();
+            });
+           
         });
     }
     public function store(){
 
-        return $this->belongsTo(Sale::class,'store_id','id');
+        return $this->belongsTo(Store::class,'store_id','id');
     }
     public function organization(){
 

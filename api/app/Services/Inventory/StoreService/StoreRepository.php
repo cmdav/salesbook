@@ -14,7 +14,7 @@ class StoreRepository
 {
     public function index()
     {
-       
+       return Store::paginate(20);
         // $store = Store::with('supplier_product:id,product_name,product_image,product_description')
         // ->select('stores.supplier_product_id')
         // ->addSelect([

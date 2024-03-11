@@ -12,14 +12,12 @@ class Store extends Model
     use  SetCreatedBy,  HasUuids, HasFactory;
     
     protected $fillable = [
-        'purchase_id',
-        'currency',
+        'product_type_id',
+        'price_id',
         'store_owner',
         'quantity_available',
         'store_type',
         'status',
-        'organization_id',
-        'last_updated_by',
         'created_by',
         'updated_by',
     ];
@@ -30,47 +28,40 @@ class Store extends Model
 
         static::created(function ($store) {
             //supply to company
-            if ($store->store_type == 1) {
-                SupplyToCompany::updateOrCreate(
-                    [
-                        'supplier_id' => auth()->user()->id,
-                        'organization_id' => $store->store_owner,
-                        'supplier_product_id' => $store->supplier_product_id,
-                    ],
-                    [
-                        'supplier_id' => auth()->user()->id,
-                        'organization_id' => $store->store_owner,
-                        'supplier_product_id' => $store->supplier_product_id,
-                    ]
-                );
-            }
+            // if ($store->store_type == 1) {
+            //     SupplyToCompany::updateOrCreate(
+            //         [
+            //             'supplier_id' => auth()->user()->id,
+            //             'organization_id' => $store->store_owner,
+            //             'supplier_product_id' => $store->product_type_id,
+            //         ],
+            //         [
+            //             'supplier_id' => auth()->user()->id,
+            //             'organization_id' => $store->store_owner,
+            //             'supplier_product_id' => $store->supplier_product_id,
+            //         ]
+            //     );
+            // }
             
-                // Inventory::create([
-                //     'supplier_product_id' => $store->supplier_product_id,
-                //     'store_id' => $store->id, 
-                //     'quantity_available' => $store->quantity,
-                //     'last_updated_by' =>auth()->check() ? auth()->user()->id : 'admin',
-                //     'created_by' =>auth()->check() ? auth()->user()->id : 'admin'
-
-                // ]);
+                
         });
 
         static::updated(function ($store) {
             // If an existing store is updated, add the difference to the inventory
-            $originalQuantity = $store->getOriginal('quantity');
-            $newQuantity = $store->quantity;
-            $quantityToAdd = $newQuantity - $originalQuantity; // Calculate the difference
+            // $originalQuantity = $store->getOriginal('quantity');
+            // $newQuantity = $store->quantity;
+            // $quantityToAdd = $newQuantity - $originalQuantity; // Calculate the difference
 
-            $inventory = Inventory::where('store_id', $store->id)
-                                  ->where('supplier_product_id', $store->supplier_product_id)
-                                  ->first();
+            // $inventory = Inventory::where('store_id', $store->id)
+            //                       ->where('supplier_product_id', $store->supplier_product_id)
+            //                       ->first();
 
-            if ($inventory) {
-                // If inventory exists, update it
-                $inventory->quantity_available += $quantityToAdd;
-                $inventory->last_updated_by = auth()->user()->id;
-                $inventory->save();
-            } 
+            // if ($inventory) {
+            //     // If inventory exists, update it
+            //     $inventory->quantity_available += $quantityToAdd;
+            //     $inventory->last_updated_by = auth()->user()->id;
+            //     $inventory->save();
+            // } 
         });
     }
 

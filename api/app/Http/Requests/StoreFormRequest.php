@@ -14,13 +14,13 @@ class StoreFormRequest extends FormRequest
     {
         return [
           
-            'supplier_product_id' => 'required|uuid',
+            'purchase_id' => 'required|uuid',
             'currency' => 'required|uuid',
-            'discount' => 'required|integer|min:0|max:100',
-            'batch_no' => 'required|string|max:50',
-            'product_identifier' => 'required|string|max:50',
-            'supplier_price' => 'required|integer|min:0', 
-            'expired_date' => 'nullable|date',
+            'store_owner' => 'required|uuid',
+            'quantity_available' => 'nullable|integer|min:0',
+            'store_type' => 'required|integer|in:0,1',
+            'organization_id' => 'nullable|uuid',
+           
         ];
     }
    

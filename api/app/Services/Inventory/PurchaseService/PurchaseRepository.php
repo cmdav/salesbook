@@ -40,7 +40,7 @@ class PurchaseRepository
             'quantity' => $purchase->quantity,
             'product_identifier' => $purchase->product_identifier,
             'expired_date' => $purchase->expired_date,
-            'purchase_owner' => $purchase->purchase_owner,
+            'purchase_by' => $purchase->purchase_by,
             'status' => $purchase->status,
             // 'created_by' => $purchase->created_by,
             // 'updated_by' => $purchase->updated_by,

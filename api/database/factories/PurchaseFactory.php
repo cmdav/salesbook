@@ -35,9 +35,13 @@ class PurchaseFactory extends Factory
             'product_identifier' => $this->faker->unique()->bothify('Prod-####-???'), 
             'expired_date' => "2022-10-02", 
             'quantity' => 50,
-            'purchase_owner' => function () {
+            'purchase_by' => function () {
                 
                 return \App\Models\User::where('email','admin@gmail.com')->first()->id;
+            },
+            'organization_id' =>function () {
+            
+                return \App\Models\Organization::first()->id;
             },
             'created_by' => 'admin' 
         ];

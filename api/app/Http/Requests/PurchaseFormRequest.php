@@ -23,7 +23,7 @@ class PurchaseFormRequest extends FormRequest
             'quantity' => 'required|integer',
             'product_identifier' => 'nullable|string|max:50',
             'expired_date' => 'nullable|date',
-            'purchase_owner' => 'required|uuid',
+            'purchase_by' => 'required|uuid',
            
            
         ];

@@ -25,6 +25,11 @@ trait SetCreatedBy
             if (Auth::check() && Schema::hasColumn($model->getTable(), 'updated_by') && empty($model->updated_by)) {
                 $model->updated_by = Auth::id();
             }
+
+             // check if the table has organization_id_by column
+             if (Auth::check() && Schema::hasColumn($model->getTable(), 'organization_id') && empty($model->organization_id)) {
+                $model->organization_id = Auth::id();
+            }
            
         });
     }

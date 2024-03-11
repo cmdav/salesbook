@@ -86,7 +86,7 @@ class User extends Authenticatable
 
                 if (!$organization) {
                   
-                    throw new ModelNotFoundException('The provided organization code does not exist.');
+                    throw new ModelNotFoundException('Error from user model state that the provided organization code does not exist.');
                 }
 
                

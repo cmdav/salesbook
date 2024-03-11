@@ -14,12 +14,11 @@ return new class extends Migration
         Schema::create('sales', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
             $table->uuid('store_id'); 
-            $table->uuid('organization_id'); 
             $table->uuid('customer_id'); 
             $table->integer('price_sold_at');
             $table->integer('quantity');
             $table->uuid('sales_owner'); 
-            $table->uuid('created_by');
+            $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
            
     $table->timestamps();

@@ -17,13 +17,13 @@ class StoreFactory extends Factory
 public function definition(): array
 {
     return [
-        'purchase_id'  =>function () {
-            return \App\Models\Purchase::first()->id;   
+        'product_type_id'  =>function () {
+            return \App\Models\ProductType::first()->id;   
         },
-        'currency'  =>function () {
-            return \App\Models\Currency::first()->id;   
+        'price_id' =>function () {
+            
+            return \App\Models\Price::first()->id;
         },
-        'organization_id' => '1234',
         'quantity_available' => 50,
         'store_owner' => function () {
             
