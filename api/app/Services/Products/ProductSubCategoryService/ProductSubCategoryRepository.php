@@ -11,7 +11,7 @@ class ProductSubCategoryRepository
     public function index()
     {
        
-        $productSubCategory = ProductSubCategory::select('id','category_id', 'sub_category_name')
+        $productSubCategory = ProductSubCategory::select('id','category_id', 'sub_category_name','sub_category_description')
                                     ->with('category:id,category_name')->latest()->paginate(3);
                             $productSubCategory->getCollection()->transform(function($productSubCategory){
                                 return $this->transformProductService($productSubCategory);

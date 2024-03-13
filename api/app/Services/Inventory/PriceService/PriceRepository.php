@@ -18,6 +18,12 @@ class PriceRepository
 
         return $this->transformAndReturn($Price);
     }
+    public function getAllPriceByProductType($id)
+    {
+        return Price::select('id','cost_price')->where('product_type_id', $id)->get();
+
+       
+    }
 
     public function getPriceByProductType($id)
     {
@@ -31,8 +37,8 @@ class PriceRepository
         return Price::with(
             'productType:id,product_type,product_type_image,product_type_description',
             'currency:id,currency_name,currency_symbol',
-            'supplier:id,first_name,last_name,phone_number'
-        );
+            // 'supplier:id,first_name,last_name,phone_number'
+        )->orderBy('status', 'desc');
     }
 
     private function transformAndReturn($Price)
@@ -49,25 +55,44 @@ class PriceRepository
         return [
             'id'=>$price->id,
             'product_type_id'=>optional($price->productType)->id,
+            'product_type_image'=>optional($price->productType)->product_type_image,
             'product_type'=>optional($price->productType)->product_type,
             'product_type_description'=>optional($price->productType)->product_type_description,
-            'product_type_image'=>optional($price->productType)->product_type_image,
-            'product_type_price'=>$price->product_type_price,
+           
+            'cost_rice'=>$price->cost_price,
             'system_price'=>$price->system_price,
+            'selling_price'=>$price->selling_price,
             'currency'=>optional($price->currency)->currency_name."(".optional($price->currency)->currency_symbol .")",
             'discount'=>$price->discount,
             'status'=>$price->status,
-            'supplier_name'=>optional($price->supplier)->first_name."(".optional($price->supplier)->last_name .")",
-            'supplier_phone_number'=>optional($price->supplier)->phone_number,
+            // 'supplier_name'=>optional($price->supplier)->first_name."(".optional($price->supplier)->last_name .")",
+            // 'supplier_phone_number'=>optional($price->supplier)->phone_number,
         ];
 
     }
 
     public function create(array $data)
     {
-       
-        return Price::create($data);
+        DB::beginTransaction(); 
+    
+        try {
+            $price = Price::create($data); 
+
+            if ($data['status'] == 1) {
+                Price::where('product_type_id', $data['product_type_id'])
+                     ->where('id', '!=', $price->id) 
+                     ->update(['status' => 0]);
+            }
+    
+            DB::commit(); 
+    
+            return $price; 
+        } catch (\Exception $e) {
+            DB::rollBack(); 
+            throw $e; 
+        }
     }
+    
 
     public function findById($id)
     {

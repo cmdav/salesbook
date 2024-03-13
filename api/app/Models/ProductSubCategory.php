@@ -15,6 +15,7 @@ class ProductSubCategory extends Model
     protected $fillable = [
 
         'sub_category_name',
+        'sub_category_description',
         'category_id',
         'created_by',
         'created_by',

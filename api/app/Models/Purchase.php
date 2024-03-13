@@ -17,12 +17,10 @@ class Purchase extends Model
         'currency_id',
         'supplier_id',
         'selling_price',
-        'discount',
         'batch_no',
         'quantity',
         'product_identifier',
         'expired_date',
-        'purchase_by',
         'organization_id',
         'status',
         'created_by',
@@ -47,10 +45,11 @@ class Purchase extends Model
                     // Create a new store record
                     Store::create([
                         'product_type_id' => $purchase->product_type_id,
-                        'store_owner' => $purchase->purchase_by,
+                        //'store_owner' => $purchase->purchase_by,
+                        'store_owner'=> auth()->check() ? auth()->user()->id : 123,
                         'price_id' => $purchase->price_id,
                         'quantity_available' => $purchase->quantity,
-                        'store_type' => auth()->user()->type_id,
+                        'store_type' => auth()->check() ?auth()->user()->type_id:2,
                         'created_by' => $purchase->created_by, 
                         'status' => 1, 
                     ]);

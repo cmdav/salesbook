@@ -14,47 +14,59 @@ class ProductTypeRepository
 {
     public function index()
     {
-    
-
-            $productType = ProductType::with('product:id,product_name','suppliers:id,first_name,last_name,phone_number')
-                    ->latest()->paginate(20);
-
-                    $productType->getCollection()->transform(function ($productType) {
-                        return $this->transformProductType($productType);
-                    });
-            
-                    return $productType;
-
+        return $this->getProductTypes();
     }
-
+    
     public function getProductTypeByProductId($id)
     {
-       
-        $ProductType = ProductType::select('id','product_type','product_type_image','supplier_id')
-                                    ->with('suppliers')
-                                    ->where('product_id', $id)
-                                    ->paginate(20);
-        
-
-        return $ProductType;
-
-        //return ProductType::latest()->paginate(3);
-
+        return $this->getProductTypes($id);
     }
-    private function transformProductType($ProductType){
+    
+    public function getProductTypeByName()
+    {
+        return ProductType::select('id','product_type')->get();
+    }
+    private function getProductTypes($productId = null)
+    {
+                    $query = ProductType::with([
+                        'product:id,product_name', 
+                        'suppliers:id,first_name,last_name,phone_number',
+                        'activePrice' => function ($query) {
+                            $query->select('id', 'product_type_id', 'cost_price', 'selling_price', 'discount');
+                        }
+                    ])->latest();
+                    
+                    
+                    if ($productId) {
+                        $query->where('product_id', $productId);
+                    };
+                
+                    $productTypes = $query->paginate(20);
+                
+                    $productTypes->getCollection()->transform(function ($productType) {
+                        return $this->transformProductType($productType);
+                    });
+    
+        return $productTypes;
+    }
+    
+    private function transformProductType($productType){
 
+        $activePrice = $productType->activePrice;
         return [
-            'id'=>$ProductType->id,
-            'product_type'=>$ProductType->product_type,
-            'product_type_description'=>$ProductType->product_type_description,
-            'product_type_image'=>$ProductType->product_type_image,
-            'supplier_name'=>optional($ProductType->suppliers)->first_name."(".optional($ProductType->suppliers)->last_name .")",
-            'supplier_phone_number'=>optional($ProductType->suppliers)->phone_number,
-            'product_name'=>optional($ProductType->product)->product_name,
-            
-           
-         
+            'id' => $productType->id,
+            'product_type_image' => $productType->product_type_image,
+            'product_name' => optional($productType->product)->product_name,
+            'view_price' => 'view price',
+            'product_type' => $productType->product_type,
+            'product_type_description' => $productType->product_type_description,
+            'cost_price' => optional($activePrice)->cost_price,
+            'selling_price' => optional($activePrice)->selling_price,
+            'discount' => optional($activePrice)->discount,
+            'supplier_name' => optional($productType->suppliers)->first_name . ' ' . optional($productType->suppliers)->last_name,
+            'supplier_phone_number' => optional($productType->suppliers)->phone_number,
         ];
+            
 
     }
     

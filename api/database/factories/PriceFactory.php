@@ -25,7 +25,8 @@ class PriceFactory extends Factory
             'supplier_id'  =>function () {
                 return \App\Models\User::where('email', 'supplier@gmail.com')->first()->id;   
             },
-            'product_type_price' => $this->faker->randomNumber(4),
+            'cost_price' => $this->faker->randomNumber(4),
+            'selling_price' => $this->faker->randomNumber(4),
             'system_price' => $this->faker->randomNumber(4),
             'currency_id'  =>function () {
                 return \App\Models\Currency::first()->id;   

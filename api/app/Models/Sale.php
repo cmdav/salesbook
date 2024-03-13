@@ -55,6 +55,10 @@ class Sale extends Model
 
         return $this->belongsTo(Store::class,'store_id','id');
     }
+    public function customers(){
+
+        return $this->belongsTo(User::class,'customer_id','id');
+    }
     public function organization(){
 
         return $this->belongsTo(Organization::class,'organization_id','id');

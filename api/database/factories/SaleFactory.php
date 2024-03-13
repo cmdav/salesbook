@@ -22,15 +22,18 @@ class SaleFactory extends Factory
         $supplierUserId = \App\Models\User::where('email', $supplierEmail)->first()->id ?? null;
         
         // Now, get a store ID that belongs to this supplier
-        $store = \App\Models\Store::where('store_owner', $supplierUserId)->inRandomOrder()->first();
+        //$store = \App\Models\Store::where('store_owner', $supplierUserId)->inRandomOrder()->first();
+        $store = \App\Models\Store::first()->id;
         
         return [
-            'store_id' => $store ? $store->id : null,
+            'store_id' =>function () {
+                return \App\Models\Store::first()->id;   
+            },
             'customer_id' => function () {
                 return \App\Models\User::where("type_id", 0)->first()->id;   
             },
-            'price' => $this->faker->numberBetween(100, 5000), 
-            'quantity' => $this->faker->numberBetween(1, 100), 
+            'price_sold_at' => $this->faker->numberBetween(100, 5000), 
+            'quantity' => 3, 
             'sales_owner' => function () use ($supplierUserId) {
                 return $supplierUserId;    
             },

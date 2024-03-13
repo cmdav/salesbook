@@ -17,7 +17,7 @@ class StoreFactory extends Factory
 public function definition(): array
 {
     return [
-        'product_type_id'  =>function () {
+        'product_type_id' =>function () {
             return \App\Models\ProductType::first()->id;   
         },
         'price_id' =>function () {

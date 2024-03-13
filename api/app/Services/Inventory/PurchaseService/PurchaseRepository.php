@@ -31,31 +31,31 @@ class PurchaseRepository
         // Assuming $purchase is the purchase data returned from the API
         return [
             'id' => $purchase->id,
-            'product_type_id' => $purchase->product_type_id,
-            'supplier_id' => $purchase->supplier_id,
-            'price_id' => $purchase->price_id,
-            'currency_id' => $purchase->currency_id,
-            'discount' => $purchase->discount,
+            //'product_type_id' => $purchase->product_type_id,
+            //'supplier_id' => $purchase->supplier_id,
+            // 'price_id' => $purchase->price_id,
+
+            'product_type' => optional($purchase->productType)->product_type,
+            'product_type_image' => optional($purchase->productType)->product_type_image,
+            'product_type_description' => optional($purchase->productType)->product_type_description,
             'batch_no' => $purchase->batch_no,
             'quantity' => $purchase->quantity,
+
             'product_identifier' => $purchase->product_identifier,
             'expired_date' => $purchase->expired_date,
-            'purchase_by' => $purchase->purchase_by,
             'status' => $purchase->status,
             // 'created_by' => $purchase->created_by,
             // 'updated_by' => $purchase->updated_by,
             // 'created_at' => $purchase->created_at,
             // 'updated_at' => $purchase->updated_at,
-            'product_type_price' => optional($purchase->price)->product_type_price,
-            'system_price' => optional($purchase->price)->system_price,
-            'price_discount' => optional($purchase->price)->discount, 
-            'price_status' => optional($purchase->price)->status,
-            'organization_id' => optional($purchase->price)->organization_id,
+            'product_cost_price' => optional($purchase->price)->cost_price,
+            //'system_price' => optional($purchase->price)->system_price,
+            //'price_discount' => optional($purchase->price)->discount, 
+            //'price_status' => optional($purchase->price)->status,
+            //'organization_id' => optional($purchase->price)->organization_id,
             'currency_name' => optional($purchase->currency)->currency_name,
-            'currency_symbol' => optional($purchase->currency)->currency_symbol,
-            'product_type' => optional($purchase->productType)->product_type,
-            'product_type_image' => optional($purchase->productType)->product_type_image,
-            'product_type_description' => optional($purchase->productType)->product_type_description,
+            //'currency_symbol' => optional($purchase->currency)->currency_symbol,
+          
         ];
     }
     

@@ -69,4 +69,12 @@ class Store extends Model
 
         return $this->belongsTo(SupplierProduct::class,'supplier_product_id','id');
     }
+    public function price(){
+
+        return $this->belongsTo(Price::class);
+    }
+    public function productType(){
+
+        return $this->belongsTo(productType::class);
+    }
 }

@@ -30,4 +30,11 @@ class ProductType extends Model
 
         return $this->belongsTo(Product::class);
     }
-}
+    public function price(){
+
+        return $this->hasMany(Price::class);
+    }
+    public function activePrice() {
+        return $this->hasOne(Price::class)->where('status', 1);
+    }
+}   

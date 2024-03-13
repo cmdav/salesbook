@@ -15,7 +15,8 @@ return new class extends Migration
             $table->uuid('id',32)->primary();
             $table->uuid('product_type_id'); 
             $table->uuid('supplier_id')->nullable();
-            $table->integer('product_type_price')->nullable();
+            $table->integer('cost_price')->nullable();
+            $table->integer('selling_price')->nullable();
             $table->integer('system_price')->nullable();
             $table->uuid('currency_id'); 
             $table->integer('discount')->default(0);

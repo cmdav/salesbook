@@ -11,7 +11,7 @@ class ProductCategoryRepository
     public function index()
     {
        
-        return ProductCategory::select('id','category_name')->latest()->get();
+        return ProductCategory::select('id','category_name','category_description')->latest()->get();
 
     }
     public function create(array $data)

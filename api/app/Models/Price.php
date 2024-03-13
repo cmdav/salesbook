@@ -13,7 +13,8 @@ class Price extends Model
     protected $fillable = [
         'product_type_id',
         'supplier_id',
-        'product_type_price',
+        'cost_price',
+        'selling_price',
         'system_price',
         'currency_id',
         'discount',
@@ -23,6 +24,12 @@ class Price extends Model
         'status',
         
     ];
+   
+
+    public function getStatusAttribute($value)
+    {
+        return $value == 1 ? 'active' : 'inactive';
+    }
 
 
     public function productType(){

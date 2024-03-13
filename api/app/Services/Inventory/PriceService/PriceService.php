@@ -33,6 +33,10 @@ class PriceService
     {
         return $this->PriceRepository->getPriceByProductType($id);
     }
+    public function getAllPriceByProductType($id)
+    {
+        return $this->PriceRepository->getAllPriceByProductType($id);
+    }
 
     public function updatePrice($id, array $data)
     {
