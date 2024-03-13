@@ -26,8 +26,8 @@ class SaleFactory extends Factory
         $store = \App\Models\Store::first()->id;
         
         return [
-            'store_id' =>function () {
-                return \App\Models\Store::first()->id;   
+            'product_type_id' =>function () {
+                return \App\Models\productType::first()->id;   
             },
             'customer_id' => function () {
                 return \App\Models\User::where("type_id", 0)->first()->id;   

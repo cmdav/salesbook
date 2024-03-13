@@ -13,7 +13,6 @@ class Store extends Model
     
     protected $fillable = [
         'product_type_id',
-        'price_id',
         'store_owner',
         'quantity_available',
         'store_type',

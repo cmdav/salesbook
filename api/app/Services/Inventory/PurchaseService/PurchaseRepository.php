@@ -14,7 +14,7 @@ class PurchaseRepository
 {
     public function index()
     {
-       $Purchase =Purchase::with('price','suppliers','currency','productType')->paginate(20);
+       $Purchase =Purchase::with('suppliers','currency','productType')->latest()->paginate(20);
        
 
         $Purchase->getCollection()->transform(function($Purchase){
@@ -48,12 +48,12 @@ class PurchaseRepository
             // 'updated_by' => $purchase->updated_by,
             // 'created_at' => $purchase->created_at,
             // 'updated_at' => $purchase->updated_at,
-            'product_cost_price' => optional($purchase->price)->cost_price,
+            'product_cost_price' => $purchase->price,
             //'system_price' => optional($purchase->price)->system_price,
             //'price_discount' => optional($purchase->price)->discount, 
             //'price_status' => optional($purchase->price)->status,
             //'organization_id' => optional($purchase->price)->organization_id,
-            'currency_name' => optional($purchase->currency)->currency_name,
+            //'currency_name' => optional($purchase->currency)->currency_name,
             //'currency_symbol' => optional($purchase->currency)->currency_symbol,
           
         ];

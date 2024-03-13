@@ -24,9 +24,7 @@ class PurchaseFactory extends Factory
                 return \App\Models\ProductType::first()->id;   
             },
 
-            'price_id' =>function () {
-                return \App\Models\Price::first()->id;   
-            },
+            'price' => 50,
             // 'currency_id'  =>function () {
             //     return \App\Models\Currency::first()->id;   
             // },

@@ -20,10 +20,7 @@ public function definition(): array
         'product_type_id' =>function () {
             return \App\Models\ProductType::first()->id;   
         },
-        'price_id' =>function () {
-            
-            return \App\Models\Price::first()->id;
-        },
+
         'quantity_available' => 50,
         'store_owner' => function () {
             

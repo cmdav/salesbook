@@ -16,14 +16,12 @@ class PurchaseFormRequest extends FormRequest
     
             'product_type_id' => 'required|uuid',
             'supplier_id' => 'nullable|uuid',
-            'price_id' => 'required|uuid',
-            'currency_id' => 'required|uuid',
-            'discount' => 'required|integer',
+            'price' => 'required|integer',
             'batch_no' => 'required|string|max:50',
             'quantity' => 'required|integer',
             'product_identifier' => 'nullable|string|max:50',
             'expired_date' => 'nullable|date',
-            'purchase_by' => 'required|uuid',
+            //'purchase_by' => 'required|uuid',
            
            
         ];

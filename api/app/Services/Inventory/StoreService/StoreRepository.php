@@ -14,7 +14,7 @@ class StoreRepository
 {
     public function index()
     {
-        $store = Store::with('price','productType')->paginate(20);
+        $store = Store::with('productType')->latest()->paginate(20);
         // $store = Store::with('supplier_product:id,product_name,product_image,product_description')
         // ->select('stores.supplier_product_id')
         // ->addSelect([
@@ -52,9 +52,10 @@ class StoreRepository
     private function transformProduct($store) {
         return [
             'id' => $store->id,
-            'product_type_id' => $store->product_type_id,
-            'price_id' => $store->price_id,
-            'store_owner' => $store->store_owner,
+            
+            'product_type' => optional($store->productType)->product_type,
+            'product_description' => optional($store->productType)->product_type_description,
+            //'store_owner' => $store->store_owner,
             'quantity_available' => $store->quantity_available,
             'store_type' => $store->store_type,
             'status' => $store->status,
@@ -63,26 +64,15 @@ class StoreRepository
             // 'created_at' => $store->created_at,
             // 'updated_at' => $store->updated_at,
             // Flatten price details
-            'price_cost_price' => optional($store->price)->cost_price,
-            'price_selling_price' => round(
-                optional($store->price)->system_price > 0 ?
-                optional($store->price)->cost_price + (optional($store->price)->cost_price * optional($store->price)->system_price) / 100 :
-                optional($store->price)->selling_price
-            ),
-            
-            'price_system_price' => optional($store->price)->system_price,
-
-            'price_currency_id' => optional($store->price)->currency_id,
-            'price_discount' => optional($store->price)->discount,
-            'price_status' => optional($store->price)->status,
+           
             // 'price_organization_id' => optional($store->price)->organization_id,
             // 'price_created_by' => optional($store->price)->created_by,
             // 'price_updated_by' => optional($store->price)->updated_by,
             // 'price_created_at' => optional($store->price)->created_at,
             // 'price_updated_at' => optional($store->price)->updated_at,
             // Flatten product type details
-            'product_type_product_id' => optional($store->productType)->product_id,
-            'product_type' => optional($store->productType)->product_type,
+            //'product_type_product_id' => optional($store->productType)->product_id,
+         
             // 'product_type_image' => optional($store->productType)->product_type_image,
             // 'product_type_description' => optional($store->productType)->product_type_description,
             // 'product_type_organization_id' => optional($store->productType)->organization_id,

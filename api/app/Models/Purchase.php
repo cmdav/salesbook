@@ -13,7 +13,7 @@ class Purchase extends Model
 
     protected $fillable = [
         'product_type_id',
-        'price_id',
+        'price',
         'currency_id',
         'supplier_id',
         'selling_price',
@@ -34,8 +34,8 @@ class Purchase extends Model
         static::created(function ($purchase) {
            
                 $store = Store::where('product_type_id', $purchase->product_type_id)
-                ->where('store_owner', $purchase->purchase_owner) 
-                ->where('price_id', $purchase->price_id)
+                ->where('store_owner', auth()->check() ? auth()->user()->id : 123) 
+               // ->where('price_id', $purchase->price_id)
                 ->first();
 
                 if ($store) {
@@ -47,7 +47,6 @@ class Purchase extends Model
                         'product_type_id' => $purchase->product_type_id,
                         //'store_owner' => $purchase->purchase_by,
                         'store_owner'=> auth()->check() ? auth()->user()->id : 123,
-                        'price_id' => $purchase->price_id,
                         'quantity_available' => $purchase->quantity,
                         'store_type' => auth()->check() ?auth()->user()->type_id:2,
                         'created_by' => $purchase->created_by, 
