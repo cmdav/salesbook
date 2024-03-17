@@ -15,9 +15,10 @@ return new class extends Migration
             $table->uuid('id',32)->primary();
             $table->uuid('product_type_id'); 
             $table->uuid('customer_id'); 
+            $table->uuid('price_id'); 
             $table->integer('price_sold_at');
             $table->integer('quantity');
-            $table->uuid('sales_owner'); 
+            //$table->uuid('sales_owner'); 
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
            

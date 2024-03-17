@@ -29,6 +29,9 @@ class SaleFactory extends Factory
             'product_type_id' =>function () {
                 return \App\Models\productType::first()->id;   
             },
+            'price_id' =>function () {
+                return \App\Models\price::first()->id;   
+            },
             'customer_id' => function () {
                 return \App\Models\User::where("type_id", 0)->first()->id;   
             },

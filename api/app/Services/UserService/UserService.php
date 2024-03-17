@@ -18,7 +18,10 @@ class UserService
     {
         return $this->userRepository->searchUser($searchCriteria); 
     }
-
+    public function userDetail()
+    {
+        return $this->userRepository->userDetail(); 
+    }
     public function getUser($type)
     {
 

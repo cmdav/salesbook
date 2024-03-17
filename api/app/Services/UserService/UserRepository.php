@@ -57,6 +57,23 @@ class UserRepository
         $user_id =Auth::user()->id;
         return $this->returnUserDetail($user_id);
     }
+    public function userDetail(){
+
+        $users = User::select("id", "first_name", "last_name", "phone_number")
+             ->where('type_id', 0)
+             ->get()
+             ->map(function ($user) {
+                 return [
+                     'id' => $user->id,
+                     'customer_id' =>  $user->first_name." " .$user->last_name." ". $user->phone_number,
+                     
+                 ];
+             });
+
+        return $users;
+
+         
+    }
     public function searchUser($searchCriteria)
     {
        

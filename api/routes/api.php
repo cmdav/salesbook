@@ -61,6 +61,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('customers', App\Http\Controllers\Users\CustomerController::class);
         route::resource('suppliers', App\Http\Controllers\Users\SupplierController::class);
         route::resource('users', App\Http\Controllers\Users\UserController::class)->only('index','show');
+        route::get('user-detail', App\Http\Controllers\Users\AllUserDetailController::class);
 
         Route::get('search-users/{searchCriteria}', App\Http\Controllers\Users\SearchUserController::class);
 

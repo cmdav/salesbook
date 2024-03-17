@@ -16,6 +16,7 @@ class Sale extends Model
     protected $fillable = [
         'product_type_id',
         'customer_id',
+        'price_id',
         'price_sold_at',
         'quantity',
         'sales_owner',
@@ -39,5 +40,8 @@ class Sale extends Model
     public function organization(){
 
         return $this->belongsTo(Organization::class,'organization_id','id');
+    }
+    public function activePrice() {
+        return $this->belongsTo(Price::class,'price_id','id');
     }
 }

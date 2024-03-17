@@ -57,7 +57,7 @@ class StoreRepository
             'product_description' => optional($store->productType)->product_type_description,
             //'store_owner' => $store->store_owner,
             'quantity_available' => $store->quantity_available,
-            'store_type' => $store->store_type,
+            //'store_type' => $store->store_type,
             'status' => $store->status,
             // 'created_by' => $store->created_by,
             // 'updated_by' => $store->updated_by,

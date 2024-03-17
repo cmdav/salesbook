@@ -14,11 +14,11 @@ class SaleFormRequest extends FormRequest
     {
         return [
     
-            'store_id' => 'required|uuid',
+            'product_type_id' => 'required|uuid',
             'customer_id' => 'required|uuid',
             'price_sold_at' => 'required|integer',
             'quantity' => 'required|integer',
-            'sales_owner' => 'required|uuid',
+            //'sales_owner' => 'required|uuid',
            
         ];
 

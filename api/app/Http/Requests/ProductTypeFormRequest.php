@@ -34,7 +34,7 @@ class ProductTypeFormRequest extends FormRequest
         return [
             'product_id' => $productIdRule,
             'product_type' => $productTypeRule,
-            'product_type_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'product_type_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'product_type_description' => 'required|string',
             'organization_id' => 'nullable|uuid',
             'supplier_id' => 'nullable|uuid',

@@ -39,15 +39,15 @@ class ProductRepository
 
     public function findById($id)
     {
-         $product =Product::with('measurement:id,measurement_name,unit,sub_category')->find($id);
+         $product =Product::with('measurement:id,measurement_name,unit')->find($id);
          return $this->transformProduct($product);
     }
 
     public function update($id, array $data)
     {
-       $product = $this->findById($id);
+       $product = Product::findorFail($id);
       
-        if ($Product) {
+        if ($product) {
 
            $product->update($data);
         }
@@ -71,12 +71,11 @@ class ProductRepository
             "product_name" => $product->product_name,
             "product_description" => $product->product_description,
             "product_type" => $product->product_type_count,
-            
-           // "measurement_name" => optional($product->measurement)->measurement_name,
            // "unit" => optional($product->measurement)->unit,
-            "product_category" => optional($product->subCategory)->category ? optional($product->subCategory->category)->category_name : null,
-            "measurement" => optional($product->measurement)->measurement_name."(". optional($product->measurement)->unit.")",
-            "product_sub_category" => optional($product->subCategory)->sub_category_name,
+            "cat_id" => optional($product->subCategory)->category_id,
+            "category_id" => optional($product->subCategory)->category ? optional($product->subCategory->category)->category_name : null,
+            "measurement_id" => optional($product->measurement)->measurement_name,
+            "product_sub_category_id" => optional($product->subCategory)->sub_category_name,
           
         ];
         

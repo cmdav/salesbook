@@ -58,9 +58,11 @@ class ProductSubCategoryRepository
     private function transformProductService($productSubCategory){
 
         return [
-             'sub_category_id' => $productSubCategory->id,
+            'id' => $productSubCategory->id,
+             'sub_category_id' => $productSubCategory->category_id,
             'sub_category_name' => $productSubCategory->sub_category_name,
-            'category_name' => optional($productSubCategory->category)->category_name,
+            'sub_category_description' => $productSubCategory->sub_category_description,
+            'category_id' => optional($productSubCategory->category)->category_name,
         ];
     }
 }

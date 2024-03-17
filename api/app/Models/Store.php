@@ -74,6 +74,6 @@ class Store extends Model
     }
     public function productType(){
 
-        return $this->belongsTo(productType::class);
+        return $this->belongsTo(ProductType::class);
     }
 }

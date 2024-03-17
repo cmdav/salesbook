@@ -5,20 +5,27 @@ namespace App\Services\Inventory\SaleService;
 use App\Models\Sale;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Models\Price;
+use App\Models\Store;
+
 
 class SaleRepository 
 {
     public function index()
     {
        
-         $sale =Sale::with('product:id,product_type,product_type_image,product_type_description',
+         $sale =Sale::with(['product:id,product_type,product_type_image,product_type_description',
                         //'store:id,product_type_id,quantity_available',
                         'customers:id,first_name,last_name,phone_number',
+                        'activePrice:id,selling_price,cost_price'
                         //'organization:id,organization_name,organization_logo'
-                        )
-                        ->latest()
+                        // 'activePrice' => function ($query) {
+                        //     $query->select('id', 'product_type_id', 'cost_price', 'selling_price', 'discount');
+                        // }
+                        ])->latest()
                         ->paginate(20);
-                     
+                    // return $sale;
 
          $sale->getCollection()->transform(function($sale){
 
@@ -33,14 +40,17 @@ class SaleRepository
 
     private function transformProduct($sale){
        
+       
         return [
             'id' => $sale->id,
             //'store_id' => $sale->store_id,
             //'customer_id' => $sale->customer_id,
-            'product_type' => optional($sale->product)->product_type,
+            'product_type_id' => optional($sale->product)->product_type,
             'product_type_description' => optional($sale->product)->product_type_description,
             'price_sold_at' => $sale->price_sold_at,
             'quantity' => $sale->quantity,
+            'cost_price' => optional($sale->activePrice)->cost_price,
+            'selling_price' => optional($sale->activePrice)->selling_price,
             //'sales_owner' => $sale->sales_owner,
             // 'created_by' => $sale->created_by,
             // 'updated_by' => $sale->updated_by,
@@ -61,10 +71,58 @@ class SaleRepository
         ];
     }
     public function create(array $data)
-    {
-       
-        return Sale::create($data);
-    }
+{
+    return DB::transaction(function () use ($data) {
+        // Initialize the errors array
+        $errors = [];
+
+        // Find the latest price for the given product type
+        $latestPrice = Price::where('product_type_id', $data['product_type_id'])
+                            ->latest()
+                            ->first();
+
+        if (!$latestPrice) {
+            $errors['price_id'] = ['Price not found for the product type.'];
+        }
+
+        // Retrieve the store item based on the product type id
+        $store = Store::where('product_type_id', $data['product_type_id'])->first();
+
+        if (!$store) {
+            $errors['store_id'] = ['Store item not found for the product type.'];
+        }
+
+        // Check if the store has enough quantity
+        if (empty($errors)) {  // Proceed only if no previous errors
+            $newQuantity = $store->quantity_available - $data['quantity'];
+            if ($newQuantity < 0) {
+                $errors['quantity'] = ['Insufficient store items.'];
+            } else {
+                // Update the store with the new quantity
+                $store->quantity_available = $newQuantity;
+                $store->save();
+
+                // Insert the sale with the latest price id
+                $sale = new Sale();
+                $sale->fill($data);
+                $sale->price_id = $latestPrice->id; // Set the latest price id
+                $sale->save();
+                
+                return $sale; // Return the sale if everything is successful
+            }
+        }
+
+        // Check if there were any errors
+        if (!empty($errors)) {
+            // If there were errors, return them in the Laravel validation error format
+            return response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => $errors
+            ], 422); // HTTP status code 422 stands for Unprocessable Entity
+        }
+    });
+}
+
 
     public function findById($id)
     {
