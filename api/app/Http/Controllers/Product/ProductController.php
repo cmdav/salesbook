@@ -48,8 +48,12 @@ class ProductController extends Controller
 
     public function update($id, Request $request)
     {
+        $data = $request->all();
        
-        $product = $this->productService->updateProduct($id, $request->all());
+        if ($request->hasFile('product_image')) {
+            $data['product_image'] = $this->fileUploadService->uploadImage($request->file('product_image'),'products');
+        }
+        $product = $this->productService->updateProduct($id, $data);
         return response()->json($product);
     }
 

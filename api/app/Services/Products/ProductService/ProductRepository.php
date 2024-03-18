@@ -45,13 +45,14 @@ class ProductRepository
 
     public function update($id, array $data)
     {
+    
        $product = Product::findorFail($id);
       
         if ($product) {
 
            $product->update($data);
         }
-        return$product;
+        return $product;
     }
 
     public function delete($id)
