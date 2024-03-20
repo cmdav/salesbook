@@ -24,7 +24,7 @@ class ProductTypeRepository
     
     public function getProductTypeByName()
     {
-        return ProductType::select('id','product_type')->get();
+        return ProductType::select('id','product_type_name')->get();
     }
     private function getProductTypes($productId = null)
     {
@@ -58,7 +58,7 @@ class ProductTypeRepository
             'product_type_image' => $productType->product_type_image,
             'product_name' => optional($productType->product)->product_name,
             'view_price' => 'view price',
-            'product_type' => $productType->product_type,
+            'product_type_name' => $productType->product_type_name,
             'product_type_description' => $productType->product_type_description,
             'cost_price' => optional($activePrice)->cost_price,
             'selling_price' => optional($activePrice)->selling_price,

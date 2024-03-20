@@ -35,7 +35,7 @@ class PriceRepository
     private function queryCommon()
     {
         return Price::with(
-            'productType:id,product_type,product_type_image,product_type_description',
+            'productType:id,product_type_name,product_type_image,product_type_description',
             'currency:id,currency_name,currency_symbol',
             // 'supplier:id,first_name,last_name,phone_number'
         )->orderBy('status', 'desc');
@@ -56,7 +56,7 @@ class PriceRepository
             'id'=>$price->id,
             'product_type_id'=>optional($price->productType)->id,
             'product_type_image'=>optional($price->productType)->product_type_image,
-            'product_type'=>optional($price->productType)->product_type,
+            'product_type_name'=>optional($price->productType)->product_type_name,
             'product_type_description'=>optional($price->productType)->product_type_description,
            
             'cost_rice'=>$price->cost_price,

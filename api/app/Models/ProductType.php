@@ -11,7 +11,7 @@ class ProductType extends Model
 {
     use  SetCreatedBy, HasUuids, HasFactory;
     protected $fillable = [
-        'product_type',
+        'product_type_name',
         'product_id',
         'product_type_image',   
         'product_type_description',

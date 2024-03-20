@@ -18,7 +18,7 @@ class ProductTypeFactory extends Factory
     {
         return [
 
-            'product_type' => $this->faker->words(3, true),
+            'product_type_name' => $this->faker->words(3, true),
             'product_type_description' => $this->faker->sentence(),
             'product_type_image' => $this->faker->imageUrl(640, 480, 'products', true),
             'product_id' =>function () {

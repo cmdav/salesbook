@@ -65,6 +65,9 @@ Route::middleware('auth:sanctum')->group(function() {
 
         Route::get('search-users/{searchCriteria}', App\Http\Controllers\Users\SearchUserController::class);
 
+        route::get('dashboard-stat', App\Http\Controllers\Product\DashboardStatController::class);
+        route::get('process-csv', App\Http\Controllers\Product\CsvController::class);
+
     });
     
 

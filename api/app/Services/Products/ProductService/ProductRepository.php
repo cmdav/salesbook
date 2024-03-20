@@ -71,12 +71,18 @@ class ProductRepository
             "product_image" => $product->product_image,
             "product_name" => $product->product_name,
             "product_description" => $product->product_description,
-            "product_type" => $product->product_type_count,
+            'view_price' => 'view price',
            // "unit" => optional($product->measurement)->unit,
             "cat_id" => optional($product->subCategory)->category_id,
             "category_id" => optional($product->subCategory)->category ? optional($product->subCategory->category)->category_name : null,
             "measurement_id" => optional($product->measurement)->measurement_name,
             "product_sub_category_id" => optional($product->subCategory)->sub_category_name,
+            "purchase_price" => "",
+            "selling_price" => "",
+            "supplier_fullname" => "",
+            "supplier_number" => "",
+            "quantity" => "",
+            "date_created" => "",
           
         ];
         

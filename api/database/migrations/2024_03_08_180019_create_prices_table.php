@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('selling_price')->nullable();
             $table->integer('system_price')->nullable();
             $table->uuid('currency_id'); 
-            $table->integer('discount')->default(0);
+            $table->integer('discount')->nullable();
             $table->boolean('status')->default(0);
             $table->uuid('organization_id', 32)->nullable(); 
             $table->uuid('created_by', 32)->nullable();

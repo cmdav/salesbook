@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('product_types', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
             $table->uuid('product_id'); 
-            $table->string('product_type', 50);
+            $table->string('product_type_name', 50);
             $table->string('product_type_image', 150)->nullable();
             $table->string('product_type_description');
             $table->uuid('organization_id', 32)->nullable();
