@@ -59,7 +59,7 @@ class ProductTypeRepository
         return [
             'id' => $productType->id,
             'product_name' => optional($productType->product)->product_name,
-            
+            'product_type_name' => $productType->product_type_name,
             'product_type_image' => $productType->product_type_image,
             // 'product_type_name' =>$productType->product_type_name,
             'view_price' => 'view price',

@@ -18,6 +18,7 @@ class SaleFormRequest extends FormRequest
             'customer_id' => 'nullable|uuid',
             'price_sold_at' => 'required|integer',
             'quantity' => 'required|integer',
+            'payment_method' => 'required|string',
             //'sales_owner' => 'required|uuid',
            
         ];
