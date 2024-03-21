@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('customers', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->uuid('user_id');
-            $table->string('address');
+            $table->uuid('id',32)->primary();
+            $table->string('first_name', 55)->nullable();
+            $table->string('last_name', 55)->nullable();
+            $table->string('phone_number', 55)->nullable();
+            $table->string('address', 55)->nullable();
+            $table->uuid('created_by', 32)->nullable();
+            $table->uuid('updated_by')->nullable();
+            $table->timestamps();
+        
         });
     }
 

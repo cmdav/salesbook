@@ -35,7 +35,7 @@ class PurchaseRepository
             //'supplier_id' => $purchase->supplier_id,
             // 'price_id' => $purchase->price_id,
 
-            'product_type_id' => optional($purchase->productType)->product_type,
+            'product_type_id' => optional($purchase->productType)->product_type_name,
             'product_type_image' => optional($purchase->productType)->product_type_image,
             'product_type_description' => optional($purchase->productType)->product_type_description,
             'batch_no' => $purchase->batch_no,
@@ -43,7 +43,7 @@ class PurchaseRepository
 
             //'product_identifier' => $purchase->product_identifier,
             'expired_date' => $purchase->expired_date,
-            'status' => $purchase->status,
+            //'status' => '',
             // 'created_by' => $purchase->created_by,
             // 'updated_by' => $purchase->updated_by,
             // 'created_at' => $purchase->created_at,

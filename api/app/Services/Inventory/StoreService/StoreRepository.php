@@ -53,12 +53,12 @@ class StoreRepository
         return [
             'id' => $store->id,
             
-            'product_type' => optional($store->productType)->product_type,
+            'product_type' => optional($store->productType)->product_type_name,
             'product_description' => optional($store->productType)->product_type_description,
             //'store_owner' => $store->store_owner,
             'quantity_available' => $store->quantity_available,
             //'store_type' => $store->store_type,
-            'status' => $store->status,
+            'status' => $store->quantity_available > 0 ? 'Available' : 'Not Available',
             // 'created_by' => $store->created_by,
             // 'updated_by' => $store->updated_by,
             // 'created_at' => $store->created_at,

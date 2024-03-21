@@ -10,14 +10,15 @@ class FileUploadService
         // $filename = time() . '.' . $file->getClientOriginalExtension(); 
         // $path = $file->storeAs("public/$path", $filename); 
         // return Storage::url($path);
-        
+
+        // local environment
         // $fileName = uniqid() . '_' . $file->getClientOriginalName();
         //  $filePath = $file->storeAs($path, $fileName, 'public');
         //  return Storage::disk('public')->url($filePath);
-
+        //server en
         $fileName = uniqid() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs($path, $fileName, 'root'); 
-            return Storage::disk('root')->url($filePath); 
+        $filePath = $file->storeAs($path, $fileName, 'root'); 
+        return Storage::disk('root')->url($filePath); 
 
     }
     

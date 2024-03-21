@@ -15,7 +15,7 @@ class SaleFormRequest extends FormRequest
         return [
     
             'product_type_id' => 'required|uuid',
-            'customer_id' => 'required|uuid',
+            'customer_id' => 'nullable|uuid',
             'price_sold_at' => 'required|integer',
             'quantity' => 'required|integer',
             //'sales_owner' => 'required|uuid',

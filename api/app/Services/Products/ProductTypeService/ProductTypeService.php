@@ -47,7 +47,7 @@ class ProductTypeService
         return $this->ProductTypeRepository->update($id, $data);
     }
 
-    public function deleteProductType($id)
+    public function deleteProduct($id)
     {
         return $this->ProductTypeRepository->delete($id);
     }

@@ -15,12 +15,12 @@ class SaleRepository
     public function index()
     {
        
-         $sale =Sale::with(['product:id,product_type,product_type_image,product_type_description',
+         $sale =Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
                         //'store:id,product_type_id,quantity_available',
                         'customers:id,first_name,last_name,phone_number',
-                        'activePrice:id,selling_price,cost_price'
+                        'Price:id,selling_price,cost_price'
                         //'organization:id,organization_name,organization_logo'
-                        // 'activePrice' => function ($query) {
+                        // 'Price' => function ($query) {
                         //     $query->select('id', 'product_type_id', 'cost_price', 'selling_price', 'discount');
                         // }
                         ])->latest()
@@ -45,12 +45,14 @@ class SaleRepository
             'id' => $sale->id,
             //'store_id' => $sale->store_id,
             //'customer_id' => $sale->customer_id,
-            'product_type_id' => optional($sale->product)->product_type,
+            'product_type_id' => optional($sale->product)->product_type_name,
             'product_type_description' => optional($sale->product)->product_type_description,
+            'cost_price' => optional($sale->Price)->cost_price,
             'price_sold_at' => $sale->price_sold_at,
             'quantity' => $sale->quantity,
-            'cost_price' => optional($sale->activePrice)->cost_price,
-            'selling_price' => optional($sale->activePrice)->selling_price,
+            'total_price' => $sale->price_sold_at * $sale->quantity,
+            'payment_method' => $sale->payment_method,
+            
             //'sales_owner' => $sale->sales_owner,
             // 'created_by' => $sale->created_by,
             // 'updated_by' => $sale->updated_by,

@@ -29,7 +29,9 @@ class ProductTypeRepository
     private function getProductTypes($productId = null)
     {
                     $query = ProductType::with([
-                        'product:id,product_name', 
+                        'product:id,category_id,product_name', 
+                        'product.product_category:id,category_name',
+                        'store:id,product_type_id,quantity_available',
                         'suppliers:id,first_name,last_name,phone_number',
                         'activePrice' => function ($query) {
                             $query->select('id', 'product_type_id', 'cost_price', 'selling_price', 'discount');
@@ -53,18 +55,24 @@ class ProductTypeRepository
     private function transformProductType($productType){
 
         $activePrice = $productType->activePrice;
+        
         return [
             'id' => $productType->id,
-            'product_type_image' => $productType->product_type_image,
             'product_name' => optional($productType->product)->product_name,
+            
+            'product_type_image' => $productType->product_type_image,
+            // 'product_type_name' =>$productType->product_type_name,
             'view_price' => 'view price',
-            'product_type_name' => $productType->product_type_name,
             'product_type_description' => $productType->product_type_description,
-            'cost_price' => optional($activePrice)->cost_price,
+            'product' => optional($productType->product)->product_name,
+            'product_category' => optional($productType->product->product_category)->category_name,
+            'quantity' => optional($productType->store)->quantity_available,
+            //'status' => optional($productType->store)->quantity_available > 0 ? 'Available' : 'Not Available',
+            'purchasing_price' => optional($productType->latestPurchase)->price,
             'selling_price' => optional($activePrice)->selling_price,
-            'discount' => optional($activePrice)->discount,
             'supplier_name' => optional($productType->suppliers)->first_name . ' ' . optional($productType->suppliers)->last_name,
             'supplier_phone_number' => optional($productType->suppliers)->phone_number,
+            'date_created' =>$productType->created_at
         ];
             
 
@@ -95,6 +103,7 @@ class ProductTypeRepository
     public function delete($id)
     {
         $ProductType = $this->findById($id);
+        
         if ($ProductType) {
             return $ProductType->delete();
         }

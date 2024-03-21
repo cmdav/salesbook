@@ -26,6 +26,8 @@ class Purchase extends Model
         'created_by',
         'updated_by',
     ];
+
+   
     protected static function boot() {
 
         parent::boot();

@@ -35,8 +35,11 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('stores', App\Http\Controllers\Inventory\StoreController::class);
         //1
         route::resource('prices', App\Http\Controllers\Inventory\PriceController::class);
+        //return price for each product
         route::get('get-price-by-product-type/{id}', App\Http\Controllers\Inventory\PriceByProductTypeController::class);
+        // return all cost price for select
         route::get('all-price-by-product-type/{id}', App\Http\Controllers\Inventory\AllPriceByProductTypeController::class);
+        route::get('latest-product-type-price/{id}', App\Http\Controllers\Inventory\LatestPriceByProductTypeController::class);
         route::resource('purchases', App\Http\Controllers\Inventory\PurchaseController::class);
       
 
@@ -61,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('customers', App\Http\Controllers\Users\CustomerController::class);
         route::resource('suppliers', App\Http\Controllers\Users\SupplierController::class);
         route::resource('users', App\Http\Controllers\Users\UserController::class)->only('index','show');
+        route::resource('customers', App\Http\Controllers\Users\CustomerController::class)->only('index','show');
         route::get('user-detail', App\Http\Controllers\Users\AllUserDetailController::class);
 
         Route::get('search-users/{searchCriteria}', App\Http\Controllers\Users\SearchUserController::class);

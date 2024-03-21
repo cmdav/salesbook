@@ -24,6 +24,19 @@ class PriceRepository
 
        
     }
+    public function getLatestPriceByProductType($id)
+        {
+           
+            $price = Price::select('id', 'selling_price')->where('product_type_id', $id)->where('status', 1)->first();
+
+            // If there is no such price, then just get the latest price regardless of the status.
+            if (is_null($price)) {
+                $price = Price::select('id', 'selling_price')->where('product_type_id', $id)->latest('created_at') ->first();
+            }
+
+            return $price;
+        }
+
 
     public function getPriceByProductType($id)
     {

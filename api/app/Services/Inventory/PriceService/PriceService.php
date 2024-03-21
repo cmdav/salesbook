@@ -37,6 +37,10 @@ class PriceService
     {
         return $this->PriceRepository->getAllPriceByProductType($id);
     }
+    public function getLatestPriceByProductType($id)
+    {
+        return $this->PriceRepository->getLatestPriceByProductType($id);
+    }
 
     public function updatePrice($id, array $data)
     {

@@ -19,6 +19,7 @@ class Sale extends Model
         'price_id',
         'price_sold_at',
         'quantity',
+        'payment_method',
         'sales_owner',
         'created_by',
         'updated_by'
@@ -41,7 +42,7 @@ class Sale extends Model
 
         return $this->belongsTo(Organization::class,'organization_id','id');
     }
-    public function activePrice() {
+    public function price() {
         return $this->belongsTo(Price::class,'price_id','id');
     }
 }
