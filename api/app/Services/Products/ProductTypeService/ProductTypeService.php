@@ -51,4 +51,8 @@ class ProductTypeService
     {
         return $this->ProductTypeRepository->delete($id);
     }
+    public function searchProductType($id)
+    {
+        return $this->ProductTypeRepository->searchProductType($id);
+    }
 }

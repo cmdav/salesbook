@@ -12,7 +12,7 @@ class CustomerRepository
 {
     public function index(){
 
-        return Customer::paginate(20);
+        return Customer::paginate(2);
     }
     public function create($data){
 

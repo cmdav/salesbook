@@ -39,4 +39,8 @@ class SaleService
     {
         return $this->saleRepository->delete($id);
     }
+    public function searchSale($id)
+    {
+        return $this->saleRepository->searchSale($id);
+    }
 }

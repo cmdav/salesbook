@@ -12,9 +12,42 @@ use Illuminate\Support\Facades\Log;
 
 class ProductTypeRepository 
 {
+    private function query(){
+
+        return ProductType::with([
+            'product:id,category_id,product_name', 
+            'product.product_category:id,category_name',
+            'store:id,product_type_id,quantity_available',
+            'suppliers:id,first_name,last_name,phone_number',
+            'activePrice' => function ($query) {
+                $query->select('id', 'product_type_id', 'cost_price', 'selling_price', 'discount');
+            }
+        ])->latest();
+    }
     public function index()
     {
         return $this->getProductTypes();
+    }
+    public function searchProductType($searchCriteria){
+
+        $query = $this->query()
+            ->where('product_type_name', 'like', '%' . $searchCriteria . '%')
+            ->Orwhere(function($query) use ($searchCriteria) {
+                $query->whereHas('product', function($q) use ($searchCriteria) {
+                    $q->where('product_name', 'like', '%' . $searchCriteria . '%');
+                });
+            // ->orWhereHas('product.product_category', function($q) use ($searchCriteria) {
+            //     $q->where('category_name', 'like', '%' . $searchCriteria . '%');
+            // });
+        });
+    
+        $productTypes = $query->paginate(2);
+    
+        $productTypes->getCollection()->transform(function ($productType) {
+            return $this->transformProductType($productType);
+        });
+
+         return $productTypes;
     }
     
     public function getProductTypeByProductId($id)
@@ -28,28 +61,18 @@ class ProductTypeRepository
     }
     private function getProductTypes($productId = null)
     {
-                    $query = ProductType::with([
-                        'product:id,category_id,product_name', 
-                        'product.product_category:id,category_name',
-                        'store:id,product_type_id,quantity_available',
-                        'suppliers:id,first_name,last_name,phone_number',
-                        'activePrice' => function ($query) {
-                            $query->select('id', 'product_type_id', 'cost_price', 'selling_price', 'discount');
-                        }
-                    ])->latest();
-                    
-                    
+                    $query =$this->query();
                     if ($productId) {
                         $query->where('product_id', $productId);
                     };
                 
-                    $productTypes = $query->paginate(20);
+                    $productTypes = $query->paginate(2);
                 
                     $productTypes->getCollection()->transform(function ($productType) {
                         return $this->transformProductType($productType);
                     });
     
-        return $productTypes;
+                     return $productTypes;
     }
     
     private function transformProductType($productType){
@@ -61,12 +84,23 @@ class ProductTypeRepository
             'product_name' => optional($productType->product)->product_name,
             'product_type_name' => $productType->product_type_name,
             'product_type_image' => $productType->product_type_image,
+            'product_image' => $productType->product_type_image,
+
             // 'product_type_name' =>$productType->product_type_name,
             'view_price' => 'view price',
+            'product_description' => $productType->product_type_description,
             'product_type_description' => $productType->product_type_description,
             'product' => optional($productType->product)->product_name,
             'product_category' => optional($productType->product->product_category)->category_name,
+            'product_sub_category' => optional($productType->product->product_category)->category_name,
             'quantity' => optional($productType->store)->quantity_available,
+
+            ///////////added Product column
+            "cat_id" => optional($productType->product->subCategory)->category_id,
+            "category_id" => optional($productType->product->subCategory)->category ? optional($productType->product->subCategory->category)->category_name : null,
+            "measurement_id" => optional($productType->product->measurement)->measurement_name,
+            "product_sub_category_id" => optional($productType->product->subCategory)->sub_category_name,
+
             //'status' => optional($productType->store)->quantity_available > 0 ? 'Available' : 'Not Available',
             'purchasing_price' => optional($productType->latestPurchase)->price,
             'selling_price' => optional($activePrice)->selling_price,

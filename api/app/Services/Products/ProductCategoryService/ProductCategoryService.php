@@ -39,4 +39,8 @@ class ProductCategoryService
     {
         return  $this->productCategoryRepository->delete($id);
     }
+    public function searchProductCategory($id)
+    {
+        return  $this->productCategoryRepository->searchProductCategory($id);
+    }
 }

@@ -13,7 +13,7 @@ class ProductRepository
        
         $product =Product::latest()->with('measurement:id,measurement_name,unit', 'subCategory.category')
                                     ->withCount('productType')
-                                    ->paginate(20);
+                                    ->paginate(2);
        
        
         $product->getCollection()->transform(function($product){
@@ -68,21 +68,21 @@ class ProductRepository
 
         return [
             "id" => $product->id,
-            "product_image" => $product->product_image,
-            "product_name" => $product->product_name,
-            "product_description" => $product->product_description,
-            'view_price' => 'view price',
-           // "unit" => optional($product->measurement)->unit,
-            "cat_id" => optional($product->subCategory)->category_id,
-            "category_id" => optional($product->subCategory)->category ? optional($product->subCategory->category)->category_name : null,
-            "measurement_id" => optional($product->measurement)->measurement_name,
-            "product_sub_category_id" => optional($product->subCategory)->sub_category_name,
-            "purchase_price" => "",
-            "selling_price" => "",
-            "supplier_fullname" => "",
-            "supplier_number" => "",
-            "quantity" => "",
-            "date_created" => "",
+        //     "product_image" => $product->product_image,
+        //     "product_name" => $product->product_name,
+        //     "product_description" => $product->product_description,
+        //     'view_price' => 'view price',
+        //    // "unit" => optional($product->measurement)->unit,
+        //     "cat_id" => optional($product->subCategory)->category_id,
+        //     "category_id" => optional($product->subCategory)->category ? optional($product->subCategory->category)->category_name : null,
+        //     "measurement_id" => optional($product->measurement)->measurement_name,
+        //     "product_sub_category_id" => optional($product->subCategory)->sub_category_name,
+        //     "purchase_price" => "",
+        //     "selling_price" => "",
+        //     "supplier_fullname" => "",
+        //     "supplier_number" => "",
+        //     "quantity" => "",
+        //     "date_created" => "",
           
         ];
         

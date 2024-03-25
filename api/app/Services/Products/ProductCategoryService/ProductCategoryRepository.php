@@ -8,12 +8,28 @@ use Illuminate\Support\Facades\Log;
 
 class ProductCategoryRepository 
 {
+
+    private function query(){
+    {
+       
+        return ProductCategory::select('id','category_name','category_description');
+
+    }
+    
+    }
     public function index()
     {
        
-        return ProductCategory::select('id','category_name','category_description')->latest()->get();
+        return $this->query()->latest()->get();
 
     }
+    public function searchProductCategory($searchCriteria)
+    {
+       
+        return $this->query()->where('category_name', 'like', '%' . $searchCriteria . '%')->latest()->get();;
+
+    }
+    
     public function create(array $data)
     {
        

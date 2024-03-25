@@ -39,4 +39,8 @@ class MeasurementService
     {
         return $this->measurementRepository->delete($id);
     }
+    public function searchMeasurement($id)
+    {
+        return $this->measurementRepository->searchMeasurement($id);
+    }
 }

@@ -8,11 +8,19 @@ use Illuminate\Support\Facades\Log;
 
 class CurrencyRepository 
 {
+    private function query(){
+
+        return Currency::select("id", "currency_name","currency_symbol");
+    }
     public function index()
     {
        
-        return Currency::select("id", "currency_name","currency_symbol")->latest()->get();
+        return $this->query()->latest()->get();
 
+    }
+    public function searchCurrency($searchCriteria){
+
+        return $this->query()->where('currency_name', 'like', '%' . $searchCriteria . '%')->latest()->get();
     }
     public function create(array $data)
     {

@@ -12,10 +12,9 @@ use App\Models\Store;
 
 class SaleRepository 
 {
-    public function index()
-    {
-       
-         $sale =Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
+    private function query(){
+
+       return Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
                         //'store:id,product_type_id,quantity_available',
                         'customers:id,first_name,last_name,phone_number',
                         'Price:id,selling_price,cost_price'
@@ -23,9 +22,13 @@ class SaleRepository
                         // 'Price' => function ($query) {
                         //     $query->select('id', 'product_type_id', 'cost_price', 'selling_price', 'discount');
                         // }
-                        ])->latest()
-                        ->paginate(20);
-                    // return $sale;
+                        ])->latest();
+    }
+    public function index()
+    {
+       
+         $sale =$this->query()->paginate(2);
+                   
 
          $sale->getCollection()->transform(function($sale){
 
@@ -35,6 +38,27 @@ class SaleRepository
                 
                     return $sale;
 
+    }
+    public function searchSale($searchCriteria)
+    {
+        $sale =$this->query()->where(function($query) use ($searchCriteria) {
+            $query->whereHas('product', function($q) use ($searchCriteria) {
+                $q->where('product_type_name', 'like', '%' . $searchCriteria . '%');
+            })
+            ->orWhereHas('customers', function($q) use ($searchCriteria) { 
+                $q->where('first_name', 'like', '%' . $searchCriteria . '%')
+                  ->orWhere('last_name', 'like', '%' . $searchCriteria . '%');
+            });
+        })->paginate(2);
+                   
+
+        $sale->getCollection()->transform(function($sale){
+
+                           return $this->transformProduct($sale);
+                       });
+               
+               
+                   return $sale;
     }
 
 
@@ -150,4 +174,5 @@ class SaleRepository
         }
         return null;
     }
+   
 }

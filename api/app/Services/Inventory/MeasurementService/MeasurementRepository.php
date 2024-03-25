@@ -8,11 +8,19 @@ use Illuminate\Support\Facades\Log;
 
 class MeasurementRepository 
 {
+    private function query(){
+
+        return Measurement::select('id','measurement_name','unit');
+    }
     public function index()
     {
        
-        return Measurement::select('id','measurement_name','unit')->latest()->get();
+        return $this->query()->latest()->get();
 
+    }
+    public function searchMeasurement($searchCriteria){
+
+        return $this->query()->where('measurement_name', 'like', '%' . $searchCriteria . '%')->latest()->get();
     }
     public function create(array $data)
     {

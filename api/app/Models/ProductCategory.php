@@ -18,4 +18,10 @@ class ProductCategory extends Model
         'updated_by',
         'category_description'
     ];
+    public function product_sub_category()
+    {
+        
+        return $this->hasMany(ProductSubCategory::class, 'category_id','id');
+
+    }
 }

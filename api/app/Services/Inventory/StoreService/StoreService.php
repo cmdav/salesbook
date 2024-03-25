@@ -39,4 +39,8 @@ class StoreService
     {
         return $this->storeRepository->delete($id);
     }
+    public function searchStore($id)
+    {
+        return $this->storeRepository->searchStore($id);
+    }
 }

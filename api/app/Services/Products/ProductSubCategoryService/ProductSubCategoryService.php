@@ -44,4 +44,8 @@ class ProductSubCategoryService
     {
         return $this->productSubCategoryRepository->delete($id);
     }
+    public function searchProductSubCategory($id)
+    {
+        return $this->productSubCategoryRepository->searchProductSubCategory($id);
+    }
 }

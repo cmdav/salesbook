@@ -8,11 +8,16 @@ use Illuminate\Support\Facades\Log;
 
 class ProductSubCategoryRepository 
 {
+
+    private function query(){
+        
+        return ProductSubCategory::select('id','category_id', 'sub_category_name','sub_category_description')
+                 ->with('category:id,category_name');
+    }
     public function index()
     {
        
-        $productSubCategory = ProductSubCategory::select('id','category_id', 'sub_category_name','sub_category_description')
-                                    ->with('category:id,category_name')->latest()->paginate(3);
+        $productSubCategory = $this->query()->latest()->paginate(2);
                             $productSubCategory->getCollection()->transform(function($productSubCategory){
                                 return $this->transformProductService($productSubCategory);
                             });     
@@ -25,6 +30,18 @@ class ProductSubCategoryRepository
         return ProductSubCategory::select('id', 'sub_category_name')->where('category_id', $category_id)->get();               
 
     }
+    public function searchProductSubCategory($searchCriteria)
+    {
+     
+         $productSubCategory =$this->query()->where('sub_category_name', 'like', '%' . $searchCriteria . '%')->paginate(2);     
+                    $productSubCategory->getCollection()->transform(function($productSubCategory){
+                        return $this->transformProductService($productSubCategory);
+                    });     
+                return $productSubCategory;           
+
+    }
+    
+
     public function create(array $data)
     {
        

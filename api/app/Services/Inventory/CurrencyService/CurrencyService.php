@@ -39,4 +39,8 @@ class CurrencyService
     {
         return $this->currencyRepository->delete($id);
     }
+    public function searchCurrency($search)
+    {
+        return $this->currencyRepository->searchCurrency($search);
+    }
 }

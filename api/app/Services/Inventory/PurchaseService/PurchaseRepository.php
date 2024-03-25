@@ -12,18 +12,38 @@ use Illuminate\Support\Facades\Log;
 
 class PurchaseRepository 
 {
+    private function query(){
+
+        return  Purchase::with('suppliers','currency','productType')->latest();
+           
+    
+    }
     public function index()
     {
-       $Purchase =Purchase::with('suppliers','currency','productType')->latest()->paginate(20);
-       
+       $Purchase = $this->query()->paginate(2);
 
         $Purchase->getCollection()->transform(function($Purchase){
 
             return $this->transformProduct($Purchase);
         });
+        return $Purchase;
 
+        
+    }
+    public function searchPurchase($searchCriteria)
+    {
+       $Purchase = $this->query()
+       ->where(function($query) use ($searchCriteria) {
+            $query->whereHas('productType', function($q) use ($searchCriteria) {
+                $q->where('product_type_name', 'like', '%' . $searchCriteria . '%');
+            });
+        })->paginate(2);
 
-    return $Purchase;
+        $Purchase->getCollection()->transform(function($Purchase){
+
+            return $this->transformProduct($Purchase);
+        });
+        return $Purchase;
 
         
     }

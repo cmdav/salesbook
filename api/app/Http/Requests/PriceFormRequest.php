@@ -28,7 +28,9 @@ class PriceFormRequest extends FormRequest
             //         $fail('One of selling price or system price must be greater than zero.');
             //     }
             // }],
-            'system_price' => ['nullable', 'integer', 'between:0,100'],
+           
+           // 'auto_generated_selling_price' => ['nullable', 'integer', 'between:0,100'],
+            'auto_generated_selling_price' => ['nullable', 'integer', 'between:0,100'],
             'currency_id' => 'required|uuid',
             'discount' => 'nullable|integer',
             'organization_id' => 'nullable|uuid',

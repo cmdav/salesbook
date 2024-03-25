@@ -39,4 +39,8 @@ class PurchaseService
     {
         return $this->PurchaseRepository->delete($id);
     }
+    public function searchPurchase($id)
+    {
+        return $this->PurchaseRepository->searchPurchase($id);
+    }
 }

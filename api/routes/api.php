@@ -72,6 +72,16 @@ Route::middleware('auth:sanctum')->group(function() {
         route::get('dashboard-stat', App\Http\Controllers\Product\DashboardStatController::class);
         route::get('process-csv', App\Http\Controllers\Product\CsvController::class);
 
+        // Search endpoints
+        route::resource('search-currency', App\Http\Controllers\Inventory\SearchCurrencyController::class)->only('show');
+        route::resource('search-measurement', App\Http\Controllers\Inventory\SearchMeasurementController::class)->only('show');
+        route::resource('search-product-categories', App\Http\Controllers\Product\SearchProductCategoryController::class)->only('show');
+        route::resource('search-product-sub-categories', App\Http\Controllers\Product\SearchProductSubCategoryController::class)->only('show');
+        route::resource('search-product-types', App\Http\Controllers\Product\SearchProductTypeController::class)->only('show');
+        route::resource('search-sales', App\Http\Controllers\Inventory\SearchSaleController::class)->only('show');
+        route::resource('search-stores', App\Http\Controllers\Inventory\SearchStoreController::class)->only('show');
+        route::resource('search-purchases', App\Http\Controllers\Inventory\SearchPurchaseController::class)->only('show');
+       
     });
     
 

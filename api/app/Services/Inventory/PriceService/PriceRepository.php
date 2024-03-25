@@ -14,7 +14,7 @@ class PriceRepository
 {
     public function index()
     {
-        $Price = $this->queryCommon()->paginate(20);
+        $Price = $this->queryCommon()->paginate(2);
 
         return $this->transformAndReturn($Price);
     }
@@ -40,7 +40,7 @@ class PriceRepository
 
     public function getPriceByProductType($id)
     {
-        $Price = $this->queryCommon()->where('product_type_id', $id)->paginate(20);
+        $Price = $this->queryCommon()->where('product_type_id', $id)->paginate(2);
 
         return $this->transformAndReturn($Price);
     }
@@ -73,7 +73,7 @@ class PriceRepository
             'product_type_description'=>optional($price->productType)->product_type_description,
            
             'cost_rice'=>$price->cost_price,
-            'system_price'=>$price->system_price,
+            'auto_generated_selling_price'=>$price->auto_generated_selling_price,
             'selling_price'=>$price->selling_price,
             'currency'=>optional($price->currency)->currency_name."(".optional($price->currency)->currency_symbol .")",
             'discount'=>$price->discount,

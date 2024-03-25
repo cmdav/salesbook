@@ -12,31 +12,32 @@ use Illuminate\Support\Facades\Log;
 
 class StoreRepository 
 {
+    private function query(){
+
+        return Store::with('productType')->latest();
+    }
     public function index()
     {
-        $store = Store::with('productType')->latest()->paginate(20);
-        // $store = Store::with('supplier_product:id,product_name,product_image,product_description')
-        // ->select('stores.supplier_product_id')
-        // ->addSelect([
-        //     'quantity_remain' => Inventory::selectRaw('SUM(quantity_available)')
-        //         ->whereColumn('supplier_product_id', 'stores.supplier_product_id')
-        //         ->limit(1), // Subquery for remaining quantity in inventories
-        //     'pending_request' => SupplierRequest::selectRaw('SUM(quantity)')
-        //         ->where('status', 0)
-        //         ->whereColumn('supplier_product_id', 'stores.supplier_product_id')
-        //         ->limit(1), // Subquery for pending requests
-        //     'completed_request' => SupplierRequest::selectRaw('SUM(quantity)')
-        //         ->where('status', 1)
-        //         ->whereColumn('supplier_product_id', 'stores.supplier_product_id')
-        //         ->limit(1), // Subquery for completed requests
-        //     'total_sales' => Sale::selectRaw('SUM(sales.quantity * sales.price)')
-        //         ->join('stores as s', 's.id', '=', 'sales.store_id')
-        //         ->whereColumn('s.supplier_product_id', 'stores.supplier_product_id')
-        //         ->limit(1) // Subquery for total sales
-        // ])
-        // ->where('store_owner', auth()->user()->id)
-        // ->groupBy('stores.supplier_product_id')
-        // ->paginate(3);
+        $store = $this->query()->paginate(2);
+
+        $store->getCollection()->transform(function($store){
+
+            return $this->transformProduct($store);
+        });
+
+
+        return $store;
+
+        //return Store::latest()->paginate(3);
+
+    }
+    public function searchStore($searchCriteria)
+    {
+        $store = $this->query()->where(function($query) use ($searchCriteria) {
+            $query->whereHas('productType', function($q) use ($searchCriteria) {
+                $q->where('product_type_name', 'like', '%' . $searchCriteria . '%');
+            });
+        })->paginate(2);
 
         $store->getCollection()->transform(function($store){
 
