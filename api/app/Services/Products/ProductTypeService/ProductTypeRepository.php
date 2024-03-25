@@ -41,9 +41,9 @@ class ProductTypeRepository
             // });
         });
     
-        $productTypes = $query->paginate(2);
+        $productTypes = $query->get();
     
-        $productTypes->getCollection()->transform(function ($productType) {
+        $productTypes->transform(function ($productType) {
             return $this->transformProductType($productType);
         });
 

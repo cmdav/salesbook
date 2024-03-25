@@ -37,9 +37,9 @@ class PurchaseRepository
             $query->whereHas('productType', function($q) use ($searchCriteria) {
                 $q->where('product_type_name', 'like', '%' . $searchCriteria . '%');
             });
-        })->paginate(2);
+        })->get();
 
-        $Purchase->getCollection()->transform(function($Purchase){
+        $Purchase->transform(function($Purchase){
 
             return $this->transformProduct($Purchase);
         });

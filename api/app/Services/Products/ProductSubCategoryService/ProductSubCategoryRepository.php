@@ -33,8 +33,8 @@ class ProductSubCategoryRepository
     public function searchProductSubCategory($searchCriteria)
     {
      
-         $productSubCategory =$this->query()->where('sub_category_name', 'like', '%' . $searchCriteria . '%')->paginate(2);     
-                    $productSubCategory->getCollection()->transform(function($productSubCategory){
+         $productSubCategory =$this->query()->where('sub_category_name', 'like', '%' . $searchCriteria . '%')->get();     
+                    $productSubCategory->transform(function($productSubCategory){
                         return $this->transformProductService($productSubCategory);
                     });     
                 return $productSubCategory;           

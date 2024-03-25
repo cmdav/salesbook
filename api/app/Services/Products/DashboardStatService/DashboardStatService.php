@@ -13,10 +13,10 @@ class DashboardStatService
 		
         $this->dashboardStatRepository = $dashboardStatRepository;
     }
-	public function index()
+	public function index($request)
     {
       
-        return $this->dashboardStatRepository->index();
+        return $this->dashboardStatRepository->index($request);
     }
     
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Traits\SetCreatedBy;
 use Illuminate\Support\Facades\DB; 
 use Exception;
-
+use Carbon\Carbon;
 class Sale extends Model
 {
     use SetCreatedBy, HasUuids, HasFactory;
@@ -24,7 +24,10 @@ class Sale extends Model
         'created_by',
         'updated_by'
     ];
-
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format('d-m-y H:i:s');
+    }
     
     // public function store(){
 

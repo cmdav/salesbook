@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Models\Price;
 use App\Models\Store;
+use Carbon\Carbon;
+
 
 
 class SaleRepository 
@@ -49,10 +51,10 @@ class SaleRepository
                 $q->where('first_name', 'like', '%' . $searchCriteria . '%')
                   ->orWhere('last_name', 'like', '%' . $searchCriteria . '%');
             });
-        })->paginate(2);
+        })->get();
                    
 
-        $sale->getCollection()->transform(function($sale){
+        $sale->transform(function($sale){
 
                            return $this->transformProduct($sale);
                        });
@@ -60,6 +62,25 @@ class SaleRepository
                
                    return $sale;
     }
+    public function dailySale()
+    {
+       
+        $startOfDay = Carbon::now()->startOfDay();
+        $endOfDay = Carbon::now()->endOfDay();
+
+       
+        $sale =  Sale::select("id","quantity","product_type_id","price_id","price_sold_at")->with(['product:id,product_type_name','Price:id,selling_price' ])
+                     ->latest()->whereBetween('created_at', [$startOfDay, $endOfDay])->paginate(2);
+                   
+        
+        // Transform the collection to apply any needed transformations
+        $sale->getCollection()->transform(function($sale) {
+            return $this->transformDailySales($sale);
+        });
+
+        return $sale;
+    }
+
 
 
     private function transformProduct($sale){
@@ -80,7 +101,7 @@ class SaleRepository
             //'sales_owner' => $sale->sales_owner,
             // 'created_by' => $sale->created_by,
             // 'updated_by' => $sale->updated_by,
-            // 'created_at' => $sale->created_at,
+            'created_at' => $sale->created_at,
             // 'updated_at' => $sale->updated_at,
             // Store details
             // 'store_product_type_id' => optional($sale->store)->product_type_id,
@@ -96,58 +117,69 @@ class SaleRepository
             // 'organization_logo' => optional($sale->organization)->organization_logo,
         ];
     }
+    private function transformDailySales($sale){
+       
+       
+        return [
+            'id' => $sale->id,
+            'product_type_id' => optional($sale->product)->product_type_name,
+            'price_sold_at' => $sale->price_sold_at,
+            'quantity' => $sale->quantity,
+            'total_price' => $sale->price_sold_at * $sale->quantity
+        ];
+    }
     public function create(array $data)
-{
-    return DB::transaction(function () use ($data) {
-        // Initialize the errors array
-        $errors = [];
+    {
+        return DB::transaction(function () use ($data) {
+            // Initialize the errors array
+            $errors = [];
 
-        // Find the latest price for the given product type
-        $latestPrice = Price::where('product_type_id', $data['product_type_id'])
-                            ->latest()
-                            ->first();
+            // Find the latest price for the given product type
+            $latestPrice = Price::where('product_type_id', $data['product_type_id'])
+                                ->latest()
+                                ->first();
 
-        if (!$latestPrice) {
-            $errors['price_id'] = ['Price not found for the product type.'];
-        }
-
-        // Retrieve the store item based on the product type id
-        $store = Store::where('product_type_id', $data['product_type_id'])->first();
-
-        if (!$store) {
-            $errors['store_id'] = ['Store item not found for the product type.'];
-        }
-
-        // Check if the store has enough quantity
-        if (empty($errors)) {  // Proceed only if no previous errors
-            $newQuantity = $store->quantity_available - $data['quantity'];
-            if ($newQuantity < 0) {
-                $errors['quantity'] = ['Insufficient store items.'];
-            } else {
-                // Update the store with the new quantity
-                $store->quantity_available = $newQuantity;
-                $store->save();
-
-                // Insert the sale with the latest price id
-                $sale = new Sale();
-                $sale->fill($data);
-                $sale->price_id = $latestPrice->id; // Set the latest price id
-                $sale->save();
-                
-                return $sale; // Return the sale if everything is successful
+            if (!$latestPrice) {
+                $errors['price_id'] = ['Price not found for the product type.'];
             }
-        }
 
-        // Check if there were any errors
-        if (!empty($errors)) {
-            // If there were errors, return them in the Laravel validation error format
-            return response()->json([
-                'message' => 'The given data was invalid.',
-                'errors' => $errors
-            ], 422); // HTTP status code 422 stands for Unprocessable Entity
-        }
-    });
-}
+            // Retrieve the store item based on the product type id
+            $store = Store::where('product_type_id', $data['product_type_id'])->first();
+
+            if (!$store) {
+                $errors['store_id'] = ['Store item not found for the product type.'];
+            }
+
+            // Check if the store has enough quantity
+            if (empty($errors)) {  // Proceed only if no previous errors
+                $newQuantity = $store->quantity_available - $data['quantity'];
+                if ($newQuantity < 0) {
+                    $errors['quantity'] = ['Insufficient store items.'];
+                } else {
+                    // Update the store with the new quantity
+                    $store->quantity_available = $newQuantity;
+                    $store->save();
+
+                    // Insert the sale with the latest price id
+                    $sale = new Sale();
+                    $sale->fill($data);
+                    $sale->price_id = $latestPrice->id; // Set the latest price id
+                    $sale->save();
+                    
+                    return $sale; // Return the sale if everything is successful
+                }
+            }
+
+            // Check if there were any errors
+            if (!empty($errors)) {
+                // If there were errors, return them in the Laravel validation error format
+                return response()->json([
+                    'message' => 'The given data was invalid.',
+                    'errors' => $errors
+                ], 422); // HTTP status code 422 stands for Unprocessable Entity
+            }
+        });
+    }
 
 
     public function findById($id)

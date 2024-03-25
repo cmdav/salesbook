@@ -37,9 +37,9 @@ class StoreRepository
             $query->whereHas('productType', function($q) use ($searchCriteria) {
                 $q->where('product_type_name', 'like', '%' . $searchCriteria . '%');
             });
-        })->paginate(2);
+        })->get();
 
-        $store->getCollection()->transform(function($store){
+        $store->transform(function($store){
 
             return $this->transformProduct($store);
         });

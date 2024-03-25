@@ -43,4 +43,8 @@ class SaleService
     {
         return $this->saleRepository->searchSale($id);
     }
+    public function dailySale()
+    {
+        return $this->saleRepository->dailySale();
+    }
 }
