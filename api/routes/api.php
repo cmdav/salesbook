@@ -58,7 +58,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::get('user-detail', App\Http\Controllers\Users\AllUserDetailController::class);
         Route::get('search-users/{searchCriteria}', App\Http\Controllers\Users\SearchUserController::class);
         route::get('dashboard-stat', App\Http\Controllers\Product\DashboardStatController::class);
-        route::get('process-csv', App\Http\Controllers\Product\CsvController::class);
+        route::post('process-csv', App\Http\Controllers\Product\CsvController::class);
     
         route::resource('users', App\Http\Controllers\Users\UserController::class)->only('index','show');
         route::resource('customers', App\Http\Controllers\Users\CustomerController::class)->only('index','show');
