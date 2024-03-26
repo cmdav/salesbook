@@ -5,9 +5,12 @@ namespace App\Imports;
 use App\Models\Currency;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Illuminate\Support\Str;
+use App\Http\Requests\CurrencyFormRequest;
 
-class CurrencyImport implements ToModel, WithHeadingRow
+class CurrencyImport implements ToModel, WithHeadingRow, WithValidation,SkipsEmptyRows
 {
     public function model(array $row)
     {
@@ -26,6 +29,11 @@ class CurrencyImport implements ToModel, WithHeadingRow
 
 
         return null;
+    }
+    public function rules(): array
+    {
+        $currencyFormRequest = new CurrencyFormRequest();
+        return $currencyFormRequest->rules();
     }
 
    

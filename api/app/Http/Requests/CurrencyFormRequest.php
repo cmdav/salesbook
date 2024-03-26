@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 class CurrencyFormRequest extends FormRequest
 {
     
-    public function rules(Request $request): array
+    public function rules(Request $request = null): array
     {
         return [
             'currency_name' => 'required|string|max:15|unique:currencies',

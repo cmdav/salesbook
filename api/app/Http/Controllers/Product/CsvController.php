@@ -6,12 +6,19 @@ use App\Services\Products\CsvService\CsvService;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\CurrencyImport;
+use App\Imports\MeasurementImport;
+use Illuminate\Validation\Rule;
+
 
 
 
 class CsvController extends Controller
 {
       protected $csvService;
+      protected $importClasses = [
+         'Currency' => CurrencyImport::class,
+         'Measurement' => MeasurementImport::class,
+     ];
 
     public function __invoke(CsvService $csvService, Request $request)
     {
@@ -21,13 +28,16 @@ class CsvController extends Controller
            
       $request->validate([
          'file' => 'required|file|mimes:csv,txt,', 
+         'type' => ['required', Rule::in(array_keys($this->importClasses))],
        ]);
        
-       Excel::import(new CurrencyImport, request()->file('file'));
+       $importClass = new $this->importClasses[$request->type];
+
+       Excel::import($importClass, $request->file('file'));
  
-       return "Success";
+       return response()->json(['message'=>'File uploaded successful'], 200);
       
-       //return $this->csvService->index();
+      
     }
    
    
