@@ -28,7 +28,7 @@ class SaleFormRequest extends FormRequest
 
         return [
 
-            'account_number'=>'Account number must be 10 digit'
+          
         ];
     }
   
