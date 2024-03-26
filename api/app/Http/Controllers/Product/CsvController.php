@@ -5,9 +5,14 @@ use App\Http\Controllers\Controller;
 use App\Services\Products\CsvService\CsvService;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\Rule;
 use App\Imports\CurrencyImport;
 use App\Imports\MeasurementImport;
-use Illuminate\Validation\Rule;
+use App\Imports\ProductCategoryImport;
+use App\Imports\ProductSubCategoryImport;
+use App\Imports\ProductImport;
+use App\Imports\ProductTypeImport;
+
 
 
 
@@ -18,6 +23,10 @@ class CsvController extends Controller
       protected $importClasses = [
          'Currency' => CurrencyImport::class,
          'Measurement' => MeasurementImport::class,
+         'ProductCategory' => ProductCategoryImport::class,
+         'ProductSubCategory'=> ProductSubCategoryImport::class,
+         'Product'=> ProductImport::class,
+         'ProductType'=> ProductTypeImport::class,
      ];
 
     public function __invoke(CsvService $csvService, Request $request)

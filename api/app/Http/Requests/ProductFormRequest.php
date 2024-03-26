@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 class ProductFormRequest extends FormRequest
 {
     
-    public function rules(Request $request): array
+    public function rules(Request $request = Null): array
     {
         return [
 

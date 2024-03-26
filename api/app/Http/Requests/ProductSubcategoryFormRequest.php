@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 class ProductSubcategoryFormRequest extends FormRequest
 {
     
-    public function rules(Request $request): array
+    public function rules(Request $request = Null): array
     {
         return [
             'sub_category_name' => [
