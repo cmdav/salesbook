@@ -14,8 +14,8 @@ class MeasurementFormRequest extends FormRequest
     {
         return [
            
-            'measurement_name' => 'required|string|max:30|unique:measurements',
-            'unit' => 'required|string|max:5|unique:measurements',
+            'measurement_name' => 'required|string|max:30|unique:measurements|regex:/^[^\s]/',
+            'unit' => 'required|string|max:5|unique:measurements|regex:/^[^\s]/',
         
         ];
     }

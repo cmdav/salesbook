@@ -34,4 +34,11 @@ class MeasurementImport implements ToModel, WithHeadingRow, WithValidation, Skip
         $measurementFormRequest = new MeasurementFormRequest();
         return $measurementFormRequest->rules();
     }
+    public function customValidationMessages()
+    {
+        return [
+            'measurement_name.regex' => 'The measurement name must not start with a space.',
+            'unit.regex' => 'The unit must not start or end with a space.',
+        ];
+    }
 }

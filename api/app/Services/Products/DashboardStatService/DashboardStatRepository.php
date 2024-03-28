@@ -46,8 +46,8 @@ class DashboardStatRepository
               ->whereBetween('created_at', [$startDate, $endDate]) 
               ->groupBy(DB::raw('Date(created_at)')) // Group the results by day, ensuring data is aggregated day by day.
               ->select(DB::raw('Date(created_at) as day'), DB::raw('SUM(quantity) as daily_sales')) 
-              ->get(); 
-              //->keyBy('day'); // Index the resulting collection by 'day' so each entry can be accessed by its date.
+              ->get()
+              ->keyBy('day'); // Index the resulting collection by 'day' so each entry can be accessed by its date.
 
               // Retrieve profit data 
               $profitsData = DB::table('sales') 
@@ -55,8 +55,8 @@ class DashboardStatRepository
               ->whereBetween('sales.created_at',[$startDate, $endDate]) 
               ->groupBy(DB::raw('Date(sales.created_at)')) // Group the results by the day the sale was made.
               ->select(DB::raw('Date(sales.created_at) as day'), DB::raw('SUM(sales.price_sold_at - purchases.price) as daily_profit')) 
-              ->get();
-              //->keyBy('day'); // Index the resulting collection by 'day' for easy access by date.
+              ->get()
+              ->keyBy('day'); // Index the resulting collection by 'day' for easy access by date.
 
 
             // Prepare for days with missing data for both sales and profits

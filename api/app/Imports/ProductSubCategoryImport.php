@@ -55,6 +55,7 @@ class ProductSubcategoryImport implements ToModel, WithHeadingRow, WithValidatio
     {
         return [
             'category_name.exists' => 'The specified category does not exist.',
+            'sub_category_name.regex' => 'The sub category name must not start  with a space.',
         ];
     }
 

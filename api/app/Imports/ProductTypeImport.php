@@ -32,7 +32,7 @@ class ProductTypeImport implements ToModel, WithHeadingRow, WithValidation, Skip
     public function rules(): array
     {
         return [
-            'product_type_name' => 'required|string|max:50|unique:product_types',
+            'product_type_name' => 'required|string|max:50|unique:product_types|regex:/^[^\s]/',
             'product_type_description' => 'required|string|max:200',
            
            
@@ -43,6 +43,7 @@ class ProductTypeImport implements ToModel, WithHeadingRow, WithValidation, Skip
     {
         return [
             'product_name.exists' => 'The specified product name does not exist.',
+            'product_type_name.regex' => 'The category name must not start  with a space.',
            
         ];
     }

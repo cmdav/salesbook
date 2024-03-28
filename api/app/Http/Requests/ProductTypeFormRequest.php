@@ -21,6 +21,7 @@ class ProductTypeFormRequest extends FormRequest
             'required',
             'string',
             'max:50',
+            
             Rule::unique('product_types')->where(function ($query) use ($request) {
                 return $query->where('product_id', $request->product_id);
             })

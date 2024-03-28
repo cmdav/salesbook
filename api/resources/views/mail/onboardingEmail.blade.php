@@ -11,17 +11,20 @@
 			{{ $first_paragraph}}
 		</p>
 		<p>
-			{{ $second_paragraph}}
+			{!! $second_paragraph !!}
+
 		</p>
-		<button style="text-align:center;padding:1em;background-color:blue;color:white;margin:2em auto;display:block;border:none;border-radius:0.2em">
+		<?php if(isset($btn_label) && isset($frontendUrl)): ?>
+			<button style="text-align:center;padding:1em;background-color:blue;color:white;margin:2em auto;display:block;border:none;border-radius:0.2em">
+				
+				<a href="{{ $frontendUrl }}" style="text-decoration:none;color:white">{{ $btn_label }}</a>
+				
+			</button>
 			
-			<a href="{{ $frontendUrl }}" style="text-decoration:none;color:white">{{ $btn_label }}</a>
+			<p>You can copy and paste the below url into the browser if you are having any challenge clicking on the button</p>
 			
-		</button>
-		
-		<p>You can copy and paste the below url into the browser if you are having any challenge clicking on the button</p>
-		
-		<p style="word-wrap: break-word;">{{ $frontendUrl }}</p> 
+			<p style="word-wrap: break-word;">{{ $frontendUrl }}</p> 
+		<?php endif; ?>
 		
 		
 		<p>

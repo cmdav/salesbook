@@ -2,18 +2,23 @@
 
 namespace App\Services\Inventory\SaleService;
 
-use App\Models\Sale;
+
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Services\Email\EmailService;
 use App\Models\Price;
 use App\Models\Store;
+use App\Models\Sale;
+use App\Models\User;
+use App\Models\ProductType;
 use Carbon\Carbon;
 
 
 
 class SaleRepository 
 {
+   
     private function query(){
 
        return Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
@@ -130,56 +135,46 @@ class SaleRepository
     }
     public function create(array $data)
     {
-        return DB::transaction(function () use ($data) {
-            // Initialize the errors array
-            $errors = [];
 
-            // Find the latest price for the given product type
-            $latestPrice = Price::where('product_type_id', $data['product_type_id'])
-                                ->latest()
-                                ->first();
+        $emailService = new EmailService(); 
+    
+        return DB::transaction(function () use ($data, $emailService) { 
+            // Retrieve the latest price for the given product type
+            $latestPrice = Price::where([['product_type_id', $data['product_type_id']],['status',1]])->firstOrFail(); 
+            $store = Store::where('product_type_id', $data['product_type_id'])->firstOrFail(); 
+            $store->quantity_available -= $data['quantity'];
+            $store->save();
 
-            if (!$latestPrice) {
-                $errors['price_id'] = ['Price not found for the product type.'];
-            }
+            // Create and return the sale record
+            $sale = new Sale();
+            $sale->fill($data);
+            $sale->price_id = $latestPrice->id;  
+            $sale->save();
 
-            // Retrieve the store item based on the product type id
-            $store = Store::where('product_type_id', $data['product_type_id'])->first();
+            $user = User::select('id','first_name','last_name','email','contact_person','phone_number')->where('id', $data['customer_id'])->first();
+            $productType = ProductType::select("id","product_type_name")->where('id', $data['product_type_id'])->first();
+            $customerDetail = (isset($user->first_name) ? $user->first_name : '') .(isset($user->last_name) ? $user->last_name : '').
+                              (isset($user->contact_person) ? $user->contact_person : '');
 
-            if (!$store) {
-                $errors['store_id'] = ['Store item not found for the product type.'];
-            }
+         
+            $productTypeName = $productType->product_type_name;
+            $qty=$data['quantity'];
+            $price =$latestPrice->selling_price;
+            $email = $user->email;
+            $email = 'okomemmanuel1@gmail.com';
+            $productDetail = [ "customerDetail"=>$customerDetail,"productTypeName"=>$productTypeName,"quantity"=> $qty,"price"=> $price];
+            $tableDetail = $this->generateProductDetailsTable([$productDetail]);
+            $user = ['email'=>$email,'first_name' => $customerDetail];
+            $response =$emailService->sendEmail($user, "sales-receipt", $tableDetail);
+            return $response;
+          
 
-            // Check if the store has enough quantity
-            if (empty($errors)) {  // Proceed only if no previous errors
-                $newQuantity = $store->quantity_available - $data['quantity'];
-                if ($newQuantity < 0) {
-                    $errors['quantity'] = ['Insufficient store items.'];
-                } else {
-                    // Update the store with the new quantity
-                    $store->quantity_available = $newQuantity;
-                    $store->save();
-
-                    // Insert the sale with the latest price id
-                    $sale = new Sale();
-                    $sale->fill($data);
-                    $sale->price_id = $latestPrice->id; // Set the latest price id
-                    $sale->save();
-                    
-                    return $sale; // Return the sale if everything is successful
-                }
-            }
-
-            // Check if there were any errors
-            if (!empty($errors)) {
-                // If there were errors, return them in the Laravel validation error format
-                return response()->json([
-                    'message' => 'The given data was invalid.',
-                    'errors' => $errors
-                ], 422); // HTTP status code 422 stands for Unprocessable Entity
-            }
+           
         });
+     
+    
     }
+
 
 
     public function findById($id)
@@ -206,5 +201,28 @@ class SaleRepository
         }
         return null;
     }
+    private function generateProductDetailsTable($productDetails) {
+        $tableHtml = "<table style='width:100%; border-collapse: collapse;'>
+                        <tr>
+                            <th style='border: 1px solid black; padding: 8px;'>Product Name</th>
+                            <th style='border: 1px solid black; padding: 8px;'>Price</th>
+                            <th style='border: 1px solid black; padding: 8px;'>Quantity</th>
+                            <th style='border: 1px solid black; padding: 8px;'>Total</th>
+                        </tr>";
+    
+        foreach ($productDetails as $detail) {
+            $tableHtml .= "<tr>
+                                <td style='border: 1px solid black; padding: 8px;'>{$detail['productTypeName']}</td>
+                                <td style='border: 1px solid black; padding: 8px;'>{$detail['price']}</td>
+                                <td style='border: 1px solid black; padding: 8px;'>{$detail['quantity']}</td>
+                                <td style='border: 1px solid black; padding: 8px;'>".$detail['price'] * $detail['quantity']."</td>
+                           </tr>";
+        }
+    
+        $tableHtml .= "</table>";
+    
+        return $tableHtml;
+    }
+    
    
 }

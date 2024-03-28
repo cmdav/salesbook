@@ -37,7 +37,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
     public function rules(): array
     {
         return [
-            'product_name' => 'required|string|max:50|unique:products',
+            'product_name' => 'required|string|max:50|unique:products|regex:/^[^\s]/',
             'product_description' => 'required|string|max:200',
             'measurement_name' => 'required|string|exists:measurements,measurement_name',
             'category_name' => 'required|string|exists:product_categories,category_name',
@@ -52,6 +52,8 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
             'category_name.exists' => 'The specified product category does not exist.',
             'sub_category_name.exists' => 'The specified product subcategory does not exist.',
             'measurement_name.exists' => 'The specified measurement does not exist.',
+            'category_name.regex' => 'The category name must not start or end with a space.',
+            'product_name.regex' => 'The category name must not start with a space.',
         ];
     }
 }

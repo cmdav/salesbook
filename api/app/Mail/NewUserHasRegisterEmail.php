@@ -30,15 +30,13 @@ class NewUserHasRegisterEmail extends Mailable
     {
       
         $this->user = $user;
-        $data=[
-            'token'=>$user->token,
-             'type'=>$type,
-             'otherDetail'=>$otherDetail,
-        ];
-        $this->url = Request::root();
-        $jsonData = json_encode($data);
-        $encryptedToken = EncryptDecryptService::encryptvalue($jsonData);
-       
+        if(isset($user->token)){
+            $data=['token'=>$user->token,'type'=>$type,'otherDetail'=>$otherDetail];
+            $this->url = Request::root();
+            $jsonData = json_encode($data);
+            $encryptedToken = EncryptDecryptService::encryptvalue($jsonData);
+        }
+      
          
         
         if ($type === 'resend' || $type === 'register') {
@@ -66,6 +64,15 @@ class NewUserHasRegisterEmail extends Mailable
             $this->second_paragraph = "Click the button to accept the invitation";
             $this->btn_label = "Join Company";
             $this->title = "Invitation from {$otherDetail['organization_name']}";
+        }
+        else if ($type == "sales-receipt") {
+           
+               
+            //$this->frontendUrl = env('FRONTEND_URL');
+            $this->first_paragraph = "Thank you for your purchase. Below are the details of the item bought";
+            $this->second_paragraph = $otherDetail;
+            //$this->btn_label = "Join Company";
+            $this->title = "Customer Receipt";
         }
 
        

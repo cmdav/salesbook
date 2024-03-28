@@ -13,10 +13,11 @@ class CurrencyFormRequest extends FormRequest
     public function rules(Request $request = null): array
     {
         return [
-            'currency_name' => 'required|string|max:15|unique:currencies',
-            'currency_symbol' => 'required|string|max:5|unique:currencies',
+            'currency_name' => 'required|string|max:15|unique:currencies|regex:/^[^\s]/',
+            'currency_symbol' => 'required|string|max:5|unique:currencies|regex:/^[^\s]/',
         ];
     }
+    
   
 
 }

@@ -24,8 +24,9 @@ class SaleController extends Controller
 
     public function store(SaleFormRequest $request)
     {
+        
         try {
-            $sale = $this->saleService->createSale($request->validated());
+            $sale = $this->saleService->createSale($request->all());
             return response()->json($sale, 201);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

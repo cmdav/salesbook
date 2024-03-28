@@ -35,6 +35,16 @@ class CurrencyImport implements ToModel, WithHeadingRow, WithValidation,SkipsEmp
         $currencyFormRequest = new CurrencyFormRequest();
         return $currencyFormRequest->rules();
     }
+    public function customValidationMessages()
+    {
+        return [
+            'currency_name.regex' => 'The currency name must not start or end with a space.',
+            'currency_symbol.regex' => 'The currency symbol must not start with a space',
+            'currency_name.required' => 'The currency name field is required.', // Example additional message
+            'currency_symbol.required' => 'The currency symbol field is required.',
+            // Add other messages as needed
+        ];
+    }
 
    
 }

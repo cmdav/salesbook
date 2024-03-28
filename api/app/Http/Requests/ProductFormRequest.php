@@ -14,7 +14,7 @@ class ProductFormRequest extends FormRequest
     {
         return [
 
-            'product_name' => 'required|string|max:50|unique:products',
+            'product_name' => 'required|string|max:50|unique:products|regex:/^[^\s]/',
             'product_description' => 'required|string|max:200',
             'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'measurement_id' => 'required|uuid|max:40',

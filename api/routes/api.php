@@ -76,7 +76,7 @@ Route::middleware('auth:sanctum')->group(function() {
        
     });
     
-
+    //php artisan make:import PriceImport --model=Price
 
 
 

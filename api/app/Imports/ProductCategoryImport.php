@@ -34,4 +34,11 @@ class ProductCategoryImport implements ToModel, WithHeadingRow, WithValidation, 
         $productCategoryFormRequest = new ProductCategoryFormRequest();
         return $productCategoryFormRequest->rules();
     }
+    public function customValidationMessages()
+    {
+        return [
+            'category_name.regex' => 'The category name must not start  with a space.',
+            
+        ];
+    }
 }
