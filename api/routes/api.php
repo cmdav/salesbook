@@ -56,6 +56,8 @@ Route::middleware('auth:sanctum')->group(function() {
         route::get('all-product-type-name', App\Http\Controllers\Product\ProductTypeNameByIdController::class);
         route::get('all-supplier-products', App\Http\Controllers\Supply\AllSupplierProductController::class);
         route::get('user-detail', App\Http\Controllers\Users\AllUserDetailController::class);
+        route::get('all-job-roles', App\Http\Controllers\Security\AllJobRoleController::class);
+        route::get('all-pages', App\Http\Controllers\Security\AllPageController::class);
         Route::get('search-users/{searchCriteria}', App\Http\Controllers\Users\SearchUserController::class);
         route::get('dashboard-stat', App\Http\Controllers\Product\DashboardStatController::class);
         route::post('process-csv', App\Http\Controllers\Product\CsvController::class);
@@ -73,6 +75,10 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('search-sales', App\Http\Controllers\Inventory\SearchSaleController::class)->only('show');
         route::resource('search-stores', App\Http\Controllers\Inventory\SearchStoreController::class)->only('show');
         route::resource('search-purchases', App\Http\Controllers\Inventory\SearchPurchaseController::class)->only('show');
+
+        route::resource('job-roles', App\Http\Controllers\Security\JobRoleController::class);
+        route::resource('pages', App\Http\Controllers\Security\PagesController::class);
+        route::resource('permissions', App\Http\Controllers\Security\PermissionController::class);
        
     });
     

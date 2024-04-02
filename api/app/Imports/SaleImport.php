@@ -18,7 +18,7 @@ class SaleImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmptyR
     {
         $productType = ProductType::where('product_type_name', trim($row['product_type_name']))->first();
         $customer = User::where('first_name', trim($row['customer_fullname']))->first(); 
-        $price = Price::where([['product_type_id',$productType->id],['status','active']])->first(); 
+        $price = Price::where([['product_type_id',$productType->id],['status',1]])->first(); 
         if (!$productType || !$price) {
             return null; 
         }
@@ -39,7 +39,7 @@ class SaleImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmptyR
     {
         return [
             'product_type_name' => 'required|string|exists:product_types,product_type_name',
-            'customer_fullname' => 'nullable|string|exists:users,name',
+            //'customer_fullname' => 'nullable|string|exists:users,name',
             'price_sold_at' => 'required|integer',
             'quantity' => 'required|integer',
             'payment_method' => 'required|string|in:cash,Pos,Bank Transfer',
@@ -51,7 +51,7 @@ class SaleImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmptyR
     {
         return [
             'product_type_name.exists' => 'The specified product type name does not exist.',
-            'customer_fullname.exists' => 'The specified customer name does not exist.',
+           // 'customer_fullname.exists' => 'The specified customer name does not exist.',
             
         ];
     }

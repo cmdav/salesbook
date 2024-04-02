@@ -2,7 +2,7 @@
 
 namespace App\Imports;
 
-use App\Models\ProductSubcategory;
+use App\Models\ProductSubCategory;
 use App\Models\ProductCategory;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;

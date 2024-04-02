@@ -13,7 +13,7 @@ class ProductRepository
        
         $product =Product::latest()->with('measurement:id,measurement_name,unit', 'subCategory.category')
                                     ->withCount('productType')
-                                    ->paginate(2);
+                                    ->paginate(20);
        
        
         $product->getCollection()->transform(function($product){

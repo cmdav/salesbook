@@ -14,7 +14,7 @@ class SearchRepository
 {
     public function index()
     {
-        $Search = $this->queryCommon()->paginate(2);
+        $Search = $this->queryCommon()->paginate(20);
 
         return $this->transformAndReturn($Search);
     }

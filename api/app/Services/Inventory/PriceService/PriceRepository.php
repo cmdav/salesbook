@@ -14,7 +14,7 @@ class PriceRepository
 {
     public function index()
     {
-        $Price = $this->queryCommon()->paginate(2);
+        $Price = $this->queryCommon()->paginate(20);
 
         return $this->transformAndReturn($Price);
     }
@@ -40,7 +40,7 @@ class PriceRepository
 
     public function getPriceByProductType($id)
     {
-        $Price = $this->queryCommon()->where('product_type_id', $id)->paginate(2);
+        $Price = $this->queryCommon()->where('product_type_id', $id)->paginate(20);
 
         return $this->transformAndReturn($Price);
     }

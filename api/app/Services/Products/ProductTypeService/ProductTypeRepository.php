@@ -66,7 +66,7 @@ class ProductTypeRepository
                         $query->where('product_id', $productId);
                     };
                 
-                    $productTypes = $query->paginate(2);
+                    $productTypes = $query->paginate(20);
                 
                     $productTypes->getCollection()->transform(function ($productType) {
                         return $this->transformProductType($productType);

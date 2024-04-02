@@ -17,7 +17,7 @@ class ProductSubCategoryRepository
     public function index()
     {
        
-        $productSubCategory = $this->query()->latest()->paginate(2);
+        $productSubCategory = $this->query()->latest()->paginate(20);
                             $productSubCategory->getCollection()->transform(function($productSubCategory){
                                 return $this->transformProductService($productSubCategory);
                             });     

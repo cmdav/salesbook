@@ -18,7 +18,7 @@ class StoreRepository
     }
     public function index()
     {
-        $store = $this->query()->paginate(2);
+        $store = $this->query()->paginate(20);
 
         $store->getCollection()->transform(function($store){
 

@@ -20,7 +20,7 @@ class PurchaseRepository
     }
     public function index()
     {
-       $Purchase = $this->query()->paginate(2);
+       $Purchase = $this->query()->paginate(20);
 
         $Purchase->getCollection()->transform(function($Purchase){
 

@@ -27,7 +27,7 @@ class SaleController extends Controller
         
         try {
             $sale = $this->saleService->createSale($request->all());
-            return response()->json($sale, 201);
+            return response()->json(['message'=>'Sales recorded successfully'], 201);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

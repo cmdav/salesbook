@@ -34,7 +34,7 @@ class SaleRepository
     public function index()
     {
        
-         $sale =$this->query()->paginate(2);
+         $sale =$this->query()->paginate(20);
                    
 
          $sale->getCollection()->transform(function($sale){
@@ -75,7 +75,7 @@ class SaleRepository
 
        
         $sale =  Sale::select("id","quantity","product_type_id","price_id","price_sold_at")->with(['product:id,product_type_name','Price:id,selling_price' ])
-                     ->latest()->whereBetween('created_at', [$startOfDay, $endOfDay])->paginate(2);
+                     ->latest()->whereBetween('created_at', [$startOfDay, $endOfDay])->paginate(20);
                    
         
         // Transform the collection to apply any needed transformations
@@ -137,40 +137,46 @@ class SaleRepository
     {
 
         $emailService = new EmailService(); 
-    
-        return DB::transaction(function () use ($data, $emailService) { 
-            // Retrieve the latest price for the given product type
-            $latestPrice = Price::where([['product_type_id', $data['product_type_id']],['status',1]])->firstOrFail(); 
-            $store = Store::where('product_type_id', $data['product_type_id'])->firstOrFail(); 
-            $store->quantity_available -= $data['quantity'];
-            $store->save();
+            try{
+                $response =DB::transaction(function () use ($data, $emailService) { 
+                    // Retrieve the latest price for the given product type
+                    $latestPrice = Price::where([['product_type_id', $data['product_type_id']],['status',1]])->firstOrFail(); 
+                    $store = Store::where('product_type_id', $data['product_type_id'])->firstOrFail(); 
+                    $store->quantity_available -= $data['quantity'];
+                    $store->save();
 
-            // Create and return the sale record
-            $sale = new Sale();
-            $sale->fill($data);
-            $sale->price_id = $latestPrice->id;  
-            $sale->save();
+                    // Create and return the sale record
+                    $sale = new Sale();
+                    $sale->fill($data);
+                    $sale->price_id = $latestPrice->id;  
+                    $sale->save();
 
-            $user = User::select('id','first_name','last_name','email','contact_person','phone_number')->where('id', $data['customer_id'])->first();
-            $productType = ProductType::select("id","product_type_name")->where('id', $data['product_type_id'])->first();
-            $customerDetail = (isset($user->first_name) ? $user->first_name : '') .(isset($user->last_name) ? $user->last_name : '').
-                              (isset($user->contact_person) ? $user->contact_person : '');
+                    $user = User::select('id','first_name','last_name','email','contact_person','phone_number')->where('id', $data['customer_id'])->first();
+                    $productType = ProductType::select("id","product_type_name")->where('id', $data['product_type_id'])->first();
+                    $customerDetail = (isset($user->first_name) ? $user->first_name : '') .(isset($user->last_name) ? $user->last_name : '').
+                                    (isset($user->contact_person) ? $user->contact_person : '');
 
-         
-            $productTypeName = $productType->product_type_name;
-            $qty=$data['quantity'];
-            $price =$latestPrice->selling_price;
-            $email = $user->email;
-            $email = 'okomemmanuel1@gmail.com';
-            $productDetail = [ "customerDetail"=>$customerDetail,"productTypeName"=>$productTypeName,"quantity"=> $qty,"price"=> $price];
-            $tableDetail = $this->generateProductDetailsTable([$productDetail]);
-            $user = ['email'=>$email,'first_name' => $customerDetail];
-            $response =$emailService->sendEmail($user, "sales-receipt", $tableDetail);
-            return $response;
-          
+                
+                    $productTypeName = $productType->product_type_name;
+                    $qty=$data['quantity'];
+                    $price =$latestPrice->selling_price;
+                    $email = $user->email;
+                    $productDetail = [ "customerDetail"=>$customerDetail,"productTypeName"=>$productTypeName,"quantity"=> $qty,"price"=> $price];
+                    $tableDetail = $this->generateProductDetailsTable([$productDetail]);
+                    $user = ['email'=>$email,'first_name' => $customerDetail];
+                    $emailService->sendEmail($user, "sales-receipt", $tableDetail);
+                    return true;
+                
 
-           
-        });
+                
+                });
+                return true;
+            } catch (Exception $e) {
+                
+                //Log::error('Sale creation failed: ' . $e->getMessage());
+                return response()->json([ 'success' => false,'message' => 'Sale creation failed due to an internal error.'
+                ],500); 
+            }
      
     
     }
