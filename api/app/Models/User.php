@@ -79,6 +79,10 @@ class User extends Authenticatable
         static::creating(function ($user) {
 
             $request = app('request');
+
+            if ($user->type_id == 3) {
+                $user->email_verified_at = now();
+            }
             
             if (isset($user->organization_code) && $request->has('password')) {
                

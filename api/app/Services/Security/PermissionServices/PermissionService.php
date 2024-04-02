@@ -19,10 +19,10 @@ class PermissionService
         return $this->PermissionRepository->create($data);
     }
 
-    public function Index()
+    public function Index($request)
     {
        
-        return $this->PermissionRepository->index();
+        return $this->PermissionRepository->index($request);
     }
 
     public function show($id)

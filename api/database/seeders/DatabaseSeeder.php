@@ -48,6 +48,65 @@ class DatabaseSeeder extends Seeder
     
         ]);
         \App\Models\User::factory(25)->create();
+
+        // Inside DatabaseSeeder's run method
+
+        // Create specific pages
+        $pageNames = [
+            'currencies', 'measurements', 'product-categories', 'product-sub-categories',
+            'products', 'product-types', 'sales', 'purchases', 'stores', 'prices'
+        ];
+
+        foreach ($pageNames as $pageName) {
+            \App\Models\Pages::factory()->create([
+                'page_name' => $pageName,
+            ]);
+        }
+
+        // Create specific roles
+        $roleNames = ['Sales Manager', 'Cashier', 'Purchase Manager'];
+        foreach ($roleNames as $roleName) {
+            \App\Models\JobRole::factory()->create([
+                'role_name' => $roleName,
+            ]);
+        }
+       
+
+            // Get all pages and roles
+            $pages = \App\Models\Pages::all();
+            $roles = \App\Models\JobRole::all();
+
+            // Loop through each role and page to create permissions
+            foreach ($roles as $role) {
+                foreach ($pages as $page) {
+                    \App\Models\Permission::factory()->create([
+                        'page_id' => $page->id,
+                        'role_id' => $role->id,
+                        'read' => rand(0, 1),
+                        'write' => rand(0, 1),
+                        'update' => rand(0, 1),
+                        'delete' => rand(0, 1),
+                    ]);
+                }
+            }
+            //admin role
+            \App\Models\JobRole::factory()->create([
+                'role_name' => 'Admin'
+            ]);
+            $adminRole= \App\Models\JobRole::where('role_name', 'Admin')->first();
+            
+            foreach ($pages as $page) {
+                \App\Models\Permission::factory()->create([
+                    'page_id' => $page->id,
+                    'role_id' => $adminRole->id,
+                    'read' => 1,
+                    'write' => 1,
+                    'update' =>1,
+                    'delete' =>1,
+                ]);
+            }
+
+
     //      \App\Models\SupplierOrganization::factory(5)->create();
     //     \App\Models\Supplier::factory(30)->create();
     //     //  create measurement

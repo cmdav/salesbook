@@ -13,10 +13,10 @@ class PermissionController extends Controller
     {
        $this->PermissionService = $PermissionService;
     }
-    public function index()
+    public function index(Request $request)
     {
-       
-        $Page =$this->PermissionService->index();
+      
+        $Page =$this->PermissionService->index($request->roleId);
         return response()->json($Page);
     }
 
