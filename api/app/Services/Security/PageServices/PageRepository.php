@@ -9,7 +9,7 @@ class PageRepository
 {
     public function index()
     {
-        return Pages::paginate(20);
+        return Pages::select('id', 'page_name')->paginate(20);
       
     }
     

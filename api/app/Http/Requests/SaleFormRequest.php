@@ -20,11 +20,11 @@ class SaleFormRequest extends FormRequest
                 'integer',
                 function ($attribute, $value, $fail) use ($request) {
                     $store = Store::where('product_type_id', $request->product_type_id)->first();
-
+    
                     if (!$store) {
                         $fail('Store item not found for the specified product type.');
-                    } else if ($store->quantity_available - $value < 0) {
-                        $fail('Insufficient store items.');
+                    } elseif ($store->quantity_available - $value < 0) {
+                        $fail('The entered quantity ('. $value .') is more than what is available ('. $store->quantity_available .').');
                     }
                 },
             ],

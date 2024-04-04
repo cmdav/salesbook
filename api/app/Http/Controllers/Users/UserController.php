@@ -87,5 +87,15 @@ class UserController extends Controller
            
         
     }
+    public function update($id, Request $request){
+
+        $user = $this->userService->updateUserById($id, $request->all());
+        if($user){
+            return response()->json(['message' => 'Update successful .'], 200);
+        }else{
+            return response()->json(['message' => 'An error occur. Please try again .'], 500);
+        }
+
+    }
    
 }

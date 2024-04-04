@@ -42,7 +42,8 @@ class PurchaseImport implements ToModel, WithHeadingRow, WithValidation, SkipsEm
             'batch_no' => 'required|string|max:50',
             'quantity' => 'required|integer',
             'product_identifier' => 'nullable|string|max:50',
-            'expired_date' => 'nullable|date',
+            'expired_date' => 'nullable|date|after_or_equal:today',
+
             // Remove 'purchase_by' from rules if it's automatically set
         ];
     }

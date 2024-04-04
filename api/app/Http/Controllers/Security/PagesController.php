@@ -24,7 +24,7 @@ class PagesController extends Controller
     {
         $request->validate([
             'page_name' =>'string|required|max:30|unique:pages
-             |in:currencies,measurements,product-categories,product-sub-categories,products,product-types,sales,purchases,stores,prices'
+             |in:currencies,measurements,product-categories,product-sub-categories,products,product-types,sales,purchases,stores,prices,job-roles,pages,permissions'
         ]);
         $Page =$this->PageService->create($request->all());
         return response()->json($Page, 201);

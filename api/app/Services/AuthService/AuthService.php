@@ -45,6 +45,7 @@ class AuthService
                 'user' => [
                     'type' => $user->type_id, 
                     'organization_id'=>$user->organization_id,
+                    'role_id'=>$user->role_id,
                 ],
                 'message' => "Success", 
                 'status' => '200', 

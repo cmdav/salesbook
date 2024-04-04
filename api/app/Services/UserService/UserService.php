@@ -63,6 +63,10 @@ class UserService
     {
         return $this->userRepository->updateUserByToken($token, $newPassword);
     }
+    public function  updateUserById($id, $request)
+    {
+        return $this->userRepository->updateUserById($id, $request);
+    }
 
     
    

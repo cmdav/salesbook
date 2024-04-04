@@ -13,48 +13,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         
-        \App\Models\Organization::factory(1)->create();
-        \App\Models\Organization::factory(1)->create([
-            'organization_code'=>'123457',
-        ]);
-        \App\Models\User::factory()->create([
-            'first_name' => 'Test',
-            'email' => 'admin@gmail.com',
-            'password'=>'test123',
-            'organization_code'=>'123456',
-            'type_id' => 2,
-    
-        ]);
-        \App\Models\User::factory()->create([
-            'first_name' => 'Test',
-            'email' => 'admin2@gmail.com',
-            'password'=>'test123',
-            'organization_code'=>'123457',
-            'type_id' => 2,
-    
-        ]);
-
-        \App\Models\User::factory()->create([
-            'first_name' => 'Test',
-            'email' => 'supplier@gmail.com',
-            'password'=>'test123',
-            'organization_code'=>'123457',
-            'type_id' => 1,
-    
-        ]);
-        \App\Models\User::factory(25)->create([
         
-            'role_id' => 1,
-    
-        ]);
-        \App\Models\User::factory(25)->create();
-
-        // Inside DatabaseSeeder's run method
-
-        // Create specific pages
         $pageNames = [
             'currencies', 'measurements', 'product-categories', 'product-sub-categories',
-            'products', 'product-types', 'sales', 'purchases', 'stores', 'prices'
+            'products', 'product-types', 'sales', 'purchases', 'stores', 'prices', 'job-roles','pages','permissions'
         ];
 
         foreach ($pageNames as $pageName) {
@@ -94,7 +56,6 @@ class DatabaseSeeder extends Seeder
                 'role_name' => 'Admin'
             ]);
             $adminRole= \App\Models\JobRole::where('role_name', 'Admin')->first();
-            
             foreach ($pages as $page) {
                 \App\Models\Permission::factory()->create([
                     'page_id' => $page->id,
@@ -106,6 +67,72 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
 
+            //Un authorized role
+            \App\Models\JobRole::factory()->create([
+                'role_name' => 'unauthorized'
+            ]);
+            $unauthorized= \App\Models\JobRole::where('role_name', 'unauthorized')->first();
+            
+            foreach ($pages as $page) {
+                \App\Models\Permission::factory()->create([
+                    'page_id' => $page->id,
+                    'role_id' => $unauthorized->id,
+                    'read' => 0,
+                    'write' => 0,
+                    'update' =>0,
+                    'delete' =>0,
+                ]);
+            }
+        
+        \App\Models\Organization::factory(1)->create();
+        \App\Models\Organization::factory(1)->create([
+            'organization_code'=>'123457',
+        ]);
+        \App\Models\User::factory()->create([
+            'first_name' => 'Test',
+            'email' => 'admin@gmail.com',
+            'password'=>'test123',
+            'organization_code'=>'123456',
+            'type_id' => 2,
+            'role_id' => $adminRole->id,
+    
+        ]);
+        \App\Models\User::factory()->create([
+            'first_name' => 'Test',
+            'email' => 'admin2@gmail.com',
+            'password'=>'test123',
+            'organization_code'=>'123457',
+            'type_id' => 2,
+            'role_id' => $unauthorized->id,
+            
+    
+        ]);
+        \App\Models\User::factory()->create([
+            'first_name' => 'Test',
+            'email' => 'admin3@gmail.com',
+            'password'=>'test123',
+            'organization_code'=>'123457',
+            'type_id' => 2,
+            'role_id' => 0,
+            
+    
+        ]);
+        \App\Models\User::factory()->create([
+            'first_name' => 'Test',
+            'email' => 'supplier@gmail.com',
+            'password'=>'test123',
+            'organization_code'=>'123457',
+            'type_id' => 1,
+    
+        ]);
+        \App\Models\User::factory(1)->create([
+        
+            'role_id' => 1,
+    
+        ]);
+        \App\Models\User::factory(1)->create();
+
+       
 
     //      \App\Models\SupplierOrganization::factory(5)->create();
     //     \App\Models\Supplier::factory(30)->create();

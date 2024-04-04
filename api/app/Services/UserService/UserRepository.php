@@ -193,6 +193,18 @@ class UserRepository
     
         return $user; 
     }
+    public function updateUserById($id, $request){
+    
+        $user = User::where('id', $id)->first();
+
+        if (!$user) {
+
+            return null;
+        }
+        $user->update($request);
+    
+        return $user; 
+    }
     
 
    

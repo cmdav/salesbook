@@ -11,7 +11,7 @@ class PermissionRepository
     {
        
         $permissions = Permission::with('role:id,role_name', 'page:id,page_name')
-                        ->where('role_id', $roleId)
+                       // ->where('role_id', $roleId)
                         ->paginate(20);
         
       

@@ -20,7 +20,8 @@ class PurchaseFormRequest extends FormRequest
             'batch_no' => 'required|string|max:50',
             'quantity' => 'required|integer',
             'product_identifier' => 'nullable|string|max:50',
-            'expired_date' => 'nullable|date',
+            'expired_date' => 'nullable|date|after_or_equal:today',
+
             //'purchase_by' => 'required|uuid',
            
            

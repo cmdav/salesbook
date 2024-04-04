@@ -9,7 +9,7 @@ class JobRoleRepository
 {
     public function index()
     {
-        return JobRole::paginate(20);
+        return JobRole::select('id', 'role_name')->paginate(20);
       
     }
     public function names()
