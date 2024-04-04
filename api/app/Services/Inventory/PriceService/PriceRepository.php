@@ -76,7 +76,7 @@ class PriceRepository
             'auto_generated_selling_price'=>$price->auto_generated_selling_price,
             'selling_price'=>$price->selling_price,
             'currency'=>optional($price->currency)->currency_name."(".optional($price->currency)->currency_symbol .")",
-            'discount'=>$price->discount,
+            //'discount'=>$price->discount,
             'status'=>$price->status,
             // 'supplier_name'=>optional($price->supplier)->first_name."(".optional($price->supplier)->last_name .")",
             // 'supplier_phone_number'=>optional($price->supplier)->phone_number,
@@ -127,6 +127,7 @@ class PriceRepository
     {
         $Price = $this->findById($id);
         if ($Price) {
+            
             return $Price->delete();
         }
         return null;
