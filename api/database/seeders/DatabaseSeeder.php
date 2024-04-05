@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
         
         $pageNames = [
             'currencies', 'measurements', 'product-categories', 'product-sub-categories',
-            'products', 'product-types', 'sales', 'purchases', 'stores', 'prices', 'job-roles','pages','permissions'
+            'products', 'product-types', 'sales', 'purchases', 'stores', 'prices', 'job-roles','pages','permissions','organizations'
         ];
 
         foreach ($pageNames as $pageName) {

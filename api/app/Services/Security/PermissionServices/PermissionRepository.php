@@ -8,35 +8,31 @@ use App\Models\Permission;
 class PermissionRepository 
 {
     public function index($roleId)
-    {
-       
-        $permissions = Permission::with('role:id,role_name', 'page:id,page_name')
-                       // ->where('role_id', $roleId)
-                        ->paginate(20);
-        
-      
-        $transformedItems = $permissions->getCollection()->map(function ($permission) {
-            return [
-                'id' => $permission->id,
-                'page_name' => $permission->page->page_name,
-                'page_id' => $permission->page_id,
-                'role_name' => $permission->role->role_name,
-                'role_id' => $permission->role_id,
-                'read' => $permission->read,
-                'write' => $permission->write,
-                'update' => $permission->update,
-                'delete' => $permission->delete,
-                
-              
-            ];
-        })->toArray();
+{
+    $permissions = Permission::with('role:id,role_name', 'page:id,page_name')
+                   // ->where('role_id', $roleId)
+                    ->paginate(20);
     
-        $permissions->setCollection(collect($transformedItems));
+  
+    $transformedItems = $permissions->getCollection()->map(function ($permission) {
+        return [
+            'id' => $permission->id,
+            'page_name' => optional($permission->page)->page_name, 
+            'page_id' => $permission->page_id,
+            'role_name' => optional($permission->role)->role_name, 
+            'role_id' => $permission->role_id,
+            'read' => $permission->read,
+            'write' => $permission->write,
+            'update' => $permission->update,
+            'delete' => $permission->delete,
+        ];
+    })->toArray();
+
+    $permissions->setCollection(collect($transformedItems));
     
-        
-        return $permissions;
-    }
-    
+    return $permissions;
+}
+
     
 
     public function create(array $data)
@@ -46,11 +42,18 @@ class PermissionRepository
         
         foreach ($permissionsData as $permissionData) {
 
-            $permissionData['role_id'] = $roleId;
-            $permission = Permission::create($permissionData);
+            
+            $uniqueCriteria = [
+                'role_id' => $roleId,
+                'page_id' => $permissionData['page_id'] 
+            ];
+
+            $permissionData['role_id'] = $roleId; 
+        
+            $permission = Permission::updateOrCreate($uniqueCriteria, $permissionData);
         }
     
-        return response()->json(['message' => 'Permissions created successfully!'], 201);           
+        return response()->json(['message' => 'Permissions created or updated successfully!'], 201);           
     }
     
 
