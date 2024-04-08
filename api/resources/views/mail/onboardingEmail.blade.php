@@ -8,7 +8,7 @@
 		<h3> Hi {{ $user['first_name'] }}</h3>
 		
 		<p>
-			{{ $first_paragraph}}
+			{!! $first_paragraph !!}
 		</p>
 		<p>
 			{!! $second_paragraph !!}

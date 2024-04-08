@@ -28,18 +28,18 @@ Route::middleware('auth:sanctum')->group(function() {
         route::post('log-out', App\Http\Controllers\Auth\LogOutController::class);
         
         //resource
-        route::resource('currencies', App\Http\Controllers\Inventory\CurrencyController::class)->middleware('check.access');
-        route::resource('measurements', App\Http\Controllers\Inventory\MeasurementController::class)->middleware('check.access');
-        route::resource('organizations', App\Http\Controllers\Inventory\OrganizationController::class)->middleware('check.access');
-        route::resource('sales', App\Http\Controllers\Inventory\SaleController::class)->middleware('check.access');
-        route::resource('stores', App\Http\Controllers\Inventory\StoreController::class)->middleware('check.access');
-        route::resource('prices', App\Http\Controllers\Inventory\PriceController::class)->middleware('check.access');
-        route::resource('purchases', App\Http\Controllers\Inventory\PurchaseController::class)->middleware('check.access');
-        //route::resource('inventories', App\Http\Controllers\Inventory\InventoryController::class)->middleware('check.access');
-        route::resource('product-categories', App\Http\Controllers\Product\ProductCategoryController::class)->middleware('check.access');
-        route::resource('products', App\Http\Controllers\Product\ProductController::class)->middleware('check.access');
-        route::resource('product-types', App\Http\Controllers\Product\ProductTypeController::class)->middleware('check.access');
-        route::resource('product-sub-categories', App\Http\Controllers\Product\ProductSubCategoryController::class)->middleware('check.access');
+        route::resource('currencies', App\Http\Controllers\Inventory\CurrencyController::class);
+        route::resource('measurements', App\Http\Controllers\Inventory\MeasurementController::class);
+        route::resource('organizations', App\Http\Controllers\Inventory\OrganizationController::class);
+        route::resource('sales', App\Http\Controllers\Inventory\SaleController::class);
+        route::resource('stores', App\Http\Controllers\Inventory\StoreController::class);
+        route::resource('prices', App\Http\Controllers\Inventory\PriceController::class);
+        route::resource('purchases', App\Http\Controllers\Inventory\PurchaseController::class);
+        //route::resource('inventories', App\Http\Controllers\Inventory\InventoryController::class);
+        route::resource('product-categories', App\Http\Controllers\Product\ProductCategoryController::class);
+        route::resource('products', App\Http\Controllers\Product\ProductController::class);
+        route::resource('product-types', App\Http\Controllers\Product\ProductTypeController::class);
+        route::resource('product-sub-categories', App\Http\Controllers\Product\ProductSubCategoryController::class);
         route::resource('supplier-organizations', App\Http\Controllers\Supply\SupplierOrganizationController::class);
         route::resource('supplier-products', App\Http\Controllers\Supply\SupplierProductController::class);
         route::resource('product-supplied-to-companies', App\Http\Controllers\Supply\ProductSuppliedToCompanyController::class);
@@ -76,9 +76,9 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('search-stores', App\Http\Controllers\Inventory\SearchStoreController::class)->only('show');
         route::resource('search-purchases', App\Http\Controllers\Inventory\SearchPurchaseController::class)->only('show');
 
-        route::resource('job-roles', App\Http\Controllers\Security\JobRoleController::class)->middleware('check.access');
-        route::resource('pages', App\Http\Controllers\Security\PagesController::class)->middleware('check.access');
-        route::resource('permissions', App\Http\Controllers\Security\PermissionController::class)->middleware('check.access');
+        route::resource('job-roles', App\Http\Controllers\Security\JobRoleController::class);
+        route::resource('pages', App\Http\Controllers\Security\PagesController::class);
+        route::resource('permissions', App\Http\Controllers\Security\PermissionController::class);
        
     });
     

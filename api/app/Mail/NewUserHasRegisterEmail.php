@@ -31,6 +31,7 @@ class NewUserHasRegisterEmail extends Mailable
       
         $this->user = $user;
         if(isset($user->token)){
+
             $data=['token'=>$user->token,'type'=>$type,'otherDetail'=>$otherDetail];
             $this->url = Request::root();
             $jsonData = json_encode($data);
@@ -43,7 +44,7 @@ class NewUserHasRegisterEmail extends Mailable
            
             
             $this->frontendUrl = env('FRONTEND_URL')."/email-verification/".$encryptedToken;
-            $this->first_paragraph ="This is to inform you that your account has been successfully created.";
+            $this->first_paragraph ="This is to inform you that your account has been successfully created and your organization code is <b>$user->token</b>";
             $this->second_paragraph="Click the button to verify your email";
             $this->btn_label = "Verify Email";
             $this->title = "Registration";

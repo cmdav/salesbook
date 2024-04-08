@@ -20,10 +20,11 @@ return new class extends Migration
             $table->string('last_name', 55)->nullable();
             $table->string('middle_name', 55)->nullable();
             $table->string('phone_number', 15)->nullable();
-            $table->integer('type_id')->default(0)->comment('0 => customer, 1=>supplier, 2=>company 3=>system users');
+           // $table->integer('type_id')->default(0)->comment('0 => customer, 1=>supplier, 2=>company 3=>system users');
+            $table->integer('type_id')->default(0)->comment('0 =>others,1 for sole_properietor, 2 for company');
             $table->string('role_id', 36)->default(0)->comment('1 customer_company');
             $table->uuid('organization_id')->nullable();
-            $table->integer('organization_code')->nullable();
+            $table->string('organization_code')->nullable();
             $table->string('active', 10)->default('active')->comment('active, suspended');
             $table->date('dob', 10)->nullable();
             $table->string('email', 55)->unique();

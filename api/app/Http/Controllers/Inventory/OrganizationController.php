@@ -42,11 +42,14 @@ class OrganizationController extends Controller
         return response()->json($organization);
     }
 
-    public function update($id, Request $request)
+    public function update($id, OrganizationFormRequest $request)
     {
-       
-        $organization = $this->organizationService->updateOrganization($id, $request->all());
-        return response()->json($organization);
+      
+        if ($request->hasFile('organization_logo')) {
+            $data['organization_logo'] = $this->fileUploadService->uploadImage($request->file('organization_logo'),'organization_logo');
+        }
+        $updateOrganization = $this->organizationService->updateOrganization($id, $data);
+        return response()->json($updateOrganization);
     }
 
     public function destroy($id)

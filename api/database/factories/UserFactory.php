@@ -31,9 +31,9 @@ class UserFactory extends Factory
             'last_name' => $this->faker->name(),
             'phone_number' => $this->faker->numberBetween(21012345670, 81012345690),
             'type_id' =>$this->faker->numberBetween(0, 2),
-            'organization_id' =>function () {
-                return \App\Models\Organization::first()->id;   
-            },
+            // 'organization_id' =>function () {
+            //     return \App\Models\Organization::first()->id;   
+            // },
             'token'=> Str::uuid(),
             'role_id'=>0,
             'dob' => $this->faker->date(),

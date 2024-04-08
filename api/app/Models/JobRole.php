@@ -11,4 +11,10 @@ class JobRole extends Model
 {
     use   SetCreatedBy, HasUuids, HasFactory;
     protected $fillable = ['role_name','created_by','updated_by'];
+
+
+    public function permissions(){
+
+        return $this->hasMany(Permission::class, 'role_id','id');
+    }
 }

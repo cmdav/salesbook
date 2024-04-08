@@ -16,6 +16,7 @@ class Permission extends Model
 
         return $this->belongsTo(Pages::class, 'page_id','id');
     }
+    
     public function role(){
 
         return $this->belongsTo(JobRole::class, 'role_id','id');

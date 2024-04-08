@@ -84,10 +84,10 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         
-        \App\Models\Organization::factory(1)->create();
-        \App\Models\Organization::factory(1)->create([
-            'organization_code'=>'123457',
-        ]);
+        // \App\Models\Organization::factory(1)->create();
+        // \App\Models\Organization::factory(1)->create([
+        //     'organization_code'=>'123457',
+        // ]);
         \App\Models\User::factory()->create([
             'first_name' => 'Test',
             'email' => 'admin@gmail.com',

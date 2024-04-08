@@ -44,7 +44,8 @@ class UserController extends Controller
     	
     public function store(UserFormRequest $request)
     { 	
-        
+       
+     
        $response ='Registration successful.';
           
         DB::beginTransaction(); 
@@ -59,7 +60,9 @@ class UserController extends Controller
                 return response()->json(['message' => 'User creation failed.'], 500);
             }
             //1 registration email
-            if($request->type_id == 2){
+            if ($user->organization_type != 'sales_personnel') {
+
+               
                 $this->emailService->sendEmail($user, 'register', $user->token);
                 $response ='Verify your account using the verification link sent to your email.';
             }

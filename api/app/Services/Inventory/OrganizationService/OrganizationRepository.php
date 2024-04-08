@@ -36,7 +36,8 @@ class OrganizationRepository
 
     public function update($id, array $data)
     {
-        $organization = $this->findById($id);
+        $organization = Organization::where('user_id', $id)->first();
+      
       
         if ($organization) {
 

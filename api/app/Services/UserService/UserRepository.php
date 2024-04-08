@@ -21,30 +21,39 @@ class UserRepository
             "last_name" => $user->last_name,
             "phone_number" => $user->phone_number,
             "email" => $user->email,
-			 "organization_id" => $user->organization_id,
+			
+            "company_name" => $user->company_name,
+            "contact_person" => $user->contact_person,
+            "company_address" => $user->company_address,
+            "organization_name" => optional($user->organization)->organization_name,
+            "organization_code" =>optional($user->organization)->organization_code,
+            "organization_logo" => optional($user->organization)->organization_logo,
+            "role" => optional($user->role)->role_name,
+           
         ];
-    
-        // Add supplier information only if type_id is 1
-        if ($user->type_id == 1) {
-            $transformed += [
-                "bank_name" => optional($user->supplier)->bank_name,
-                "account_name" => optional($user->supplier)->account_name,
-                "account_number" => optional($user->supplier)->account_number,
-                "state" => optional($user->supplier)->state,
-                "address" => optional($user->supplier)->address,
-            ];
-        }
+
     
         return $transformed;
     }
     private function returnUserDetail($user_id){
-        $query = User::select('id', 'first_name', 'last_name', 'organization_id', 'type_id', 'phone_number', 'email')
-             ->where('id', $user_id);
-            $user = $query->when(User::where('id', $user_id)->value('type_id') == 1, function ($query) {
-            return $query->with(['supplier:id,user_id,bank_name,account_name,account_number,state,address']);
-            })->first();
-
+    
+        $user= User::select( "id", 
+                        "first_name",
+                            "middle_name", 
+                            "last_name", 
+                            "phone_number",
+                            "company_name",
+                            "contact_person",
+                            "company_address",
+                            'email',
+                            'role_id',
+                            'organization_id')
+            ->with('role:id,role_name')
+             ->where('id', $user_id)->with('organization:id,organization_name,organization_code,organization_type,organization_logo')->first();
+        
+          
             if ($user) {
+                
             return $this->transformUsers($user);
             }
 
@@ -59,7 +68,19 @@ class UserRepository
     }
     public function userDetail(){
 
-        $users = User::select("id", "first_name", "last_name", "phone_number")
+        $users = User::select(
+                                "id", 
+                                "first_name",
+                                    "middle_name", 
+                                    "last_name", 
+                                    "phone_number",
+                                    "company_name",
+                                    "contact_person",
+                                    "company_address",
+                                     'email',
+                                     'role_id',
+                                     'organization_id'
+                                     )
              ->where('type_id', 0)
              ->get()
              ->map(function ($user) {

@@ -15,9 +15,10 @@ class Organization extends Model
     protected $fillable = [
 
         'organization_name',
-        'organization_url',
+        //'organization_url',
         'organization_code', 
         'organization_logo',
+        'user_id',
         'created_by',
         'updated_by',
     ];

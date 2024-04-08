@@ -72,7 +72,7 @@ class PriceRepository
             'product_type_name'=>optional($price->productType)->product_type_name,
             'product_type_description'=>optional($price->productType)->product_type_description,
            
-            'cost_rice'=>$price->cost_price,
+            'cost_price'=>$price->cost_price,
             'auto_generated_selling_price'=>$price->auto_generated_selling_price,
             'selling_price'=>$price->selling_price,
             'currency'=>optional($price->currency)->currency_name."(".optional($price->currency)->currency_symbol .")",

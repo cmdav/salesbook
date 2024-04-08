@@ -9,10 +9,12 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Str;
+use App\Traits\SetCreatedBy;
 
 class User extends Authenticatable
 {
-    use HasUuids, HasApiTokens, HasFactory, Notifiable;
+    use SetCreatedBy, HasUuids, HasApiTokens, HasFactory, Notifiable;
 
    
 
@@ -80,23 +82,50 @@ class User extends Authenticatable
 
             $request = app('request');
 
-            if ($user->type_id == 3) {
-                $user->email_verified_at = now();
-            }
-            
-            if (isset($user->organization_code) && $request->has('password')) {
-               
-                $organization = Organization::where('organization_code', $user->organization_code)->first();
+           
+            if ($user->organization_type != 'sales_personnel') {
 
-                if (!$organization) {
-                  
-                    throw new ModelNotFoundException('Error from user model state that the provided organization code does not exist.');
+              
+                do {
+                    $time = time(); 
+                    $randomNumber = rand(100000, 999999);
+                    $hash = hash('sha256', $randomNumber . $time);
+                    $code = hexdec(substr($hash, 0, 6)) % 1000000; 
+                
+                } while (User::where('organization_code', $code)->exists());
+                
+           
+                 $user->organization_code = $code;
+                 $user->token =  hexdec(substr($hash, 0, 6)) % 3000000;
+
+
+                $adminRole = JobRole::where('role_name', 'Admin')->first();
+                if (!$adminRole) {
+                    throw new ModelNotFoundException('Error from user Admin role not found.');
                 }
-
-               
-                $user->organization_id = $organization->id;
+                $user->role_id = $adminRole->id;
             }
-            $user->token = \Str::uuid();
+            // $user->token = \Str::uuid();
+        });
+
+        static::created(function ($user) {
+
+            if ($user->organization_type != 'sales_personnel') {
+
+                  $request = app('request');
+                    $organization = new Organization([
+                        'id' => Str::uuid(),
+
+                        'organization_code' => $user->organization_code,
+                        'organization_type' =>  $request->input('organization_type_request') === 'sole_proprietor' ? 1 : 2,
+                        'organization_logo' => 'default_logo.png', 
+                        //'organization_email' => $user->email,
+                        'user_id' => $user->id,
+                    
+                    ]);
+            
+                    $organization->save();
+             }
         });
 
         static::updated(function ($user) {
@@ -117,7 +146,14 @@ class User extends Authenticatable
 
         return $this->hasMany(SupplierOrganization::class, "supplier_id","id");
     }
+    public function role(){
 
+        return $this->hasOne(JobRole::class, 'id','role_id');
+    }
+    public function organization(){
+
+        return $this->hasOne(organization::class, 'id','organization_id');
+    }
 
 
 

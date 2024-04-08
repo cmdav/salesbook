@@ -15,8 +15,12 @@ class PermissionController extends Controller
     }
     public function index(Request $request)
     {
-      
-        $Page =$this->PermissionService->index($request->roleId);
+        //return $request;
+        $validatedData = $request->validate([
+            'role' => 'required|exists:job_roles,id'
+        ]);
+       
+        $Page =$this->PermissionService->index($validatedData['role']);
         return response()->json($Page);
     }
 
