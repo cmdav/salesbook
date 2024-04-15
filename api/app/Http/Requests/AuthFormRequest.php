@@ -23,14 +23,14 @@ class AuthFormRequest extends FormRequest
        
         if ($request->code === 'yes') {
           
-            // $rules['email'][] = Rule::exists('users')->where(function ($query) use ($request) {
-            //     $query->where('email', $request->email)
-            //           ->where('organization_code', $request->organization_code);
-            // });
-            // $rules['organization_code'] = [
-            //     'required',
+            $rules['email'][] = Rule::exists('users')->where(function ($query) use ($request) {
+                $query->where('email', $request->email)
+                      ->where('organization_code', $request->organization_code);
+            });
+            $rules['organization_code'] = [
+                'required',
                
-            // ];
+            ];
         } else {
             
             $rules['email'][] = Rule::exists('users', 'email');

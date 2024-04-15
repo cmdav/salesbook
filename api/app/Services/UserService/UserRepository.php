@@ -7,12 +7,37 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Arr;
 
 
 
 
 class UserRepository
 {
+
+    protected function transformSaleUsers(object $user): array
+    {
+        $transformed = [
+           
+            "first_name" => $user->first_name,
+            "last_name" => $user->last_name,
+           
+            "email" => $user->email,
+			//'organization_id' => $user->organization_id,
+            // "company_name" => $user->company_name,
+            // "contact_person" => $user->contact_person,
+            // "company_address" => $user->company_address,
+            // // "organization_name" => optional($user->organization)->organization_name,
+            // "organization_code" =>optional($user->organization)->organization_code,
+            // "organization_logo" => optional($user->organization)->organization_logo,
+            // "organization_type" => optional($user->organization)->organization_type,
+            "role" => optional($user->role)->role_name,
+           
+        ];
+
+    
+        return $transformed;
+    }
     protected function transformUsers(object $user): array
     {
         $transformed = [
@@ -21,13 +46,14 @@ class UserRepository
             "last_name" => $user->last_name,
             "phone_number" => $user->phone_number,
             "email" => $user->email,
-			
+			'organization_id' => $user->organization_id,
             "company_name" => $user->company_name,
             "contact_person" => $user->contact_person,
             "company_address" => $user->company_address,
-            "organization_name" => optional($user->organization)->organization_name,
+            // "organization_name" => optional($user->organization)->organization_name,
             "organization_code" =>optional($user->organization)->organization_code,
             "organization_logo" => optional($user->organization)->organization_logo,
+            "organization_type" => optional($user->organization)->organization_type,
             "role" => optional($user->role)->role_name,
            
         ];
@@ -48,10 +74,12 @@ class UserRepository
                             'email',
                             'role_id',
                             'organization_id')
-            ->with('role:id,role_name')
-             ->where('id', $user_id)->with('organization:id,organization_name,organization_code,organization_type,organization_logo')->first();
+                           ->with('role:id,role_name')
+                              ->where('id', $user_id)
+                              //->with('organization')->first();
+                              ->with('organization:id,organization_name,organization_code,organization_type,organization_logo,user_id')->first();
         
-          
+           
             if ($user) {
                 
             return $this->transformUsers($user);
@@ -132,26 +160,41 @@ class UserRepository
                         ->whereHas('supplierOrganization', function($query) {
                             $query->where('organization_id', Auth::user()->organization_id); 
                         })
-                        ->latest()->paginate(3);
+                        ->latest()->paginate(20);
                          $user->getCollection()->transform(function ($user) {
                                     return $this->transformUsers($user);
                         });
                         return $user;
             
 
-        }else{
+        }else if($type == 'sales_personnel')
+        {
+                        $user = User::select('id', 'first_name', 'last_name',  'email','role_id')
+                        ->where('type_id', 0) 
+                        ->with('role:id,role_name')
+                        //->where('organization_id', Auth::user()->organization_id)
+                        ->latest()->paginate(20);
+                         $user->getCollection()->transform(function ($user) {
+                                    return $this->transformSaleUsers($user);
+                        });
+                        return $user;
+            
+
+        }
+        
+        else{
             if($type == 'company_customer'){
                 
                 return  User::select('id','company_name','contact_person','type_id','phone_number','email')
                 ->where('role_id', 1)
                 ->where('organization_id', Auth::user()->organization_id)
-                ->latest()->paginate(3);
+                ->latest()->paginate(20);
             }
              return  User::select('id','first_name','last_name','organization_id','type_id','phone_number','email','company_name','contact_person','company_address')
                                 ->where('type_id', 0)
                                 ->where('role_id', 0)
                                 ->where('organization_id', Auth::user()->organization_id)
-                                ->latest()->paginate(3);
+                                ->latest()->paginate(20);
         }
 
         
@@ -184,13 +227,18 @@ class UserRepository
       
         try {
           
+            $filteredData = Arr::except($data, ['organization_type']);
+
+           
+      
             return User::updateOrCreate(
-                ['email' => $data['email']], 
-                $data 
+                ['email' => $filteredData['email']], 
+                $filteredData
             );
+
         } catch (QueryException $exception) {
             Log::channel('insertion_errors')->error('Error creating or updating user: ' . $exception->getMessage());
-            throw new ModelNotFoundException('Insertion or update error.');
+            throw new ModelNotFoundException('Insertion or update error while creating user.');
         }
     }
     public function updateUserToken(User $user, $newToken){

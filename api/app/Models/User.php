@@ -8,9 +8,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+
 use Illuminate\Support\Str;
 use App\Traits\SetCreatedBy;
+use Auth;
 
 class User extends Authenticatable
 {
@@ -83,7 +84,7 @@ class User extends Authenticatable
             $request = app('request');
 
            
-            if ($user->organization_type != 'sales_personnel') {
+            if (!$request->has('role_id')) {
 
               
                 do {
@@ -105,20 +106,28 @@ class User extends Authenticatable
                 }
                 $user->role_id = $adminRole->id;
             }
+            else{
+
+                $user->email_verified_at = now();
+              
+                if (Auth::check()) {
+                    $user->organization_code = Auth::user()->organization_code;
+                }
+            }
             // $user->token = \Str::uuid();
         });
 
         static::created(function ($user) {
-
-            if ($user->organization_type != 'sales_personnel') {
+            $request = app('request');
+            if (!$request->has('role_id')) {
 
                   $request = app('request');
                     $organization = new Organization([
                         'id' => Str::uuid(),
 
                         'organization_code' => $user->organization_code,
-                        'organization_type' =>  $request->input('organization_type_request') === 'sole_proprietor' ? 1 : 2,
-                        'organization_logo' => 'default_logo.png', 
+                        'organization_type' =>  $request->input('organization_type'),
+                        'organization_logo' => 'logo.png', 
                         //'organization_email' => $user->email,
                         'user_id' => $user->id,
                     
@@ -152,7 +161,7 @@ class User extends Authenticatable
     }
     public function organization(){
 
-        return $this->hasOne(organization::class, 'id','organization_id');
+        return $this->hasOne(Organization::class, 'user_id','id');
     }
 
 

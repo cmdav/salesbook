@@ -38,7 +38,7 @@ class OrganizationRepository
     {
         $organization = Organization::where('user_id', $id)->first();
       
-      
+        
         if ($organization) {
 
             $organization->update($data);

@@ -12,10 +12,10 @@ class PermissionRepository
         //return $roleId;
         $permissions = Permission::with('role:id,role_name', 'page:id,page_name')
                     ->where('role_id', $roleId)
-                        ->paginate(20);
+                        ->get();
+        
     
-    
-        $transformedItems = $permissions->getCollection()->map(function ($permission) {
+        $transformedItems = $permissions->map(function ($permission) {
             return [
                 'id' => $permission->id,
                 'page_name' => optional($permission->page)->page_name, 
@@ -25,13 +25,13 @@ class PermissionRepository
                 'read' => $permission->read,
                 'write' => $permission->write,
                 'update' => $permission->update,
-                'delete' => $permission->delete,
+                'del' => $permission->del,
             ];
         })->toArray();
 
-        $permissions->setCollection(collect($transformedItems));
+       // $permissions->setCollection(collect($transformedItems));
         
-        return $permissions;
+        return  $transformedItems;
     }
 
     

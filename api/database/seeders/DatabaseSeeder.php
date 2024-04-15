@@ -107,16 +107,16 @@ class DatabaseSeeder extends Seeder
             
     
         ]);
-        \App\Models\User::factory()->create([
-            'first_name' => 'Test',
-            'email' => 'admin3@gmail.com',
-            'password'=>'test123',
-            'organization_code'=>'123457',
-            'type_id' => 2,
-            'role_id' => 0,
+        // \App\Models\User::factory()->create([
+        //     'first_name' => 'Test',
+        //     'email' => 'admin3@gmail.com',
+        //     'password'=>'test123',
+        //     'organization_code'=>'123457',
+        //     'type_id' => 2,
+        //     'role_id' => 0,
             
     
-        ]);
+        // ]);
         \App\Models\User::factory()->create([
             'first_name' => 'Test',
             'email' => 'supplier@gmail.com',
@@ -125,12 +125,12 @@ class DatabaseSeeder extends Seeder
             'type_id' => 1,
     
         ]);
-        \App\Models\User::factory(1)->create([
+        // \App\Models\User::factory(1)->create([
         
-            'role_id' => 1,
+        //     'role_id' => 1,
     
-        ]);
-        \App\Models\User::factory(1)->create();
+        // ]);
+        // \App\Models\User::factory(1)->create();
 
        
 

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->boolean('read'); 
             $table->boolean('write'); 
             $table->boolean('update'); 
-            $table->boolean('delete'); 
+            $table->boolean('del'); 
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();

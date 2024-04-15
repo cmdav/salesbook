@@ -12,36 +12,20 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
-class UserController extends Controller
+class SaleUserController extends Controller
 {
     
     protected UserService $userService;
 
-    protected EmailService $emailService;
+   
 
-    public function __construct(UserService $userService, EmailService $emailService)
+    public function __construct(UserService $userService)
     {
         $this->userService = $userService;
 
-        $this->emailService = $emailService; 
+     
     }
-    public function index(Request $request){
-        
-        $validatedData = $request->validate([
-           // 'type'=>'required'
-            'type' => 'required|in:supplier,customer,profile,company_customer,company,sales_personnel'
-        ]);
-
-       return  $this->userService->getUser($validatedData['type']);
-    }
-    public function show($id){
-
-        if($user =$this->userService->findById($id)){
-            return response()->json($user);
-        }
-        return response()->json(['message'=>'user not found'], 404);
-    }
-   // public function store(Request $request)
+    
     	
     public function store(UserFormRequest $request)
     { 	
@@ -61,13 +45,6 @@ class UserController extends Controller
                 return response()->json(['message' => 'User creation failed.'], 500);
             }
           
-            //1 registration email
-            if (!$request->has('role_id')) {
-               
-               
-                $this->emailService->sendEmail($user, 'register', $user->token);
-                $response ='Verify your account using the verification link sent to your email.';
-            }
     
           
             DB::commit(); 
@@ -92,15 +69,6 @@ class UserController extends Controller
            
         
     }
-    public function update($id, Request $request){
-
-        $user = $this->userService->updateUserById($id, $request->all());
-        if($user){
-            return response()->json(['message' => 'Update successful .'], 200);
-        }else{
-            return response()->json(['message' => 'An error occur. Please try again .'], 500);
-        }
-
-    }
+   
    
 }

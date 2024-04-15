@@ -38,7 +38,7 @@ return [
         
         'root' => [
             'driver' => 'local',
-            'root' => base_path('uploads'), // This sets the root to the 'uploads' folder at the application root
+            'root' => base_path('../uploads'),
             'url' => env('APP_URL').'/uploads',
             'visibility' => 'public',
             'throw' => false,

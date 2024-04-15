@@ -29,7 +29,7 @@ class Product extends Model
     // public function getProductImageAttribute($value): string
     // {
         
-    //    // return url('/') . $value;
+//    // return url('/') . $value;[]
     // }
     public function subCategory()
     {
@@ -49,5 +49,23 @@ class Product extends Model
         return $this->belongsTo(ProductCategory::class, 'category_id','id');
 
     }
+    public function suppliers(){
+
+        return $this->belongsTo(User::class, 'supplier_id', 'id');
+    }
+    // public function price(){
+
+    //     return $this->hasMany(Price::class);
+    // }
+    // public function store(){
+
+    //     return $this->hasOne(Store::class,'product_type_id','id');
+    // }
+    // public function activePrice() {
+    //     return $this->hasOne(Price::class)->where('status', 1);
+    // }
+    // public function latestPurchase() {
+    //     return $this->hasOne(Purchase::class, 'product_type_id','id')->latest('created_at');;
+    // }
 
 }

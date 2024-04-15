@@ -16,32 +16,28 @@ class Organization extends Model
 
         'organization_name',
         //'organization_url',
+        'organization_type',
         'organization_code', 
         'organization_logo',
         'user_id',
         'created_by',
         'updated_by',
     ];
-    protected static function boot() {
+   
 
-        parent::boot();
+    // public function getOrganizationLogoAttribute($value): string
+    // {
         
-
-        static::creating(function ($organization) {
-            if (Auth::check()) {
-               
-                do {
-                    $token = rand(100000, 999999); 
-                } while (Organization::where('organization_code', $token)->exists());
-
-                $organization->organization_code = $token;
-            }
-        });
-    }
-
-    public function getOrganizationLogoAttribute($value): string
+    //     return url('/') . $value;
+    // }
+    public function getOrganizationTypeAttribute($value): string
     {
-        
-        return url('/') . $value;
+        return $value == 2 ? 'company' : 'sole_proprietor';
     }
+    public function setOrganizationTypeAttribute($value)
+    {
+       
+        $this->attributes['organization_type'] = $value == 'company' ? 2 : 1;
+    }
+
 }

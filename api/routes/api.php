@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function() {
 
     Route::group(['prefix'=>'v1'], function(){
         route::post('log-out', App\Http\Controllers\Auth\LogOutController::class);
+        route::resource('sale-users', App\Http\Controllers\Users\SaleUserController::class)->only('store');
         
         //resource
         route::resource('currencies', App\Http\Controllers\Inventory\CurrencyController::class);

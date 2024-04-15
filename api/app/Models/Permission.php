@@ -10,7 +10,7 @@ use App\Traits\SetCreatedBy;
 class Permission extends Model
 {
     use   SetCreatedBy, HasUuids, HasFactory;
-    protected $fillable = ['page_id','role_id','read','update','delete','write','created_by','updated_by'];
+    protected $fillable = ['page_id','role_id','read','update','del','write','created_by','updated_by'];
 
     public function page(){
 

@@ -31,19 +31,32 @@ class EmailVerificationController extends Controller
        
         $type = $token['type'];
         if ($type == "reset-password") {
-            $request->validate([
+            $messages = [
+                'password.required' => 'A password is required.',
+                'password.string' => 'The password must be a string.',
+                'password.min' => 'The password must be at least 8 characters.',
+                'password.max' => 'The password may not be greater than 30 characters.',
+                'password.confirmed' => 'The password confirmation does not match.',
+                'password.regex' => 'The password must contain at least one lowercase letter, one uppercase letter, one digit, and one special character (@$!%*#?&).',
+            ];
+    
+            $validator = \Validator::make($request->all(), [
                 'password' => [
                     'required',
                     'string',
                     'min:8',
                     'max:30',
                     'confirmed',
-                    'regex:/[a-z]/',      // must contain at least one lowercase letter
-                    'regex:/[A-Z]/',      // must contain at least one uppercase letter
-                    'regex:/[0-9]/',      // must contain at least one digit
-                    'regex:/[@$!%*#?&]/', // must contain a special character
+                    'regex:/[a-z]/',
+                    'regex:/[A-Z]/',
+                    'regex:/[0-9]/',
+                    'regex:/[@$!%*#?&]/',
                 ]
-            ]);
+            ], $messages);
+    
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
         }
         
         
@@ -97,3 +110,4 @@ class EmailVerificationController extends Controller
         return response()->json(['message' => 'Email verified successfully.']);
     }
 }
+ 
