@@ -109,7 +109,7 @@ class User extends Authenticatable
             else{
 
                 $user->email_verified_at = now();
-              
+    
                 if (Auth::check()) {
                     $user->organization_code = Auth::user()->organization_code;
                 }

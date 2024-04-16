@@ -200,9 +200,49 @@ class UserRepository
         
 
     }
-    public function getUserByEmail($email){
+    public function getUserByEmail($email) {
+         return User::where('email', $email)
+            ->with([
+                'role:id,role_name',
+                'role.permissions:id,role_id,page_id,read,write,update,del',
+                'role.permissions.page:id,page_name'
+            ])
+            ->first();
+    
+        
+           
+    
+    
+        
+    }
+    public function transformUser($user){
 
-        return  User::where('email', $email)->first();
+        $userArray = [
+            // "type_id" => $user->type_id,
+            // "role_id" => $user->role_id,
+            // "password" => $user->password,
+            // "email_verified_at" => $user->email_verified_at,
+            // "organization_id" => $user->organization_id,
+            // "organization_code" => optional($user->organization)->code,
+            // "email" => $user->email,
+            "role_name" => optional($user->role)->role_name,
+            "permissions" => []
+        ];
+
+        // Adding permissions array with transformed structure
+        if ($user->role && $user->role->permissions) {
+            $userArray['permissions'] = $user->role->permissions->map(function ($permission) {
+                return [
+                    'page_name' => optional($permission->page)->page_name,
+                    'read' => $permission->read,
+                    'write' => $permission->write,
+                    'update' => $permission->update,
+                    'del' => $permission->del
+                ];
+            });
+        }
+
+        return $userArray;
 
     }
     public function getUserByToken($token){

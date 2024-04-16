@@ -26,6 +26,7 @@ class AuthService
        // get user detail using their email
         $user = $this->userRepository->authenticateUser($request);
        
+      
         if (!$user) {
             
             return response()->json(['message' => 'Invalid credential'], 401);
@@ -46,6 +47,7 @@ class AuthService
                     'type' => $user->type_id, 
                     'organization_id'=>$user->organization_id,
                     'role_id'=>$user->role_id,
+                    'permission' => $this->userRepository->transformUser($user),
                 ],
                 'message' => "Success", 
                 'status' => '200', 
