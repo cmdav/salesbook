@@ -58,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::get('all-supplier-products', App\Http\Controllers\Supply\AllSupplierProductController::class);
         route::get('user-detail', App\Http\Controllers\Users\AllUserDetailController::class);
         route::get('all-job-roles', App\Http\Controllers\Security\AllJobRoleController::class);
+       
         route::get('all-pages', App\Http\Controllers\Security\AllPageController::class);
         Route::get('search-users/{searchCriteria}', App\Http\Controllers\Users\SearchUserController::class);
         route::get('dashboard-stat', App\Http\Controllers\Product\DashboardStatController::class);
@@ -65,6 +66,7 @@ Route::middleware('auth:sanctum')->group(function() {
     
         route::resource('users', App\Http\Controllers\Users\UserController::class)->only('index','show','update');
         route::resource('customers', App\Http\Controllers\Users\CustomerController::class)->only('index','show');
+        route::get('customer-names', App\Http\Controllers\Users\CustomerNamesController::class);
         route::resource('daily-sales', App\Http\Controllers\Inventory\DailySaleController::class)->only('index');
 
         // Search endpoints

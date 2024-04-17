@@ -24,6 +24,21 @@ class CustomerController extends Controller
      
     }
     public function store(Request $request){
+
+        $rules = [
+            'first_name' => 'nullable|string|max:55',
+            'company_name' => 'nullable|string|max:55',
+            'contact_person' => 'nullable|string|max:55',
+            'address' => 'nullable|string|max:55',
+            'last_name' => 'nullable|string|max:55',
+            'middle_name' => 'nullable|string|max:55',
+            'phone_number' => 'nullable|string|max:15',
+            'type_id' => 'required|string|in:individual, company',
+            'email' => 'nullable|email|unique:customers',
+        ];
+    
+        // Validate the request data
+        $validatedData = $request->validate($rules);
         
         return $this->CustomerService->create($request->all());
     

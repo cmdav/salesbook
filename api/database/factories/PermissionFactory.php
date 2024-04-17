@@ -20,7 +20,7 @@ class PermissionFactory extends Factory
 			'read' => $this->faker->boolean,
             'write' => $this->faker->boolean,
             'update' => $this->faker->boolean,
-            'delete' => $this->faker->boolean,
+            'del' => $this->faker->boolean,
             'created_by'=>'admin',
             'updated_by'=>'admin',
         ];

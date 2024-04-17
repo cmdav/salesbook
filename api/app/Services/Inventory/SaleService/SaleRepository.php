@@ -11,6 +11,7 @@ use App\Models\Price;
 use App\Models\Store;
 use App\Models\Sale;
 use App\Models\User;
+use App\Models\Customer;
 use App\Models\ProductType;
 use Carbon\Carbon;
 
@@ -134,52 +135,70 @@ class SaleRepository
         ];
     }
     public function create(array $data)
-    {
+{
+   //dd($data);
+   
+    $emailService = new EmailService();
+    try {
+        $response = DB::transaction(function () use ($data, $emailService) {
+            $productDetails = [];
+           
+            foreach ($data['products'] as $product) {
+                // Check the latest price and store availability for each product
+                $latestPrice = Price::where([
+                    ['product_type_id', $product['product_type_id']],
+                    ['status', 1]
+                ])->firstOrFail();
 
-        $emailService = new EmailService(); 
-            try{
-                $response =DB::transaction(function () use ($data, $emailService) { 
-                    // Retrieve the latest price for the given product type
-                    $latestPrice = Price::where([['product_type_id', $data['product_type_id']],['status',1]])->firstOrFail(); 
-                    $store = Store::where('product_type_id', $data['product_type_id'])->firstOrFail(); 
-                    $store->quantity_available -= $data['quantity'];
-                    $store->save();
+                $store = Store::where('product_type_id', $product['product_type_id'])->firstOrFail();
+                if ($store->quantity_available < $product['quantity']) {
+                    throw new Exception("Insufficient stock for {$latestPrice->productType->product_type_name}.");
+                }
+                $store->quantity_available -= $product['quantity'];
+                $store->save();
 
-                    // Create and return the sale record
-                    $sale = new Sale();
-                    $sale->fill($data);
-                    $sale->price_id = $latestPrice->id;  
-                    $sale->save();
+                // Create the sale record
+                $sale = new Sale();
+                $sale->fill([
+                    'product_type_id' => $product['product_type_id'],
+                    'customer_id' => $data['customer_id'],
+                    'price_sold_at' => $product['price_sold_at'],
+                    'quantity' => $product['quantity'],
+                    'payment_method' => $data['payment_method']
+                ]);
+                $sale->price_id = $latestPrice->id;
+                $sale->save();
 
-                    $user = User::select('id','first_name','last_name','email','contact_person','phone_number')->where('id', $data['customer_id'])->first();
-                    $productType = ProductType::select("id","product_type_name")->where('id', $data['product_type_id'])->first();
-                    $customerDetail = (isset($user->first_name) ? $user->first_name : '') .(isset($user->last_name) ? $user->last_name : '').
-                                    (isset($user->contact_person) ? $user->contact_person : '');
-
-                
-                    $productTypeName = $productType->product_type_name;
-                    $qty=$data['quantity'];
-                    $price =$latestPrice->selling_price;
-                    $email = $user->email;
-                    $productDetail = [ "customerDetail"=>$customerDetail,"productTypeName"=>$productTypeName,"quantity"=> $qty,"price"=> $price];
-                    $tableDetail = $this->generateProductDetailsTable([$productDetail]);
-                    $user = ['email'=>$email,'first_name' => $customerDetail];
-                    $emailService->sendEmail($user, "sales-receipt", $tableDetail);
-                    return true;
-                
-
-                
-                });
-                return true;
-            } catch (Exception $e) {
-                
-                //Log::error('Sale creation failed: ' . $e->getMessage());
-                return response()->json([ 'success' => false,'message' => 'Sale creation failed due to an internal error.'
-                ],500); 
+                // Prepare product details for the email
+                $productDetails[] = [
+                    "productTypeName" => $latestPrice->productType->product_type_name,
+                    "price" => $latestPrice->selling_price,
+                    "quantity" => $product['quantity']
+                ];
             }
-     
-    
+
+            // Customer details for the email
+            $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
+                        ->where('id', $data['customer_id'])
+                        ->firstOrFail();
+            $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
+
+            // Generate email content
+            $tableDetail = $this->generateProductDetailsTable($productDetails);
+            $emailService->sendEmail(
+                ['email' => $user->email, 'first_name' => $customerDetail],
+                "sales-receipt",
+                $tableDetail
+            );
+
+            return true;
+        });
+        return response()->json(['success' => true], 200);
+    } catch (Exception $e) {
+       // return response()->json(['success' => false, 'message' => 'Sale creation failed: ' . $e->getMessage()], 500);
     }
+}
+    
 
 
 
@@ -217,11 +236,12 @@ class SaleRepository
                         </tr>";
     
         foreach ($productDetails as $detail) {
+            $totalPrice = $detail['price'] * $detail['quantity'];
             $tableHtml .= "<tr>
                                 <td style='border: 1px solid black; padding: 8px;'>{$detail['productTypeName']}</td>
                                 <td style='border: 1px solid black; padding: 8px;'>{$detail['price']}</td>
                                 <td style='border: 1px solid black; padding: 8px;'>{$detail['quantity']}</td>
-                                <td style='border: 1px solid black; padding: 8px;'>".$detail['price'] * $detail['quantity']."</td>
+                                <td style='border: 1px solid black; padding: 8px;'>$totalPrice</td>
                            </tr>";
         }
     
@@ -229,6 +249,11 @@ class SaleRepository
     
         return $tableHtml;
     }
+  
+    
+    
+    
+    
     
    
 }

@@ -14,9 +14,15 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
             $table->string('first_name', 55)->nullable();
-            $table->string('last_name', 55)->nullable();
-            $table->string('phone_number', 55)->nullable();
+            $table->string('company_name', 55)->nullable();
+            $table->string('contact_person', 55)->nullable();
             $table->string('address', 55)->nullable();
+            $table->string('last_name', 55)->nullable();
+            $table->string('middle_name', 55)->nullable();
+            $table->string('phone_number', 15)->nullable();
+            $table->string('email', 150);
+           // $table->integer('type_id')->default(0)->comment('0 => customer, 1=>supplier, 2=>company 3=>system users');
+            $table->integer('type_id')->default(0)->comment('0 =>others,1 individual, 2 for company');
             $table->uuid('created_by', 32)->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();

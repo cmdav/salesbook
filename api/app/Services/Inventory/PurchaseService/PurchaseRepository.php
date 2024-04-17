@@ -89,8 +89,22 @@ class PurchaseRepository
     
     public function create(array $data)
     {
-       
-        return Purchase::create($data);
+        
+        foreach ($data['purchases'] as $purchaseData) {
+            // Create a new Purchase object
+            $purchase = new Purchase();
+            $purchase->product_type_id = $purchaseData['product_type_id'];
+            $purchase->supplier_id = $purchaseData['supplier_id'];
+            $purchase->price = $purchaseData['price'];
+            //$purchase->currency_id = $purchaseData['currency_id'];
+            $purchase->batch_no = $purchaseData['batch_no'];
+            $purchase->quantity = $purchaseData['quantity'];
+            $purchase->product_identifier = $purchaseData['product_identifier'];
+            $purchase->expired_date = $purchaseData['expired_date'];
+            $purchase->save();
+        }
+        return response()->json(['message' => 'Permissions created successfully!'], 201);  
+        // return Purchase::create($data);
     }
 
     public function findById($id)

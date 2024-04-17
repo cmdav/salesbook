@@ -27,6 +27,12 @@ class CustomerService
         return $this->customerRepository->create($data);
        
     }
+    public function customerName()
+    {
+    
+        return $this->customerRepository->customerName();
+       
+    }
 
    
 

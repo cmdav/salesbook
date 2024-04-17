@@ -47,7 +47,7 @@ class DatabaseSeeder extends Seeder
                         'read' => rand(0, 1),
                         'write' => rand(0, 1),
                         'update' => rand(0, 1),
-                        'delete' => rand(0, 1),
+                        'del' => rand(0, 1),
                     ]);
                 }
             }
@@ -63,7 +63,7 @@ class DatabaseSeeder extends Seeder
                     'read' => 1,
                     'write' => 1,
                     'update' =>1,
-                    'delete' =>1,
+                    'del' =>1,
                 ]);
             }
 
@@ -80,7 +80,7 @@ class DatabaseSeeder extends Seeder
                     'read' => 0,
                     'write' => 0,
                     'update' =>0,
-                    'delete' =>0,
+                    'del' =>0,
                 ]);
             }
         
