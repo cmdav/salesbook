@@ -88,10 +88,12 @@ class ProductTypeRepository
             'product_type_image' => $productType->product_type_image,
             'product_type_description' => $productType->product_type_description,
             'view_price' => 'view price',
+
             'product_name' => optional($productType->product)->product_name,
             'product_description' => $productType->product_type_description,
             'product_image' => $productType->product_type_image,
             'product_category' => optional(optional($productType->product)->product_category)->category_name,
+            
             'category_ids' => optional(optional($productType->product)->product_category)->id,
             'category_id' => optional(optional($productType->product)->product_category)->category_name,
     

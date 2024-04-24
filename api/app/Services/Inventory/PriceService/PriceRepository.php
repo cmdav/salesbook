@@ -68,6 +68,7 @@ class PriceRepository
         return [
             'id'=>$price->id,
             'product_type_id'=>optional($price->productType)->id,
+            'product_type_id'=>optional($price->productType)->product_type_name,
             'product_type_image'=>optional($price->productType)->product_type_image,
             'product_type_name'=>optional($price->productType)->product_type_name,
             'product_type_description'=>optional($price->productType)->product_type_description,
@@ -75,7 +76,7 @@ class PriceRepository
             'cost_price'=>$price->cost_price,
             'auto_generated_selling_price'=>$price->auto_generated_selling_price,
             'selling_price'=>$price->selling_price,
-            'currency'=>optional($price->currency)->currency_name."(".optional($price->currency)->currency_symbol .")",
+            //'currency'=>optional($price->currency)->currency_name."(".optional($price->currency)->currency_symbol .")",
             //'discount'=>$price->discount,
             'status'=>$price->status,
             // 'supplier_name'=>optional($price->supplier)->first_name."(".optional($price->supplier)->last_name .")",

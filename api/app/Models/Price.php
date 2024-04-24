@@ -28,7 +28,7 @@ class Price extends Model
 
     public function getStatusAttribute($value)
     {
-        return $value == 1 ? 'active' : 'inactive';
+        return $value == 1 ? 'Active price' : 'Inactive price';
     }
 
 

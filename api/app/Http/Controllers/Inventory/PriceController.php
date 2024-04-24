@@ -37,7 +37,7 @@ class PriceController extends Controller
         return $this->priceService->getPriceByProductType($id);
     }
 
-    public function update($id, Request $request)
+    public function update($id, PriceFormRequest $request)
     {
        
         $price =$this->priceService->updatePrice($id, $request->all());
