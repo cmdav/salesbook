@@ -17,4 +17,16 @@ class JobRole extends Model
 
         return $this->hasMany(Permission::class, 'role_id','id');
     }
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by')
+                    ->select(['id', \DB::raw("CONCAT(first_name, ' ', COALESCE(contact_person, ''), ' ', last_name) as fullname")]);
+    }
+
+   
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by')
+                    ->select(['id', \DB::raw("CONCAT(first_name, ' ', COALESCE(contact_person, ''), ' ', last_name) as fullname")]);
+    }
 }

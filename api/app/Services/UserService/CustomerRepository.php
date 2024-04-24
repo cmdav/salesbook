@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\DB;
 
 class CustomerRepository
 {
-    public function index(){
+    public function index($type){
 
-        return Customer::paginate(20);
+        return Customer::ofType($type)->paginate(20);
     }
     public function create($data){
 

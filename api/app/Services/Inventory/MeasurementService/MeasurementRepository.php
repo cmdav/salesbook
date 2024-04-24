@@ -10,12 +10,27 @@ class MeasurementRepository
 {
     private function query(){
 
-        return Measurement::select('id','measurement_name','unit');
+        return Measurement::select('id','measurement_name','unit')->latest();
     }
+    
     public function index()
     {
+        
+        $measurements =  Measurement::select('id','measurement_name','unit',"created_by","updated_by")->latest()->with('creator','updater')->get();
        
-        return $this->query()->latest()->get();
+        $transformed = $measurements->map(function($measurement) {
+            return [
+                'id' => $measurement->id,
+                'measurement_name' => $measurement->measurement_name,
+                'unit' => $measurement->unit,
+                'created_by' => $measurement->creator->fullname ?? '',  
+                'updated_by' => $measurement->updater->fullname ?? '',
+                
+            ];
+        });
+
+        return $transformed;
+       
 
     }
     public function searchMeasurement($searchCriteria){

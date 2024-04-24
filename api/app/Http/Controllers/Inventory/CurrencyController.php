@@ -33,7 +33,7 @@ class CurrencyController extends Controller
         return response()->json($currency);
     }
 
-    public function update($id, Request $request)
+    public function update($id, CurrencyFormRequest $request)
     {
        
         $currency = $this->currencyService->updateCurrency($id, $request->all());

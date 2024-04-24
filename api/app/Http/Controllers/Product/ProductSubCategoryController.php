@@ -33,7 +33,7 @@ class ProductSubCategoryController extends Controller
         return response()->json($productSubCategory);
     }
 
-    public function update($id, Request $request)
+    public function update($id, ProductSubcategoryFormRequest $request)
     {
        
         $productSubCategory =$this->productSubCategoryService->updateProductSubCategory($id, $request->all());

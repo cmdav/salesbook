@@ -15,12 +15,13 @@ class ProductTypeRepository
     private function query(){
 
         return ProductType::with([
-            'product:id,category_id,product_name', 
-            'product.product_category:id,category_name',
+            'product:id,category_id,product_name,measurement_id,sub_category_id', 
+            'product.measurement:id,measurement_name',
+            'product.subCategory:id,sub_category_name',
             'store:id,product_type_id,quantity_available',
             'suppliers:id,first_name,last_name,phone_number',
             'activePrice' => function ($query) {
-                $query->select('id', 'product_type_id', 'cost_price', 'selling_price', 'discount');
+                $query->select('id',  'cost_price', 'selling_price','product_type_id');
             }
         ])->latest();
     }
@@ -42,7 +43,7 @@ class ProductTypeRepository
         });
     
         $productTypes = $query->get();
-    
+      
         $productTypes->transform(function ($productType) {
             return $this->transformProductType($productType);
         });
@@ -67,7 +68,9 @@ class ProductTypeRepository
                     };
                 
                     $productTypes = $query->paginate(20);
-                
+                   
+    
+                    
                     $productTypes->getCollection()->transform(function ($productType) {
                         return $this->transformProductType($productType);
                     });
@@ -77,36 +80,33 @@ class ProductTypeRepository
     
     private function transformProductType($productType){
 
-        $activePrice = $productType->activePrice;
-        
         return [
             'id' => $productType->id,
-            'product_name' => optional($productType->product)->product_name,
+            'product_id' => optional($productType->product)->product_name,
+            'product_ids' => optional($productType->product)->id,
             'product_type_name' => $productType->product_type_name,
             'product_type_image' => $productType->product_type_image,
-            'product_image' => $productType->product_type_image,
-
-            // 'product_type_name' =>$productType->product_type_name,
-            'view_price' => 'view price',
-            'product_description' => $productType->product_type_description,
             'product_type_description' => $productType->product_type_description,
-            'product' => optional($productType->product)->product_name,
-            'product_category' => optional($productType->product->product_category)->category_name,
-            'product_sub_category' => optional($productType->product->product_category)->category_name,
-            'quantity' => optional($productType->store)->quantity_available,
-
-            ///////////added Product column
-            "cat_id" => optional($productType->product->subCategory)->category_id,
-            "category_id" => optional($productType->product->subCategory)->category ? optional($productType->product->subCategory->category)->category_name : null,
-            "measurement_id" => optional($productType->product->measurement)->measurement_name,
-            "product_sub_category_id" => optional($productType->product->subCategory)->sub_category_name,
-
-            //'status' => optional($productType->store)->quantity_available > 0 ? 'Available' : 'Not Available',
-            'purchasing_price' => optional($productType->latestPurchase)->price,
-            'selling_price' => optional($activePrice)->selling_price,
-            'supplier_name' => optional($productType->suppliers)->first_name . ' ' . optional($productType->suppliers)->last_name,
-            'supplier_phone_number' => optional($productType->suppliers)->phone_number,
-            'date_created' =>$productType->created_at
+            'view_price' => 'view price',
+            'product_name' => optional($productType->product)->product_name,
+            'product_description' => $productType->product_type_description,
+            'product_image' => $productType->product_type_image,
+            'product_category' => optional(optional($productType->product)->product_category)->category_name,
+            'category_ids' => optional(optional($productType->product)->product_category)->id,
+            'category_id' => optional(optional($productType->product)->product_category)->category_name,
+    
+            'product_sub_category' => optional(optional($productType->product)->subCategory)->sub_category_name,
+            'sub_category_id' => optional(optional($productType->product)->subCategory)->id,
+            'quantity_available' => optional($productType->store)->quantity_available ?? 0,
+            "measurement_id" => optional(optional($productType->product)->measurement)->measurement_name,
+    
+            'purchasing_price' => optional($productType->latestPurchase)->price ?? 'Not set',
+            'selling_price' => optional($productType->activePrice)->selling_price ?? 'Not set',
+            'supplier_name' => trim((optional($productType->suppliers)->first_name ?? '') . ' ' . (optional($productType->suppliers)->last_name ?? '')) ?: 'None',
+            'supplier_phone_number' => optional($productType->suppliers)->phone_number ?? 'None',
+            'date_created' => $productType->created_at,
+            'created_by' => optional($productType->creator)->fullname,
+            'updated_by' => optional($productType->updater)->fullname,
         ];
             
 
@@ -125,6 +125,7 @@ class ProductTypeRepository
 
     public function update($id, array $data)
     {
+        
         $ProductType = $this->findById($id);
       
         if ($ProductType) {
@@ -139,6 +140,10 @@ class ProductTypeRepository
         $ProductType = $this->findById($id);
         
         if ($ProductType) {
+            if($ProductType->type == 1){
+                 $product= \App\Models\Product::find($ProductType->product_id);
+                 $product->delete();
+            }
             return $ProductType->delete();
         }
         return null;

@@ -60,12 +60,12 @@ class UserController extends Controller
 
                 return response()->json(['message' => 'User creation failed.'], 500);
             }
-          
+            
             //1 registration email
             if (!$request->has('role_id')) {
                
-               
-                $this->emailService->sendEmail($user, 'register', $user->token);
+              // dd($user->organization_code);
+                $this->emailService->sendEmail($user, 'register', $user->organization_code);
                 $response ='Verify your account using the verification link sent to your email.';
             }
     

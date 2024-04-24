@@ -16,7 +16,7 @@ class ProductTypeFormRequest extends FormRequest
 
     public function rules(Request $request): array
     {
-        $productIdRule = 'required|uuid';
+        $productIdRule = 'required|string';
         $productTypeRule = [
             'required',
             'string',
@@ -37,8 +37,8 @@ class ProductTypeFormRequest extends FormRequest
             'product_type_name' => $productTypeRule,
             'product_type_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'product_type_description' => 'required|string',
-            'organization_id' => 'nullable|uuid',
-            'supplier_id' => 'nullable|uuid',
+            'organization_id' => 'nullable|string',
+            'supplier_id' => 'nullable|string',
         ];
     }
     

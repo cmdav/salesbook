@@ -14,10 +14,10 @@ class CustomerService
         $this->customerRepository = $customerRepository;
 
     }
-    public function index()
+    public function index($type)
     {
     
-        return $this->customerRepository->index();
+        return $this->customerRepository->index($type);
        
     }
    

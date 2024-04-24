@@ -23,6 +23,20 @@ class PurchaseFormRequest extends FormRequest
             // 'expired_date' => 'nullable|date|after_or_equal:today',
 
             //'purchase_by' => 'required|uuid',
+            
+                'purchases' => 'required|array|min:1',
+                'purchases.*.product_type_id' => 'required|string',
+                //'purchases.*.supplier_id' => 'nullable|uuid',
+                'purchases.*.price' => 'required|integer',
+                'purchases.*.batch_no' => 'required|string|max:50',
+                'purchases.*.quantity' => 'required|integer',
+                'purchases.*.product_identifier' => 'nullable|string|max:50',
+                'purchases.*.expired_date' => [
+                    'nullable',
+                    'date',
+                    'after_or_equal:' . now()->startOfYear()->toDateString() // Checks if the date is within the current year or future
+                ],
+            
            
            
         ];

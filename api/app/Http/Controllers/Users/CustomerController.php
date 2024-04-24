@@ -19,8 +19,13 @@ class CustomerController extends Controller
 
      
     }
-    public function index(){
-         return $this->CustomerService->index();
+    public function index(Request $request){
+
+        $validatedData = $request->validate([
+            'type' => 'required|in:individual,company'
+        ]);
+        
+         return $this->CustomerService->index($request->type);
      
     }
     public function store(Request $request){
@@ -33,7 +38,7 @@ class CustomerController extends Controller
             'last_name' => 'nullable|string|max:55',
             'middle_name' => 'nullable|string|max:55',
             'phone_number' => 'nullable|string|max:15',
-            'type_id' => 'required|string|in:individual, company',
+            'type_id' => 'required|string|in:individual,company',
             'email' => 'nullable|email|unique:customers',
         ];
     

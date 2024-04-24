@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use App\Traits\SetCreatedBy;
+use Carbon\Carbon;
 
 class Product extends Model
 {
@@ -22,15 +23,42 @@ class Product extends Model
         'category_id'
     ];
 
+    protected static function booted()
+    {
+        static::updated(function ($product) {
+            
+            $now = Carbon::now();
+            $product->productType()->update([
+                'product_type_name' => $product->product_name,
+                'product_type_image' => $product->product_image,
+                'product_type_description' => $product->product_description,
+                'updated_by' => $product->updated_by,
+                'updated_at' => $now,
+               
+            ]);
+        });
+
+        static::created(function ($product) {
+            $now = Carbon::now();
+            $product->productType()->create([
+    
+                'product_type_name' => $product->product_name,
+                'product_type_image' => $product->product_image,
+                'product_type_description' => $product->product_description,
+                'created_by' => $product->created_by,
+                'updated_by' => $product->updated_by,
+                'created_at' => $now, 
+                'updated_at' => $now,
+                'type' => 1
+            ]);
+        });
+    }
+
     public function measurement(){
        
         return $this->belongsTo(Measurement::class, 'measurement_id','id');
     }
-    // public function getProductImageAttribute($value): string
-    // {
-        
-//    // return url('/') . $value;[]
-    // }
+    
     public function subCategory()
     {
         
@@ -53,19 +81,5 @@ class Product extends Model
 
         return $this->belongsTo(User::class, 'supplier_id', 'id');
     }
-    // public function price(){
-
-    //     return $this->hasMany(Price::class);
-    // }
-    // public function store(){
-
-    //     return $this->hasOne(Store::class,'product_type_id','id');
-    // }
-    // public function activePrice() {
-    //     return $this->hasOne(Price::class)->where('status', 1);
-    // }
-    // public function latestPurchase() {
-    //     return $this->hasOne(Purchase::class, 'product_type_id','id')->latest('created_at');;
-    // }
-
+    
 }

@@ -23,7 +23,7 @@ return new class extends Migration
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
            
-    $table->timestamps();
+             $table->timestamps();
         });
     }
 

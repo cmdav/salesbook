@@ -69,11 +69,11 @@ class ProductController extends Controller
         ];
 
         // Use your product type service or repository to create the product type
-        $productType = $this->productTypeService->create($productTypeData);
+       // $productType = $this->productTypeService->create($productTypeData);
 
         DB::commit(); // Commit the transaction
 
-        return response()->json(['product' => $product, 'productType' => $productType], 201);
+    return response()->json(['product' => $product], 201);
     } catch (\Exception $e) {
         DB::rollBack(); // Rollback the transaction on any error
         return response()->json(['error' => $e->getMessage()], 500);

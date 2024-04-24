@@ -14,8 +14,8 @@ class PriceFormRequest extends FormRequest
     {
         return [
     
-            'product_type_id' => 'required|uuid',
-            'supplier_id' => 'nullable|uuid',
+            'product_type_id' => 'required|string',
+            'supplier_id' => 'nullable|string',
             'cost_price' => 'required|integer',
             'selling_price' => 'required|integer',
             // 'selling_price' => ['nullable', 'integer', function ($attribute, $value, $fail) use ($request) {
@@ -31,9 +31,9 @@ class PriceFormRequest extends FormRequest
            
            // 'auto_generated_selling_price' => ['nullable', 'integer', 'between:0,100'],
             'auto_generated_selling_price' => ['nullable', 'integer', 'between:0,100'],
-            'currency_id' => 'required|uuid',
+            'currency_id' => 'required|string',
             'discount' => 'nullable|integer',
-            'organization_id' => 'nullable|uuid',
+            'organization_id' => 'nullable|string',
            
         ];
 

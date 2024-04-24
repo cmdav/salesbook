@@ -44,8 +44,15 @@ class ProductTypeController extends Controller
 
     public function update($id, Request $request)
     {
+        $data = $request->all();
        
-        $productType = $this->productTypeService->update($id, $request->all());
+        if ($request->hasFile('product_type_image')) {
+
+            $data['product_type_image'] = $this->fileUploadService->uploadImage($request->file('product_type_image'),'product_type');
+           
+        }
+       
+        $productType = $this->productTypeService->update($id,  $data);
         return response()->json($productType);
     }
 

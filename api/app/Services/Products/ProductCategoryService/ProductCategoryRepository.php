@@ -12,15 +12,28 @@ class ProductCategoryRepository
     private function query(){
     {
        
-        return ProductCategory::select('id','category_name','category_description');
+        return ProductCategory::select('id','category_name','category_description')->latest();
 
     }
     
     }
     public function index()
     {
+        
+        $productCategories = ProductCategory::select('id','category_name','category_description', 'created_by','updated_by')->latest()->with('creator','updater')->get();
        
-        return $this->query()->latest()->get();
+        $transformed = $productCategories->map(function($productCategory) {
+            return [
+                'id' => $productCategory->id,
+                'category_name' => $productCategory->category_name,
+                'category_description' => $productCategory->category_description,
+                'created_by' => $productCategory->creator->fullname ?? '',  
+                'updated_by' => $productCategory->updater->fullname ?? ''
+            ];
+        });
+
+        return $transformed;
+       
 
     }
     public function searchProductCategory($searchCriteria)

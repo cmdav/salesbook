@@ -14,8 +14,22 @@ class CurrencyRepository
     }
     public function index()
     {
+        
+        $currencies =Currency::select("id", "currency_name","currency_symbol","status", "created_by","updated_by")->with('creator','updater')->get();
        
-        return $this->query()->latest()->get();
+        $transformed = $currencies->map(function($currency) {
+            return [
+                'id' => $currency->id,
+                'currency_name' => $currency->currency_name,
+                'currency_symbol' => $currency->currency_symbol,
+                'status' => $currency->status,
+                'created_by' => $currency->creator->fullname ?? '',  
+                'updated_by' => $currency->updater->fullname ?? ''
+            ];
+        });
+
+        return $transformed;
+       
 
     }
     public function searchCurrency($searchCriteria){

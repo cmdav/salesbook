@@ -15,8 +15,9 @@ return new class extends Migration
             $table->uuid('id',32)->primary();
             $table->string('currency_name', 15)->unique();
             $table->string('currency_symbol', 5)->unique();
-            $table->uuid('created_by', 32)->nullable();
+            $table->boolean('status')->default(0);
             $table->uuid('updated_by')->nullable();
+            $table->uuid('created_by')->nullable();
             $table->timestamps();
         });
     }

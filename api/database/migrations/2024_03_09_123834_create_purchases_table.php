@@ -18,10 +18,10 @@ return new class extends Migration
             $table->integer('price');
             $table->string('batch_no', 50); 
             $table->integer('quantity')->default(0); 
-            $table->string('product_identifier', 50)->nullable(); 
+            //$table->string('product_identifier', 50)->nullable(); 
             $table->date('expired_date')->nullable();
             $table->uuid('organization_id', 32)->nullabe();
-            $table->integer('status')->default(0); 
+            $table->integer('status')->default(1); 
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();

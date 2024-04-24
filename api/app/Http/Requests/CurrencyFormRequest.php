@@ -4,20 +4,29 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 
 class CurrencyFormRequest extends FormRequest
 {
-    
-    public function rules(Request $request = null): array
+    public function rules(): array
     {
+       
+        $currencyId = $this->route('currency'); 
+
         return [
-            'currency_name' => 'required|string|max:15|unique:currencies|regex:/^[^\s]/',
-            'currency_symbol' => 'required|string|max:5|unique:currencies|regex:/^[^\s]/',
+            'currency_name' => [
+                'required',
+                'string',
+                'max:15',
+                'regex:/^[^\s]/',
+                Rule::unique('currencies')->ignore($currencyId) 
+            ],
+            'currency_symbol' => [
+                'required',
+                'string',
+                'max:5',
+                'regex:/^[^\s]/',
+                Rule::unique('currencies')->ignore($currencyId) 
+            ],
         ];
     }
-    
-  
-
 }

@@ -59,9 +59,25 @@ class Customer extends Model
                 $this->attributes['type_id'] = 2;
                 break;
             default:
-                $this->attributes['type_id'] = 1; // Default to 'Individual'
+                $this->attributes['type_id'] = 1; 
         }
     }
+    public function scopeOfType($query, $type)
+    {
+        $typeId = $type === 'company' ? 2 : 1;
+        return $query->where('type_id', $typeId);
+    }
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by')
+                    ->select(['id', \DB::raw("CONCAT(first_name, ' ', COALESCE(contact_person, ''), ' ', last_name) as fullname")]);
+    }
 
+   
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by')
+                    ->select(['id', \DB::raw("CONCAT(first_name, ' ', COALESCE(contact_person, ''), ' ', last_name) as fullname")]);
+    }
 
 }

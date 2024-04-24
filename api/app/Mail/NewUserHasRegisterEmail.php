@@ -44,7 +44,7 @@ class NewUserHasRegisterEmail extends Mailable
            
             
             $this->frontendUrl = env('FRONTEND_URL')."/email-verification/".$encryptedToken;
-            $this->first_paragraph ="This is to inform you that your account has been successfully created and your organization code is <b>$user->token</b>";
+            $this->first_paragraph ="This is to inform you that your account has been successfully created and your organization code is <b>$user->organization_code</b>";
             $this->second_paragraph="Click the button to verify your email";
             $this->btn_label = "Verify Email";
             $this->title = "Registration";

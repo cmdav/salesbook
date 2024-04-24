@@ -24,7 +24,7 @@ class SaleRepository
 
        return Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
                         //'store:id,product_type_id,quantity_available',
-                        'customers:id,first_name,last_name,phone_number',
+                        'customers:id,first_name,last_name,contact_person,phone_number',
                         'Price:id,selling_price,cost_price'
                         //'organization:id,organization_name,organization_logo'
                         // 'Price' => function ($query) {
@@ -114,9 +114,11 @@ class SaleRepository
             // 'store_price_id' => optional($sale->store)->price_id,
             // 'store_quantity_available' => optional($sale->store)->quantity_available,
             // Customer details
-            'customer_first_name' => optional($sale->customers)->first_name,
-            'customer_last_name' => optional($sale->customers)->last_name,
+            'customer_detail' => optional($sale->customers)->first_name . ' ' . optional($sale->customers)->last_name . ' ' . optional($sale->customers)->contact_person,
+
             'customer_phone_number' => optional($sale->customers)->phone_number,
+            'created_by' => optional($sale->creator)->fullname,
+            'updated_by' => optional($sale->updater)->fullname,
             // Organization details
             // 'organization_id' => optional($sale->organization)->id,
             // 'organization_name' => optional($sale->organization)->organization_name,
@@ -180,16 +182,19 @@ class SaleRepository
             // Customer details for the email
             $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
                         ->where('id', $data['customer_id'])
-                        ->firstOrFail();
-            $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
+                        ->first();
+            if($user){
+                $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
 
-            // Generate email content
-            $tableDetail = $this->generateProductDetailsTable($productDetails);
-            $emailService->sendEmail(
-                ['email' => $user->email, 'first_name' => $customerDetail],
-                "sales-receipt",
-                $tableDetail
-            );
+                // Generate email content
+
+                $tableDetail = $this->generateProductDetailsTable($productDetails);
+                $emailService->sendEmail(
+                    ['email' => $user->email, 'first_name' => $customerDetail],
+                    "sales-receipt",
+                    $tableDetail
+                );
+            }
 
             return true;
         });

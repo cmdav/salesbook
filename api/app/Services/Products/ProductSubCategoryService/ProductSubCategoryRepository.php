@@ -11,8 +11,10 @@ class ProductSubCategoryRepository
 
     private function query(){
         
-        return ProductSubCategory::select('id','category_id', 'sub_category_name','sub_category_description')
-                 ->with('category:id,category_name');
+        return ProductSubCategory::select('id','category_id', 'sub_category_name','sub_category_description','created_by','updated_by')
+                ->latest()
+                 ->with('category:id,category_name')
+                 ->with('creator','updater');
     }
     public function index()
     {
@@ -80,6 +82,8 @@ class ProductSubCategoryRepository
             'sub_category_name' => $productSubCategory->sub_category_name,
             'sub_category_description' => $productSubCategory->sub_category_description,
             'category_id' => optional($productSubCategory->category)->category_name,
+            'created_by' => optional($productSubCategory->creator)->fullname,
+            'updated_by' => optional($productSubCategory->updater)->fullname,
         ];
     }
 }

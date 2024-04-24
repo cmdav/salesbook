@@ -34,7 +34,7 @@ class MeasurementController extends Controller
         return response()->json($measurement);
     }
 
-    public function update($id, Request $request)
+    public function update($id, MeasurementFormRequest $request)
     {
        
         $measurement =$this->measurementService->updateMeasurement($id, $request->all());
