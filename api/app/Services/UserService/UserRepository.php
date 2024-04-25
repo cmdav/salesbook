@@ -18,7 +18,7 @@ class UserRepository
     protected function transformSaleUsers(object $user): array
     {
         $transformed = [
-           
+            "id" => $user->first_name,
             "first_name" => $user->first_name,
             "last_name" => $user->last_name,
            
@@ -313,6 +313,16 @@ class UserRepository
         $user->update($request);
     
         return $user; 
+    }
+    public function delete($id)
+    {
+        $user = User::where('id', $id)->first();
+        
+        if ($user) {
+            
+            return $user->delete();
+        }
+        return null;
     }
     
 

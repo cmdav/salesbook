@@ -20,7 +20,7 @@ class Purchase extends Model
         'batch_no',
         'quantity',
         'product_identifier',
-        'expired_date',
+        'expiry_date',
         'organization_id',
         'status',
         'created_by',

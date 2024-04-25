@@ -25,8 +25,8 @@ class DashboardStatRepository
         }
           
             $activeUsers = DB::table('users')->where('type_id', 2)->count();
-            $customers = DB::table('users')->where('type_id', 0)->count();
-            $suppliers = DB::table('users')->where('type_id', 1)->count();
+            $customers = DB::table('customers')->count();
+            $suppliers = DB::table('users')->where('type_id', 3)->count();
             $totalProduct = DB::table('products')->count();
             $totalProductType = DB::table('product_types')->count();
 

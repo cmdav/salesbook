@@ -64,7 +64,7 @@ class UserController extends Controller
             //1 registration email
             if (!$request->has('role_id')) {
                
-              // dd($user->organization_code);
+               //dd($user->organization_code);
                 $this->emailService->sendEmail($user, 'register', $user->organization_code);
                 $response ='Verify your account using the verification link sent to your email.';
             }
@@ -101,6 +101,11 @@ class UserController extends Controller
             return response()->json(['message' => 'An error occur. Please try again .'], 500);
         }
 
+    }
+    public function destroy($id)
+    {
+        $this->userService->deleteUser($id);
+        return response()->json(null, 204);
     }
    
 }

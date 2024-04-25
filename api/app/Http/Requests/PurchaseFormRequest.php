@@ -31,7 +31,7 @@ class PurchaseFormRequest extends FormRequest
                 'purchases.*.batch_no' => 'required|string|max:50',
                 'purchases.*.quantity' => 'required|integer',
                 'purchases.*.product_identifier' => 'nullable|string|max:50',
-                'purchases.*.expired_date' => [
+                'purchases.*.expiry_date' => [
                     'nullable',
                     'date',
                     'after_or_equal:' . now()->startOfYear()->toDateString() // Checks if the date is within the current year or future

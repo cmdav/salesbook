@@ -62,7 +62,7 @@ class PurchaseRepository
             'quantity' => $purchase->quantity,
 
             //'product_identifier' => $purchase->product_identifier,
-            'expiry_date' => $purchase->expired_date,
+            'expiry_date' => $purchase->expiry_date,
             //'status' => '',
             // 'created_by' => $purchase->created_by,
             // 'updated_by' => $purchase->updated_by,
@@ -102,10 +102,10 @@ class PurchaseRepository
             $purchase->batch_no = $purchaseData['batch_no'];
             $purchase->quantity = $purchaseData['quantity'];
             $purchase->product_identifier = $purchaseData['product_identifier'];
-            $purchase->expired_date = $purchaseData['expired_date'];
+            $purchase->expiry_date = $purchaseData['expiry_date'];
             $purchase->save();
         }
-        return response()->json(['message' => 'Permissions created successfully!'], 201);  
+        return response()->json(['message' => 'Purchase created successfully!'], 201);  
         // return Purchase::create($data);
     }
 

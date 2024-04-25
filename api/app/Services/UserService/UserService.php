@@ -67,7 +67,10 @@ class UserService
     {
         return $this->userRepository->updateUserById($id, $request);
     }
-
+    public function deleteUser($id)
+    {
+        return $this->userRepository->delete($id);
+    }
     
    
    
