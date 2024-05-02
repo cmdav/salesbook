@@ -18,13 +18,12 @@ class UserFormRequest extends FormRequest
        
         'dob' => 'nullable|date|date_format:Y-m-d',
         'phone_number'=>'nullable|string',
-        // 'organization_type' => 'nullable|string|in:sole_properietor,company,sales_personnel',
         'organization_type' => [
             Rule::requiredIf(!$request->filled('role_id')), // Require this field if 'role_id' is not filled
             'string',
-            'in:sole_properietor,company,sales_personnel'
+            'in:sole_properietor,company,sales_personnel,supplier'
         ],
-        'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
+       
         'password' => 
         'required',
         'string',
@@ -36,24 +35,52 @@ class UserFormRequest extends FormRequest
         'regex:/[0-9]/',      // must contain at least one digit
         'regex:/[@$!%*#?&]/', // must contain a special character
     ];
-    // if ($request->input('organization_type') == 'company') { 
+   
+    if ($this->input('organization_type') === 'supplier') {
+      
+        $rules['email'] = [
+            'required',
+            'email',
+            'max:255',
+            function ($attribute, $value, $fail) {
+              
+                $exists = \App\Models\User::where('email', $value)
+                                          ->where('organization_id', $this->input('organization_id'))
+                                          ->exists();
+                if (!$exists) {
+                    $fail($attribute . ' is invalid or does not match the given organization.');
+                }
+            }
+        ];
+    }
+    
+    else {
+       
+        $rules['email'] = [
+            'required',
+            'email',
+            'max:255',
+            Rule::unique('users')->ignore($this->user() ? $this->user()->id : null)
+        ];
+    }
 
-    //     $rules['organization_type'] = 'required|string|in:sole_properietor,company';
-     
-    // }
-     
+
+
+
+
      if ($request->input('organization_type') == 'company') { 
 
         $rules['contact_person'] = 'required|string|max:55';
         $rules['company_name'] = 'required|string|max:55';
         $rules['company_address'] = 'required|string|max:55';
     }
-    //1 for business 0 for sole_properietor
+
     if ($request->input('organization_type') == 'sole_properietor'  || $request->input('organization_type') == 'sales_personnel') { 
 
         $rules['first_name'] = 'required|string|max:55';
         $rules['last_name'] = 'required|string|max:55';
         $rules['middle_name'] = 'nullable|string|max:55';
+        $rules['dob'] = 'nullable|date|max:55';
       
     }
 

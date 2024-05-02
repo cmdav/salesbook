@@ -17,7 +17,7 @@ return new class extends Migration
             $table->uuid('supplier_id')->nullable();
             $table->integer('cost_price')->nullable();
             $table->integer('selling_price')->nullable();
-            $table->integer('auto_generated_selling_price')->nullable();
+           // $table->integer('auto_generated_selling_price')->nullable();
             $table->uuid('currency_id')->nullable(); 
             $table->integer('discount')->nullable();
             $table->boolean('status')->default(0);

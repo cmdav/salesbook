@@ -13,7 +13,7 @@ class Purchase extends Model
 
     protected $fillable = [
         'product_type_id',
-        'price',
+        'price_id',
         'currency_id',
         'supplier_id',
         'selling_price',
@@ -73,7 +73,7 @@ class Purchase extends Model
     }
     public function price(){
 
-        return $this->belongsTo(price::class);
+        return $this->belongsTo(Price::class);
     }
     public function creator()
     {

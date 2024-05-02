@@ -9,6 +9,7 @@ use App\Services\Inventory\OrganizationService\OrganizationService;
 use App\Services\Supply\SupplierOrganizationService\SupplierOrganizationService;
 use App\Http\Requests\EmailFormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 
 
@@ -53,6 +54,14 @@ class SendUserEmailController extends Controller
             return  $this->passwordResetEmail();
          }
          else if($request->type === 'invitation'){
+
+            $request->validate([
+                'email' => ['required', 'email', Rule::unique('users', 'email')],
+                'organization_id' => [ 'required',  'uuid',Rule::exists('organizations', 'id')],
+                'type' => [ 'required','in:invitation'],
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255'
+            ]);
 
             $this->organization_code = $request->organization_code;
             return  $this->InvitationEmail($request->organization_id,$request->first_name,$request->last_name);
@@ -127,23 +136,24 @@ class SendUserEmailController extends Controller
        
         //new user;
         if (!$user || is_null($user->email_verified_at)) {
-          
+         
             try {
                 if (!$user || is_null($user->email_verified_at)) {
+
+
                     $newUser = $this->userService->createUser([
                         'email' => $this->email,
-                        'type_id' => 1,
                         'first_name' => $first_name,
                         'last_name' => $last_name,
                         'password' => 'none',
-                        'organization_id' => $organization_id
+                        'organization_id' => $organization_id,
                     ]);
-            
+                    
                     $this->supplierOrganizationService->createSupplierOrganization([
                         'supplier_id' => $newUser->id,
                         'organization_id' => $organization_id,
                     ]);
-            
+                  
                     if ($this->emailService->sendEmail($newUser, "new-supplier", $data)) {
                         return response()->json(['message' => 'Invitation email has been sent to this supplier.']);
                     } else {

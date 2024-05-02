@@ -98,16 +98,16 @@ class DatabaseSeeder extends Seeder
             'role_id' => $adminRole->id,
     
         ]);
-        \App\Models\User::factory()->create([
-            'first_name' => 'Test',
-            'email' => 'admin2@gmail.com',
-            'password'=>'test123',
-            'organization_code'=>'123457',
-            'type_id' => 2,
-            'role_id' => $unauthorized->id,
+        // \App\Models\User::factory()->create([
+        //     'first_name' => 'Test',
+        //     'email' => 'admin2@gmail.com',
+        //     'password'=>'test123',
+        //     'organization_code'=>'123457',
+        //     'type_id' => 2,
+        //     'role_id' => $unauthorized->id,
             
     
-        ]);
+        // ]);
         // \App\Models\User::factory()->create([
         //     'first_name' => 'Test',
         //     'email' => 'admin3@gmail.com',
@@ -118,14 +118,14 @@ class DatabaseSeeder extends Seeder
             
     
         // ]);
-        \App\Models\User::factory()->create([
-            'first_name' => 'Test',
-            'email' => 'supplier@gmail.com',
-            'password'=>'test123',
-            'organization_code'=>'123457',
-            'type_id' => 1,
+        // \App\Models\User::factory()->create([
+        //     'first_name' => 'Test',
+        //     'email' => 'supplier@gmail.com',
+        //     'password'=>'test123',
+        //     'organization_code'=>'123457',
+        //     'type_id' =>3,
     
-        ]);
+        // ]);
         // \App\Models\User::factory(1)->create([
         
         //     'role_id' => 1,

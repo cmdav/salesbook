@@ -83,28 +83,50 @@ class User extends Authenticatable
 
             $request = app('request');
 
-           
+           //
             if (!$request->has('role_id')) {
 
-              
-                do {
+                if (!$request->has('type')) 
+                {
+                        do {
+                            $time = time(); 
+                            $randomNumber = rand(100000, 999999);
+                            $hash = hash('sha256', $randomNumber . $time);
+                            $code = hexdec(substr($hash, 0, 6)) % 1000000; 
+                        
+                        } while (User::where('organization_code', $code)->exists());
+                        
+                
+                        $user->organization_code = $code;
+                        $user->token =  hexdec(substr($hash, 0, 6)) % 3000000;
+
+
+                        $adminRole = JobRole::where('role_name', 'Admin')->first();
+                        if (!$adminRole) {
+                            throw new ModelNotFoundException('Error from user Admin role not found.');
+                        }
+                        $user->role_id = $adminRole->id;
+
+                        if (($request->has('organization_type')) && ($request->input('organization_type') == 'company')) {
+
+                            $user->type_id = 2;
+
+                        } else if (($request->has('organization_type')) && ($request->input('organization_type') == 'sole_properietor')) {
+
+                            $user->type_id = 1;
+                        }
+                }
+                else {
+
+                    $user->type_id = 3;
+                    $user->email_verified_at = now();
                     $time = time(); 
                     $randomNumber = rand(100000, 999999);
-                    $hash = hash('sha256', $randomNumber . $time);
-                    $code = hexdec(substr($hash, 0, 6)) % 1000000; 
-                
-                } while (User::where('organization_code', $code)->exists());
-                
-           
-                 $user->organization_code = $code;
-                 $user->token =  hexdec(substr($hash, 0, 6)) % 3000000;
-
-
-                $adminRole = JobRole::where('role_name', 'Admin')->first();
-                if (!$adminRole) {
-                    throw new ModelNotFoundException('Error from user Admin role not found.');
+                    $hash = hash('sha256', $randomNumber . $time); 
+                    $user->token =  hexdec(substr($hash, 0, 6)) % 3000000;
                 }
-                $user->role_id = $adminRole->id;
+                
+               
             }
             else{
 
@@ -114,26 +136,26 @@ class User extends Authenticatable
                     $user->organization_code = Auth::user()->organization_code;
                 }
             }
-            // $user->token = \Str::uuid();
+           
         });
 
         static::created(function ($user) {
             $request = app('request');
-            if (!$request->has('role_id')) {
+            if (($request->input('organization_type') == 'company') || ($request->input('organization_type') == 'sole_properietor')) { 
 
                   $request = app('request');
                     $organization = new Organization([
                         'id' => Str::uuid(),
-
                         'organization_code' => $user->organization_code,
                         'organization_type' =>  $request->input('organization_type'),
                         'organization_logo' => 'logo.png', 
-                        //'organization_email' => $user->email,
                         'user_id' => $user->id,
                     
                     ]);
             
                     $organization->save();
+                    $user->organization_id = $organization->id;
+                    $user->save();
              }
         });
 
@@ -145,6 +167,7 @@ class User extends Authenticatable
                     'organization_id' => $user->organization_id
                 ])->update(['status' => 1]);
             }
+           
         });
     }
     public function supplier(){

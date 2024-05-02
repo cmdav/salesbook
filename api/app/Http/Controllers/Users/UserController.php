@@ -62,7 +62,7 @@ class UserController extends Controller
             }
             
             //1 registration email
-            if (!$request->has('role_id')) {
+            if (($request->input('organization_type') == 'company') || ($request->input('organization_type') == 'sole_properietor')) {
                
                //dd($user->organization_code);
                 $this->emailService->sendEmail($user, 'register', $user->organization_code);

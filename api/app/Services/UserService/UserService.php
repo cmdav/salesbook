@@ -22,6 +22,10 @@ class UserService
     {
         return $this->userRepository->userDetail(); 
     }
+    public function allSupplier()
+    {
+        return $this->userRepository->allSupplier(); 
+    }
     public function getUser($type)
     {
 

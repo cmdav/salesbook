@@ -11,8 +11,9 @@ class SupplierProduct extends Model
 {
     use  SetCreatedBy,  HasUuids, HasFactory;
     protected $fillable = [
-        'product_id',
+        'product_type_id',
         'product_description',
+        'price',
         'product_image',
         'product_name',
         'created_by',

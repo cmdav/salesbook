@@ -15,7 +15,7 @@ class Price extends Model
         'supplier_id',
         'cost_price',
         'selling_price',
-        'auto_generated_selling_price',
+        //'auto_generated_selling_price',
         'currency_id',
         'discount',
         'organization_id',

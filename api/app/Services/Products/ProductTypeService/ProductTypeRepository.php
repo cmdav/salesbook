@@ -58,7 +58,19 @@ class ProductTypeRepository
     
     public function getProductTypeByName()
     {
-        return ProductType::select('id','product_type_name')->get();
+        return ProductType::select('id','product_type_name')
+                            ->with('activePrice:id,cost_price,product_type_id,selling_price','store:id,product_type_id,quantity_available')
+                            ->get()->map(function($productType) {
+                               
+                                return [
+                                    'id' => $productType->id,
+                                    'product_type_name' => $productType->product_type_name,
+                                    'price_id' => optional($productType->activePrice)->id,  
+                                    'cost_price' => optional($productType->activePrice)->cost_price ?? 0,  
+                                    'selling_price' => optional($productType->activePrice)->selling_price ?? 0,  
+                                    'quantity_available' => optional( $productType->store)->quantity_available ?? 0  
+                                ];
+                            });
     }
     private function getProductTypes($productId = null)
     {
@@ -102,7 +114,7 @@ class ProductTypeRepository
             'quantity_available' => optional($productType->store)->quantity_available ?? 0,
             "measurement_id" => optional(optional($productType->product)->measurement)->measurement_name,
     
-            'purchasing_price' => optional($productType->latestPurchase)->price ?? 'Not set',
+            'purchasing_price' => optional($productType->latestPurchase)->price_id ?? 'Not set',
             'selling_price' => optional($productType->activePrice)->selling_price ?? 'Not set',
             'supplier_name' => trim((optional($productType->suppliers)->first_name ?? '') . ' ' . (optional($productType->suppliers)->last_name ?? '')) ?: 'None',
             'supplier_phone_number' => optional($productType->suppliers)->phone_number ?? 'None',

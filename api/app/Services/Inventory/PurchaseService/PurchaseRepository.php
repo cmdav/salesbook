@@ -68,7 +68,8 @@ class PurchaseRepository
             // 'updated_by' => $purchase->updated_by,
             // 'created_at' => $purchase->created_at,
             // 'updated_at' => $purchase->updated_at,
-            'price' => $purchase->price,
+            'price' => $purchase->price ? $purchase->price->cost_price : 0,
+
             'created_by' => optional($purchase->creator)->fullname,
             'updated_by' => optional($purchase->updater)->fullname,
             //'system_price' => optional($purchase->price)->system_price,
@@ -97,7 +98,7 @@ class PurchaseRepository
             $purchase = new Purchase();
             $purchase->product_type_id = $purchaseData['product_type_id'];
             $purchase->supplier_id = $purchaseData['supplier_id'];
-            $purchase->price = $purchaseData['price'];
+            $purchase->price_id = $purchaseData['price_id'];
             //$purchase->currency_id = $purchaseData['currency_id'];
             $purchase->batch_no = $purchaseData['batch_no'];
             $purchase->quantity = $purchaseData['quantity'];

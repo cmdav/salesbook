@@ -51,6 +51,8 @@ Route::middleware('auth:sanctum')->group(function() {
         route::get('get-price-by-product-type/{id}', App\Http\Controllers\Inventory\PriceByProductTypeController::class);
         route::get('all-price-by-product-type/{id}', App\Http\Controllers\Inventory\AllPriceByProductTypeController::class);
         route::get('latest-product-type-price/{id}', App\Http\Controllers\Inventory\LatestPriceByProductTypeController::class);
+        route::get('latest-supplier-price/{product_type_id}/{supplier_id}', App\Http\Controllers\Inventory\LatestSupplierPriceController::class);
+    
         route::get('all-products', App\Http\Controllers\Product\AllProductController::class);
         route::get('all-product-sub-categories-by-category-id/{id}', App\Http\Controllers\Product\AllProductSubCategoryController::class);
         route::get('product-type-by-id/{id}', App\Http\Controllers\Product\ProductTypeByIdController::class);
@@ -58,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::get('all-supplier-products', App\Http\Controllers\Supply\AllSupplierProductController::class);
         route::get('user-detail', App\Http\Controllers\Users\AllUserDetailController::class);
         route::get('all-job-roles', App\Http\Controllers\Security\AllJobRoleController::class);
+        route::get('all-suppliers', App\Http\Controllers\Users\AllSupplierController::class);
        
         route::get('all-pages', App\Http\Controllers\Security\AllPageController::class);
         Route::get('search-users/{searchCriteria}', App\Http\Controllers\Users\SearchUserController::class);

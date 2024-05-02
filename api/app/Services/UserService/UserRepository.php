@@ -18,7 +18,7 @@ class UserRepository
     protected function transformSaleUsers(object $user): array
     {
         $transformed = [
-            "id" => $user->first_name,
+            "id" => $user->id,
             "first_name" => $user->first_name,
             "last_name" => $user->last_name,
            
@@ -94,6 +94,30 @@ class UserRepository
         $user_id =Auth::user()->id;
         return $this->returnUserDetail($user_id);
     }
+    public function allSupplier(){
+
+        $users = User::select(
+                                "id", 
+                                "first_name",
+                                   
+                                    "last_name", 
+                                    "phone_number",
+                                
+                                     )
+             ->where('type_id', 3)
+             ->get()
+             ->map(function ($user) {
+                 return [
+                     'id' => $user->id,
+                     'customer_id' =>  $user->first_name." " .$user->last_name." ". $user->phone_number,
+                     
+                 ];
+             });
+
+        return $users;
+
+         
+    }
     public function userDetail(){
 
         $users = User::select(
@@ -154,7 +178,7 @@ class UserRepository
         if($type == 'supplier')
         {
                         $user = User::select('id', 'first_name', 'last_name', 'organization_id', 'type_id', 'phone_number', 'email')
-                        ->where('type_id', 1) 
+                        ->where('type_id', 3) 
                         ->where('organization_id', Auth::user()->organization_id)
                         ->with(['supplier:id,user_id,bank_name,account_name,account_number,state,address'])
                         ->whereHas('supplierOrganization', function($query) {
@@ -182,20 +206,20 @@ class UserRepository
 
         }
         
-        else{
-            if($type == 'company_customer'){
+        // else{
+        //     if($type == 'company_customer'){
                 
-                return  User::select('id','company_name','contact_person','type_id','phone_number','email')
-                ->where('role_id', 1)
-                ->where('organization_id', Auth::user()->organization_id)
-                ->latest()->paginate(20);
-            }
-             return  User::select('id','first_name','last_name','organization_id','type_id','phone_number','email','company_name','contact_person','company_address')
-                                ->where('type_id', 0)
-                                ->where('role_id', 0)
-                                ->where('organization_id', Auth::user()->organization_id)
-                                ->latest()->paginate(20);
-        }
+        //         return  User::select('id','company_name','contact_person','type_id','phone_number','email')
+        //         ->where('role_id', 1)
+        //         ->where('organization_id', Auth::user()->organization_id)
+        //         ->latest()->paginate(20);
+        //     }
+        //      return  User::select('id','first_name','last_name','organization_id','type_id','phone_number','email','company_name','contact_person','company_address')
+        //                         ->where('type_id', 0)
+        //                         ->where('role_id', 0)
+        //                         ->where('organization_id', Auth::user()->organization_id)
+        //                         ->latest()->paginate(20);
+        // }
 
         
 
