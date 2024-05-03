@@ -27,24 +27,9 @@ class PriceNotificationService
 
     public function show($id)
     {
-        return $this->PriceNotificationRepository->findById($id);
+        return $this->PriceNotificationRepository->show($id);
     }
-    public function getPriceByProductType($id)
-    {
-        return $this->PriceNotificationRepository->getPriceByProductType($id);
-    }
-    public function getAllPriceByProductType($id)
-    {
-        return $this->PriceNotificationRepository->getAllPriceByProductType($id);
-    }
-    public function getLatestPriceByProductType($id)
-    {
-        return $this->PriceNotificationRepository->getLatestPriceByProductType($id);
-    }
-    public function getLatestSupplierPrice($product_type_id, $supplier_id)
-    {
-        return $this->PriceNotificationRepository->getLatestSupplierPrice($product_type_id, $supplier_id);
-    }
+   
     public function updatePrice($id, array $data)
     {
         return $this->PriceNotificationRepository->update($id, $data);

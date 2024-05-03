@@ -42,38 +42,27 @@ class PriceNotificationRepository
 
     public function create(array $data)
     {
-        DB::beginTransaction(); 
-    
-        try {
-            $price = Price::create($data); 
+        return PriceNotification::UpdateOrCreate(
+            [
+                'supplier_id' => $data['supplier_id'],
+                'product_type_id' => $data['product_type_id']
+            ],$data); 
 
-            if ($data['status'] == 1) {
-                Price::where('product_type_id', $data['product_type_id'])
-                     ->where('id', '!=', $price->id) 
-                     ->update(['status' => 0]);
-            }
-    
-            DB::commit(); 
-    
-            return $price; 
-        } catch (\Exception $e) {
-            DB::rollBack(); 
-            throw $e; 
-        }
+
     }
     
 
-    public function findById($id)
+    public function show($id)
     {
-        return Price::find($id);
+        return PriceNotification::find($id);
     }
 
     public function update($id, array $data)
     {
-        $Price = $this->findById($id);
-      
+        $Price = PriceNotification::find($id);
+        
         if ($Price) {
-
+         
             $Price->update($data);
         }
         return $Price;
@@ -81,7 +70,7 @@ class PriceNotificationRepository
 
     public function delete($id)
     {
-        $Price = $this->findById($id);
+        $Price = PriceNotification::find($id);
         if ($Price) {
             
             return $Price->delete();
