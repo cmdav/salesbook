@@ -39,6 +39,10 @@ class ProductType extends Model
 
         return $this->hasMany(Price::class);
     }
+    public function pricenotification(){
+
+        return $this->hasOne(PriceNotification::class);
+    }
     public function store(){
 
         return $this->hasOne(Store::class,'product_type_id','id');

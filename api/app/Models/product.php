@@ -16,6 +16,7 @@ class Product extends Model
         'product_name',
         'product_description',
         'product_image',
+        'vat',
         'measurement_id',
         'sub_category_id',
         'created_by',

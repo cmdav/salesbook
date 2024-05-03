@@ -24,6 +24,11 @@ class SupplierProductService
        
         return $this->supplierProductRepository->index();
     }
+    public function getAuthSupplierProduct()
+    {
+       
+        return $this->supplierProductRepository->getAuthSupplierProduct();
+    }
     public function listAllSupplierProduct()
     {
        

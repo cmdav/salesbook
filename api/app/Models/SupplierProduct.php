@@ -13,9 +13,9 @@ class SupplierProduct extends Model
     protected $fillable = [
         'product_type_id',
         'product_description',
-        'price',
-        'product_image',
-        'product_name',
+        // 'price',
+        // 'product_image',
+        // 'product_name',
         'created_by',
         'updated_by',
         'supplier_id'
@@ -25,4 +25,20 @@ class SupplierProduct extends Model
 
         return $this->hasMany(Store::class, 'supplier_product_id', 'id');
     }
+    public function users(){
+
+        return $this->belongsTo(User::class, 'supplier_id', 'id');
+    }
+    public function producttypes(){
+
+        return $this->belongsTo(ProductType::class, 'product_type_id', 'id');
+    }
+    // In ProductType model
+    public function prices()
+    {
+        return $this->hasMany(Price::class);
+    }
+
+    
+
 }

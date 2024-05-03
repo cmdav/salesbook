@@ -12,7 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('price_notifications', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id',32)->primary();
+            $table->uuid('product_type_id'); 
+            $table->uuid('supplier_id')->nullable();
+            $table->integer('cost_price');
+            $table->integer('selling_price')->nullable();
+            $table->boolean('status')->default(0)->comment('3 for active, 2 for rejected, 1 for pending');
+            $table->uuid('created_by', 32)->nullable();
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
         });
     }

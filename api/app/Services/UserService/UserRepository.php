@@ -109,7 +109,7 @@ class UserRepository
              ->map(function ($user) {
                  return [
                      'id' => $user->id,
-                     'customer_id' =>  $user->first_name." " .$user->last_name." ". $user->phone_number,
+                     'supplier_detail' =>  $user->first_name." " .$user->last_name." ". $user->phone_number,
                      
                  ];
              });
