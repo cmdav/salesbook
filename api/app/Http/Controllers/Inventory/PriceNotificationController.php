@@ -26,7 +26,8 @@ class PriceNotificationController extends Controller
         $request->validate([
             'supplier_id'=> 'required','uuid',
             'product_type_id'=>'required','uuid',
-            'cost_price'=>'required','integer'
+            'cost_price'=>'required','integer',
+            'status'=>'required','integer',
         ]);
         $price =$this->priceNotificationService->createPrice($request->all());
         return response()->json($price, 201);
@@ -38,9 +39,14 @@ class PriceNotificationController extends Controller
         return response()->json($price);
     }
    
-
+    
     public function update($id, Request $request)
     {
+        $request->validate([
+           
+            'selling_price'=>'required','integer',
+            'status'=>'required','integer'
+        ]);
        
         $price =$this->priceNotificationService->updatePrice($id, $request->all());
         return response()->json($price);
