@@ -16,6 +16,7 @@ class SaleFormRequest extends FormRequest
             'payment_method' => 'required|string',
             'products' => 'required|array|min:1',
             'products.*.product_type_id' => 'required|uuid',
+            'products.*.batch_no' => 'nullable|string',
             'products.*.price_sold_at' => [
                 'required',
                 'integer',

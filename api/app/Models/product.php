@@ -54,6 +54,18 @@ class Product extends Model
             ]);
         });
     }
+    public function getVatAttribute($value)
+    {
+        switch ($value) {
+            case 0:
+                return 'No';
+            case 1:
+                return 'Yes';
+            default:
+                return 'No'; 
+        }
+    }
+
 
     public function measurement(){
        

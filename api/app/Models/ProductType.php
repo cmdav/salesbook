@@ -15,6 +15,7 @@ class ProductType extends Model
         'product_id',
         'product_type_image',   
         'product_type_description',
+        'vat',
         'organization_id',
         'selling_price',
         'supplier_id',
@@ -34,6 +35,10 @@ class ProductType extends Model
     public function product(){
 
         return $this->belongsTo(Product::class);
+    }
+    public function batches(){
+
+        return $this->hasMany(Store::class, 'product_type_id', 'id')->select('id','product_type_id','batch_no','quantity_available');
     }
     public function price(){
 

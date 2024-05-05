@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('stores', function (Blueprint $table) {
             $table->uuid('id',32)->primary();
             $table->uuid('product_type_id');
+            $table->string('batch_no');
             $table->uuid('store_owner'); 
             $table->integer('quantity_available')->default(0); 
             $table->integer('store_type')->default(0)->comment("0 supplier, 1 company"); 

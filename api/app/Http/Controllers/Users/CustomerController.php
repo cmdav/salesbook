@@ -45,7 +45,8 @@ class CustomerController extends Controller
         // Validate the request data
         $validatedData = $request->validate($rules);
         
-        return $this->CustomerService->create($request->all());
+        $data = $this->CustomerService->create($request->all());
+        return response()->json(['data'=>$data, 'message'=>'Submission successful']);
     
    }
 }

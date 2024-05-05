@@ -6,6 +6,7 @@ use App\Models\Purchase;
 use App\Models\SupplierRequest;
 use App\Models\Inventory;
 use App\Models\Sale;
+use App\Models\Price;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
@@ -81,34 +82,63 @@ class PurchaseRepository
           
         ];
     }
-    
-
-
-
-
-
-
-
-    
     public function create(array $data)
     {
+    DB::beginTransaction();
+    
+    try {
+        $purchases = [];
         
         foreach ($data['purchases'] as $purchaseData) {
-            // Create a new Purchase object
+           
+            if (isset($purchaseData['price_id']) && is_numeric($purchaseData['price_id'])) {
+                   
+                $price = new Price();
+                $price->product_type_id = $purchaseData['product_type_id'];
+                $price->supplier_id = $purchaseData['supplier_id'];
+                $price->cost_price = $purchaseData['cost_price'];
+                $price->selling_price = $purchaseData['selling_price'];
+                $price->status = 1;
+                $price->save();
+
+                $purchaseData['price_id'] = $price->id;
+            }
+
+          
+            if (!empty($purchaseData['supplier_id'])) {
+                $existingRecord = \App\Models\SupplierProduct::where('product_type_id', $purchaseData['product_type_id'])
+                                                            ->where('supplier_id', $purchaseData['supplier_id'])
+                                                            ->first();
+                if (!$existingRecord) {
+                    $supplierProduct = new \App\Models\SupplierProduct();
+                    $supplierProduct->product_type_id = $purchaseData['product_type_id'];
+                    $supplierProduct->supplier_id = $purchaseData['supplier_id'];
+                    $supplierProduct->save();
+                }
+            }
+
             $purchase = new Purchase();
             $purchase->product_type_id = $purchaseData['product_type_id'];
             $purchase->supplier_id = $purchaseData['supplier_id'];
             $purchase->price_id = $purchaseData['price_id'];
-            //$purchase->currency_id = $purchaseData['currency_id'];
             $purchase->batch_no = $purchaseData['batch_no'];
             $purchase->quantity = $purchaseData['quantity'];
             $purchase->product_identifier = $purchaseData['product_identifier'];
             $purchase->expiry_date = $purchaseData['expiry_date'];
             $purchase->save();
+            
+            $purchases[] = $purchase;
         }
-        return response()->json(['message' => 'Purchase created successfully!'], 201);  
-        // return Purchase::create($data);
+
+        DB::commit();
+        return 'Purchase created successfully!';
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return 'Failed to create purchases';
     }
+}
+
+
 
     public function findById($id)
     {

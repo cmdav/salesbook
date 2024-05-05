@@ -23,12 +23,13 @@ class PriceNotificationController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(['status' => 0]);
         $request->validate([
-            'supplier_id'=> 'required','uuid',
-            'product_type_id'=>'required','uuid',
-            'cost_price'=>'required','integer',
-            'status'=>'required','integer',
+            'supplier_id' => 'required|uuid',
+            'product_type_id' => 'required|uuid',
+            'cost_price' => 'required|integer',
         ]);
+        
         $price =$this->priceNotificationService->createPrice($request->all());
         return response()->json($price, 201);
     }
@@ -44,8 +45,8 @@ class PriceNotificationController extends Controller
     {
         $request->validate([
            
-            'selling_price'=>'required','integer',
-            'status'=>'required','integer'
+            'selling_price' => 'required|integer',
+            'status' => 'required|string|in:pending,accepted,decline',
         ]);
        
         $price =$this->priceNotificationService->updatePrice($id, $request->all());

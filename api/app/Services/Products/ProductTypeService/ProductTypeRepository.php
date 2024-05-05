@@ -15,13 +15,18 @@ class ProductTypeRepository
     private function query(){
 
         return ProductType::with([
-            'product:id,category_id,product_name,measurement_id,sub_category_id', 
+            'product:id,category_id,product_name,vat,measurement_id,sub_category_id', 
             'product.measurement:id,measurement_name',
             'product.subCategory:id,sub_category_name',
-            'store:id,product_type_id,quantity_available',
+            // 'store:id,product_type_id,quantity_available',
             'suppliers:id,first_name,last_name,phone_number',
             'activePrice' => function ($query) {
                 $query->select('id',  'cost_price', 'selling_price','product_type_id');
+            },
+            'store' => function ($query) {
+                $query->selectRaw('product_type_id, SUM(quantity_available) as total_quantity')
+                      ->where('status', 1)
+                      ->groupBy('product_type_id');
             }
         ])->latest();
     }
@@ -58,19 +63,39 @@ class ProductTypeRepository
     
     public function getProductTypeByName()
     {
-        return ProductType::select('id','product_type_name')
-                            ->with('activePrice:id,cost_price,product_type_id,selling_price','store:id,product_type_id,quantity_available')
-                            ->get()->map(function($productType) {
+        return ProductType::select('id','product_type_name','product_id')
+                            ->with(['activePrice:id,cost_price,product_type_id,selling_price',
+                                    'product:id,vat',
+                                    'batches' => function ($query) {
+                                        $query->where('status', 1);  
+                                    },
+                                    'store' => function ($query) {
+                                        $query->selectRaw('product_type_id, SUM(quantity_available) as total_quantity')
+                                              ->where('status', 1)
+                                              ->groupBy('product_type_id'); 
+                                    }
+                                    ])
+                                   
+                            ->get()
+                            ->map(function($productType) {
                                
                                 return [
-                                    'id' => $productType->id,
-                                    'product_type_name' => $productType->product_type_name,
-                                    'price_id' => optional($productType->activePrice)->id,  
-                                    'cost_price' => optional($productType->activePrice)->cost_price ?? 0,  
-                                    'selling_price' => optional($productType->activePrice)->selling_price ?? 0,  
-                                    'quantity_available' => optional( $productType->store)->quantity_available ?? 0  
-                                ];
-                            });
+                                     'id' => $productType->id,
+                                     'product_type_name' => $productType->product_type_name,
+                                     'price_id' => optional($productType->activePrice)->id,  
+                                     'cost_price' => optional($productType->activePrice)->cost_price ?? 0,  
+                                     'selling_price' => optional($productType->activePrice)->selling_price ?? 0,  
+                                     'quantity_available' => optional( $productType->store)->total_quantity ?? 0,
+                                     'vat' => optional( $productType->product)->vat,
+                                     'batches' => $productType->batches->map(function ($batch) {
+                                         return [
+                                             'id' => $batch->id,
+                                             'batch_no' => $batch->batch_no,
+                                             'batch_quantity_left' =>$batch->quantity_available
+                                         ];
+                                     })->toArray() 
+                                 ];
+                             });
     }
     private function getProductTypes($productId = null)
     {
@@ -100,10 +125,11 @@ class ProductTypeRepository
             'product_type_image' => $productType->product_type_image,
             'product_type_description' => $productType->product_type_description,
             'view_price' => 'view price',
-
+            'vat' => optional($productType->product)->vat,
             'product_name' => optional($productType->product)->product_name,
             'product_description' => $productType->product_type_description,
             'product_image' => $productType->product_type_image,
+
             'product_category' => optional(optional($productType->product)->product_category)->category_name,
             
             'category_ids' => optional(optional($productType->product)->product_category)->id,
@@ -111,7 +137,7 @@ class ProductTypeRepository
     
             'product_sub_category' => optional(optional($productType->product)->subCategory)->sub_category_name,
             'sub_category_id' => optional(optional($productType->product)->subCategory)->id,
-            'quantity_available' => optional($productType->store)->quantity_available ?? 0,
+            'quantity_available' => optional($productType->store)->total_quantity ?? 0,
             "measurement_id" => optional(optional($productType->product)->measurement)->measurement_name,
     
             'purchasing_price' => optional($productType->latestPurchase)->price_id ?? 'Not set',

@@ -12,9 +12,12 @@ class PriceNotificationRepository
 {
     public function index()
     {
+        //if(auth()->user()->type_id < 3){
         $priceNotification= PriceNotification::select('id','product_type_id','supplier_id','cost_price','selling_price','status')
                                   ->with('productTypes:id,product_type_name,product_type_image',
-                                         'supplier:id,first_name,last_name,contact_person,phone_number')->paginate(20);
+                                         'supplier:id,first_name,last_name,contact_person,phone_number')
+                                         ->latest()
+                                         ->paginate(20);
 
                                          $priceNotification->getCollection()->transform(function ($Price) {
                                             return $this->transformProduct($Price);
@@ -22,6 +25,9 @@ class PriceNotificationRepository
                                 
 
                                          return  $priceNotification;
+       // }
+        
+        
     }
 
     private function transformProduct($price){
@@ -65,28 +71,32 @@ class PriceNotificationRepository
     if ($priceNotification) {
         // Update the price notification
         $priceNotification->update($data);
-
-        // Set previous prices to inactive
-        Price::where('supplier_id', $priceNotification->supplier_id)
-             ->where('product_type_id', $priceNotification->product_type_id)
-             ->update(['status' => 0]);  // Set all other prices for this product type to inactive
+       
+        if($data['status'] == 'accepted'){
+          
+            // Set previous prices to inactive
+            Price::where('supplier_id', $priceNotification->supplier_id)
+                ->where('product_type_id', $priceNotification->product_type_id)
+                ->update(['status' => 0]);  // Set all other prices for this product type to inactive
 
         // Update or create a new active price
-        Price::updateOrCreate(
-            [
-                'supplier_id' => $priceNotification->supplier_id,
-                'product_type_id' => $priceNotification->product_type_id,
-                'status' => 1  // Ensure to target only the active status
-            ],
-            [
-                'cost_price' => $priceNotification->cost_price,
-                'selling_price' => $priceNotification->selling_price,
-                'currency_id' => $data['currency_id'] ?? null,  // Assuming you get currency_id in the data array
-                'organization_id' => $data['organization_id'] ?? null,  // Assuming organization_id is provided
-                'created_by' => $data['created_by'] ?? auth()->id(),  // Assuming the creator's ID is passed or take from auth user
-                'updated_by' => $data['updated_by'] ?? auth()->id()  // Same assumption as above
-            ]
-        );
+    
+            Price::updateOrCreate(
+                [
+                    'supplier_id' => $priceNotification->supplier_id,
+                    'product_type_id' => $priceNotification->product_type_id,
+                    'status' => 1  // Ensure to target only the active status
+                ],
+                [
+                    'cost_price' => $priceNotification->cost_price,
+                    'selling_price' => $priceNotification->selling_price,
+                    'currency_id' => $data['currency_id'] ?? null,  // Assuming you get currency_id in the data array
+                    'organization_id' => $data['organization_id'] ?? null,  // Assuming organization_id is provided
+                    'created_by' => $data['created_by'] ?? auth()->id(),  // Assuming the creator's ID is passed or take from auth user
+                    'updated_by' => $data['updated_by'] ?? auth()->id()  // Same assumption as above
+                ]
+            );
+        }
     }
 
     return $priceNotification;

@@ -16,7 +16,6 @@ class Purchase extends Model
         'price_id',
         'currency_id',
         'supplier_id',
-        'selling_price',
         'batch_no',
         'quantity',
         'product_identifier',
@@ -35,7 +34,9 @@ class Purchase extends Model
 
         static::created(function ($purchase) {
            
-                $store = Store::where('product_type_id', $purchase->product_type_id)
+                $store = Store::where([['product_type_id', $purchase->product_type_id],
+                    ['batch_no', $purchase->batch_no]])
+                    
                 ->where('store_owner', auth()->check() ? auth()->user()->id : 123) 
                // ->where('price_id', $purchase->price_id)
                 ->first();
@@ -50,6 +51,7 @@ class Purchase extends Model
                         //'store_owner' => $purchase->purchase_by,
                         'store_owner'=> auth()->check() ? auth()->user()->id : 123,
                         'quantity_available' => $purchase->quantity,
+                        'batch_no' => $purchase->batch_no,
                         'store_type' => auth()->check() ?auth()->user()->type_id:2,
                         'created_by' => $purchase->created_by, 
                         'status' => 1, 

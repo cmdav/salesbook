@@ -13,7 +13,7 @@ class CustomerRepository
 {
     public function index($type){
 
-        return Customer::ofType($type)->paginate(20);
+        return Customer::ofType($type)->latest()->paginate(20);
     }
     public function create($data){
 
@@ -24,6 +24,7 @@ class CustomerRepository
     
         return Customer::select('id', 
         \DB::raw("CONCAT_WS(' ', first_name, last_name, contact_person) AS customer_detail"))
+        ->latest()
         ->get();
        
     }

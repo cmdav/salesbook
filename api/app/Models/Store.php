@@ -14,6 +14,7 @@ class Store extends Model
     protected $fillable = [
         'product_type_id',
         'store_owner',
+        'batch_no',
         'quantity_available',
         'store_type',
         'status',

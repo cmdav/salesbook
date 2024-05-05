@@ -27,14 +27,15 @@ class PurchaseFormRequest extends FormRequest
                 'purchases' => 'required|array|min:1',
                 'purchases.*.product_type_id' => 'required|string',
                 'purchases.*.supplier_id' => 'nullable|uuid',
-                'purchases.*.price_id' => 'required|uuid',
-                'purchases.*.batch_no' => 'nullable|string|max:50',
+                'purchases.*.price_id' => 'required',
+                'purchases.*.cost_price' => 'required',
+                'purchases.*.batch_no' => 'required|string|max:50',
                 'purchases.*.quantity' => 'required|integer',
                 'purchases.*.product_identifier' => 'nullable|string|max:50',
                 'purchases.*.expiry_date' => [
                     'nullable',
                     'date',
-                    'after_or_equal:' . now()->startOfYear()->toDateString() // Checks if the date is within the current year or future
+                    'after_or_equal:today'
                 ],
             
            

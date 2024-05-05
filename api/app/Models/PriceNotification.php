@@ -23,8 +23,36 @@ class PriceNotification extends Model
     ];
     public function getStatusAttribute($value)
     {
-        return $value == 1 ? 'Accepted' : 'Declined';
+        switch ($value) {
+            case 0:
+                return 'pending';
+            case 1:
+                return 'decline';
+            case 2:
+                return 'accepted';
+            default:
+                return 'pending'; 
+        }
     }
+
+    
+    public function setStatusAttribute($value)
+    {
+        switch ($value) {
+            case 'pending':
+                $this->attributes['status'] = 0;
+                break;
+            case 'decline':
+                $this->attributes['status'] = 1;
+                break;
+            case 'accepted':
+                $this->attributes['status'] = 2;
+                break;
+            default:
+                $this->attributes['status'] = 0; 
+        }
+    }
+
     public function productTypes(){
 
         return $this->belongsTo(ProductType::class, 'product_type_id','id');

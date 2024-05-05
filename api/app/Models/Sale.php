@@ -19,6 +19,7 @@ class Sale extends Model
         'price_id',
         'price_sold_at',
         'quantity',
+        'batch_no',
         'payment_method',
         'sales_owner',
         'created_by',

@@ -147,14 +147,18 @@ class SaleRepository
            
             foreach ($data['products'] as $product) {
                 // Check the latest price and store availability for each product
-                $latestPrice = Price::where([
-                    ['product_type_id', $product['product_type_id']],
-                    ['status', 1]
-                ])->firstOrFail();
+                $latestPrice = Price::where(
+                    [
+                        ['product_type_id', $product['product_type_id']],
+                        ['status', 1]
+                ]
+                )->firstOrFail();
 
-                $store = Store::where('product_type_id', $product['product_type_id'])->firstOrFail();
+                $store = Store::where([['product_type_id', $product['product_type_id']],
+                                        ['batch_no', $product['batch_no']]])->firstOrFail();
                 if ($store->quantity_available < $product['quantity']) {
-                    throw new Exception("Insufficient stock for {$latestPrice->productType->product_type_name}.");
+                    throw new Exception("Insufficient stock for {$latestPrice->productType->product_type_name} 
+                            with {$product['batch_no']} number ");
                 }
                 $store->quantity_available -= $product['quantity'];
                 $store->save();
@@ -166,6 +170,7 @@ class SaleRepository
                     'customer_id' => $data['customer_id'],
                     'price_sold_at' => $product['price_sold_at'],
                     'quantity' => $product['quantity'],
+                    'batch_no' => $product['batch_no'],
                     'payment_method' => $data['payment_method']
                 ]);
                 $sale->price_id = $latestPrice->id;
