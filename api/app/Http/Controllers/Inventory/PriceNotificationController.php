@@ -44,11 +44,10 @@ class PriceNotificationController extends Controller
     public function update($id, Request $request)
     {
         $request->validate([
-           
-            'selling_price' => 'required|integer',
+            'selling_price' => 'integer|required_unless:status,decline',
             'status' => 'required|string|in:pending,accepted,decline',
         ]);
-       
+        
         $price =$this->priceNotificationService->updatePrice($id, $request->all());
         return response()->json($price);
     }

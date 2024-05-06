@@ -138,32 +138,30 @@ class SaleRepository
     }
     public function create(array $data)
 {
-   //dd($data);
-   
     $emailService = new EmailService();
     try {
         $response = DB::transaction(function () use ($data, $emailService) {
             $productDetails = [];
-           
-            foreach ($data['products'] as $product) {
-                // Check the latest price and store availability for each product
-                $latestPrice = Price::where(
-                    [
-                        ['product_type_id', $product['product_type_id']],
-                        ['status', 1]
-                ]
-                )->firstOrFail();
+            $totalPrice = 0; // Initialize total price
 
-                $store = Store::where([['product_type_id', $product['product_type_id']],
-                                        ['batch_no', $product['batch_no']]])->firstOrFail();
+            foreach ($data['products'] as $product) {
+                $latestPrice = Price::where([
+                    ['product_type_id', $product['product_type_id']],
+                    ['batch_no', $product['batch_no']],
+                    ['status', 1]
+                ])->firstOrFail();
+
+                $store = Store::where([
+                    ['product_type_id', $product['product_type_id']],
+                    ['batch_no', $product['batch_no']]
+                ])->firstOrFail();
+
                 if ($store->quantity_available < $product['quantity']) {
-                    throw new Exception("Insufficient stock for {$latestPrice->productType->product_type_name} 
-                            with {$product['batch_no']} number ");
+                    throw new Exception("Insufficient stock for batch {$product['batch_no']}");
                 }
                 $store->quantity_available -= $product['quantity'];
                 $store->save();
 
-                // Create the sale record
                 $sale = new Sale();
                 $sale->fill([
                     'product_type_id' => $product['product_type_id'],
@@ -171,16 +169,24 @@ class SaleRepository
                     'price_sold_at' => $product['price_sold_at'],
                     'quantity' => $product['quantity'],
                     'batch_no' => $product['batch_no'],
+                    'vat' => $product['vat'],
                     'payment_method' => $data['payment_method']
                 ]);
-                $sale->price_id = $latestPrice->id;
+                $sale->price_id =  $latestPrice->id;
                 $sale->save();
+
+                $amount = $product['price_sold_at'] * $product['quantity'];
+                $vatValue = $product['vat'] == 1 ? ($amount * 0.075) : 0; // 7.5% VAT
+                $amount += $vatValue;
+                $totalPrice += $amount; // Add to total price
 
                 // Prepare product details for the email
                 $productDetails[] = [
                     "productTypeName" => $latestPrice->productType->product_type_name,
                     "price" => $latestPrice->selling_price,
-                    "quantity" => $product['quantity']
+                    "quantity" => $product['quantity'],
+                    "vat" => $product['vat'] == 1 ? 'Yes' : 'No', // Human-readable VAT status
+                    "amount" => $amount
                 ];
             }
 
@@ -188,12 +194,11 @@ class SaleRepository
             $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
                         ->where('id', $data['customer_id'])
                         ->first();
-            if($user){
+            if ($user) {
                 $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
 
                 // Generate email content
-
-                $tableDetail = $this->generateProductDetailsTable($productDetails);
+                $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice);
                 $emailService->sendEmail(
                     ['email' => $user->email, 'first_name' => $customerDetail],
                     "sales-receipt",
@@ -205,10 +210,10 @@ class SaleRepository
         });
         return response()->json(['success' => true], 200);
     } catch (Exception $e) {
-       // return response()->json(['success' => false, 'message' => 'Sale creation failed: ' . $e->getMessage()], 500);
+        return response()->json(['success' => false, 'message' => 'Sale creation failed: ' . $e->getMessage()], 500);
     }
 }
-    
+
 
 
 
@@ -236,29 +241,41 @@ class SaleRepository
         }
         return null;
     }
-    private function generateProductDetailsTable($productDetails) {
+    private function generateProductDetailsTable($productDetails, $totalPrice) {
         $tableHtml = "<table style='width:100%; border-collapse: collapse;'>
                         <tr>
                             <th style='border: 1px solid black; padding: 8px;'>Product Name</th>
                             <th style='border: 1px solid black; padding: 8px;'>Price</th>
                             <th style='border: 1px solid black; padding: 8px;'>Quantity</th>
+                            <th style='border: 1px solid black; padding: 8px;'>VAT</th>
                             <th style='border: 1px solid black; padding: 8px;'>Total</th>
                         </tr>";
-    
+        
         foreach ($productDetails as $detail) {
-            $totalPrice = $detail['price'] * $detail['quantity'];
+            // Calculate total for the current row
+            $currentTotal = $detail['amount']; // Use the amount which includes VAT if applicable
+            $vatStatus = $detail['vat'] == 'Yes' ? 'Yes' : 'No'; // Use the readable VAT status
             $tableHtml .= "<tr>
                                 <td style='border: 1px solid black; padding: 8px;'>{$detail['productTypeName']}</td>
                                 <td style='border: 1px solid black; padding: 8px;'>{$detail['price']}</td>
                                 <td style='border: 1px solid black; padding: 8px;'>{$detail['quantity']}</td>
-                                <td style='border: 1px solid black; padding: 8px;'>$totalPrice</td>
+                                <td style='border: 1px solid black; padding: 8px;'>$vatStatus</td>
+                                <td style='border: 1px solid black; padding: 8px;'>$currentTotal</td>
                            </tr>";
         }
+    
+        
+        $tableHtml .= "<tr>
+                           <td colspan='4' style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Total:</strong></td>
+                           <td style='border: 1px solid black; padding: 8px;'><strong>$totalPrice</strong></td>
+                       </tr>";
     
         $tableHtml .= "</table>";
     
         return $tableHtml;
     }
+    
+    
   
     
     

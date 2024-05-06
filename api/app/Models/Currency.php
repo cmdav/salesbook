@@ -16,7 +16,7 @@ class Currency extends Model
 
         static::creating(function ($currency) {
 
-        if ($currency->currency_name == 'naira') {
+            if (strtolower($currency->currency_name) == 'naira') {
                 $currency->status = 1;
             }
         });

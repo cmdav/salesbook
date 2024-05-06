@@ -52,10 +52,7 @@ class PurchaseRepository
         // Assuming $purchase is the purchase data returned from the API
         return [
             'id' => $purchase->id,
-            //'product_type_id' => $purchase->product_type_id,
-            //'supplier_id' => $purchase->supplier_id,
-            // 'price_id' => $purchase->price_id,
-
+          
             'product_type_id' => optional($purchase->productType)->product_type_name,
             'product_type_image' => optional($purchase->productType)->product_type_image,
             'product_type_description' => optional($purchase->productType)->product_type_description,
@@ -64,21 +61,11 @@ class PurchaseRepository
 
             //'product_identifier' => $purchase->product_identifier,
             'expiry_date' => $purchase->expiry_date,
-            //'status' => '',
-            // 'created_by' => $purchase->created_by,
-            // 'updated_by' => $purchase->updated_by,
-            // 'created_at' => $purchase->created_at,
-            // 'updated_at' => $purchase->updated_at,
             'price' => $purchase->price ? $purchase->price->cost_price : 0,
 
             'created_by' => optional($purchase->creator)->fullname,
             'updated_by' => optional($purchase->updater)->fullname,
-            //'system_price' => optional($purchase->price)->system_price,
-            //'price_discount' => optional($purchase->price)->discount, 
-            //'price_status' => optional($purchase->price)->status,
-            //'organization_id' => optional($purchase->price)->organization_id,
-            //'currency_name' => optional($purchase->currency)->currency_name,
-            //'currency_symbol' => optional($purchase->currency)->currency_symbol,
+
           
         ];
     }
@@ -98,6 +85,7 @@ class PurchaseRepository
                 $price->supplier_id = $purchaseData['supplier_id'];
                 $price->cost_price = $purchaseData['cost_price'];
                 $price->selling_price = $purchaseData['selling_price'];
+                $price->batch_no = $purchaseData['batch_no'];
                 $price->status = 1;
                 $price->save();
 

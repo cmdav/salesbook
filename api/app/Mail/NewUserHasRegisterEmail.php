@@ -70,7 +70,8 @@ class NewUserHasRegisterEmail extends Mailable
            
                
             //$this->frontendUrl = env('FRONTEND_URL');
-            $this->first_paragraph = "Thank you for your purchase. Below are the details of the item bought";
+            $this->first_paragraph = "Thank you for your purchase. Below are the details of the item bought. 
+                However we will like to inform you that the value of VAT is calculated as 7.5% on each item if it is included in your purchase";
             $this->second_paragraph = $otherDetail;
             //$this->btn_label = "Join Company";
             $this->title = "Customer Receipt";

@@ -73,6 +73,10 @@ class Store extends Model
 
         return $this->belongsTo(Price::class);
     }
+    public function batch_price(){
+
+        return $this->belongsTo(Price::class, 'batch_no','batch_no');
+    }
     public function productType(){
 
         return $this->belongsTo(ProductType::class);

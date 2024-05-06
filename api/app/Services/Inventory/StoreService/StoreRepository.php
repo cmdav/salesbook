@@ -57,6 +57,7 @@ class StoreRepository
             'product_type' => optional($store->productType)->product_type_name,
             'product_description' => optional($store->productType)->product_type_description,
             //'store_owner' => $store->store_owner,
+            'batch_no' => $store->batch_no,
             'quantity_available' => $store->quantity_available,
             //'store_type' => $store->store_type,
             'status' => $store->quantity_available > 0 ? 'Available' : 'Not Available',

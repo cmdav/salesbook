@@ -67,7 +67,11 @@ class ProductTypeRepository
                             ->with(['activePrice:id,cost_price,product_type_id,selling_price',
                                     'product:id,vat',
                                     'batches' => function ($query) {
-                                        $query->where('status', 1);  
+                                        $query->where('status', 1)
+                                              ->with(['batch_price' => function ($query) {
+                                                  $query->select('id', 'selling_price', 'batch_no', 'product_type_id')
+                                                        ->where('status', 1);
+                                              }]);
                                     },
                                     'store' => function ($query) {
                                         $query->selectRaw('product_type_id, SUM(quantity_available) as total_quantity')
@@ -82,16 +86,20 @@ class ProductTypeRepository
                                 return [
                                      'id' => $productType->id,
                                      'product_type_name' => $productType->product_type_name,
-                                     'price_id' => optional($productType->activePrice)->id,  
+                                     //'price_id' => optional($productType->activePrice)->id, 
+                                     'vat_percentage' =>7.5,
                                      'cost_price' => optional($productType->activePrice)->cost_price ?? 0,  
                                      'selling_price' => optional($productType->activePrice)->selling_price ?? 0,  
                                      'quantity_available' => optional( $productType->store)->total_quantity ?? 0,
                                      'vat' => optional( $productType->product)->vat,
+                                     //'vat' => 'yes',
                                      'batches' => $productType->batches->map(function ($batch) {
                                          return [
                                              'id' => $batch->id,
                                              'batch_no' => $batch->batch_no,
-                                             'batch_quantity_left' =>$batch->quantity_available
+                                             'batch_quantity_left' =>$batch->quantity_available,
+                                             'batch_selling_price' => $batch->batch_price->selling_price ?? 0
+
                                          ];
                                      })->toArray() 
                                  ];

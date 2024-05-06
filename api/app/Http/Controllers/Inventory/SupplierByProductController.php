@@ -19,7 +19,7 @@ class SupplierByProductController extends Controller
        ->where('product_type_id', $product_type_id) 
        ->get()
        ->map(function ($supplier) {
-           $user = $supplier->users->first(); 
+            $user = $supplier->users ? $supplier->users->first() : null;
            if ($user) {
               
                $supplier_detail = "{$user->first_name} {$user->last_name} - {$user->phone_number}";

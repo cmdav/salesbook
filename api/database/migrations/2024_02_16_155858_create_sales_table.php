@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('batch_no')->nullable();
             $table->integer('price_sold_at');
             $table->integer('quantity');
+            $table->integer('vat')->nullable()->comment('0->no, 1->yes');
             $table->string('payment_method')->default('cash');
             //$table->uuid('sales_owner'); 
             $table->uuid('created_by')->nullable();
