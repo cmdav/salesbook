@@ -22,6 +22,7 @@ class Sale extends Model
         'batch_no',
         'vat',
         'payment_method',
+        'transaction_id',
         'sales_owner',
         'created_by',
         'updated_by'
@@ -41,7 +42,7 @@ class Sale extends Model
     }
     public function customers(){
 
-        return $this->belongsTo(User::class,'customer_id','id');
+        return $this->belongsTo(Customer::class,'customer_id','id');
     }
     public function organization(){
 

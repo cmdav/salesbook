@@ -13,6 +13,7 @@ class SupplierProduct extends Model
     protected $fillable = [
         'product_type_id',
         'product_description',
+        'batch_no',
         // 'price',
         // 'product_image',
         // 'product_name',

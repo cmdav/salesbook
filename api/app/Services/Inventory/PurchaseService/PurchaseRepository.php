@@ -96,11 +96,13 @@ class PurchaseRepository
             if (!empty($purchaseData['supplier_id'])) {
                 $existingRecord = \App\Models\SupplierProduct::where('product_type_id', $purchaseData['product_type_id'])
                                                             ->where('supplier_id', $purchaseData['supplier_id'])
+                                                            ->where('batch_no', $purchaseData['batch_no'])
                                                             ->first();
                 if (!$existingRecord) {
                     $supplierProduct = new \App\Models\SupplierProduct();
                     $supplierProduct->product_type_id = $purchaseData['product_type_id'];
                     $supplierProduct->supplier_id = $purchaseData['supplier_id'];
+                    $supplierProduct->batch_no = $purchaseData['batch_no'];
                     $supplierProduct->save();
                 }
             }

@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\Customer;
 use App\Models\ProductType;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 
@@ -34,6 +35,7 @@ class SaleRepository
     }
     public function index()
     {
+        
        
          $sale =$this->query()->paginate(20);
                    
@@ -47,6 +49,7 @@ class SaleRepository
                     return $sale;
 
     }
+    
     public function searchSale($searchCriteria)
     {
         $sale =$this->query()->where(function($query) use ($searchCriteria) {
@@ -94,8 +97,6 @@ class SaleRepository
        
         return [
             'id' => $sale->id,
-            //'store_id' => $sale->store_id,
-            //'customer_id' => $sale->customer_id,
             'product_type_id' => optional($sale->product)->product_type_name,
             'product_type_description' => optional($sale->product)->product_type_description,
             'cost_price' => optional($sale->Price)->cost_price,
@@ -103,28 +104,71 @@ class SaleRepository
             'quantity' => $sale->quantity,
             'total_price' => $sale->price_sold_at * $sale->quantity,
             'payment_method' => $sale->payment_method,
-            
-            //'sales_owner' => $sale->sales_owner,
-            // 'created_by' => $sale->created_by,
-            // 'updated_by' => $sale->updated_by,
             'created_at' => $sale->created_at,
-            // 'updated_at' => $sale->updated_at,
-            // Store details
-            // 'store_product_type_id' => optional($sale->store)->product_type_id,
-            // 'store_price_id' => optional($sale->store)->price_id,
-            // 'store_quantity_available' => optional($sale->store)->quantity_available,
-            // Customer details
+            
             'customer_detail' => optional($sale->customers)->first_name . ' ' . optional($sale->customers)->last_name . ' ' . optional($sale->customers)->contact_person,
-
+            'transaction_id' => $sale->transaction_id,
             'customer_phone_number' => optional($sale->customers)->phone_number,
             'created_by' => optional($sale->creator)->fullname,
             'updated_by' => optional($sale->updater)->fullname,
-            // Organization details
-            // 'organization_id' => optional($sale->organization)->id,
-            // 'organization_name' => optional($sale->organization)->organization_name,
-            // 'organization_logo' => optional($sale->organization)->organization_logo,
+          
         ];
     }
+
+    public function downSalesReceipt($transactionId)
+    {
+        $sales = $this->query()->where('transaction_id', $transactionId)->get();
+
+        if ($sales->isEmpty()) {
+            return response()->json(['message' => 'No sales found for this transaction.'], 404);
+        }
+
+        $transformedData = $this->transformSalesReceipt($sales);
+
+        return $transformedData;
+    }
+
+private function transformSalesReceipt($sales)
+{
+    // Collect transaction details from the first sale
+    $transactionDetails = [
+        'created_at' => $sales->first()->created_at,
+        'customer_detail' => optional($sales->first()->customers)->first_name . ' ' . optional($sales->first()->customers)->last_name . ' ' . optional($sales->first()->customers)->contact_person,
+        'customer_phone_number' => optional($sales->first()->customers)->phone_number,
+        'transaction_id' => $sales->first()->transaction_id,
+        'transaction_amount' => 0 // Will be calculated below
+    ];
+
+    $items = $sales->map(function ($sale) use (&$transactionDetails) {
+        $total_price = $sale->price_sold_at * $sale->quantity;
+        if ($sale->vat == 1) {
+            $vatAmount = $total_price * 0.075; // Assuming VAT is 7.5%
+            $total_price += $vatAmount;
+        }
+
+        // Accumulate total transaction amount
+        $transactionDetails['transaction_amount'] += $total_price;
+
+        return [
+            'id' => $sale->id,
+            'product_type_name' => optional($sale->product)->product_type_name,
+            'product_type_description' => optional($sale->product)->product_type_description,
+            'price_sold_at' => $sale->price_sold_at,
+            'vat' => $sale->vat,
+            'quantity' => $sale->quantity,
+             'amount' => $sale->price_sold_at * $sale->quantity,
+            'total_price' => $total_price,
+            'payment_method' => $sale->payment_method,
+        ];
+    });
+
+    // Package everything into the expected structure
+    return [
+        'transaction_details' => $transactionDetails,
+        'items' => $items
+    ];
+}
+
     private function transformDailySales($sale){
        
        
@@ -139,8 +183,9 @@ class SaleRepository
     public function create(array $data)
 {
     $emailService = new EmailService();
+    $transactionId =  time() . rand(1000, 9999);
     try {
-        $response = DB::transaction(function () use ($data, $emailService) {
+        $response = DB::transaction(function () use ($data, $emailService, $transactionId) {
             $productDetails = [];
             $totalPrice = 0; // Initialize total price
 
@@ -170,22 +215,24 @@ class SaleRepository
                     'quantity' => $product['quantity'],
                     'batch_no' => $product['batch_no'],
                     'vat' => $product['vat'],
-                    'payment_method' => $data['payment_method']
+                    'payment_method' => $data['payment_method'],
+                    'transaction_id' =>$transactionId
                 ]);
                 $sale->price_id =  $latestPrice->id;
+               
                 $sale->save();
 
                 $amount = $product['price_sold_at'] * $product['quantity'];
                 $vatValue = $product['vat'] == 1 ? ($amount * 0.075) : 0; // 7.5% VAT
                 $amount += $vatValue;
-                $totalPrice += $amount; // Add to total price
+                $totalPrice += $amount; 
 
-                // Prepare product details for the email
+                
                 $productDetails[] = [
                     "productTypeName" => $latestPrice->productType->product_type_name,
                     "price" => $latestPrice->selling_price,
                     "quantity" => $product['quantity'],
-                    "vat" => $product['vat'] == 1 ? 'Yes' : 'No', // Human-readable VAT status
+                    "vat" => $product['vat'] == 1 ? 'Yes' : 'No', 
                     "amount" => $amount
                 ];
             }
@@ -242,38 +289,43 @@ class SaleRepository
         return null;
     }
     private function generateProductDetailsTable($productDetails, $totalPrice) {
-        $tableHtml = "<table style='width:100%; border-collapse: collapse;'>
-                        <tr>
-                            <th style='border: 1px solid black; padding: 8px;'>Product Name</th>
-                            <th style='border: 1px solid black; padding: 8px;'>Price</th>
-                            <th style='border: 1px solid black; padding: 8px;'>Quantity</th>
-                            <th style='border: 1px solid black; padding: 8px;'>VAT</th>
-                            <th style='border: 1px solid black; padding: 8px;'>Total</th>
-                        </tr>";
-        
-        foreach ($productDetails as $detail) {
-            // Calculate total for the current row
-            $currentTotal = $detail['amount']; // Use the amount which includes VAT if applicable
-            $vatStatus = $detail['vat'] == 'Yes' ? 'Yes' : 'No'; // Use the readable VAT status
-            $tableHtml .= "<tr>
-                                <td style='border: 1px solid black; padding: 8px;'>{$detail['productTypeName']}</td>
-                                <td style='border: 1px solid black; padding: 8px;'>{$detail['price']}</td>
-                                <td style='border: 1px solid black; padding: 8px;'>{$detail['quantity']}</td>
-                                <td style='border: 1px solid black; padding: 8px;'>$vatStatus</td>
-                                <td style='border: 1px solid black; padding: 8px;'>$currentTotal</td>
-                           </tr>";
-        }
+    $tableHtml = "<table style='width:100%; border-collapse: collapse;'>
+                    <tr>
+                        <th style='border: 1px solid black; padding: 8px;'>Product Name</th>
+                        <th style='border: 1px solid black; padding: 8px;'>Price</th>
+                        <th style='border: 1px solid black; padding: 8px;'>Quantity</th>
+                        <th style='border: 1px solid black; padding: 8px;'>VAT</th>
+                        <th style='border: 1px solid black; padding: 8px;'>Total</th>
+                    </tr>";
     
+    foreach ($productDetails as $detail) {
+        // Format the price and total for each product
+        $formattedPrice = number_format($detail['price'], 2, '.', ',');
+        $formattedTotal = number_format($detail['amount'], 2, '.', ','); // Use the amount which includes VAT if applicable
+        $vatStatus = $detail['vat'] == 'Yes' ? 'Yes' : 'No'; // Use the readable VAT status
         
         $tableHtml .= "<tr>
-                           <td colspan='4' style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Total:</strong></td>
-                           <td style='border: 1px solid black; padding: 8px;'><strong>$totalPrice</strong></td>
+                            <td style='border: 1px solid black; padding: 8px;'>{$detail['productTypeName']}</td>
+                            <td style='border: 1px solid black; padding: 8px;'>$formattedPrice</td>
+                            <td style='border: 1px solid black; padding: 8px;'>{$detail['quantity']}</td>
+                            <td style='border: 1px solid black; padding: 8px;'>$vatStatus</td>
+                            <td style='border: 1px solid black; padding: 8px;'>$formattedTotal</td>
                        </tr>";
-    
-        $tableHtml .= "</table>";
-    
-        return $tableHtml;
     }
+
+    // Format the grand total price
+    $formattedGrandTotal = number_format($totalPrice, 2, '.', ',');
+    
+    $tableHtml .= "<tr>
+                       <td colspan='4' style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Total:</strong></td>
+                       <td style='border: 1px solid black; padding: 8px;'><strong>$formattedGrandTotal</strong></td>
+                   </tr>";
+
+    $tableHtml .= "</table>";
+
+    return $tableHtml;
+}
+
     
     
   

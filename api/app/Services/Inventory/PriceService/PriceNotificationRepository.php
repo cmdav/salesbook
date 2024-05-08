@@ -77,6 +77,7 @@ class PriceNotificationRepository
             // Set previous prices to inactive
             Price::where('supplier_id', $priceNotification->supplier_id)
                 ->where('product_type_id', $priceNotification->product_type_id)
+                ->where('batch_no', $priceNotification->batch_no)
                 ->update(['status' => 0]);  // Set all other prices for this product type to inactive
 
         // Update or create a new active price
@@ -90,6 +91,7 @@ class PriceNotificationRepository
                 [
                     'cost_price' => $priceNotification->cost_price,
                     'selling_price' => $priceNotification->selling_price,
+                    'batch_no' => $priceNotification->batch_no,
                     'currency_id' => $data['currency_id'] ?? null,  // Assuming you get currency_id in the data array
                     'organization_id' => $data['organization_id'] ?? null,  // Assuming organization_id is provided
                     'created_by' => $data['created_by'] ?? auth()->id(),  // Assuming the creator's ID is passed or take from auth user

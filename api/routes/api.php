@@ -55,6 +55,12 @@ Route::middleware('auth:sanctum')->group(function() {
 
         //need modification
         route::get('auto-generate-system-selling-price', function(){ return 100; });
+
+        // route::get('download-sales-receipt/{id}', function(){
+        //     return 'download in process';
+        // });
+        route::resource('download-sales-receipts', App\Http\Controllers\Inventory\SalesRecieptController::class)->only('show');
+
         route::get('all-price-by-product-type/{id}', App\Http\Controllers\Inventory\AllPriceByProductTypeController::class);
         route::get('latest-product-type-price/{id}', App\Http\Controllers\Inventory\LatestPriceByProductTypeController::class);
         route::get('latest-supplier-price/{product_type_id}/{supplier_id}', App\Http\Controllers\Inventory\LatestSupplierPriceController::class);

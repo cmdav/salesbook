@@ -98,7 +98,7 @@ class DatabaseSeeder extends Seeder
             'role_id' => $adminRole->id,
     
         ]);
-        $currencies = [["name" => "Naira", "symbol" => "Ngn", "status" => 1],];
+        $currencies = [["name" => "Naira", "symbol" => "NGN", "status" => 1],];
         
             foreach ($currencies as $currency) {
                 \App\Models\Currency::factory()->create([

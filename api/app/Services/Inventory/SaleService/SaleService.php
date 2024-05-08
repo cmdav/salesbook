@@ -47,4 +47,8 @@ class SaleService
     {
         return $this->saleRepository->dailySale();
     }
+    public function downSalesReceipt($TransactionId)
+    {
+        return $this->saleRepository->downSalesReceipt($TransactionId);
+    }
 }

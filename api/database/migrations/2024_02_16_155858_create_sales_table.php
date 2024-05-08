@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('quantity');
             $table->integer('vat')->nullable()->comment('0->no, 1->yes');
             $table->string('payment_method')->default('cash');
+            $table->string('transaction_id');
             //$table->uuid('sales_owner'); 
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
