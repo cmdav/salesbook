@@ -80,6 +80,7 @@ class UserFormRequest extends FormRequest
         $rules['first_name'] = 'required|string|max:55';
         $rules['last_name'] = 'required|string|max:55';
         $rules['middle_name'] = 'nullable|string|max:55';
+        $rules['company_name'] = 'required|string|max:55';
         $rules['dob'] = 'nullable|date|max:55';
       
     }

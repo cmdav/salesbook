@@ -16,6 +16,7 @@ Route::group(['prefix'=>'v1'], function(){
    // route::post('forgot-password', App\Http\Controllers\Email\ForgotPasswordController::class); //send reset link
     
     route::resource('users', App\Http\Controllers\Users\UserController::class)->only('store');
+    route::resource('contact-forms', App\Http\Controllers\Users\ContactFormController::class);
 
    
 
@@ -85,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::post('process-csv', App\Http\Controllers\Product\CsvController::class);
     
         route::resource('users', App\Http\Controllers\Users\UserController::class)->only('index','show','update','destroy');
+        
         route::resource('customers', App\Http\Controllers\Users\CustomerController::class)->only('index','show');
         route::get('customer-names', App\Http\Controllers\Users\CustomerNamesController::class);
         route::resource('daily-sales', App\Http\Controllers\Inventory\DailySaleController::class)->only('index');
