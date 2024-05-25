@@ -16,8 +16,9 @@ class DatabaseSeeder extends Seeder
         
         $pageNames = [
             'currencies', 'measurements', 'product-categories', 'product-sub-categories',
-            'products', 'product-types', 'sales', 'purchases', 'stores', 'prices', 'job-roles','pages','permissions','organizations',
-            'records', 'reports','customers','supplier-products','suppliers','dashboards'
+            'products', 'product-types', 'sales', 'purchases', 'stores', 'prices', 
+            'job-roles','pages','permissions','organizations',
+            'records', 'reports','customers','supplier-products','suppliers','dashboards','settings'
         ];
 
         foreach ($pageNames as $pageName) {
@@ -95,6 +96,17 @@ class DatabaseSeeder extends Seeder
             'password'=>'test123',
             'organization_code'=>'123456',
             'type_id' => 2,
+            'role_id' => $adminRole->id,
+            'email_verified_at' => now(),
+
+    
+        ]);
+        \App\Models\User::factory()->create([
+            'first_name' => 'No supplier',
+            'email' => 'system_supplier@gmail.com',
+            'password'=>'test123',
+            'organization_code'=>'123456',
+            'type_id' => 3,
             'role_id' => $adminRole->id,
     
         ]);

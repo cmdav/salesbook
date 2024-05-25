@@ -37,6 +37,13 @@ class ProductTypeService
         return $this->ProductTypeRepository->getProductTypeByName();
 
     }
+    public function  onlyProductTypeName()
+    {
+       
+        return $this->ProductTypeRepository->onlyProductTypeName();
+
+    }
+    
     public function show($id)
     {
         return $this->ProductTypeRepository->findById($id);

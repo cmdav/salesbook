@@ -39,11 +39,11 @@ class Customer extends Model
             case 0:
                 return 'others';
             case 1:
-                return 'Individual';
+                return 'individual';
             case 2:
-                return 'Company';
+                return 'company';
             default:
-                return 'Individual'; 
+                return 'others'; 
         }
     }
     public function setTypeIdAttribute($value)
@@ -64,20 +64,20 @@ class Customer extends Model
     }
     public function scopeOfType($query, $type)
     {
-        $typeId = $type === 'company' ? 2 : 1;
+        $typeId = 0; // Default type_id for 'other'
+    
+        switch ($type) {
+            case 'company':
+                $typeId = 2;
+                break;
+            case 'individual':
+                $typeId = 1;
+                break;
+        }
+    
         return $query->where('type_id', $typeId);
     }
-    public function creator()
-    {
-        return $this->belongsTo(User::class, 'created_by')
-                    ->select(['id', \DB::raw("CONCAT(first_name, ' ', COALESCE(contact_person, ''), ' ', last_name) as fullname")]);
-    }
-
+    
    
-    public function updater()
-    {
-        return $this->belongsTo(User::class, 'updated_by')
-                    ->select(['id', \DB::raw("CONCAT(first_name, ' ', COALESCE(contact_person, ''), ' ', last_name) as fullname")]);
-    }
 
 }

@@ -24,8 +24,8 @@ class PurchaseController extends Controller
 
     public function store(PurchaseFormRequest $request)
     {
-        $purchase =$this->purchaseService->createPurchase($request->all());
-        return response()->json($purchase, 201);
+        return $this->purchaseService->createPurchase($request->all());
+       
     }
 
     public function show($id)

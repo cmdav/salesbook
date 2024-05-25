@@ -27,23 +27,22 @@ class PriceRepository
     public function getLatestSupplierPrice($product_type_id, $supplier_id)
     { 
        
-        $price = Price::select('id', 'selling_price','cost_price')
-                            ->where([
-                                        ['product_type_id', $product_type_id],
-                                        ['supplier_id', $supplier_id]]
-                                     )->where('status', 1)->first();
+        $data  = Price::select('id', 'selling_price','cost_price', 'batch_no')
+                            ->where([['product_type_id', $product_type_id],
+                                    ['supplier_id', $supplier_id],
+                                       ['status', 1],
+                            
+                                        
+                                    ]
+                                     )->first();
+                                    
 
-         if (is_null($price)) {
-                $price = [
-                    "id" => 1,
-                    "selling_price" => 0,
-                    "cost_price"=> 0,
-                ];
-                   
-                  
-            }
-                        
-                                    return $price;
+        if($data){
+            return response()->json(['data' =>$data],200);
+        }
+        return [];
+      
+                                    //return $price;
 
 
     }

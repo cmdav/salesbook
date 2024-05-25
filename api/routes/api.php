@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Route;
 
 // unprotected route
 Route::group(['prefix'=>'v1'], function(){
-    
+   
+    route::resource('all-customers', App\Http\Controllers\Users\CustomerController::class)->only('index','show');
     route::post('login', App\Http\Controllers\Auth\AuthController::class);
 
 
@@ -30,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('sale-users', App\Http\Controllers\Users\SaleUserController::class)->only('store');
         
         //resource
+       // route::resource('currencies', App\Http\Controllers\Inventory\CurrencyController::class);
         route::resource('currencies', App\Http\Controllers\Inventory\CurrencyController::class);
         route::resource('measurements', App\Http\Controllers\Inventory\MeasurementController::class);
         route::resource('organizations', App\Http\Controllers\Inventory\OrganizationController::class);
@@ -57,6 +59,17 @@ Route::middleware('auth:sanctum')->group(function() {
         //need modification
         route::get('auto-generate-system-selling-price', function(){ return 100; });
 
+        //need modification
+        route::get('last-batch-number', function(){
+
+            $lastBatchNumber = \App\Models\Purchase::select('batch_no')->orderBy('created_at', 'desc')->first();
+            if($lastBatchNumber){
+                return response()->json(['data'=>$lastBatchNumber], 200);
+            }
+            return [];
+            
+        });
+
         // route::get('download-sales-receipt/{id}', function(){
         //     return 'download in process';
         // });
@@ -73,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::get('all-product-sub-categories-by-category-id/{id}', App\Http\Controllers\Product\AllProductSubCategoryController::class);
         route::get('product-type-by-id/{id}', App\Http\Controllers\Product\ProductTypeByIdController::class);
         route::get('all-product-type-name', App\Http\Controllers\Product\ProductTypeNameByIdController::class);
+        route::get('all-product-type', App\Http\Controllers\Product\AllProductTypeController::class);
         route::get('all-supplier-products', App\Http\Controllers\Supply\AllSupplierProductController::class);
         route::get('user-detail', App\Http\Controllers\Users\AllUserDetailController::class);
         route::get('all-job-roles', App\Http\Controllers\Security\AllJobRoleController::class);
@@ -112,3 +126,8 @@ Route::middleware('auth:sanctum')->group(function() {
 
 
 });
+
+
+
+
+

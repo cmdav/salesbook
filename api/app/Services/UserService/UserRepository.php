@@ -15,6 +15,7 @@ use Illuminate\Support\Arr;
 class UserRepository
 {
 
+   
     protected function transformSaleUsers(object $user): array
     {
         $transformed = [
@@ -114,7 +115,10 @@ class UserRepository
                  ];
              });
 
-        return $users;
+             if($users){
+                return response()->json(['data' =>$users],200);
+            }
+            return [];
 
          
     }
@@ -151,25 +155,26 @@ class UserRepository
     {
        
        
-            $user = User::where(function($query) use ($searchCriteria) {
-                $query->where('email', 'like', '%' . $searchCriteria . '%')
-                  ->orWhere('phone_number', 'like', '%' . $searchCriteria . '%');
-            })->first(); 
-
+    $user = User::where('type_id', 0)
+                ->where(function($query) use ($searchCriteria) {
+                    $query->where('email', 'like', '%' . $searchCriteria . '%')
+                        ->orWhere('phone_number', 'like', '%' . $searchCriteria . '%');
+                })
+                ->get();
            
-            if ($user) {
+            // if ($user) {
            
-                if ($user->type_id == 1) {
+            //     if ($user->type_id == 1) {
                    
-                    $user->load(['supplier' => function($query) {
-                        $query->select('id', 'user_id', 'bank_name', 'account_name', 'account_number', 'state', 'address');
-                    }]);
-                }
-                return $this->transformUsers($user);
-            }
+            //         $user->load(['supplier' => function($query) {
+            //             $query->select('id', 'user_id', 'bank_name', 'account_name', 'account_number', 'state', 'address');
+            //         }]);
+            //     }
+            //     return $this->transformUsers($user);
+            // }
 
             
-            return false;
+            return $user;
 
       
     }

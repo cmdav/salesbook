@@ -21,9 +21,10 @@ class CustomerController extends Controller
     }
     public function index(Request $request){
 
-        $validatedData = $request->validate([
-            'type' => 'required|in:individual,company'
-        ]);
+        //return $request->all();
+        // $validatedData = $request->validate([
+        //     'type' => 'required|in:individual,company'
+        // ]);
         
          return $this->CustomerService->index($request->type);
      

@@ -19,7 +19,7 @@ class AllSupplierController extends Controller
         
         $this->userService = $userService;
         if($user =$this->userService->allSupplier()){
-            return response()->json($user);
+            return $user;
         }
         return response()->json(['message'=>'user not found'], 404);
         

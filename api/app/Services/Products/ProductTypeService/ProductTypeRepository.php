@@ -60,50 +60,79 @@ class ProductTypeRepository
     {
         return $this->getProductTypes($id);
     }
+    public function  onlyProductTypeName()
+    {
+        $response= ProductType::select('id','product_type_name')->get();
+        if($response){
+            return response()->json(['data' =>$response],200);
+        }
+        return [];
+    }
+   
     
     public function getProductTypeByName()
     {
-        return ProductType::select('id','product_type_name','product_id')
-                            ->with(['activePrice:id,cost_price,product_type_id,selling_price',
-                                    'product:id,vat',
-                                    'batches' => function ($query) {
-                                        $query->where('status', 1)
-                                              ->with(['batch_price' => function ($query) {
-                                                  $query->select('id', 'selling_price', 'batch_no', 'product_type_id')
-                                                        ->where('status', 1);
-                                              }]);
-                                    },
-                                    'store' => function ($query) {
-                                        $query->selectRaw('product_type_id, SUM(quantity_available) as total_quantity')
-                                              ->where('status', 1)
-                                              ->groupBy('product_type_id'); 
-                                    }
-                                    ])
-                                   
-                            ->get()
-                            ->map(function($productType) {
-                               
-                                return [
-                                     'id' => $productType->id,
-                                     'product_type_name' => $productType->product_type_name,
-                                     //'price_id' => optional($productType->activePrice)->id, 
-                                     'vat_percentage' =>7.5,
-                                     'cost_price' => optional($productType->activePrice)->cost_price ?? 0,  
-                                     'selling_price' => optional($productType->activePrice)->selling_price ?? 0,  
-                                     'quantity_available' => optional( $productType->store)->total_quantity ?? 0,
-                                     'vat' => optional( $productType->product)->vat,
-                                     //'vat' => 'yes',
-                                     'batches' => $productType->batches->map(function ($batch) {
-                                         return [
-                                             'id' => $batch->id,
-                                             'batch_no' => $batch->batch_no,
-                                             'batch_quantity_left' =>$batch->quantity_available,
-                                             'batch_selling_price' => $batch->batch_price->selling_price ?? 0
 
-                                         ];
-                                     })->toArray() 
-                                 ];
-                             });
+
+                $productTypes = DB::table('product_types')
+                    ->select('product_types.id', 'product_types.product_type_name', 'product_types.product_id')
+                    ->addSelect(DB::raw("
+                        (SELECT JSON_OBJECT(
+                            'id', products.id,
+                            'vat', products.vat
+                        )
+                        FROM products
+                        WHERE products.id = product_types.product_id
+                        ) as product"))
+                    ->addSelect(DB::raw("
+                        (SELECT JSON_OBJECT(
+                            'product_type_id', stores.product_type_id,
+                            'total_quantity', SUM(stores.quantity_available)
+                        )
+                        FROM stores
+                        WHERE stores.product_type_id = product_types.id AND stores.status = 1
+                        GROUP BY stores.product_type_id
+                        ) as store"))
+                    ->addSelect(DB::raw("
+                        (SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                            'id', stores.id,
+                            'product_type_id', stores.product_type_id,
+                            'batch_no', stores.batch_no,
+                            'quantity_available', stores.quantity_available,
+                            'selling_price', prices.selling_price,
+                            'cost_price', prices.cost_price
+                        ))
+                        FROM stores
+                        JOIN prices ON prices.batch_no = stores.batch_no AND prices.product_type_id = stores.product_type_id
+                        WHERE stores.product_type_id = product_types.id AND stores.status = 1 AND prices.status = 1
+                        ) as batches"))
+                    ->get();
+
+                $productTypes->transform(function ($item) {
+                    $item->product = json_decode($item->product);
+                    $item->store = json_decode($item->store);
+                    $item->batches = json_decode($item->batches);
+                    return [
+                        'id' => $item->id,
+                        'product_type_name' => $item->product_type_name,
+                        'vat_percentage' => 7.5,
+                        'cost_price' => $item->batches[0]->cost_price ?? 0, 
+                        'selling_price' => $item->batches[0]->selling_price ?? 0, 
+                        'quantity_available' => $item->store->total_quantity ?? 0,
+                        'vat' => $item->product->vat ?? 'No',
+                        'batches' => collect($item->batches)->map(function ($batch) {
+                            return [
+                                'id' => $batch->id,
+                                'batch_no' => $batch->batch_no,
+                                'batch_quantity_left' => $batch->quantity_available,
+                                'batch_selling_price' => $batch->selling_price
+                            ];
+                        })->toArray()
+                    ];
+                });
+
+                return $productTypes;
+
     }
     private function getProductTypes($productId = null)
     {

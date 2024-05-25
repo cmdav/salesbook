@@ -13,6 +13,7 @@ class CustomerRepository
 {
     public function index($type){
 
+    
         return Customer::ofType($type)->latest()->paginate(20);
     }
     public function create($data){

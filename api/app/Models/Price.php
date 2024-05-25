@@ -32,11 +32,11 @@ class Price extends Model
         return $value == 1 ? 'Active price' : 'Inactive price';
     }
 
-
-    public function productType(){
-
+    public function productType()
+    {
         return $this->belongsTo(ProductType::class);
     }
+
     public function currency(){
 
         return $this->belongsTo(Currency::class);

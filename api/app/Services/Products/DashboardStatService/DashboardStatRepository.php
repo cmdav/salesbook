@@ -24,8 +24,9 @@ class DashboardStatRepository
             $startDate = now()->subDays(6)->startOfDay()->toDateString(); 
         }
           
-            $activeUsers = DB::table('users')->where('type_id', 2)->count();
-            $customers = DB::table('customers')->count();
+           // $activeUsers = DB::table('users')->whereIn('type_id', [1, 2])->count();
+            $activeUsers = DB::table('users')->where('type_id',"<", 3)->count();
+             $customers = DB::table('customers')->count();
             $suppliers = DB::table('users')->where('type_id', 3)->count();
             $totalProduct = DB::table('products')->count();
             $totalProductType = DB::table('product_types')->count();
@@ -37,10 +38,12 @@ class DashboardStatRepository
             
             // daily profit made
             $totalProductTypeDailyProfits = DB::table('sales')
-                ->join('prices', 'sales.product_type_id', '=', 'prices.product_type_id')
-                ->where('prices.status', 1) 
+                ->join('prices', 'sales.price_id', '=', 'prices.id')
+                ->where('prices.status', 1)
                 ->whereDate('sales.created_at', now()->toDateString())
-               ->sum(DB::raw('(sales.price_sold_at - prices.selling_price) * sales.quantity'));
+                ->sum(DB::raw('(sales.price_sold_at - prices.cost_price) * sales.quantity'));
+
+                
 
             // Retrieve sales data from the last 7 days.
               $salesData = DB::table('sales') 
@@ -65,7 +68,7 @@ class DashboardStatRepository
             ->groupBy(DB::raw('Date(sales.created_at)')) // Group the results by the day the sale was made.
             ->select(
                 DB::raw('Date(sales.created_at) as day'),
-                DB::raw('SUM((sales.price_sold_at - prices.selling_price) * sales.quantity) as daily_profit')
+                DB::raw('SUM((sales.price_sold_at - prices.cost_price) * sales.quantity) as daily_profit')
             )
             ->get()
             ->keyBy('day'); // Index the resulting collection by 'day' for easy access by date.
@@ -98,7 +101,7 @@ class DashboardStatRepository
                 "total_product" => $totalProduct,
                 "total_product_type" => $totalProductType,
                 "daily_product_type_quantity_sold" => $dailyProductTypeQuantitySold,
-                "total_product_type_daily_profits" => $totalProductTypeDailyProfits,
+                "total_product_type_daily_profits" => $totalProductTypeDailyProfits." NGN",
                 "weekly_product_type_quantity_sales" => $weeklyProductTypeSalesMadePerDay,
                 "weekly_product_type_profit_made_per_day" => $weeklyProductTypeProfitMadePerDay,
             ];

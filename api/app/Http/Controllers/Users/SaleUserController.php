@@ -27,7 +27,7 @@ class SaleUserController extends Controller
     }
     
     	
-    public function store(UserFormRequest $request)
+    public function store(Request $request)
     { 	
        
       

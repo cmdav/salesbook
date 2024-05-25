@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\Artisan;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return 'you are view the web version';
+   // return view('welcome');
 });
 
 Route::get('/clear', function () {

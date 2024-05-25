@@ -93,16 +93,18 @@ class SaleRepository
 
 
     private function transformProduct($sale){
-       
+        $total_price = $sale->price_sold_at * $sale->quantity;
+        $formatted_total_price = number_format($total_price, 2, '.', ',');
+        $formatted_price_sold_at = number_format($sale->price_sold_at, 2, '.', ',');
        
         return [
             'id' => $sale->id,
-            'product_type_id' => optional($sale->product)->product_type_name,
+            'product_type_name' => optional($sale->product)->product_type_name,
             'product_type_description' => optional($sale->product)->product_type_description,
             'cost_price' => optional($sale->Price)->cost_price,
-            'price_sold_at' => $sale->price_sold_at,
+            'price_sold_at' => $formatted_price_sold_at,
             'quantity' => $sale->quantity,
-            'total_price' => $sale->price_sold_at * $sale->quantity,
+            'total_price' => $formatted_total_price,
             'payment_method' => $sale->payment_method,
             'created_at' => $sale->created_at,
             
@@ -141,6 +143,7 @@ private function transformSalesReceipt($sales)
 
     $items = $sales->map(function ($sale) use (&$transactionDetails) {
         $total_price = $sale->price_sold_at * $sale->quantity;
+        $formatted_total_price = number_format($total_price, 2, '.', ',');
         if ($sale->vat == 1) {
             $vatAmount = $total_price * 0.075; // Assuming VAT is 7.5%
             $total_price += $vatAmount;
@@ -157,7 +160,7 @@ private function transformSalesReceipt($sales)
             'vat' => $sale->vat,
             'quantity' => $sale->quantity,
              'amount' => $sale->price_sold_at * $sale->quantity,
-            'total_price' => $total_price,
+            'total_price' =>  $formatted_total_price,
             'payment_method' => $sale->payment_method,
         ];
     });
@@ -170,18 +173,19 @@ private function transformSalesReceipt($sales)
 }
 
     private function transformDailySales($sale){
-       
-       
+        $total_price = $sale->price_sold_at * $sale->quantity;
+        $formatted_total_price = number_format($total_price, 2, '.', ',');
         return [
             'id' => $sale->id,
             'product_type_id' => optional($sale->product)->product_type_name,
             'price_sold_at' => $sale->price_sold_at,
             'quantity' => $sale->quantity,
-            'total_price' => $sale->price_sold_at * $sale->quantity
+            'total_price' => $formatted_total_price,
         ];
     }
     public function create(array $data)
 {
+    
     $emailService = new EmailService();
     $transactionId =  time() . rand(1000, 9999);
     try {
@@ -190,6 +194,10 @@ private function transformSalesReceipt($sales)
             $totalPrice = 0; // Initialize total price
 
             foreach ($data['products'] as $product) {
+
+                $batchNoParts = explode('->', $product['batch_no']);
+                $batchNo = $batchNoParts[0];
+
                 $latestPrice = Price::where([
                     ['product_type_id', $product['product_type_id']],
                     ['batch_no', $product['batch_no']],
@@ -289,42 +297,46 @@ private function transformSalesReceipt($sales)
         return null;
     }
     private function generateProductDetailsTable($productDetails, $totalPrice) {
-    $tableHtml = "<table style='width:100%; border-collapse: collapse;'>
-                    <tr>
-                        <th style='border: 1px solid black; padding: 8px;'>Product Name</th>
-                        <th style='border: 1px solid black; padding: 8px;'>Price</th>
-                        <th style='border: 1px solid black; padding: 8px;'>Quantity</th>
-                        <th style='border: 1px solid black; padding: 8px;'>VAT</th>
-                        <th style='border: 1px solid black; padding: 8px;'>Total</th>
-                    </tr>";
-    
-    foreach ($productDetails as $detail) {
-        // Format the price and total for each product
-        $formattedPrice = number_format($detail['price'], 2, '.', ',');
-        $formattedTotal = number_format($detail['amount'], 2, '.', ','); // Use the amount which includes VAT if applicable
-        $vatStatus = $detail['vat'] == 'Yes' ? 'Yes' : 'No'; // Use the readable VAT status
+        $tableHtml = "<table style='width: 100%; border-collapse: collapse; max-width: 100%;'>
+                        <tr>
+                            <th style='border: 1px solid black; padding: 8px;'>Product Name</th>
+                            <th style='border: 1px solid black; padding: 8px;'>Price</th>
+                            <th style='border: 1px solid black; padding: 8px;'>Quantity</th>
+                            <th style='border: 1px solid black; padding: 8px;'>VAT</th>
+                            <th style='border: 1px solid black; padding: 8px;'>Total</th>
+                        </tr>";
         
-        $tableHtml .= "<tr>
-                            <td style='border: 1px solid black; padding: 8px;'>{$detail['productTypeName']}</td>
-                            <td style='border: 1px solid black; padding: 8px;'>$formattedPrice</td>
-                            <td style='border: 1px solid black; padding: 8px;'>{$detail['quantity']}</td>
-                            <td style='border: 1px solid black; padding: 8px;'>$vatStatus</td>
-                            <td style='border: 1px solid black; padding: 8px;'>$formattedTotal</td>
-                       </tr>";
-    }
-
-    // Format the grand total price
-    $formattedGrandTotal = number_format($totalPrice, 2, '.', ',');
+        foreach ($productDetails as $detail) {
+            // Format the price and total for each product
+            $formattedPrice = number_format($detail['price'], 2, '.', ',');
+            $formattedTotal = number_format($detail['amount'], 2, '.', ',');
+            $vatValue = number_format($detail['amount'] - ($detail['price'] * $detail['quantity']), 2, '.', ','); // Calculate the VAT value
+            
+            $tableHtml .= "<tr>
+                                <td style='border: 1px solid black; padding: 8px;'>{$detail['productTypeName']}</td>
+                                <td style='border: 1px solid black; padding: 8px;'>$formattedPrice</td>
+                                <td style='border: 1px solid black; padding: 8px;'>{$detail['quantity']}</td>
+                                <td style='border: 1px solid black; padding: 8px;'>$vatValue</td>
+                                <td style='border: 1px solid black; padding: 8px;'>$formattedTotal</td>
+                           </tr>";
+        }
     
-    $tableHtml .= "<tr>
-                       <td colspan='4' style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Total:</strong></td>
-                       <td style='border: 1px solid black; padding: 8px;'><strong>$formattedGrandTotal</strong></td>
-                   </tr>";
-
-    $tableHtml .= "</table>";
-
-    return $tableHtml;
-}
+        // Format the grand total price
+        $formattedGrandTotal = number_format($totalPrice, 2, '.', ',');
+    
+        $tableHtml .= "<tr>
+                           <td colspan='4' style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Total:</strong></td>
+                           <td style='border: 1px solid black; padding: 8px;'><strong>$formattedGrandTotal</strong></td>
+                       </tr>";
+    
+        $tableHtml .= "</table>";
+    
+        // Wrap the table in a responsive container
+        $responsiveTableHtml = "<div style='width: 100%; overflow-x: auto;'>$tableHtml</div>";
+    
+        return $responsiveTableHtml;
+    }
+    
 
     
     

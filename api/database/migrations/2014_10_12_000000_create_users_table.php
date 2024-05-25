@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('middle_name', 55)->nullable();
             $table->string('phone_number', 15)->nullable();
            // $table->integer('type_id')->default(0)->comment('0 => customer, 1=>supplier, 2=>company 3=>system users');
-            $table->integer('type_id')->default(0)->comment('0 =>others,1 for sole_properietor, 2 for company', '3 supplier');
+            $table->integer('type_id')->default(0)->comment('0 =>sales-personnel,1 for sole_properietor, 2 for company', '3 supplier');
             $table->string('role_id', 36)->default(0);
             $table->uuid('organization_id')->nullable();
             $table->string('organization_code')->nullable();

@@ -7,6 +7,7 @@ use App\Models\SupplierRequest;
 use App\Models\Inventory;
 use App\Models\Sale;
 use App\Models\Price;
+use App\Models\Store;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
@@ -50,10 +51,15 @@ class PurchaseRepository
     }
     private function transformProduct($purchase){
         // Assuming $purchase is the purchase data returned from the API
+        $cost_price =  $purchase->price ? $purchase->price->cost_price : 0;
+        $formatted_cost_price = number_format($cost_price, 2, '.', ',');
+
+        $selling_price = $purchase->price ? $purchase->price->selling_price : 0;
+        $formatted_selling_price = number_format($selling_price, 2, '.', ',');
         return [
             'id' => $purchase->id,
           
-            'product_type_id' => optional($purchase->productType)->product_type_name,
+            'product_type_name' => optional($purchase->productType)->product_type_name,
             'product_type_image' => optional($purchase->productType)->product_type_image,
             'product_type_description' => optional($purchase->productType)->product_type_description,
             'batch_no' => $purchase->batch_no,
@@ -61,8 +67,8 @@ class PurchaseRepository
 
             //'product_identifier' => $purchase->product_identifier,
             'expiry_date' => $purchase->expiry_date,
-            'price' => $purchase->price ? $purchase->price->cost_price : 0,
-
+            'cost_price' => $formatted_cost_price,
+            'selling_price' => $formatted_selling_price,
             'created_by' => optional($purchase->creator)->fullname,
             'updated_by' => optional($purchase->updater)->fullname,
 
@@ -78,7 +84,10 @@ class PurchaseRepository
         
         foreach ($data['purchases'] as $purchaseData) {
            
-            if (isset($purchaseData['price_id']) && is_numeric($purchaseData['price_id'])) {
+            //if (isset($purchaseData['price_id']) && is_numeric($purchaseData['price_id'])) {
+                if (empty($purchaseData['price_id'])) {  
+
+                    //return "price_id is empty";
                    
                 $price = new Price();
                 $price->product_type_id = $purchaseData['product_type_id'];
@@ -91,7 +100,7 @@ class PurchaseRepository
 
                 $purchaseData['price_id'] = $price->id;
             }
-
+            // return "price_id is not empty";
           
             if (!empty($purchaseData['supplier_id'])) {
                 $existingRecord = \App\Models\SupplierProduct::where('product_type_id', $purchaseData['product_type_id'])
@@ -121,10 +130,11 @@ class PurchaseRepository
         }
 
         DB::commit();
-        return 'Purchase created successfully!';
+        return response()->json(['data' =>$purchase] , 201);
     } catch (\Exception $e) {
         DB::rollBack();
-        return 'Failed to create purchases';
+        return response()->json(['message' =>'Failed to create purchases'] , 500);
+        //return 'Failed to create purchases';
     }
 }
 
@@ -135,23 +145,56 @@ class PurchaseRepository
         return Purchase::find($id);
     }
 
-    public function update($id, array $data)
+      public function update($id, array $data)
     {
-        $Purchase = $this->findById($id);
-      
-        if ($Purchase) {
+        $purchase = Purchase::find($id);
 
-            $Purchase->update($data);
+        if ($purchase) {
+            $originalQuantity = $purchase->quantity;
+            $newQuantity = $data['quantity'];
+            $quantityDifference = $newQuantity - $originalQuantity;
+
+            $purchase->update($data);
+
+            // Update store quantity
+            $store = Store::where('product_type_id', $purchase->product_type_id)
+                          ->where('batch_no', $purchase->batch_no)
+                          ->first();
+
+            if ($store) {
+                $store->quantity_available += $quantityDifference;
+                if ($store->quantity_available < 0) {
+                    $store->quantity_available = 0;
+                }
+                $store->save();
+            }
         }
-        return $Purchase;
+
+        return $purchase;
     }
 
     public function delete($id)
     {
-        $Purchase = $this->findById($id);
-        if ($Purchase) {
-            return $Purchase->delete();
+        $purchase = Purchase::find($id);
+
+        if ($purchase) {
+          
+            $store = Store::where('product_type_id', $purchase->product_type_id)
+                          ->where('batch_no', $purchase->batch_no)
+                          ->first();
+
+            if ($store) {
+                $store->quantity_available -= $purchase->quantity;
+                if ($store->quantity_available < 0) {
+                    $store->quantity_available = 0;
+                }
+                $store->save();
+            }
+
+            return $purchase->delete();
         }
+
         return null;
     }
+    
 }

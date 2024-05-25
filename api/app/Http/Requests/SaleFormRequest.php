@@ -24,11 +24,13 @@ class SaleFormRequest extends FormRequest
                     $index = explode('.', $attribute)[1];
                     $productTypeId = $this->input('products')[$index]['product_type_id'];
                     $batchNo = $this->input('products')[$index]['batch_no'];
-
+                      //$fail($productTypeId);
+                     // $fail($batchNo);
                     $price = Price::where('product_type_id', $productTypeId)
                                   ->where('batch_no', $batchNo)
-                                  ->where('status', 1)
+                                //   ->where('status', 1)
                                   ->first();
+                   //dd($productTypeId);
 
                     if (!$price) {
                         $fail('No active price set for the specified batch of the product.');
@@ -45,7 +47,8 @@ class SaleFormRequest extends FormRequest
                     $index = explode('.', $attribute)[1];
                     $productTypeId = $this->input('products')[$index]['product_type_id'];
                     $batchNo = $this->input('products')[$index]['batch_no'];
-
+                  
+                    
                     $store = Store::where('product_type_id', $productTypeId)
                                   ->where('batch_no', $batchNo)
                                   ->first();
