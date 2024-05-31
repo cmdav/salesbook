@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_sub_categories', function (Blueprint $table) {
-            $table->uuid('id',32)->primary();
-            $table->uuid('category_id'); 
-            $table->string('sub_category_name', 100);
-            $table->text('sub_category_description')->nullable(); 
-            $table->uuid('created_by', 32)->nullable();
+        Schema::create('subscriptions', function (Blueprint $table) {
+            $table->id();
+            $table->string('plan_name', 50); 
+            $table->string('description');
+            $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
         });
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_sub_categories');
+        Schema::dropIfExists('subscriptions');
     }
 };

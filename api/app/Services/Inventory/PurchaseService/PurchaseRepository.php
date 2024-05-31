@@ -20,9 +20,9 @@ class PurchaseRepository
            
     
     }
-    public function index()
+public function index()
     {
-       $Purchase = $this->query()->paginate(20);
+     $Purchase = $this->query()->paginate(20 );
 
         $Purchase->getCollection()->transform(function($Purchase){
 
@@ -84,34 +84,45 @@ class PurchaseRepository
         
         foreach ($data['purchases'] as $purchaseData) {
            
-            //if (isset($purchaseData['price_id']) && is_numeric($purchaseData['price_id'])) {
-                if (empty($purchaseData['price_id'])) {  
-
-                    //return "price_id is empty";
-                   
+            //Empty for new price
                 $price = new Price();
                 $price->product_type_id = $purchaseData['product_type_id'];
                 $price->supplier_id = $purchaseData['supplier_id'];
-                $price->cost_price = $purchaseData['cost_price'];
-                $price->selling_price = $purchaseData['selling_price'];
+                // $price->cost_price = $purchaseData['cost_price'];
+                // $price->selling_price = $purchaseData['selling_price'];
                 $price->batch_no = $purchaseData['batch_no'];
                 $price->status = 1;
+                // $price->save();
+                // $purchaseData['price_id'] = $price->id;
+            if (empty($purchaseData['price_id'])) {  
+                   
+                // $price = new Price();
+                // $price->product_type_id = $purchaseData['product_type_id'];
+                // $price->supplier_id = $purchaseData['supplier_id'];
+                $price->cost_price = $purchaseData['cost_price'];
+                $price->selling_price = $purchaseData['selling_price'];
+                // $price->batch_no = $purchaseData['batch_no'];
+                // $price->status = 1;
+                $price->save();
+                $purchaseData['price_id'] = $price->id;
+            }else{
+                $price->price_id = $purchaseData['price_id'];
                 $price->save();
 
-                $purchaseData['price_id'] = $price->id;
             }
             // return "price_id is not empty";
           
             if (!empty($purchaseData['supplier_id'])) {
+                //check if it's a new supplier
                 $existingRecord = \App\Models\SupplierProduct::where('product_type_id', $purchaseData['product_type_id'])
                                                             ->where('supplier_id', $purchaseData['supplier_id'])
-                                                            ->where('batch_no', $purchaseData['batch_no'])
+                                                            // ->where('batch_no', $purchaseData['batch_no'])
                                                             ->first();
                 if (!$existingRecord) {
                     $supplierProduct = new \App\Models\SupplierProduct();
                     $supplierProduct->product_type_id = $purchaseData['product_type_id'];
                     $supplierProduct->supplier_id = $purchaseData['supplier_id'];
-                    $supplierProduct->batch_no = $purchaseData['batch_no'];
+                    //$supplierProduct->batch_no = $purchaseData['batch_no'];
                     $supplierProduct->save();
                 }
             }
@@ -130,8 +141,9 @@ class PurchaseRepository
         }
 
         DB::commit();
-        return response()->json(['data' =>$purchase] , 201);
+        return response()->json(['data' =>$purchase ,'message' =>'Purchase record was added successfully'] , 201);
     } catch (\Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
         DB::rollBack();
         return response()->json(['message' =>'Failed to create purchases'] , 500);
         //return 'Failed to create purchases';

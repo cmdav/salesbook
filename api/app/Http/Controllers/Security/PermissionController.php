@@ -26,9 +26,11 @@ class PermissionController extends Controller
 
     public function store(Request $request)
     {
-        // $request->validate([
-        //     'page_name' => 'string|required|max:30|unique:Permission'
-        // ]);
+        $request->validate([
+            'role_id' => 'required|exists:job_roles,id',
+            'permissions' => 'required|array',
+            'permissions.*.page_id' => 'required|exists:pages,id',
+        ]);
         return $this->PermissionService->create($request->all());
         
     }

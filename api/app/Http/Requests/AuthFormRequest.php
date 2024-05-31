@@ -10,6 +10,7 @@ class AuthFormRequest extends FormRequest
 {
     public function rules(Request $request): array
     {
+       
         $rules = [
             'email' => [
                 'required',
@@ -19,7 +20,6 @@ class AuthFormRequest extends FormRequest
             'password' => 'required|string|min:2|max:60',
             //'code' => 'required|string|min:2|max:60',
         ];
-
        
         if ($request->code === 'yes') {
           

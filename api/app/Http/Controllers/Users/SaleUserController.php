@@ -31,7 +31,7 @@ class SaleUserController extends Controller
     { 	
        
       
-       $response ='Registration successful.';
+       $response ='User created successfully.';
           
         DB::beginTransaction(); 
 

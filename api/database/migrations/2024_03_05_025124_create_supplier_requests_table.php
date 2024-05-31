@@ -23,6 +23,9 @@ return new class extends Migration
             $table->uuid('updated_by')->nullable();
             $table->uuid('created_by')->nullable();
             $table->timestamps();
+           // $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('restrict'); 
+            $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('restrict'); 
+            $table->foreign('supplier_product_id')->references('id')->on('supplier_products')->onDelete('restrict'); 
         });
     }
 

@@ -27,7 +27,10 @@ return new class extends Migration
             $table->uuid('updated_by')->nullable();
            
              $table->timestamps();
-        });
+
+            //  $table->foreign('customer_id')->references('id')->on('customers')->onDelete('restrict'); 
+            //  $table->foreign('product_type_id')->references('id')->on('product_types')->onDelete('restrict'); 
+            });
     }
 
     /**

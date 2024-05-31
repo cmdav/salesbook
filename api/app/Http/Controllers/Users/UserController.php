@@ -27,12 +27,12 @@ class UserController extends Controller
     }
     public function index(Request $request){
         
-        $validatedData = $request->validate([
-           // 'type'=>'required'
-            'type' => 'required|in:supplier,customer,profile,company_customer,company,sales_personnel'
-        ]);
+        // $validatedData = $request->validate([
+        //    // 'type'=>'required'
+        //     'type' => 'required|in:suppliers,profile,sole_properietor,company,sales_personnel'
+        // ]);
 
-       return  $this->userService->getUser($validatedData['type']);
+       return  $this->userService->getUser($request->type);
     }
     public function show($id){
 

@@ -3,8 +3,8 @@
 namespace App\Services\Inventory\MeasurementService;
 
 use App\Models\Measurement;
-use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class MeasurementRepository 
 {
@@ -40,8 +40,21 @@ class MeasurementRepository
     }
     public function create(array $data)
     {
+        try{
        
-        return Measurement::create($data);
+         $data  =Measurement::create($data);
+        return response()->json([
+            'success' => true,
+            'message' => 'Measurement created successfully',
+            'data'=>$data
+        ], 201);
+      } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Product category could not be created',
+        ], 500);
+      }
     }
 
     public function findById($id)
@@ -51,21 +64,48 @@ class MeasurementRepository
 
     public function update($id, array $data)
     {
+        try{
        $measurement = $this->findById($id);
       
         if ($measurement) {
 
            $measurement->update($data);
-        }
-        return $measurement;
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Measurement successfully updated',
+            'data' => $measurement,
+        ], 200);
+    }
+       
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Product category could not be updated',
+        ], 500);
+      }
     }
 
     public function delete($id)
     {
+        try{
        $measurement = $this->findById($id);
         if ($measurement) {
-            return $measurement->delete();
+            $measurement->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Deletion successful',
+            ], 200);
         }
         return null;
+
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'This measurement is already in use',
+        ], 500);
+    }
     }
 }

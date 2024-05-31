@@ -18,9 +18,6 @@ Route::group(['prefix'=>'v1'], function(){
     
     route::resource('users', App\Http\Controllers\Users\UserController::class)->only('store');
     route::resource('contact-forms', App\Http\Controllers\Users\ContactFormController::class);
-
-   
-
 });
 
 // protected route
@@ -70,6 +67,28 @@ Route::middleware('auth:sanctum')->group(function() {
             
         });
 
+          //list organization
+          route::get('all-organizations', function(){
+
+            $organizations = \App\Models\Organization::select('id', 'organization_name')->orderBy('created_at', 'desc')->first();
+            if($organizations){
+                return response()->json(['data'=>$organizations], 200);
+            }
+            return [];
+            
+        });
+
+          //list organization
+          route::get('all-subscriptions', function(){
+
+            $subscriptions = \App\Models\Subscription::select('id', 'plan_name')->orderBy('created_at', 'desc')->first();
+            if($subscriptions){
+                return response()->json(['data'=>$subscriptions], 200);
+            }
+            return [];
+            
+        });
+
         // route::get('download-sales-receipt/{id}', function(){
         //     return 'download in process';
         // });
@@ -103,6 +122,7 @@ Route::middleware('auth:sanctum')->group(function() {
         
         route::resource('customers', App\Http\Controllers\Users\CustomerController::class)->only('index','show');
         route::get('customer-names', App\Http\Controllers\Users\CustomerNamesController::class);
+        
         route::resource('daily-sales', App\Http\Controllers\Inventory\DailySaleController::class)->only('index');
 
         // Search endpoints
@@ -114,10 +134,13 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('search-sales', App\Http\Controllers\Inventory\SearchSaleController::class)->only('show');
         route::resource('search-stores', App\Http\Controllers\Inventory\SearchStoreController::class)->only('show');
         route::resource('search-purchases', App\Http\Controllers\Inventory\SearchPurchaseController::class)->only('show');
+       route::get('search-customer/{searchCriteria}', App\Http\Controllers\Users\SearchCustomerController::class);
 
         route::resource('job-roles', App\Http\Controllers\Security\JobRoleController::class);
         route::resource('pages', App\Http\Controllers\Security\PagesController::class);
         route::resource('permissions', App\Http\Controllers\Security\PermissionController::class);
+        Route::resource('subscriptions', App\Http\Controllers\Security\SubscriptionController::class);
+        Route::resource('subscription-statuses', App\Http\Controllers\Security\SubscriptionStatusController::class);
        
     });
     
@@ -126,6 +149,7 @@ Route::middleware('auth:sanctum')->group(function() {
 
 
 });
+
 
 
 

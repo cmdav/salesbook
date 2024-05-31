@@ -23,6 +23,8 @@ return new class extends Migration
             $table->uuid('created_by');
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
+        
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict'); 
         });
     }
 

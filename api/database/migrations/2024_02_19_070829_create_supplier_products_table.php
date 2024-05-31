@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id',32)->primary();
             $table->uuid('product_type_id'); 
             $table->uuid('supplier_id'); 
-            $table->string('batch_no'); 
+            $table->string('batch_no')->nullable();
             // $table->integer('price')->nullable();
             // $table->string('product_name', 255)->nullable();
             // $table->string('product_image', 225)->nullable();
@@ -23,6 +23,8 @@ return new class extends Migration
             $table->uuid('created_by', 32)->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
+            // $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('restrict'); 
+            // $table->foreign('product_type_id')->references('id')->on('product_types')->onDelete('restrict'); 
         });
     }
 

@@ -9,6 +9,7 @@ use App\Models\Sale;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class ProductTypeRepository 
 {
@@ -72,68 +73,88 @@ class ProductTypeRepository
     
     public function getProductTypeByName()
     {
-
-
-                $productTypes = DB::table('product_types')
-                    ->select('product_types.id', 'product_types.product_type_name', 'product_types.product_id')
-                    ->addSelect(DB::raw("
-                        (SELECT JSON_OBJECT(
-                            'id', products.id,
-                            'vat', products.vat
-                        )
-                        FROM products
-                        WHERE products.id = product_types.product_id
-                        ) as product"))
-                    ->addSelect(DB::raw("
-                        (SELECT JSON_OBJECT(
-                            'product_type_id', stores.product_type_id,
-                            'total_quantity', SUM(stores.quantity_available)
-                        )
-                        FROM stores
-                        WHERE stores.product_type_id = product_types.id AND stores.status = 1
-                        GROUP BY stores.product_type_id
-                        ) as store"))
-                    ->addSelect(DB::raw("
-                        (SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                            'id', stores.id,
-                            'product_type_id', stores.product_type_id,
-                            'batch_no', stores.batch_no,
-                            'quantity_available', stores.quantity_available,
-                            'selling_price', prices.selling_price,
-                            'cost_price', prices.cost_price
-                        ))
-                        FROM stores
-                        JOIN prices ON prices.batch_no = stores.batch_no AND prices.product_type_id = stores.product_type_id
-                        WHERE stores.product_type_id = product_types.id AND stores.status = 1 AND prices.status = 1
-                        ) as batches"))
-                    ->get();
-
-                $productTypes->transform(function ($item) {
-                    $item->product = json_decode($item->product);
-                    $item->store = json_decode($item->store);
-                    $item->batches = json_decode($item->batches);
+        // Query the 'product_types' table and select specific columns
+        $productTypes = DB::table('product_types')
+            ->select('product_types.id', 'product_types.product_type_name', 'product_types.product_id')
+            
+            // Select a JSON object containing 'id' and 'vat' from the 'products' table where the 'product_id' matches
+            ->addSelect(DB::raw("
+                (SELECT JSON_OBJECT(
+                    'id', products.id,
+                    'vat', products.vat
+                )
+                FROM products
+                WHERE products.id = product_types.product_id
+                ) as product"))
+            
+            // Select a JSON object containing 'product_type_id' and the sum of 'quantity_available' from the 'stores' table
+            // where 'product_type_id' matches and 'status' is 1, grouped by 'product_type_id'
+            ->addSelect(DB::raw("
+                (SELECT JSON_OBJECT(
+                    'product_type_id', stores.product_type_id,
+                    'total_quantity', SUM(stores.quantity_available)
+                )
+                FROM stores
+                WHERE stores.product_type_id = product_types.id AND stores.status = 1
+                GROUP BY stores.product_type_id
+                ) as store"))
+            
+            // Select a JSON array of objects containing batch details from the 'stores' table joined with 'prices' table
+            // where 'product_type_id' matches, 'status' is 1, and 'prices.status' is 1
+            ->addSelect(DB::raw("
+                (SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                    'id', stores.id,
+                    'product_type_id', stores.product_type_id,
+                    'batch_no', stores.batch_no,
+                    'quantity_available', stores.quantity_available,
+                    'selling_price', COALESCE(prices.selling_price, 
+                        (SELECT p.selling_price FROM prices p WHERE p.id = prices.price_id)),
+                    'cost_price', COALESCE(prices.cost_price, 
+                        (SELECT p.cost_price FROM prices p WHERE p.id = prices.price_id))
+                ))
+                FROM stores
+                JOIN prices ON prices.batch_no = stores.batch_no AND prices.product_type_id = stores.product_type_id
+                WHERE stores.product_type_id = product_types.id AND stores.status = 1 AND prices.status = 1
+                ) as batches"))
+            
+            // Execute the query and get the results
+            ->get();
+    
+        // Transform the results
+        $productTypes->transform(function ($item) {
+            // Decode the JSON fields
+            $item->product = json_decode($item->product);
+            $item->store = json_decode($item->store);
+            $item->batches = json_decode($item->batches);
+            
+            // Return a formatted array with the desired structure
+            return [
+                'id' => $item->id,
+                'product_type_name' => $item->product_type_name,
+                'vat_percentage' => 7.5, // Static VAT percentage
+                'cost_price' => $item->batches[0]->cost_price ?? 0, // Cost price from the first batch or 0 if not available
+                'selling_price' => $item->batches[0]->selling_price ?? 0, // Selling price from the first batch or 0 if not available
+                'quantity_available' => $item->store->total_quantity ?? 0, // Total quantity available from the store or 0 if not available
+                'vat' => $item->product->vat ?? 'No', // VAT value from the product or 'No' if not available
+                'batches' => collect($item->batches)->map(function ($batch) {
+                    // Create a label combining batch number and selling price
+                    $batchLabel = $batch->batch_no."->".$batch->selling_price;
+                    // Return a formatted array for each batch
                     return [
-                        'id' => $item->id,
-                        'product_type_name' => $item->product_type_name,
-                        'vat_percentage' => 7.5,
-                        'cost_price' => $item->batches[0]->cost_price ?? 0, 
-                        'selling_price' => $item->batches[0]->selling_price ?? 0, 
-                        'quantity_available' => $item->store->total_quantity ?? 0,
-                        'vat' => $item->product->vat ?? 'No',
-                        'batches' => collect($item->batches)->map(function ($batch) {
-                            return [
-                                'id' => $batch->id,
-                                'batch_no' => $batch->batch_no,
-                                'batch_quantity_left' => $batch->quantity_available,
-                                'batch_selling_price' => $batch->selling_price
-                            ];
-                        })->toArray()
+                        'id' => $batch->id,
+                        'batch_no' =>  $batchLabel,
+                        'batch_quantity_left' => $batch->quantity_available,
+                        'batch_selling_price' => $batch->selling_price
                     ];
-                });
-
-                return $productTypes;
-
+                })->toArray()
+            ];
+        });
+    
+        // Return the transformed product types
+        return $productTypes;
     }
+    
+
     private function getProductTypes($productId = null)
     {
                     $query =$this->query();
@@ -191,8 +212,20 @@ class ProductTypeRepository
     
     public function create(array $data)
     {
-    
-        return ProductType::create($data);
+     try{
+        $data=ProductType::create($data);
+        return response()->json([
+            'success' => false,
+            'message' => 'This Product type created successfully',
+            'data' =>$data,
+        ], 200);
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'This Product type could not be created',
+        ], 500);
+    }
     }
 
     public function findById($id)
@@ -202,27 +235,72 @@ class ProductTypeRepository
 
     public function update($id, array $data)
     {
-        
+        try{
         $ProductType = $this->findById($id);
       
         if ($ProductType) {
 
-            $ProductType->update($data);
+            $data=$ProductType->update($data);
+            return response()->json([
+                'success' => true,
+                'message' => 'Update successful',
+                'data' => $data,
+            ], 200);
         }
-        return $ProductType;
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'This Product type could not be updated',
+        ], 500);
+    }
     }
 
     public function delete($id)
     {
         $ProductType = $this->findById($id);
-        
-        if ($ProductType) {
-            if($ProductType->type == 1){
-                 $product= \App\Models\Product::find($ProductType->product_id);
-                 $product->delete();
+     if(!$ProductType){
+        return response()->json([
+            'success' => false,
+            'message' => "No product found"
+        ], 404);
+     }
+        //check if type is  a product
+    if($ProductType->type == 1){
+               
+            $product= \App\Models\Product::find($ProductType->product_id);
+            if($product){
+                $productTypes =ProductType::where('product_id', $product->id);
+                if ($productTypes->count() > 1) {
+                    // Delete all associated ProductType records
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Deletion not successful"
+                    ], 500);
+                   
+                }else{
+                    //delete the only product and product type
+                    $ProductType->delete();
+                    $product->delete();
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Deletion successful',
+                    ], 200);
+                }
             }
-            return $ProductType->delete();
+            $product->delete();
+            return response()->json([
+                'success' => true,
+                'message' => "Deletion successful"
+            ], 500);
+     }
+     else{
+              
+            $ProductType->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Deletion successful',
+            ], 200);
         }
-        return null;
     }
 }

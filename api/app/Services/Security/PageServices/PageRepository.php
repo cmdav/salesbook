@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Services\Security\PageServices;
-
+use Illuminate\Support\Facades\Log;
 use App\Models\Pages;
 
 

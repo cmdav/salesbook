@@ -24,13 +24,13 @@ class SaleFormRequest extends FormRequest
                     $index = explode('.', $attribute)[1];
                     $productTypeId = $this->input('products')[$index]['product_type_id'];
                     $batchNo = $this->input('products')[$index]['batch_no'];
-                      //$fail($productTypeId);
-                     // $fail($batchNo);
+
+                    // Extract the real batch number
+                    $realBatchNo = explode('->', $batchNo)[0];
+
                     $price = Price::where('product_type_id', $productTypeId)
-                                  ->where('batch_no', $batchNo)
-                                //   ->where('status', 1)
+                                  ->where('batch_no', $realBatchNo)
                                   ->first();
-                   //dd($productTypeId);
 
                     if (!$price) {
                         $fail('No active price set for the specified batch of the product.');
@@ -47,10 +47,12 @@ class SaleFormRequest extends FormRequest
                     $index = explode('.', $attribute)[1];
                     $productTypeId = $this->input('products')[$index]['product_type_id'];
                     $batchNo = $this->input('products')[$index]['batch_no'];
-                  
+
+                    // Extract the real batch number
+                    $realBatchNo = explode('->', $batchNo)[0];
                     
                     $store = Store::where('product_type_id', $productTypeId)
-                                  ->where('batch_no', $batchNo)
+                                  ->where('batch_no', $realBatchNo)
                                   ->first();
 
                     if (!$store) {
@@ -71,7 +73,7 @@ class SaleFormRequest extends FormRequest
     public function messages()
     {
         return [
-           
+            // Custom validation messages can be added here
         ];
     }
 }

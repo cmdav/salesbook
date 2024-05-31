@@ -32,8 +32,8 @@ class ProductTypeController extends Controller
         if ($request->hasFile('product_type_image')) {
             $data['product_type_image'] = $this->fileUploadService->uploadImage($request->file('product_type_image'),'product_type');
         }
-        $productType = $this->productTypeService->create($data);
-        return response()->json($productType, 201);
+        return $this->productTypeService->create($data);
+       
     }
 
     public function show($id)
@@ -52,13 +52,13 @@ class ProductTypeController extends Controller
            
         }
        
-        $productType = $this->productTypeService->update($id,  $data);
-        return response()->json($productType);
+        return $this->productTypeService->update($id,  $data);
+       
     }
 
     public function destroy($id)
     {
-        $this->productTypeService->deleteProduct($id);
-        return response()->json(null, 204);
+        return $this->productTypeService->deleteProduct($id);
+       
     }
 }

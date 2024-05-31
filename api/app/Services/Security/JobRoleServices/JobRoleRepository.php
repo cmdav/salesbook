@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Services\Security\JobRoleServices;
-
+use Illuminate\Support\Facades\Log;
 use App\Models\JobRole;
 
 

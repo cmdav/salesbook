@@ -33,6 +33,12 @@ class CustomerService
         return $this->customerRepository->customerName();
        
     }
+    public function searchCustomer($criteria)
+    {
+    
+        return $this->customerRepository->searchCustomer($criteria);
+       
+    }
 
    
 

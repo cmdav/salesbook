@@ -31,8 +31,8 @@ class OrganizationController extends Controller
             $data['organization_logo'] = $this->fileUploadService->uploadImage($request->file('organization_logo'),'organization');
         }
 
-        $organization = $this->organizationService->createOrganization($data);
-        return response()->json($organization, 201);
+        return $this->organizationService->createOrganization($data);
+      
     }
    
 
@@ -49,13 +49,13 @@ class OrganizationController extends Controller
             $data['organization_logo'] = $this->fileUploadService->uploadImage($request->file('organization_logo'),'organization_logo');
            
         }
-        $updateOrganization = $this->organizationService->updateOrganization($id, $data);
-        return response()->json($updateOrganization);
+        return $this->organizationService->updateOrganization($id, $data);
+      
     }
 
     public function destroy($id)
     {
-        $this->organizationService->deleteOrganization($id);
-        return response()->json(null, 204);
+        return $this->organizationService->deleteOrganization($id);
+       
     }
 }

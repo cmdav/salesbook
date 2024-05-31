@@ -5,6 +5,7 @@ namespace App\Services\Products\ProductSubCategoryService;
 use App\Models\ProductSubCategory;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class ProductSubCategoryRepository 
 {
@@ -46,8 +47,22 @@ class ProductSubCategoryRepository
 
     public function create(array $data)
     {
+        try{
        
-        return ProductSubCategory::create($data);
+             $data=ProductSubCategory::create($data);
+        return response()->json([
+            'success' => true,
+            'message' => 'Product Subcategory created successfully',
+            'data' => $data,
+        ], 200);
+    }
+     catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+    return response()->json([
+        'success' => false,
+        'message' => 'Product Subcategory could not be created',
+    ], 500);
+     }
     }
 
     public function findById($id)
@@ -57,22 +72,46 @@ class ProductSubCategoryRepository
 
     public function update($id, array $data)
     {
-        $productSubCategory = $this->findById($id);
+        
+        try{
+            $productSubCategory = $this->findById($id);
       
         if ($productSubCategory) {
 
-            $productSubCategory->update($data);
+            $data=$productSubCategory->update($data);
+            return response()->json([
+                'success' => true,
+                'message' => 'Update successful',
+                'data' => $data,
+            ], 200);
         }
-        return $productSubCategory;
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Product Subcategory could not be updated',
+        ], 500);
+    }
     }
 
     public function delete($id)
     {
+        try{
         $productSubCategory = $this->findById($id);
         if ($productSubCategory) {
-            return $productSubCategory->delete();
+            $productSubCategory->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Deletion successful',
+            ], 200);
         }
-        return null;
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Product Subcategory could not deleted',
+        ], 500);
+    }
     }
     private function transformProductService($productSubCategory){
 

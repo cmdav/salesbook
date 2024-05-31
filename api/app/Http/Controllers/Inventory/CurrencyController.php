@@ -23,8 +23,8 @@ class CurrencyController extends Controller
 
     public function store(CurrencyFormRequest $request)
     {
-        $currency = $this->currencyService->createcurrency($request->all());
-        return response()->json($currency, 201);
+        return $this->currencyService->createcurrency($request->all());
+       
     }
 
     public function show($id)
@@ -36,13 +36,13 @@ class CurrencyController extends Controller
     public function update($id, CurrencyFormRequest $request)
     {
        
-        $currency = $this->currencyService->updateCurrency($id, $request->all());
-        return response()->json($currency);
+        return $this->currencyService->updateCurrency($id, $request->all());
+      
     }
 
     public function destroy($id)
     {
-        $this->currencyService->deleteCurrency($id);
-        return response()->json(null, 204);
+        return $this->currencyService->deleteCurrency($id);
+       
     }
 }

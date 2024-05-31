@@ -73,7 +73,7 @@ class ProductController extends Controller
 
         DB::commit(); // Commit the transaction
 
-    return response()->json(['product' => $product], 201);
+    return response()->json(['data' => $product, 'message' =>'Product created successfully'], 201);
     } catch (\Exception $e) {
         DB::rollBack(); // Rollback the transaction on any error
         return response()->json(['error' => $e->getMessage()], 500);
@@ -93,13 +93,13 @@ class ProductController extends Controller
         if ($request->hasFile('product_image')) {
             $data['product_image'] = $this->fileUploadService->uploadImage($request->file('product_image'),'products');
         }
-        $product = $this->productService->updateProduct($id, $data);
-        return response()->json($product);
+        return  $this->productService->updateProduct($id, $data);
+       
     }
 
     public function destroy($id)
     {
-        $this->productService->deleteProduct($id);
-        return response()->json(null, 204);
+        return $this->productService->deleteProduct($id);
+       
     }
 }

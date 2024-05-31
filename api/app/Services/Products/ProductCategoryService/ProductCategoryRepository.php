@@ -5,6 +5,7 @@ namespace App\Services\Products\ProductCategoryService;
 use App\Models\ProductCategory;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class ProductCategoryRepository 
 {
@@ -45,8 +46,21 @@ class ProductCategoryRepository
     
     public function create(array $data)
     {
-       
-        return ProductCategory::create($data);
+       try{
+        $productCategory=ProductCategory::create($data);
+            return response()->json([
+                'success' => true,
+                'message' => 'Product category created successfully',
+                'data'=>$productCategory
+            ], 201);
+          
+        } catch (Exception $e) {
+            Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Product category could not be created',
+            ], 500);
+        }
     }
 
     public function findById($id)
@@ -56,21 +70,44 @@ class ProductCategoryRepository
 
     public function update($id, array $data)
     {
-        $productCategory = $this->findById($id);
+        try{
+            $productCategory = $this->findById($id);
       
         if ($productCategory) {
 
-            $productCategory->update($data);
+            $productCategory=$productCategory->update($data);
+            return response()->json([
+                'success' => true,
+                'message' => 'Update successful',
+                'data'=>$productCategory
+            ], 200);
         }
-        return $productCategory;
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'This category could not be updated',
+        ], 500);
+    }
     }
 
     public function delete($id)
     {
-        $productCategory = $this->findById($id);
-        if ($productCategory) {
-            return $productCategory->delete();
+        try{
+            $productCategory = $this->findById($id);
+            if ($productCategory) {
+                return $productCategory->delete();
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Deletion Successful..',
+            ], 204);
+        } catch (Exception $e) {
+            Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'This category could not be deleted',
+            ], 500);
         }
-        return null;
     }
 }

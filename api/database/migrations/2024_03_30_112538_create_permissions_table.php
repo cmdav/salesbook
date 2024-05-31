@@ -22,6 +22,10 @@ return new class extends Migration
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
+
+            $table->foreign('page_id')->references('id')->on('pages')->onDelete('restrict'); 
+            $table->foreign('role_id')->references('id')->on('job_roles')->onDelete('restrict'); 
+           
         });
     }
 

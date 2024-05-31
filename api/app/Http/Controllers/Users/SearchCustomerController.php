@@ -6,19 +6,20 @@ use Illuminate\Http\Request;
 use App\Services\UserService\CustomerService;
 
 
-class CustomerNamesController extends Controller
+class SearchCustomerController extends Controller
 {
     
     protected CustomerService $CustomerService;
 
-    public function __invoke(CustomerService $CustomerService)
+    public function __invoke(CustomerService $CustomerService, $criteria)
     {
-
+        
         $this->CustomerService = $CustomerService;
-        if($customerNames =$this->CustomerService->customerName()){
+        if($customerNames =$this->CustomerService->searchCustomer($criteria)){
+            
             return response()->json($customerNames);
         }
-        return response()->json(['message'=>'JobRole not found'], 404);
+        return response()->json(['message'=>'Customer not found'], 404);
         
          
 

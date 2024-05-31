@@ -184,12 +184,12 @@ class UserRepository
         {
                         $user = User::select('id', 'first_name', 'last_name', 'organization_id', 'type_id', 'phone_number', 'email')
                         ->where('type_id', 3) 
-                        ->where('organization_id', Auth::user()->organization_id)
-                        ->with(['supplier:id,user_id,bank_name,account_name,account_number,state,address'])
-                        ->whereHas('supplierOrganization', function($query) {
-                            $query->where('organization_id', Auth::user()->organization_id); 
-                        })
-                        ->latest()->paginate(20);
+                        //->where('organization_id', Auth::user()->organization_id)
+                        // ->with(['supplier:id,user_id,bank_name,account_name,account_number,state,address'])
+                        // ->whereHas('supplierOrganization', function($query) {
+                        //     $query->where('organization_id', Auth::user()->organization_id); 
+                        // })
+                        ->latest()->paginate(2);
                          $user->getCollection()->transform(function ($user) {
                                     return $this->transformUsers($user);
                         });
@@ -345,13 +345,23 @@ class UserRepository
     }
     public function delete($id)
     {
-        $user = User::where('id', $id)->first();
         
-        if ($user) {
+        try{
+        $user = User::where('id', $id)->first();
             
-            return $user->delete();
+            if ($user) {
+                
+                return $user->delete();
+            }
+            return null;
+        } catch (QueryException $e) {
+            Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting user.',
+                'errors' => 'There was an error deleting this user'
+            ], 500);
         }
-        return null;
     }
     
 

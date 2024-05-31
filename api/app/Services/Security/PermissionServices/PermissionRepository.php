@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Services\Security\PermissionServices;
-
+use Illuminate\Support\Facades\Log;
 use App\Models\Permission;
+use Exception;
 
 
 class PermissionRepository 
@@ -38,6 +39,7 @@ class PermissionRepository
 
     public function create(array $data)
     {
+        try{
         $roleId = $data['role_id'];
         $permissionsData = $data['permissions'];
         
@@ -54,7 +56,14 @@ class PermissionRepository
             $permission = Permission::updateOrCreate($uniqueCriteria, $permissionData);
         }
     
-        return response()->json(['message' => 'Permissions created or updated successfully!'], 201);           
+        return response()->json(['message' => 'Permissions created or updated successfully!'], 201); 
+        
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        DB::rollBack();
+        return response()->json(['message' =>'Failed to create permission'] , 500);
+        //return 'Failed to create purchases';
+    }
     }
     
 

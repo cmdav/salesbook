@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             'currencies', 'measurements', 'product-categories', 'product-sub-categories',
             'products', 'product-types', 'sales', 'purchases', 'stores', 'prices', 
             'job-roles','pages','permissions','organizations',
-            'records', 'reports','customers','supplier-products','suppliers','dashboards','settings'
+             'records', 'reports','customers','supplier-products','suppliers','dashboards','settings','subscriptions'
         ];
 
         foreach ($pageNames as $pageName) {

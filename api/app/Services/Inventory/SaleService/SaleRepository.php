@@ -185,7 +185,7 @@ private function transformSalesReceipt($sales)
     }
     public function create(array $data)
 {
-    
+   
     $emailService = new EmailService();
     $transactionId =  time() . rand(1000, 9999);
     try {
@@ -197,20 +197,20 @@ private function transformSalesReceipt($sales)
 
                 $batchNoParts = explode('->', $product['batch_no']);
                 $batchNo = $batchNoParts[0];
-
+              
                 $latestPrice = Price::where([
                     ['product_type_id', $product['product_type_id']],
-                    ['batch_no', $product['batch_no']],
+                    ['batch_no', $batchNo],
                     ['status', 1]
                 ])->firstOrFail();
-
+              
                 $store = Store::where([
                     ['product_type_id', $product['product_type_id']],
-                    ['batch_no', $product['batch_no']]
+                    ['batch_no', $batchNo]
                 ])->firstOrFail();
 
                 if ($store->quantity_available < $product['quantity']) {
-                    throw new Exception("Insufficient stock for batch {$product['batch_no']}");
+                    throw new Exception("Insufficient stock for batch {$batchNo}");
                 }
                 $store->quantity_available -= $product['quantity'];
                 $store->save();
@@ -221,7 +221,7 @@ private function transformSalesReceipt($sales)
                     'customer_id' => $data['customer_id'],
                     'price_sold_at' => $product['price_sold_at'],
                     'quantity' => $product['quantity'],
-                    'batch_no' => $product['batch_no'],
+                    'batch_no' => $batchNo,
                     'vat' => $product['vat'],
                     'payment_method' => $data['payment_method'],
                     'transaction_id' =>$transactionId
@@ -263,7 +263,7 @@ private function transformSalesReceipt($sales)
 
             return true;
         });
-        return response()->json(['success' => true], 200);
+        return response()->json(['success' => true,'message' => 'Sale successfully recorded: '], 200);
     } catch (Exception $e) {
         return response()->json(['success' => false, 'message' => 'Sale creation failed: ' . $e->getMessage()], 500);
     }

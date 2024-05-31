@@ -5,6 +5,7 @@ namespace App\Services\Products\ProductService;
 use App\Models\Product;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class ProductRepository 
 {
@@ -35,8 +36,10 @@ class ProductRepository
    
     public function create(array $data)
     {
+      
+         return Product::create($data);
        
-        return Product::create($data);
+    
     }
 
     public function findById($id)
@@ -47,23 +50,45 @@ class ProductRepository
 
     public function update($id, array $data)
     {
-    
+      try{
        $product = Product::findorFail($id);
       
         if ($product) {
 
-           $product->update($data);
+          $product  =$product->update($data);
+           return response()->json([
+            'success' =>true,
+            'message' => 'Update successful',
+            'data' => $product
+        ], 200);
         }
-        return $product;
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'This Product could not be updated',
+        ], 500);
+    }
     }
 
     public function delete($id)
     {
+        try{
        $product = $this->findById($id);
         if ($Product) {
-            return$product->delete();
+            $product->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Deletion successful',
+            ], 200);
         }
-        return null;
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'This Product could not be deleted',
+        ], 500);
+    }
     }
 
     public function transformProduct($product){

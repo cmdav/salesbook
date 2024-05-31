@@ -24,8 +24,8 @@ class MeasurementController extends Controller
 
     public function store(MeasurementFormRequest $request)
     {
-        $measurement =$this->measurementService->createMeasurement($request->all());
-        return response()->json($measurement, 201);
+        return $this->measurementService->createMeasurement($request->all());
+      
     }
 
     public function show($id)
@@ -37,13 +37,13 @@ class MeasurementController extends Controller
     public function update($id, MeasurementFormRequest $request)
     {
        
-        $measurement =$this->measurementService->updateMeasurement($id, $request->all());
-        return response()->json($measurement);
+       return $this->measurementService->updateMeasurement($id, $request->all());
+       
     }
 
     public function destroy($id)
     {
-       $this->measurementService->deleteMeasurement($id);
-        return response()->json(null, 204);
+       return $this->measurementService->deleteMeasurement($id);
+        
     }
 }

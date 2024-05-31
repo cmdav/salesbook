@@ -23,8 +23,8 @@ class ProductCategoryController extends Controller
 
     public function store(ProductCategoryFormRequest $request)
     {
-        $productCategory = $this->productCategoryService->createProductCategory($request->all());
-        return response()->json($productCategory, 201);
+        return $this->productCategoryService->createProductCategory($request->all());
+       
     }
 
     public function show($id)
@@ -36,13 +36,13 @@ class ProductCategoryController extends Controller
     public function update($id, ProductCategoryFormRequest $request)
     {
        
-        $productCategory = $this->productCategoryService->updateProductCategory($id, $request->all());
-        return response()->json($productCategory);
+        return $this->productCategoryService->updateProductCategory($id, $request->all());
+       
     }
 
     public function destroy($id)
     {
-        $this->productCategoryService->deleteProductCategory($id);
-        return response()->json(null, 204);
+        return $this->productCategoryService->deleteProductCategory($id);
+     
     }
 }

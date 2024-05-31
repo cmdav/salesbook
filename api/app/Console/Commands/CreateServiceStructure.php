@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 
 class CreateServiceStructure extends Command
 {
+    //php artisan make:service-structure  CustomerAppointmentController Appointment Customer
     protected $signature = 'make:service-structure {controller} {model} {namespace}';
     protected $description = 'Creates a service and repository structure for a given controller with CRUD operations.';
 
@@ -105,35 +106,64 @@ namespace App\\Services\\{$namespace}\\{$baseName}Service;
 
 use App\\Models\\{$model};
 
+use Exception;
+
 class {$baseName}Repository
 {
     public function index()
     {
-        return {$model}::all();
+        return {$model}::paginate(20);
     }
 
     public function show(\$id)
     {
-        return {$model}::findOrFail(\$id);
+        return {$model}::where('id',\$id)->first();
     }
 
     public function store(\$data)
     {
-        return {$model}::create(\$data);
+        try {
+            return {$model}::create(\$data);
+        } catch (Exception \$e) {
+            Log::channel('insertion_errors')->error('Error creating or updating user: ' . \$e->getMessage());
+            return response()->json([
+                'success' => 'false',
+                'message' => 'Insertion error'
+            ], 500);
+        }
+        
     }
 
     public function update(\$data, \$id)
     {
-        \$model = {$model}::findOrFail(\$id);
-        \$model->update(\$data);
-        return \$model;
-    }
+        try {  
+        \$model = {$model}::where('id',\$id)->first();
+            if(\$model){
+                \$model->update(\$data);
+            }
+            return \$model;
+        } catch (Exception \$e) {
+            Log::channel('insertion_errors')->error('Error creating or updating user: ' . \$e->getMessage());
+            return response()->json([
+                'success' => 'false',
+                'message' => 'Insertion error'
+            ], 500);
+        }
+    }   
 
     public function destroy(\$id)
     {
-        \$model = {$model}::findOrFail(\$id);
-        \$model->delete();
-        return \$model;
+        try { 
+            \$model = {$model}:where('id',\$id)->first();
+            \$model->delete();
+            return \$model;
+        } catch (Exception \$e) {
+            Log::channel('insertion_errors')->error('Error creating or updating user: ' . \$e->getMessage());
+            return response()->json([
+                'success' => 'false',
+                'message' => 'Insertion error'
+            ], 500);
+        }
     }
 }
 ";
@@ -152,6 +182,7 @@ use App\\Http\\Controllers\\Controller;
 use {$serviceNamespace};
 use {$formRequestNamespace};
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class {$controller} extends Controller
 {
@@ -174,12 +205,12 @@ class {$controller} extends Controller
 
     public function store({$baseName}FormRequest \$request)
     {
-        return \$this->{$serviceVar}->store(\$request->validated());
+        return \$this->{$serviceVar}->store(\$request->all());
     }
 
     public function update({$baseName}FormRequest \$request, \$id)
     {
-        return \$this->{$serviceVar}->update(\$request->validated(), \$id);
+        return \$this->{$serviceVar}->update(\$request->all(), \$id);
     }
 
     public function destroy(\$id)

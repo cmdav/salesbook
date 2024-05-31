@@ -20,6 +20,7 @@ class Organization extends Model
         'organization_code', 
         'organization_logo',
         'user_id',
+        'id',
         'created_by',
         'updated_by',
     ];

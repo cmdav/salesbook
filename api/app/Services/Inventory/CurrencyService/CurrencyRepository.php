@@ -38,8 +38,23 @@ class CurrencyRepository
     }
     public function create(array $data)
     {
-       
-        return Currency::create($data);
+       try{
+        $data=Currency::create($data);
+        return response()->json([
+            'success' => true,
+            'message' => 'Currency created successfully',
+            'data' => $data,
+        ], 200);
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'This currency could not be  created',
+        ], 500);
+      
+
+    }
+      
     }
 
     public function findById($id)
@@ -50,20 +65,58 @@ class CurrencyRepository
     public function update($id, array $data)
     {
         $Currency = $this->findById($id);
-      
+      try{
         if ($Currency) {
 
-            $Currency->update($data);
+            $data  =$Currency->update($data);
+            return response()->json([
+                'success' => true,
+                'message' => 'Update successful',
+                'data' => $data,
+            ], 200);
         }
-        return $Currency;
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'This currency could not be updated',
+        ], 500);
+      
+
+    }
     }
 
     public function delete($id)
-    {
+{
+    try {
         $Currency = $this->findById($id);
+
         if ($Currency) {
-            return $Currency->delete();
+            if (strtolower($Currency->currency_name) === 'naira') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You cannot delete the default currency.',
+                ], 403); 
+            }
+
+            $Currency->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Deletion successful',
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Currency not found',
+            ], 404); // Not Found status code
         }
-        return null;
+    } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error deleting currency: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'This currency could not be deleted',
+        ], 500); // Internal Server Error status code
     }
+}
+
 }

@@ -146,6 +146,7 @@ class User extends Authenticatable
                   $request = app('request');
                     $organization = new Organization([
                         'id' => Str::uuid(),
+                        'organization_name' => $user->company_name,
                         'organization_code' => $user->organization_code,
                         'organization_type' =>  $request->input('organization_type'),
                         'organization_logo' => 'logo.png', 

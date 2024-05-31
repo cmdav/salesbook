@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id',32)->primary();
             $table->uuid('product_type_id'); 
             $table->uuid('supplier_id')->nullable();
+            $table->uuid('price_id')->nullable();
             $table->integer('cost_price')->nullable();
             $table->integer('selling_price')->nullable();
             $table->string('batch_no')->nullable();
@@ -26,6 +27,10 @@ return new class extends Migration
             $table->uuid('created_by', 32)->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
+
+            // $table->foreign('currency_id')->references('id')->on('currencies')->onDelete('restrict'); 
+            // $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('restrict'); 
+            // $table->foreign('product_type_id')->references('id')->on('product_types')->onDelete('restrict'); 
         });
     }
 
