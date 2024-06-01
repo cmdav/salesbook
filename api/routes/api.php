@@ -81,7 +81,7 @@ Route::middleware('auth:sanctum')->group(function() {
           //list organization
           route::get('all-subscriptions', function(){
 
-            $subscriptions = \App\Models\Subscription::select('id', 'plan_name')->orderBy('created_at', 'desc')->first();
+            $subscriptions = \App\Models\Subscription::select('id', 'plan_name')->orderBy('created_at', 'desc')->paginate(20);
             if($subscriptions){
                 return response()->json(['data'=>$subscriptions], 200);
             }
@@ -114,7 +114,7 @@ Route::middleware('auth:sanctum')->group(function() {
        
        
         route::get('all-pages', App\Http\Controllers\Security\AllPageController::class);
-        Route::get('search-users/{searchCriteria}', App\Http\Controllers\Users\SearchUserController::class);
+        
         route::get('dashboard-stat', App\Http\Controllers\Product\DashboardStatController::class);
         route::post('process-csv', App\Http\Controllers\Product\CsvController::class);
     
@@ -135,6 +135,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('search-stores', App\Http\Controllers\Inventory\SearchStoreController::class)->only('show');
         route::resource('search-purchases', App\Http\Controllers\Inventory\SearchPurchaseController::class)->only('show');
        route::get('search-customer/{searchCriteria}', App\Http\Controllers\Users\SearchCustomerController::class);
+       Route::get('search-users/{searchCriteria}', App\Http\Controllers\Users\SearchUserController::class);
 
         route::resource('job-roles', App\Http\Controllers\Security\JobRoleController::class);
         route::resource('pages', App\Http\Controllers\Security\PagesController::class);

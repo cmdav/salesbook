@@ -29,7 +29,7 @@ class UserRepository
             // "contact_person" => $user->contact_person,
             // "company_address" => $user->company_address,
             // // "organization_name" => optional($user->organization)->organization_name,
-            // "organization_code" =>optional($user->organization)->organization_code,
+            "organization_code" =>$user->organization_code,
             // "organization_logo" => optional($user->organization)->organization_logo,
             // "organization_type" => optional($user->organization)->organization_type,
             "role" => optional($user->role)->role_name,
@@ -198,7 +198,7 @@ class UserRepository
 
         }else if($type == 'sales_personnel')
         {
-                        $user = User::select('id', 'first_name', 'last_name',  'email','role_id')
+                        $user = User::select('id', 'first_name', 'last_name',  'email','role_id','organization_code')
                         ->where('type_id', 0) 
                         ->with('role:id,role_name')
                         //->where('organization_id', Auth::user()->organization_id)
