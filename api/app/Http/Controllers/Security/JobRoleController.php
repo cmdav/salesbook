@@ -39,13 +39,13 @@ class JobRoleController extends Controller
     public function update($id, Request $request)
     {
        
-        $jobRole =$this->jobRoleService->update($id, $request->all());
-        return response()->json($jobRole);
+        return $this->jobRoleService->update($id, $request->all());
+        
     }
 
     public function destroy($id)
     {
-       $this->jobRoleService->delete($id);
-        return response()->json(null, 204);
+       return $this->jobRoleService->delete($id);
+    
     }
 }

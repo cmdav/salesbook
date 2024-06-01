@@ -83,11 +83,12 @@ class User extends Authenticatable
 
             $request = app('request');
 
-           //
+           //company and individual and supplier do not have role
             if (!$request->has('role_id')) {
-
+            
                 if (!$request->has('type')) 
                 {
+                    //company and individual do not have a type
                         do {
                             $time = time(); 
                             $randomNumber = rand(100000, 999999);
@@ -117,7 +118,7 @@ class User extends Authenticatable
                         }
                 }
                 else {
-
+                    //supplier have a type_id of 3
                     $user->type_id = 3;
                     $user->email_verified_at = now();
                     $time = time(); 
@@ -129,11 +130,12 @@ class User extends Authenticatable
                
             }
             else{
-
+                //sale personnel commence with role
                 $user->email_verified_at = now();
     
                 if (Auth::check()) {
                     $user->organization_code = Auth::user()->organization_code;
+                    $user->organization_id = Auth::user()->organization_id;
                 }
             }
            

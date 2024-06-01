@@ -43,7 +43,7 @@ class UserController extends Controller
     }
    // public function store(Request $request)
     	
-    public function store(Request $request)
+    public function store(UserFormRequest $request)
     { 	
        
       
@@ -65,7 +65,7 @@ class UserController extends Controller
             if (($request->input('organization_type') == 'company') || ($request->input('organization_type') == 'sole_properietor')) {
                
                //dd($user->organization_code);
-                $this->emailService->sendEmail($user, 'register', $user->organization_code);
+        $this->emailService->sendEmail($user, 'register', $user->organization_code);
                 $response ='Verify your account using the verification link sent to your email.';
             }
     

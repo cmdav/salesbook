@@ -31,11 +31,7 @@ class SaleUserController extends Controller
     { 	
        
       
-       $response ='User created successfully.';
-          
-        DB::beginTransaction(); 
-
-        try {
+        
           
             $user = $this->userService->createUser($request->all());
            
@@ -47,24 +43,10 @@ class SaleUserController extends Controller
           
     
           
-            DB::commit(); 
-        
-            return response()->json(['message' => $response], 201);
+          
+            return response()->json(['message' => "User created successfully.", 'data' =>$user], 201);
             
-        }catch (ModelNotFoundException $e) {
-
-            DB::rollBack();
-            Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
-            return response()->json(['message' => 'submission Error.','errors' => ['organization' => ['An error occur while creating a user.']]], 422); 
-
-        } catch (Exception $e) {
-
-            DB::rollBack(); 
-
-            Log::channel('email_errors')->error('Error sending email: ' . $e->getMessage());
-
-            return response()->json(['message' => 'An error occur. Please try again .'], 500);
-        }
+      
             
            
         
