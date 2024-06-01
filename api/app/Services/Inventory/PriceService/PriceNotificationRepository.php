@@ -104,16 +104,7 @@ class PriceNotificationRepository
     return $priceNotification;
 }
 
-    // public function update($id, array $data)
-    // {
-    //     $Price = PriceNotification::find($id);
-        
-    //     if ($Price) {
-         
-    //         $Price->update($data);
-    //     }
-    //     return $Price;
-    // }
+ 
 
     public function delete($id)
     {
@@ -122,6 +113,6 @@ class PriceNotificationRepository
             
             return $Price->delete();
         }
-        return null;
+      
     }
 }

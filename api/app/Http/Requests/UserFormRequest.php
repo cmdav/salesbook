@@ -11,7 +11,7 @@ class UserFormRequest extends FormRequest
     public function rules(Request $request): array
     {
         $rules = [
-            'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
+            
             'password' => [
                 'required',
                 'string',
@@ -26,13 +26,14 @@ class UserFormRequest extends FormRequest
             'organization_type' => [
                 'required',
                 'string',
-                'in:sole_properietor,company,sales_personnel'
+                'in:sole_properietor,company,sales_personnel,supplier'
             ],
             'phone_number' => 'required|string',
         ];
 
         if ($request->input('organization_type') == 'company') {
             $rules = array_merge($rules, [
+                'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
                 'company_name' => 'required|string|max:55',
                 'company_address' => 'required|string|max:55',
                 'contact_person' => 'required|string|max:55',
@@ -46,6 +47,7 @@ class UserFormRequest extends FormRequest
                 'last_name' => 'required|string|max:55',
                 'middle_name' => 'nullable|string|max:55',
                 'dob' => 'nullable|date|date_format:Y-m-d',
+                'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
             ]);
         }
 
@@ -54,6 +56,31 @@ class UserFormRequest extends FormRequest
                 'first_name' => 'required|string|max:55',
                 'last_name' => 'required|string|max:55',
                 'organization_code' => 'required|string|max:55',
+                'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
+            ]);
+        }
+        if ($request->input('organization_type') == 'supplier') {
+            $rules = array_merge($rules, [
+                'first_name' => 'required|string|max:55',
+                'last_name' => 'required|string|max:55',
+                'organization_id' => 'required|string|max:55',
+                'email' => [
+                    'required',
+                    'email',
+                    'max:55',
+                    function ($attribute, $value, $fail) use ($request) {
+                        $exists = DB::table('users')
+                            ->where('email', $value)
+                            ->where('organization_id', $request->input('organization_id'))
+                            ->exists();
+
+                        if (!$exists) {
+                            $fail('The email and organization ID combination does not exist.');
+                        }
+                    }
+                ],
+                'middle_name' => 'nullable|string|max:55',
+                'dob' => 'nullable|date|date_format:Y-m-d',
             ]);
         }
 

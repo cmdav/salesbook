@@ -30,8 +30,8 @@ class PriceNotificationController extends Controller
             'cost_price' => 'required|integer',
         ]);
         
-        $price =$this->priceNotificationService->createPrice($request->all());
-        return response()->json($price, 201);
+        return $this->priceNotificationService->createPrice($request->all());
+       
     }
 
     public function show($id)
