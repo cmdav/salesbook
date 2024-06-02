@@ -155,12 +155,14 @@ class UserRepository
     {
        
        
-    $user = User::where('type_id', 0)
-                ->where(function($query) use ($searchCriteria) {
-                    $query->where('email', 'like', '%' . $searchCriteria . '%')
-                        ->orWhere('phone_number', 'like', '%' . $searchCriteria . '%');
-                })
-                ->get();
+        $user = User::where('type_id', 0)
+            ->where(function($query) use ($searchCriteria) {
+                $query->whereRaw('LOWER(email) LIKE ?', ['%' . strtolower($searchCriteria) . '%'])
+                    ->orWhereRaw('LOWER(phone_number) LIKE ?', ['%' . strtolower($searchCriteria) . '%'])
+                    ->orWhereRaw('LOWER(first_name) LIKE ?', ['%' . strtolower($searchCriteria) . '%'])
+                    ->orWhereRaw('LOWER(last_name) LIKE ?', ['%' . strtolower($searchCriteria) . '%']);
+            })
+            ->get();
            
             // if ($user) {
            

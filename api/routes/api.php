@@ -18,6 +18,9 @@ Route::group(['prefix'=>'v1'], function(){
     
     route::resource('users', App\Http\Controllers\Users\UserController::class)->only('store');
     route::resource('contact-forms', App\Http\Controllers\Users\ContactFormController::class);
+    Route::get('search-users/{searchCriteria}', App\Http\Controllers\Users\SearchUserController::class);
+    //testing route
+   
 });
 
 // protected route
@@ -135,7 +138,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('search-stores', App\Http\Controllers\Inventory\SearchStoreController::class)->only('show');
         route::resource('search-purchases', App\Http\Controllers\Inventory\SearchPurchaseController::class)->only('show');
        route::get('search-customer/{searchCriteria}', App\Http\Controllers\Users\SearchCustomerController::class);
-       Route::get('search-users/{searchCriteria}', App\Http\Controllers\Users\SearchUserController::class);
+       //Route::get('search-users/{searchCriteria}', App\Http\Controllers\Users\SearchUserController::class);
 
         route::resource('job-roles', App\Http\Controllers\Security\JobRoleController::class);
         route::resource('pages', App\Http\Controllers\Security\PagesController::class);

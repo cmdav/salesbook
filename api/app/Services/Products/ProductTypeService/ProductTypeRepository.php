@@ -198,7 +198,7 @@ class ProductTypeRepository
             'quantity_available' => optional($productType->store)->total_quantity ?? 0,
             "measurement_id" => optional(optional($productType->product)->measurement)->measurement_name,
     
-            'purchasing_price' => optional($productType->latestPurchase)->price_id ?? 'Not set',
+            'purchasing_price' => optional($productType->activePrice)->cost_price ?? 'Not set',
             'selling_price' => optional($productType->activePrice)->selling_price ?? 'Not set',
             'supplier_name' => trim((optional($productType->suppliers)->first_name ?? '') . ' ' . (optional($productType->suppliers)->last_name ?? '')) ?: 'None',
             'supplier_phone_number' => optional($productType->suppliers)->phone_number ?? 'None',

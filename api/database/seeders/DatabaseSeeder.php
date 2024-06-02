@@ -15,10 +15,22 @@ class DatabaseSeeder extends Seeder
         
         
         $pageNames = [
-            'currencies', 'measurements', 'product-categories', 'product-sub-categories',
-            'products', 'product-types', 'sales', 'purchases', 'stores', 'prices', 
-            'job-roles','pages','permissions','organizations',
-             'records', 'reports','customers','supplier-products','suppliers','dashboards','settings','subscriptions'
+            'currencies',
+             'measurements', 
+             'product-categories', 
+             'product-sub-categories',
+            'products', 
+            'product-types',
+             'sales',
+              'purchases', 
+              'stores',
+               //'prices', 
+            //'job-roles',
+            //'pages',
+            'permissions','organizations',
+             'records', 'reports','customers','supplier-products','suppliers',
+             //'dashboards',
+             'settings','subscriptions'
         ];
 
         foreach ($pageNames as $pageName) {
@@ -46,7 +58,7 @@ class DatabaseSeeder extends Seeder
                     \App\Models\Permission::factory()->create([
                         'page_id' => $page->id,
                         'role_id' => $role->id,
-                        'read' => rand(0, 1),
+                        'read' => 1,
                         'write' => rand(0, 1),
                         'update' => rand(0, 1),
                         'del' => rand(0, 1),
@@ -86,18 +98,20 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         
-        // \App\Models\Organization::factory(1)->create();
-        // \App\Models\Organization::factory(1)->create([
+            $organization = \App\Models\Organization::factory(1)->create()->first();
+         
+        //  $organization = \App\Models\Organization::factory(1)->create([
         //     'organization_code'=>'123457',
         // ]);
         \App\Models\User::factory()->create([
             'first_name' => 'Test',
             'email' => 'admin@gmail.com',
             'password'=>'test123',
-            'organization_code'=>'123456',
             'type_id' => 2,
             'role_id' => $adminRole->id,
             'email_verified_at' => now(),
+            'organization_id'  => $organization->id,
+            'organization_code'  => $organization->organization_code,
 
     
         ]);

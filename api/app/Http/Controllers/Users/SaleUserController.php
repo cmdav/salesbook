@@ -30,7 +30,22 @@ class SaleUserController extends Controller
     public function store(Request $request)
     { 	
        
-      
+            $request->validate([
+                'password' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'max:30',
+                    'confirmed',
+                    'regex:/[a-z]/',      // must contain at least one lowercase letter
+                    'regex:/[A-Z]/',      // must contain at least one uppercase letter
+                    'regex:/[0-9]/',      // must contain at least one digit
+                    'regex:/[@$!%*#?&]/', // must contain a special character
+                ],
+                'first_name' => 'required|string|max:55',
+                'last_name' => 'required|string|max:55',
+                'email' => ['required', 'email', 'max:55'],
+            ]);
         
           
             $user = $this->userService->createUser($request->all());
