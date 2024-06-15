@@ -78,7 +78,8 @@ class SaleRepository
         $endOfDay = Carbon::now()->endOfDay();
 
        
-        $sale =  Sale::select("id","quantity","product_type_id","price_id","price_sold_at")->with(['product:id,product_type_name','Price:id,selling_price' ])
+        $sale =  Sale::select("id","quantity","product_type_id","price_id","price_sold_at","batch_no")
+                     ->with(['product:id,product_type_name','Price:id,selling_price' ])
                      ->latest()->whereBetween('created_at', [$startOfDay, $endOfDay])->paginate(20);
                    
         
@@ -96,14 +97,19 @@ class SaleRepository
         $total_price = $sale->price_sold_at * $sale->quantity;
         $formatted_total_price = number_format($total_price, 2, '.', ',');
         $formatted_price_sold_at = number_format($sale->price_sold_at, 2, '.', ',');
-       
+        
+        $cost_price = optional($sale->price)->is_new == 1 
+        ? (optional($sale->price)->new_cost_price ?? optional($sale->price->referencePrice)->new_cost_price) 
+        : (optional($sale->price)->cost_price ?? optional($sale->price->referencePrice)->cost_price);
+        
         return [
             'id' => $sale->id,
             'product_type_name' => optional($sale->product)->product_type_name,
             'product_type_description' => optional($sale->product)->product_type_description,
-            'cost_price' => optional($sale->Price)->cost_price,
+            'cost_price' =>  $cost_price,
             'price_sold_at' => $formatted_price_sold_at,
             'quantity' => $sale->quantity,
+            'batch_no' => $sale->batch_no,
             'total_price' => $formatted_total_price,
             'payment_method' => $sale->payment_method,
             'created_at' => $sale->created_at,
@@ -238,7 +244,7 @@ private function transformSalesReceipt($sales)
                 
                 $productDetails[] = [
                     "productTypeName" => $latestPrice->productType->product_type_name,
-                    "price" => $latestPrice->selling_price,
+                    'price_sold_at' => $latestPrice->is_new ? $latestPrice->new_selling_price : $latestPrice->selling_price,
                     "quantity" => $product['quantity'],
                     "vat" => $product['vat'] == 1 ? 'Yes' : 'No', 
                     "amount" => $amount

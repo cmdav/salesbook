@@ -27,6 +27,7 @@ class SubscriptionStatusController extends Controller
 
     public function store(SubscriptionStatusFormRequest $request)
     {
+
         return $this->subscriptionStatusService->store($request->all());
     }
 

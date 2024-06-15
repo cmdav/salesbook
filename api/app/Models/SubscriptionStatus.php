@@ -26,7 +26,7 @@ class SubscriptionStatus extends Model
     }
     public function organization(){
 
-        return $this->belongsTo(Organization::class,'organization_id', 'user_id');
+        return $this->belongsTo(Organization::class,'organization_id', 'id');
     }
     public function users(){
 

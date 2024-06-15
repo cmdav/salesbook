@@ -63,7 +63,7 @@ class Purchase extends Model
     }
     public function suppliers(){
 
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'supplier_id', 'id');
     }
     public function currency(){
 

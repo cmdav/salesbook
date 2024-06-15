@@ -69,6 +69,7 @@ public function index()
             'expiry_date' => $purchase->expiry_date,
             'cost_price' => $formatted_cost_price,
             'selling_price' => $formatted_selling_price,
+            'supplier' =>optional($purchase->suppliers)->first_name." ". optional($purchase->suppliers)->last_name." ". optional($purchase->suppliers)->company_name,
             'created_by' => optional($purchase->creator)->fullname,
             'updated_by' => optional($purchase->updater)->fullname,
 
@@ -94,6 +95,7 @@ public function index()
                 $price->status = 1;
                 // $price->save();
                 // $purchaseData['price_id'] = $price->id;
+                //purchaseData price id will be empty for initial price
             if (empty($purchaseData['price_id'])) {  
                    
                 // $price = new Price();

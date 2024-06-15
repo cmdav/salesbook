@@ -33,7 +33,8 @@ class SubscriptionController extends Controller
 
     public function update(SubscriptionFormRequest $request, $id)
     {
-        return $this->subscriptionService->update($request, $id);
+       
+        return $this->subscriptionService->update($request->all(), $id);
     }
 
     public function destroy($id)

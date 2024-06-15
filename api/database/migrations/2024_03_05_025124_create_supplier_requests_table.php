@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('supplier_requests', function (Blueprint $table) {
-            $table->uuid('id',32)->primary();
+            $table->uuid('id')->primary();
             $table->uuid('organization_id');
             $table->uuid('supplier_product_id');
             $table->string('batch_no')->nullable();
             $table->integer('quantity');
             $table->integer('status')->default(0)->comment('pending');
-            $table->text('comment',15)->nullable();
+            $table->text('comment')->nullable();
             $table->date('expected_date_of_arrival')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->uuid('created_by')->nullable();

@@ -16,6 +16,9 @@ class Price extends Model
         'cost_price',
         'selling_price',
         'batch_no',
+        'new_cost_price',
+        'new_selling_price',
+         'is_new',
         //'auto_generated_selling_price',
         'currency_id',
         'discount',
@@ -44,5 +47,9 @@ class Price extends Model
     public function supplier(){
 
         return $this->belongsTo(User::class);
+    }
+    public function referencePrice()
+    {
+        return $this->belongsTo(Price::class, 'price_id');
     }
 }

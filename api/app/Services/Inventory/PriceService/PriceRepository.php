@@ -101,7 +101,7 @@ class PriceRepository
             'selling_price'=>$price->selling_price,
             //'currency'=>optional($price->currency)->currency_name."(".optional($price->currency)->currency_symbol .")",
             //'discount'=>$price->discount,
-            'status'=>$price->status,
+            //'status'=>$price->status,
             // 'supplier_name'=>optional($price->supplier)->first_name."(".optional($price->supplier)->last_name .")",
             // 'supplier_phone_number'=>optional($price->supplier)->phone_number,
         ];

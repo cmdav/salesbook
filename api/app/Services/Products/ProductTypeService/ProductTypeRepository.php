@@ -74,51 +74,64 @@ class ProductTypeRepository
     public function getProductTypeByName()
     {
         // Query the 'product_types' table and select specific columns
-        $productTypes = DB::table('product_types')
-            ->select('product_types.id', 'product_types.product_type_name', 'product_types.product_id')
-            
-            // Select a JSON object containing 'id' and 'vat' from the 'products' table where the 'product_id' matches
-            ->addSelect(DB::raw("
-                (SELECT JSON_OBJECT(
-                    'id', products.id,
-                    'vat', products.vat
-                )
-                FROM products
-                WHERE products.id = product_types.product_id
-                ) as product"))
-            
-            // Select a JSON object containing 'product_type_id' and the sum of 'quantity_available' from the 'stores' table
-            // where 'product_type_id' matches and 'status' is 1, grouped by 'product_type_id'
-            ->addSelect(DB::raw("
-                (SELECT JSON_OBJECT(
-                    'product_type_id', stores.product_type_id,
-                    'total_quantity', SUM(stores.quantity_available)
-                )
-                FROM stores
-                WHERE stores.product_type_id = product_types.id AND stores.status = 1
-                GROUP BY stores.product_type_id
-                ) as store"))
-            
-            // Select a JSON array of objects containing batch details from the 'stores' table joined with 'prices' table
-            // where 'product_type_id' matches, 'status' is 1, and 'prices.status' is 1
-            ->addSelect(DB::raw("
-                (SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                    'id', stores.id,
-                    'product_type_id', stores.product_type_id,
-                    'batch_no', stores.batch_no,
-                    'quantity_available', stores.quantity_available,
-                    'selling_price', COALESCE(prices.selling_price, 
-                        (SELECT p.selling_price FROM prices p WHERE p.id = prices.price_id)),
-                    'cost_price', COALESCE(prices.cost_price, 
-                        (SELECT p.cost_price FROM prices p WHERE p.id = prices.price_id))
-                ))
-                FROM stores
-                JOIN prices ON prices.batch_no = stores.batch_no AND prices.product_type_id = stores.product_type_id
-                WHERE stores.product_type_id = product_types.id AND stores.status = 1 AND prices.status = 1
-                ) as batches"))
-            
-            // Execute the query and get the results
-            ->get();
+                $productTypes = DB::table('product_types')
+                ->select('product_types.id', 'product_types.product_type_name', 'product_types.product_id')
+
+                // Select a JSON object containing 'id' and 'vat' from the 'products' table where the 'product_id' matches
+                ->addSelect(DB::raw("
+                    (SELECT JSON_OBJECT(
+                        'id', products.id,
+                        'vat', products.vat
+                    )
+                    FROM products
+                    WHERE products.id = product_types.product_id
+                    ) as product"))
+
+                // Select a JSON object containing 'product_type_id' and the sum of 'quantity_available' from the 'stores' table
+                // where 'product_type_id' matches and 'status' is 1, grouped by 'product_type_id'
+                ->addSelect(DB::raw("
+                    (SELECT JSON_OBJECT(
+                        'product_type_id', stores.product_type_id,
+                        'total_quantity', SUM(stores.quantity_available)
+                    )
+                    FROM stores
+                    WHERE stores.product_type_id = product_types.id AND stores.status = 1
+                    GROUP BY stores.product_type_id
+                    ) as store"))
+
+                // Select a JSON array of objects containing batch details from the 'stores' table joined with 'prices' table
+                // where 'product_type_id' matches, 'status' is 1, and 'prices.status' is 1
+                ->addSelect(DB::raw("
+                        (SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                        'id', stores.id,
+                        'product_type_id', stores.product_type_id,
+                        'batch_no', stores.batch_no,
+                        'quantity_available', stores.quantity_available,
+                        'selling_price', 
+                            COALESCE(
+                                (CASE WHEN prices.is_new = 1 AND prices.status = 1 THEN prices.new_selling_price ELSE prices.selling_price END),
+                                (SELECT CASE WHEN p.is_new = 1 THEN p.new_selling_price ELSE p.selling_price END FROM prices p WHERE p.id = prices.price_id)
+                            ),
+                        'cost_price', 
+                            COALESCE(
+                                (CASE WHEN prices.is_new = 1 AND prices.status = 1 THEN prices.new_cost_price ELSE prices.cost_price END),
+                                (SELECT CASE WHEN p.is_new = 1 THEN p.new_cost_price ELSE p.cost_price END FROM prices p WHERE p.id = prices.price_id)
+                            )
+                    ))
+                    FROM stores
+                    JOIN prices ON prices.batch_no = stores.batch_no AND prices.product_type_id = stores.product_type_id
+                    WHERE stores.product_type_id = product_types.id 
+                    AND stores.status = 1 
+                    AND prices.status = 1
+                    AND stores.quantity_available > 0  
+                    ) as batches
+                "))
+
+
+                // Execute the query and get the results
+                ->get();
+
+       
     
         // Transform the results
         $productTypes->transform(function ($item) {

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            $table->string('plan_name', 50); 
+            $table->string('plan_name', 50)->unique(); 
             $table->string('description');
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();

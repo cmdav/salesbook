@@ -35,12 +35,21 @@ class SubscriptionRepository
 
     public function update($data, $id)
     {
+       
         try {  
         $model = Subscription::where('id',$id)->first();
             if($model){
                 $model->update($data);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Update successful',
+                    'data' => $data,
+                ], 200);
             }
-            return $model;
+            return response()->json([
+                'success' => false,
+                'message' => 'Update fail',
+            ], 404);
         } catch (Exception $e) {
             Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
             return response()->json([
@@ -52,8 +61,22 @@ class SubscriptionRepository
 
     public function destroy($id)
     {
-        $model = Subscription::findOrFail($id);
-        $model->delete();
-        return $model;
+        try{
+            $subscription = Subscription::where('id',$id)->first();
+            if ($subscription) {
+                 $subscription->delete();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Deletion successful',
+                ], 200);
+            }
+          
+        } catch (Exception $e) {
+            Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'subscription could not be deleted',
+            ], 500);
+        }
     }
 }

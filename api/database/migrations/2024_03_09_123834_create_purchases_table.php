@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('purchases', function (Blueprint $table) {
-            $table->uuid('id',32)->primary();
+            $table->uuid('id')->primary();
             $table->uuid('product_type_id');
             $table->uuid('supplier_id')->nullable();
             $table->uuid('price_id')->nullable();
@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('quantity')->default(0); 
             $table->string('product_identifier', 50)->nullable(); 
             $table->date('expiry_date')->nullable();
-            $table->uuid('organization_id', 32)->nullabe();
+            $table->uuid('organization_id')->nullabe();
             $table->integer('status')->default(1); 
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();

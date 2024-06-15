@@ -12,19 +12,22 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('prices', function (Blueprint $table) {
-            $table->uuid('id',32)->primary();
+            $table->uuid('id')->primary();
             $table->uuid('product_type_id'); 
             $table->uuid('supplier_id')->nullable();
             $table->uuid('price_id')->nullable();
             $table->integer('cost_price')->nullable();
             $table->integer('selling_price')->nullable();
             $table->string('batch_no')->nullable();
+            $table->integer('new_cost_price')->nullable();
+            $table->integer('new_selling_price')->nullable();
+            $table->integer('is_new')->default(0);
            // $table->integer('auto_generated_selling_price')->nullable();
             $table->uuid('currency_id')->nullable(); 
             $table->integer('discount')->nullable();
             $table->boolean('status')->default(0);
-            $table->uuid('organization_id', 32)->nullable(); 
-            $table->uuid('created_by', 32)->nullable();
+            $table->uuid('organization_id')->nullable(); 
+            $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
 

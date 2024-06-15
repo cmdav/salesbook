@@ -5,12 +5,15 @@ namespace App\Traits;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 trait SetCreatedBy
 {
     protected static function bootSetCreatedBy()
     {
         static::creating(function ($model) {
+            $request = request(); // Get the current request instance
+            
             // Check if the table has 'created_by' column and set it
             if (Auth::check() && Schema::hasColumn($model->getTable(), 'created_by')) {
                 $model->created_by = Auth::id();
@@ -23,9 +26,11 @@ trait SetCreatedBy
 
             // Check if the table has 'organization_id' column and set it
             if (Auth::check() && Schema::hasColumn($model->getTable(), 'organization_id')) {
-                // Set the organization_id as per your business logic.
-                // If the organization_id should be fetched from a different source, replace Auth::id() with the appropriate logic.
-                $model->organization_id = Auth::id(); // Adjust as needed
+                if ($request->has('organization_id')) {
+                    $model->organization_id = $request->input('organization_id');
+                } else {
+                    $model->organization_id = Auth::id();
+                }
             }
 
             // Always set 'updated_by' during creation

@@ -2,17 +2,20 @@
 
 namespace App\Services\AuthService;
 use App\Services\UserService\UserRepository;
+use App\Services\Security\SubscriptionStatusService\SubscriptionStatusRepository;
 use Illuminate\Support\Facades\Hash;
 
 
 class AuthService
 {
     protected UserRepository $userRepository;
+    protected SubscriptionStatusRepository $subscriptionStatusRepository;
     
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository, SubscriptionStatusRepository $subscriptionStatusRepository)
     {
         $this->userRepository = $userRepository;
+        $this->subscriptionStatusRepository = $subscriptionStatusRepository;
 
     }
 
@@ -38,6 +41,10 @@ class AuthService
             return response()->json(['message' => 'Your email is not verified.'], 401);
         }
         
+        if(!$this->subscriptionStatusRepository->checkSubscriptionStatus($user->organization_id)){
+
+            return response()->json(['message' => 'Your subscription has expired.'], 401);
+        }
        
         if($this->passwordValidation($request['password'], $user->password)){
 

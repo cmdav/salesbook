@@ -14,7 +14,10 @@ class SubscriptionStatusFormRequest extends FormRequest
     public function rules()
     {
         return [
-            // Validation rules
+            'plan_id' => 'required|exists:subscriptions,id|integer',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after_or_equal:start_time',
+            'organization_id' => 'required|uuid|exists:organizations,id',
         ];
     }
 }

@@ -102,9 +102,9 @@ class User extends Authenticatable
                         $user->token =  hexdec(substr($hash, 0, 6)) % 3000000;
 
 
-                        $adminRole = JobRole::where('role_name', 'Admin')->first();
+                        $adminRole = JobRole::where('role_name', 'Super Admin')->first();
                         if (!$adminRole) {
-                            throw new ModelNotFoundException('Error from user Admin role not found.');
+                            throw new ModelNotFoundException('Error from user Super Admin role not found.');
                         }
                         $user->role_id = $adminRole->id;
 

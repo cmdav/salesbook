@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('supplier_products', function (Blueprint $table) {
-            $table->uuid('id',32)->primary();
+            $table->uuid('id')->primary();
             $table->uuid('product_type_id'); 
             $table->uuid('supplier_id'); 
             $table->string('batch_no')->nullable();
@@ -20,7 +20,7 @@ return new class extends Migration
             // $table->string('product_name', 255)->nullable();
             // $table->string('product_image', 225)->nullable();
             // $table->text('product_description')->nullable(); 
-            $table->uuid('created_by', 32)->nullable();
+            $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
             // $table->foreign('supplier_id')->references('id')->on('users')->onDelete('restrict'); 

@@ -30,6 +30,7 @@ class SubscriptionService
 
     public function update($data, $id)
     {
+        
         return $this->subscriptionRepository->update($data, $id);
     }
 
