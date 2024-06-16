@@ -53,6 +53,7 @@ class AuthService
                 'user' => [
                     'type' => $user->type_id, 
                     'organization_id'=>$user->organization_id,
+                    'organization_name'=>$user->company_name,
                     'role_id'=>$user->role_id,
                     'permission' => $this->userRepository->transformUser($user),
                 ],

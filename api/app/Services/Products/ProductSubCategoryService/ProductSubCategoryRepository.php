@@ -109,7 +109,7 @@ class ProductSubCategoryRepository
         Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
         return response()->json([
             'success' => false,
-            'message' => 'Product Subcategory could not deleted',
+            'message' => 'This Product sub category is already in use',
         ], 500);
     }
     }

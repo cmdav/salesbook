@@ -7,14 +7,18 @@ use Illuminate\Database\QueryException;
 
 class JobRoleRepository 
 {
+    private function query(){
+        
+        return JobRole::select('id', 'role_name')->where('role_name', "!=", 'Super Admin');
+    }
     public function index()
     {
-        return JobRole::select('id', 'role_name')->paginate(20);
+        return $this->query()->paginate(20);
       
     }
     public function names()
     {
-        return JobRole::select('id', 'role_name')->get();
+        return $this->query()->get();
       
     }
     
@@ -75,7 +79,7 @@ class JobRoleRepository
             Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => "You can't delete this role.",
+                'message' => "This Job role is already in use",
                 'errors' => 'There was an error deleting this role'
             ], 500);
         }

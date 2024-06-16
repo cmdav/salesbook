@@ -95,7 +95,7 @@ class CurrencyRepository
             if (strtolower($Currency->currency_name) === 'naira') {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You cannot delete the default currency.',
+                    'message' => 'This Currency is already in use.',
                 ], 403); 
             }
 

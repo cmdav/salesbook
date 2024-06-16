@@ -271,49 +271,54 @@ class ProductTypeRepository
 
     public function delete($id)
     {
-        $ProductType = $this->findById($id);
-     if(!$ProductType){
-        return response()->json([
-            'success' => false,
-            'message' => "No product found"
-        ], 404);
-     }
-        //check if type is  a product
-    if($ProductType->type == 1){
-               
-            $product= \App\Models\Product::find($ProductType->product_id);
-            if($product){
-                $productTypes =ProductType::where('product_id', $product->id);
-                if ($productTypes->count() > 1) {
-                    // Delete all associated ProductType records
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Deletion not successful"
-                    ], 500);
-                   
-                }else{
-                    //delete the only product and product type
-                    $ProductType->delete();
-                    $product->delete();
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Deletion successful',
-                    ], 200);
-                }
+        try {
+            $ProductType = $this->findById($id);
+            if (!$ProductType) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "No product found"
+                ], 404);
             }
-            $product->delete();
+    
+            // Check if type is a product
+            if ($ProductType->type == 1) {
+                $product = \App\Models\Product::find($ProductType->product_id);
+                if ($product) {
+                    // Check if the product has more than one product type
+                    $productTypes = ProductType::where('product_id', $product->id);
+                    if ($productTypes->count() > 1) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => "This Record is already in use"
+                        ], 500);
+                    } else {
+                        // Delete the only product and product type
+                        $ProductType->delete();
+                        $product->delete();
+                        return response()->json([
+                            'success' => true,
+                            'message' => 'Deletion successful',
+                        ], 200);
+                    }
+                }
+                $ProductType->delete();
+                return response()->json([
+                    'success' => true,
+                    'message' => "Deletion successful"
+                ], 200);
+            } else {
+                $ProductType->delete();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Deletion successful',
+                ], 200);
+            }
+        } catch (Exception $e) {
             return response()->json([
-                'success' => true,
-                'message' => "Deletion successful"
+                'success' => false,
+                'message' => 'This record is already in use'
             ], 500);
-     }
-     else{
-              
-            $ProductType->delete();
-            return response()->json([
-                'success' => true,
-                'message' => 'Deletion successful',
-            ], 200);
         }
     }
+    
 }

@@ -7,15 +7,19 @@ use App\Models\Pages;
 
 class PageRepository 
 {
+    public function query(){
+
+        return Pages::select('id', 'page_name')->where('page_name', '!=','subscriptions');
+    }
     public function index()
     {
-        return Pages::select('id', 'page_name')->paginate(20);
+        return $this->query()->paginate(20);
       
     }
     
     public function names()
     {
-        return Pages::select('id', 'page_name')->get();
+        return $this->query()->get();
       
     }
     public function create(array $data)

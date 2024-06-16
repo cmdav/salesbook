@@ -15,6 +15,8 @@ use App\Models\Customer;
 use App\Models\ProductType;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
+use Exception;
 
 
 
@@ -119,7 +121,12 @@ class SaleRepository
             'customer_phone_number' => optional($sale->customers)->phone_number,
             'created_by' => optional($sale->creator)->fullname,
             'updated_by' => optional($sale->updater)->fullname,
-          
+
+            'organization_name' => auth()->user()->company_name,
+            'organization_phone_number' => auth()->user()->phone_number,
+            'organization_email' => auth()->user()->email,
+            'organization_address' => auth()->user()->company_address,
+                    
         ];
     }
 
@@ -168,6 +175,7 @@ private function transformSalesReceipt($sales)
              'amount' => $sale->price_sold_at * $sale->quantity,
             'total_price' =>  $formatted_total_price,
             'payment_method' => $sale->payment_method,
+          
         ];
     });
 
@@ -244,7 +252,7 @@ private function transformSalesReceipt($sales)
                 
                 $productDetails[] = [
                     "productTypeName" => $latestPrice->productType->product_type_name,
-                    'price_sold_at' => $latestPrice->is_new ? $latestPrice->new_selling_price : $latestPrice->selling_price,
+                    'price' => $product['price_sold_at'],
                     "quantity" => $product['quantity'],
                     "vat" => $product['vat'] == 1 ? 'Yes' : 'No', 
                     "amount" => $amount
@@ -258,8 +266,10 @@ private function transformSalesReceipt($sales)
             if ($user) {
                 $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
 
+            //    $p=json_encode($productDetails);
+            //     throw new Exception($p);
                 // Generate email content
-                $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice);
+                $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId);
                 $emailService->sendEmail(
                     ['email' => $user->email, 'first_name' => $customerDetail],
                     "sales-receipt",
@@ -271,6 +281,7 @@ private function transformSalesReceipt($sales)
         });
         return response()->json(['success' => true,'message' => 'Sale successfully recorded: '], 200);
     } catch (Exception $e) {
+        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
         return response()->json(['success' => false, 'message' => 'Sale creation failed: ' . $e->getMessage()], 500);
     }
 }
@@ -302,7 +313,7 @@ private function transformSalesReceipt($sales)
         }
         return null;
     }
-    private function generateProductDetailsTable($productDetails, $totalPrice) {
+    private function generateProductDetailsTable($productDetails, $totalPrice, $transactionId) {
         $tableHtml = "<table style='width: 100%; border-collapse: collapse; max-width: 100%;'>
                         <tr>
                             <th style='border: 1px solid black; padding: 8px;'>Product Name</th>
@@ -331,7 +342,9 @@ private function transformSalesReceipt($sales)
         $formattedGrandTotal = number_format($totalPrice, 2, '.', ',');
     
         $tableHtml .= "<tr>
-                           <td colspan='4' style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Total:</strong></td>
+                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Transaction Id</strong></td>
+                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>$transactionId</strong></td>
+                           <td colspan='2' style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Total:</strong></td>
                            <td style='border: 1px solid black; padding: 8px;'><strong>$formattedGrandTotal</strong></td>
                        </tr>";
     

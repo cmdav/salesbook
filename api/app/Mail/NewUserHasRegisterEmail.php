@@ -11,6 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Services\EncryptDecryptService;
 use App\Services\EmailDataService;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Auth;
 
 
 class NewUserHasRegisterEmail extends Mailable
@@ -70,12 +71,19 @@ class NewUserHasRegisterEmail extends Mailable
            
                
             //$this->frontendUrl = env('FRONTEND_URL');
-            $this->first_paragraph = "Thank you for your purchase. Below are the details of the item bought.";
+            $companyName = Auth::user()->company_name; // Retrieve authenticated user's company name
+            $this->first_paragraph = "Thank you for your purchase from <b>{$companyName}</b>. Below are the details of the item bought.";
             $this->second_paragraph = $otherDetail;
             //$this->btn_label = "Join Company";
             $this->title = "Customer Receipt";
         }
 
+        $this->organizationDetails = [
+            'organization_name' => Auth::user()->company_name,
+            'organization_phone_number' => Auth::user()->phone_number,
+            'organization_email' => Auth::user()->email,
+            'organization_address' => Auth::user()->company_address,
+        ];
        
     }
 
@@ -96,7 +104,7 @@ class NewUserHasRegisterEmail extends Mailable
     {
         return new Content(
             view: 'mail.onboardingEmail',
-           
+            with: ['organizationDetails' => $this->organizationDetails]
         );
     }
 

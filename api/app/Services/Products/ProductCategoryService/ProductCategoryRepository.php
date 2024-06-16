@@ -106,7 +106,7 @@ class ProductCategoryRepository
             Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'This category could not be deleted',
+                'message' => 'This Product category is already in use',
             ], 500);
         }
     }

@@ -104,7 +104,7 @@ class MeasurementRepository
         Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
         return response()->json([
             'success' => false,
-            'message' => 'This measurement is already in use',
+            'message' => 'This Measurement is already in use',
         ], 500);
     }
     }

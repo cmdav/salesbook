@@ -86,7 +86,7 @@ class ProductRepository
         Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
         return response()->json([
             'success' => false,
-            'message' => 'This Product could not be deleted',
+            'message' => 'This Product is already in use',
         ], 500);
     }
     }
