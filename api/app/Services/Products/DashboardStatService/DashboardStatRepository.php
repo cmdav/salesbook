@@ -58,21 +58,14 @@ class DashboardStatRepository
               ->keyBy('day'); // Index the resulting collection by 'day' so each entry can be accessed by its date.
 
               // Retrieve profit data 
-            //   $profitsData = DB::table('sales') 
-            //   ->join('purchases', 'sales.product_type_id', '=', 'purchases.product_type_id') 
-            //   ->whereBetween('sales.created_at',[$startDate, $endDate]) 
-            //   ->groupBy(DB::raw('Date(sales.created_at)')) // Group the results by the day the sale was made.
-            //   ->select(DB::raw('Date(sales.created_at) as day'), DB::raw('SUM(sales.price_sold_at - purchases.price) as daily_profit')) 
-            //   ->get()
-            //   ->keyBy('day'); // Index the resulting collection by 'day' for easy access by date.
+          
             $profitsData = DB::table('sales')
             ->join('prices', 'sales.product_type_id', '=', 'prices.product_type_id')
-           // ->where('prices.status', 1) // Only consider prices where status is 1
             ->whereBetween('sales.created_at', [$startDate, $endDate])
             ->groupBy(DB::raw('Date(sales.created_at)')) // Group the results by the day the sale was made.
             ->select(
                 DB::raw('Date(sales.created_at) as day'),
-                DB::raw('SUM((sales.price_sold_at - prices.cost_price) * sales.quantity) as daily_profit')
+                DB::raw('SUM((sales.price_sold_at - CASE WHEN prices.is_new = 1 THEN prices.new_cost_price ELSE prices.cost_price END) * sales.quantity) as daily_profit')
             )
             ->get()
             ->keyBy('day'); // Index the resulting collection by 'day' for easy access by date.

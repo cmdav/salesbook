@@ -14,6 +14,8 @@ Route::group(['prefix'=>'v1'], function(){
 
     route::put('email-verification/{hash}', App\Http\Controllers\Email\EmailVerificationController::class);
 
+    route::get('dashboard-stat', App\Http\Controllers\Product\DashboardStatController::class);
+
    // route::post('forgot-password', App\Http\Controllers\Email\ForgotPasswordController::class); //send reset link
     
     route::resource('users', App\Http\Controllers\Users\UserController::class)->only('store');
@@ -117,7 +119,7 @@ Route::middleware('auth:sanctum')->group(function() {
        
         route::get('all-pages', App\Http\Controllers\Security\AllPageController::class);
         
-        route::get('dashboard-stat', App\Http\Controllers\Product\DashboardStatController::class);
+        // route::get('dashboard-stat', App\Http\Controllers\Product\DashboardStatController::class);
         route::post('process-csv', App\Http\Controllers\Product\CsvController::class);
     
         route::resource('users', App\Http\Controllers\Users\UserController::class)->only('index','show','update','destroy');
