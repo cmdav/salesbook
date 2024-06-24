@@ -143,46 +143,71 @@ class SaleRepository
         return $transformedData;
     }
 
-private function transformSalesReceipt($sales)
+    
+    private function transformSalesReceipt($sales)
 {
+    // Define admin details
+    $adminDetails = [
+        'organization_name' => 'iSalesbook',
+        'organization_phone_number' => '+2348161749665',
+        'organization_email' => 'salesbook@rdas.com.ng',
+        'organization_address' => 'Lagos',
+    ];
+
+    // Check if the user is authenticated
+    if (Auth::check()) {
+        $organizationDetails = [
+            'organization_name' => Auth::user()->company_name,
+            'organization_phone_number' => Auth::user()->phone_number,
+            'organization_email' => Auth::user()->email,
+            'organization_address' => Auth::user()->company_address,
+        ];
+    } else {
+        $organizationDetails = $adminDetails;
+    }
+
     // Collect transaction details from the first sale
     $transactionDetails = [
         'created_at' => $sales->first()->created_at,
         'customer_detail' => optional($sales->first()->customers)->first_name . ' ' . optional($sales->first()->customers)->last_name . ' ' . optional($sales->first()->customers)->contact_person,
         'customer_phone_number' => optional($sales->first()->customers)->phone_number,
         'transaction_id' => $sales->first()->transaction_id,
-        'transaction_amount' => 0 // Will be calculated below
+        'transaction_amount' => 0, // Will be calculated below
+        'organization_name' => $organizationDetails['organization_name'],
+        'organization_phone_number' => $organizationDetails['organization_phone_number'],
+        'organization_email' => $organizationDetails['organization_email'],
+        'organization_address' => $organizationDetails['organization_address'],
+        'payment_method' => $sales->first()->payment_method,
     ];
 
     $items = $sales->map(function ($sale) use (&$transactionDetails) {
         $total_price = $sale->price_sold_at * $sale->quantity;
-        $formatted_total_price = number_format($total_price, 2, '.', ',');
-        if ($sale->vat == 1) {
-            $vatAmount = $total_price * 0.075; // Assuming VAT is 7.5%
-            $total_price += $vatAmount;
-        }
+        $vatAmount = $sale->vat == 1 ? $total_price * 0.075 : 0; // Assuming VAT is 7.5%
+        $total_price_with_vat = $total_price + $vatAmount;
+        $formatted_total_price = number_format($total_price_with_vat, 2, '.', ',');
 
         // Accumulate total transaction amount
-        $transactionDetails['transaction_amount'] += $total_price;
+        $transactionDetails['transaction_amount'] += $total_price_with_vat;
 
         return [
             'id' => $sale->id,
             'product_type_name' => optional($sale->product)->product_type_name,
             'product_type_description' => optional($sale->product)->product_type_description,
             'price_sold_at' => $sale->price_sold_at,
-            'vat' => $sale->vat,
+            //'vat' => $sale->vat,
             'quantity' => $sale->quantity,
-             'amount' => $sale->price_sold_at * $sale->quantity,
-            'total_price' =>  $formatted_total_price,
-            'payment_method' => $sale->payment_method,
-          
+            'amount' => $total_price,
+            'vat' => $vatAmount,
+            'total_price' => $formatted_total_price,
+           // 'payment_method' => $sale->payment_method,
+           
         ];
     });
 
     // Package everything into the expected structure
     return [
         'transaction_details' => $transactionDetails,
-        'items' => $items
+        'items' => $items,
     ];
 }
 
@@ -314,7 +339,14 @@ private function transformSalesReceipt($sales)
         return null;
     }
     private function generateProductDetailsTable($productDetails, $totalPrice, $transactionId) {
+
+        $transactionTime = Carbon::now()->format('Y-m-d H:i:s');
+
         $tableHtml = "<table style='width: 100%; border-collapse: collapse; max-width: 100%;'>
+                        <tr>
+                             <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Transaction Time</strong></td>
+                             <td style='border: 1px solid black; padding: 8px; text-align: right;' colspan='4'><strong>{$transactionTime}</strong></td>
+                        </tr>
                         <tr>
                             <th style='border: 1px solid black; padding: 8px;'>Product Name</th>
                             <th style='border: 1px solid black; padding: 8px;'>Price</th>
@@ -323,6 +355,7 @@ private function transformSalesReceipt($sales)
                             <th style='border: 1px solid black; padding: 8px;'>Total</th>
                         </tr>";
         
+ 
         foreach ($productDetails as $detail) {
             // Format the price and total for each product
             $formattedPrice = number_format($detail['price'], 2, '.', ',');
@@ -331,10 +364,10 @@ private function transformSalesReceipt($sales)
             
             $tableHtml .= "<tr>
                                 <td style='border: 1px solid black; padding: 8px;'>{$detail['productTypeName']}</td>
-                                <td style='border: 1px solid black; padding: 8px;'>$formattedPrice</td>
+                                <td style='border: 1px solid black; padding: 8px;'>₦{$formattedPrice}</td>
                                 <td style='border: 1px solid black; padding: 8px;'>{$detail['quantity']}</td>
-                                <td style='border: 1px solid black; padding: 8px;'>$vatValue</td>
-                                <td style='border: 1px solid black; padding: 8px;'>$formattedTotal</td>
+                                <td style='border: 1px solid black; padding: 8px;'>₦{$vatValue}</td>
+                                <td style='border: 1px solid black; padding: 8px;'>₦{$formattedTotal}</td>
                            </tr>";
         }
     
@@ -345,7 +378,7 @@ private function transformSalesReceipt($sales)
                             <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Transaction Id</strong></td>
                             <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>$transactionId</strong></td>
                            <td colspan='2' style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Total:</strong></td>
-                           <td style='border: 1px solid black; padding: 8px;'><strong>$formattedGrandTotal</strong></td>
+                           <td style='border: 1px solid black; padding: 8px;'><strong>₦{$formattedGrandTotal}</strong></td>
                        </tr>";
     
         $tableHtml .= "</table>";

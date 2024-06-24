@@ -12,7 +12,7 @@ class EmailService
     {
         
        try{
-            
+            //dd($user);
            
             Mail::to($user['email'])->send(new NewUserHasRegisterEmail($user, $type, $otherDetail));
 

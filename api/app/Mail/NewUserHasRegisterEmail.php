@@ -43,7 +43,7 @@ class NewUserHasRegisterEmail extends Mailable
         
         if ($type === 'resend' || $type === 'register') {
            
-            
+           
             $this->frontendUrl = env('FRONTEND_URL')."/email-verification/".$encryptedToken;
             $this->first_paragraph ="This is to inform you that your account has been successfully created and your organization code is <b>$user->organization_code</b>";
             $this->second_paragraph="Click the button to verify your email";
@@ -77,13 +77,26 @@ class NewUserHasRegisterEmail extends Mailable
             //$this->btn_label = "Join Company";
             $this->title = "Customer Receipt";
         }
-
-        $this->organizationDetails = [
-            'organization_name' => Auth::user()->company_name,
-            'organization_phone_number' => Auth::user()->phone_number,
-            'organization_email' => Auth::user()->email,
-            'organization_address' => Auth::user()->company_address,
+        //Set Admin detail
+        $adminDetails = [
+            'organization_name' => 'iSalesbook',
+            'organization_phone_number' => '+2348161749665',
+            'organization_email' => 'salesbook@rdas.com.ng',
+            'organization_address' => 'Lagos',
         ];
+        
+        // Check if the user is authenticated
+        if (Auth::check()) {
+            $this->organizationDetails = [
+                'organization_name' => Auth::user()->company_name,
+                'organization_phone_number' => Auth::user()->phone_number,
+                'organization_email' => Auth::user()->email,
+                'organization_address' => Auth::user()->company_address,
+            ];
+        } else {
+            
+            $this->organizationDetails = $adminDetails;
+        }
        
     }
 
@@ -102,6 +115,7 @@ class NewUserHasRegisterEmail extends Mailable
      */
     public function content(): Content
     {
+       
         return new Content(
             view: 'mail.onboardingEmail',
             with: ['organizationDetails' => $this->organizationDetails]

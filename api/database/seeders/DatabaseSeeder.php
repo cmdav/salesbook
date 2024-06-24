@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
                 'dashboards',
                 'settings',
                 'subscriptions',
-                'c-subscriptions'
+                'c-subscriptions' // for customer
             ];
     
             foreach ($pageNames as $pageName) {
@@ -128,7 +128,7 @@ class DatabaseSeeder extends Seeder
                 'email' => 'admin@gmail.com',
                 'password' => bcrypt('test123'),
                 'type_id' => 2,
-                'role_id' => $adminRole->id,
+                'role_id' =>  $superAdminRole->id,
                 'email_verified_at' => now(),
                 'organization_id'  => $organization->id,
                 'organization_code'  => $organization->organization_code,

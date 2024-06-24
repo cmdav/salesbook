@@ -74,7 +74,7 @@ Route::middleware('auth:sanctum')->group(function() {
           //list organization
           route::get('all-organizations', function(){
 
-            $organizations = \App\Models\Organization::select('id', 'organization_name')->orderBy('created_at', 'desc')->first();
+            $organizations = \App\Models\Organization::select('id', 'organization_name')->orderBy('created_at', 'desc')->get();
             if($organizations){
                 return response()->json(['data'=>$organizations], 200);
             }
@@ -85,7 +85,7 @@ Route::middleware('auth:sanctum')->group(function() {
           //list organization
           route::get('all-subscriptions', function(){
 
-            $subscriptions = \App\Models\Subscription::select('id', 'plan_name')->orderBy('created_at', 'desc')->paginate(20);
+            $subscriptions = \App\Models\Subscription::select('id', 'plan_name')->orderBy('created_at', 'desc')->get();
             if($subscriptions){
                 return response()->json(['data'=>$subscriptions], 200);
             }

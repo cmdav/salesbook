@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 use App\Traits\SetCreatedBy;
 use Auth;
@@ -102,7 +102,7 @@ class User extends Authenticatable
                         $user->token =  hexdec(substr($hash, 0, 6)) % 3000000;
 
 
-                        $adminRole = JobRole::where('role_name', 'Super Admin')->first();
+                        $adminRole = JobRole::where('role_name', 'Admin')->first();
                         if (!$adminRole) {
                             throw new ModelNotFoundException('Error from user Super Admin role not found.');
                         }
