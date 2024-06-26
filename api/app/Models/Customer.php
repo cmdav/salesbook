@@ -26,6 +26,7 @@ class Customer extends Model
         'contact_person',
         'email',
         'phone_number',
+        'branch_id',
         'address',
         'type_id', // assuming 'type_id' is the correct column name in your database
         'created_by' // only include this if you still need it

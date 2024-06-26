@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('last_name', 55)->nullable();
             $table->string('middle_name', 55)->nullable();
             $table->string('phone_number', 15)->nullable();
+            $table->uuid('branch_id')->nullable();
             $table->string('email', 150);
            // $table->integer('type_id')->default(0)->comment('0 => customer, 1=>supplier, 2=>company 3=>system users');
             $table->integer('type_id')->default(0)->comment('0 =>others,1 individual, 2 for company');

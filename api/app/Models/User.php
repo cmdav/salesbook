@@ -32,6 +32,7 @@ class User extends Authenticatable
         'middle_name',
         'phone_number',
         'type_id',
+        'branch_id',
         'organization_id',
         'organization_code',
         'email',

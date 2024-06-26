@@ -20,6 +20,7 @@ class Store extends Model
         'status',
         'created_by',
         'updated_by',
+        'branch_id',
     ];
     protected static function boot() {
 

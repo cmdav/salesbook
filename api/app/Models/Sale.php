@@ -25,6 +25,7 @@ class Sale extends Model
         'transaction_id',
         'sales_owner',
         'created_by',
+        'branch_id',
         'updated_by'
     ];
     public function getCreatedAtAttribute($value)

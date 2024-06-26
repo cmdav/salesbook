@@ -16,6 +16,7 @@ return new class extends Migration
             $table->uuid('product_type_id');
             $table->uuid('supplier_id')->nullable();
             $table->uuid('price_id')->nullable();
+            $table->uuid('branch_id')->nullable();
             $table->string('batch_no', 50); 
             $table->integer('quantity')->default(0); 
             $table->string('product_identifier', 50)->nullable(); 

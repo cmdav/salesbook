@@ -23,6 +23,7 @@ class Purchase extends Model
         'organization_id',
         'status',
         'created_by',
+        'branch_id',
         'updated_by',
     ];
 
