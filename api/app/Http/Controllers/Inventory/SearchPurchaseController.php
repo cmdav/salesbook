@@ -16,9 +16,9 @@ class SearchPurchaseController extends Controller
        $this->purchaseService = $purchaseService;
     }
   
-    public function show($id)
+    public function show($id, Request $request)
     {
-        $purchase =$this->purchaseService->searchPurchase($id);
+        $purchase =$this->purchaseService->searchPurchase($id, $request->all());
         return response()->json($purchase);
     }
 

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class SupplierRepository 
 {
-    public function index()
+    public function index(Request $request)
     {
        
         return Supplier::latest()->paginate(3);

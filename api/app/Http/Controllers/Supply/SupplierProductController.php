@@ -18,9 +18,9 @@ class SupplierProductController extends Controller
         $this->supplierProductService = $supplierProductService;
         $this->fileUploadService = $fileUploadService;
     }
-    public function index()
+    public function index(Request $request)
     {
-        $supplierProduct = $this->supplierProductService->getAllSupplierProduct();
+        $supplierProduct = $this->supplierProductService->getAllSupplierProduct($request);
         return response()->json($supplierProduct);
     }
 

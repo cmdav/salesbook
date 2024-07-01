@@ -33,6 +33,7 @@ class UserRepository
             // "organization_logo" => optional($user->organization)->organization_logo,
             // "organization_type" => optional($user->organization)->organization_type,
             "role" => optional($user->role)->role_name,
+            "branch" => optional($user->branches)->name,
            
         ];
 
@@ -56,6 +57,7 @@ class UserRepository
             "organization_logo" => optional($user->organization)->organization_logo,
             "organization_type" => optional($user->organization)->organization_type,
             "role" => optional($user->role)->role_name,
+            "branch" => optional($user->branches)->name,
            
         ];
 
@@ -75,7 +77,7 @@ class UserRepository
                             'email',
                             'role_id',
                             'organization_id')
-                           ->with('role:id,role_name')
+                           ->with('role:id,role_name','branches:id,name')
                               ->where('id', $user_id)
                               //->with('organization')->first();
                               ->with('organization:id,organization_name,organization_code,organization_type,organization_logo,user_id')->first();
@@ -180,12 +182,18 @@ class UserRepository
 
       
     }
-    public function getUser($type){
-
+    public function getUser($request){
+      
+        $type=$request['type'];
+        //return  $type;
+        $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
         if($type == 'supplier')
         {
-                        $user = User::select('id', 'first_name', 'last_name', 'organization_id', 'type_id', 'phone_number', 'email')
+                        $user = User::select('id', 'first_name', 'last_name', 'organization_id', 'type_id', 'phone_number', 'email','branch_id')
+                        ->with('branches:id,name')
                         ->where('type_id', 3) 
+                        ->where('branch_id', $branchId)
+                       
                         //->where('organization_id', Auth::user()->organization_id)
                         // ->with(['supplier:id,user_id,bank_name,account_name,account_number,state,address'])
                         // ->whereHas('supplierOrganization', function($query) {
@@ -200,9 +208,10 @@ class UserRepository
 
         }else if($type == 'sales_personnel')
         {
-                        $user = User::select('id', 'first_name', 'last_name',  'email','role_id','organization_code')
+                        $user = User::select('id', 'first_name', 'last_name',  'email','role_id','organization_code','branch_id')
                         ->where('type_id', 0) 
-                        ->with('role:id,role_name')
+                        ->with('role:id,role_name','branches:id,name')
+                         ->where('branch_id', $branchId)
                         //->where('organization_id', Auth::user()->organization_id)
                         ->latest()->paginate(20);
                          $user->getCollection()->transform(function ($user) {
@@ -301,7 +310,7 @@ class UserRepository
             $filteredData = Arr::except($data, ['organization_type']);
 
            
-      
+            // return  $filteredData ;
             return User::updateOrCreate(
                 ['email' => $filteredData['email']], 
                 $filteredData

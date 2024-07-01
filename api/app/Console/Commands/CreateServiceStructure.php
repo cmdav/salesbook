@@ -154,7 +154,7 @@ class {$baseName}Repository
     public function destroy(\$id)
     {
         try { 
-            \$model = {$model}:where('id',\$id)->first();
+            \$model = {$model}::where('id',\$id)->first();
             \$model->delete();
             return \$model;
         } catch (Exception \$e) {

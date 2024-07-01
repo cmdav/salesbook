@@ -19,10 +19,10 @@ class SupplierService
         return $this->SupplierRepository->create($data);
     }
 
-    public function getAllSupplier()
+    public function getAllSupplier($request)
     {
        
-        return $this->SupplierRepository->index();
+        return $this->SupplierRepository->index($request);
     }
 
     public function getSupplierById($id)

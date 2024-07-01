@@ -31,8 +31,10 @@ class NewUserHasRegisterEmail extends Mailable
     {
       
         $this->user = $user;
+        $encryptedToken = "";
+        // dd($user->token);
         if(isset($user->token)){
-
+           
             $data=['token'=>$user->token,'type'=>$type,'otherDetail'=>$otherDetail];
             $this->url = Request::root();
             $jsonData = json_encode($data);

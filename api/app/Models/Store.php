@@ -82,5 +82,9 @@ class Store extends Model
 
         return $this->belongsTo(ProductType::class);
     }
+    public function branches(){
+
+        return $this->belongsTo(BusinessBranch::class,'branch_id', 'id');
+    }
    
 }

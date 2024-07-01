@@ -11,11 +11,11 @@ class SearchCustomerController extends Controller
     
     protected CustomerService $CustomerService;
 
-    public function __invoke(CustomerService $CustomerService, $criteria)
+    public function __invoke(CustomerService $CustomerService, $criteria, Request $request)
     {
         
         $this->CustomerService = $CustomerService;
-        if($customerNames =$this->CustomerService->searchCustomer($criteria)){
+        if($customerNames =$this->CustomerService->searchCustomer($criteria, $request->all())){
             
             return response()->json($customerNames);
         }

@@ -19,10 +19,10 @@ class SupplierProductService
         return $this->supplierProductRepository->create($data);
     }
 
-    public function getAllSupplierProduct()
+    public function getAllSupplierProduct($request)
     {
        
-        return $this->supplierProductRepository->index();
+        return $this->supplierProductRepository->index($request);
     }
     public function getAuthSupplierProduct()
     {

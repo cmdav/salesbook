@@ -26,9 +26,10 @@ class CustomerController extends Controller
         //     'type' => 'required|in:individual,company'
         // ]);
         
-         return $this->CustomerService->index($request->type);
+         return $this->CustomerService->index($request->all());
      
     }
+    
     public function store(Request $request){
 
         $rules = [
@@ -37,6 +38,7 @@ class CustomerController extends Controller
             'contact_person' => 'nullable|string|max:55',
             'address' => 'nullable|string|max:55',
             'last_name' => 'nullable|string|max:55',
+            'branch_id' => 'nullable|integer',
             'middle_name' => 'nullable|string|max:55',
             'phone_number' => 'nullable|string|max:15',
             'type_id' => 'required|string|in:individual,company',

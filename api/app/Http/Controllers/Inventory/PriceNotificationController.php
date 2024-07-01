@@ -14,10 +14,10 @@ class PriceNotificationController extends Controller
     {
        $this->priceNotificationService = $priceNotificationService;
     }
-    public function index()
+    public function index(Request $request)
     {
       
-        $price =$this->priceNotificationService->index();
+        $price =$this->priceNotificationService->index($request->all());
         return response()->json($price);
     }
 

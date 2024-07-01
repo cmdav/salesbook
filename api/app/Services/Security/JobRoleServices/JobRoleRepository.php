@@ -7,18 +7,17 @@ use Illuminate\Database\QueryException;
 
 class JobRoleRepository 
 {
-    private function query(){
-        
-        return JobRole::select('id', 'role_name')->where('role_name', "!=", 'Super Admin');
-    }
+   
     public function index()
     {
-        return $this->query()->paginate(20);
-      
+        return JobRole::select('id', 'role_name')
+            ->whereNotIn('role_name', ['Super Admin', 'Admin'])
+            ->paginate(20);
     }
+
     public function names()
     {
-        return $this->query()->get();
+        return JobRole::select('id', 'role_name')->where('role_name', "!=", 'Super Admin')->get();
       
     }
     

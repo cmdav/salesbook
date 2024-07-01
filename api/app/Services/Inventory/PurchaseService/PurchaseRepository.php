@@ -14,27 +14,33 @@ use Illuminate\Support\Facades\Log;
 
 class PurchaseRepository 
 {
-    private function query(){
+    private function query($branchId)
+        {
+            return Purchase::with('suppliers', 'currency', 'productType','branches:id,name')
+                        ->where('branch_id', $branchId)
+                        ->latest();
+        }
 
-        return  Purchase::with('suppliers','currency','productType')->latest();
+        public function index($request)
+        {
            
-    
-    }
-public function index()
+            
+            $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+          
+            $Purchase = $this->query($branchId)->paginate(20);
+
+            $Purchase->getCollection()->transform(function($Purchase) {
+                return $this->transformProduct($Purchase);
+            });
+
+            return $Purchase;
+        }
+
+    public function searchPurchase($searchCriteria, $request)
     {
-     $Purchase = $this->query()->paginate(20 );
-
-        $Purchase->getCollection()->transform(function($Purchase){
-
-            return $this->transformProduct($Purchase);
-        });
-        return $Purchase;
-
-        
-    }
-    public function searchPurchase($searchCriteria)
-    {
-       $Purchase = $this->query()
+       
+        $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+       $Purchase = $this->query($branchId)
        ->where(function($query) use ($searchCriteria) {
             $query->whereHas('productType', function($q) use ($searchCriteria) {
                 $q->where('product_type_name', 'like', '%' . $searchCriteria . '%');
@@ -62,6 +68,7 @@ public function index()
             'product_type_name' => optional($purchase->productType)->product_type_name,
             'product_type_image' => optional($purchase->productType)->product_type_image,
             'product_type_description' => optional($purchase->productType)->product_type_description,
+            'branch_name' => optional($purchase->branches)->name,
             'batch_no' => $purchase->batch_no,
             'quantity' => $purchase->quantity,
 

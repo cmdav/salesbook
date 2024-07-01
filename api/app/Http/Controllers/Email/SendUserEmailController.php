@@ -123,7 +123,7 @@ class SendUserEmailController extends Controller
     
     private function invitationEmail($organization_id, $first_name, $last_name){
     
-        
+       
         $organizationInfo =$this->organizationService->getOrganizationById($organization_id);
 
         $data=[
@@ -147,6 +147,7 @@ class SendUserEmailController extends Controller
                         'last_name' => $last_name,
                         'password' => 'none',
                         'organization_id' => $organization_id,
+                        'token' =>time(),
                     ]);
                     
                     $this->supplierOrganizationService->createSupplierOrganization([

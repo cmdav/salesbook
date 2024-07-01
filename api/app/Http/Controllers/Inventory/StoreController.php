@@ -15,11 +15,12 @@ class StoreController extends Controller
     {
        $this->storeService = $storeService;
     }
-    public function index()
+    public function index(Request $request)
     {
-        $store =$this->storeService->getAllStore();
+        $store =$this->storeService->getAllStore($request->all());
         return response()->json($store);
     }
+    
 
     public function store(StoreFormRequest $request)
     {

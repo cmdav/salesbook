@@ -19,10 +19,10 @@ class PurchaseService
         return $this->PurchaseRepository->create($data);
     }
 
-    public function getAllPurchase()
+    public function getAllPurchase($request)
     {
        
-        return $this->PurchaseRepository->index();
+        return $this->PurchaseRepository->index($request);
     }
 
     public function getPurchaseById($id)
@@ -39,8 +39,8 @@ class PurchaseService
     {
         return $this->PurchaseRepository->delete($id);
     }
-    public function searchPurchase($id)
+    public function searchPurchase($id, $request)
     {
-        return $this->PurchaseRepository->searchPurchase($id);
+        return $this->PurchaseRepository->searchPurchase($id, $request);
     }
 }

@@ -12,13 +12,14 @@ use Illuminate\Support\Facades\Log;
 
 class StoreRepository 
 {
-    private function query(){
+    private function query($branchId){
 
-        return Store::with('productType')->latest();
+        return Store::with('productType','branches:id,name')->where('branch_id', $branchId)->latest();
     }
-    public function index()
+    public function index($request)
     {
-        $store = $this->query()->paginate(20);
+        $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+        $store = $this->query($branchId)->paginate(20);
 
         $store->getCollection()->transform(function($store){
 
@@ -31,9 +32,10 @@ class StoreRepository
         //return Store::latest()->paginate(3);
 
     }
-    public function searchStore($searchCriteria)
+    public function searchStore($searchCriteria, $request)
     {
-        $store = $this->query()->where(function($query) use ($searchCriteria) {
+        $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+        $store = $this->query($branchId)->where(function($query) use ($searchCriteria) {
             $query->whereHas('productType', function($q) use ($searchCriteria) {
                 $q->where('product_type_name', 'like', '%' . $searchCriteria . '%');
             });
@@ -58,6 +60,7 @@ class StoreRepository
             'product_description' => optional($store->productType)->product_type_description,
             //'store_owner' => $store->store_owner,
             'batch_no' => $store->batch_no,
+            'branch_name' => optional($store->branches)->name,
             'quantity_available' => $store->quantity_available,
             //'store_type' => $store->store_type,
             'status' => $store->quantity_available > 0 ? 'Available' : 'Not Available',

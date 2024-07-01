@@ -19,10 +19,10 @@ class PriceNotificationService
         return $this->PriceNotificationRepository->create($data);
     }
 
-    public function index()
+    public function index($request)
     {
        
-        return $this->PriceNotificationRepository->index();
+        return $this->PriceNotificationRepository->index($request);
     }
 
     public function show($id)

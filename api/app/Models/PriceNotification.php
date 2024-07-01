@@ -15,6 +15,7 @@ class PriceNotification extends Model
         'supplier_id',
         'cost_price',
         'selling_price',
+        'branch_id',
         'status',
         'created_by',
         'updated_by',
@@ -61,4 +62,9 @@ class PriceNotification extends Model
 
         return $this->belongsTo(User::class, 'supplier_id','id');
     }
+    public function branches(){
+
+        return $this->belongsTo(BusinessBranch::class, 'branch_id','id');
+    }
+
 }

@@ -15,13 +15,13 @@ class PurchaseController extends Controller
     {
        $this->purchaseService = $purchaseService;
     }
-    public function index()
+    public function index(Request $request)
     {
         
-        $purchase =$this->purchaseService->getAllPurchase();
+        $purchase =$this->purchaseService->getAllPurchase($request->all());
         return response()->json($purchase);
     }
-
+    
     public function store(PurchaseFormRequest $request)
     {
         return $this->purchaseService->createPurchase($request->all());

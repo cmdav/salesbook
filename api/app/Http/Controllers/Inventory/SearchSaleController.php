@@ -16,9 +16,9 @@ class SearchSaleController extends Controller
     }
  
 
-    public function show($id)
+    public function show($id,Request $request)
     {
-        $sale = $this->saleService->searchSale($id);
+        $sale = $this->saleService->searchSale($id, $request->all());
         return response()->json($sale);
     }
 

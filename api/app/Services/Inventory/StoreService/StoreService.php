@@ -19,10 +19,10 @@ class StoreService
         return $this->storeRepository->create($data);
     }
 
-    public function getAllStore()
+    public function getAllStore($request)
     {
        
-        return $this->storeRepository->index();
+        return $this->storeRepository->index($request);
     }
 
     public function getStoreById($id)
@@ -39,8 +39,8 @@ class StoreService
     {
         return $this->storeRepository->delete($id);
     }
-    public function searchStore($id)
+    public function searchStore($id, $request)
     {
-        return $this->storeRepository->searchStore($id);
+        return $this->storeRepository->searchStore($id, $request);
     }
 }

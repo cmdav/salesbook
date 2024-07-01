@@ -52,14 +52,15 @@ class UserFormRequest extends FormRequest
             ]);
         }
 
-        if ($request->input('organization_type') == 'sales_personnel') {
-            $rules = array_merge($rules, [
-                'first_name' => 'required|string|max:55',
-                'last_name' => 'required|string|max:55',
-                'organization_code' => 'required|string|max:55',
-                'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
-            ]);
-        }
+        // if ($request->input('organization_type') == 'sales_personnel') {
+        //     $rules = array_merge($rules, [
+        //         'first_name' => 'required|string|max:55',
+        //         'last_name' => 'required|string|max:55',
+        //         'branch_id' => 'required|integer',
+        //         'organization_code' => 'required|string|max:55',
+        //         'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
+        //     ]);
+        // }
         if ($request->input('organization_type') == 'supplier') {
             $rules = array_merge($rules, [
                 'first_name' => 'required|string|max:55',

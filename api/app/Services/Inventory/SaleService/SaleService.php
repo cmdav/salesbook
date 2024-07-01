@@ -19,10 +19,10 @@ class SaleService
         return $this->saleRepository->create($data);
     }
 
-    public function getAllSale()
+    public function getAllSale($request)
     {
        
-        return $this->saleRepository->index();
+        return $this->saleRepository->index($request);
     }
 
     public function getSaleById($id)
@@ -39,9 +39,9 @@ class SaleService
     {
         return $this->saleRepository->delete($id);
     }
-    public function searchSale($id)
+    public function searchSale($id, $request)
     {
-        return $this->saleRepository->searchSale($id);
+        return $this->saleRepository->searchSale($id, $request);
     }
     public function dailySale()
     {

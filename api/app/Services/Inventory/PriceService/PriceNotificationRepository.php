@@ -11,13 +11,15 @@ use Illuminate\Support\Facades\Log;
 
 class PriceNotificationRepository 
 {
-    public function index()
+    public function index($request)
     {
         //if(auth()->user()->type_id < 3){
+            $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
         $priceNotification= PriceNotification::select('id','product_type_id','supplier_id','cost_price','selling_price','status')
                                   ->with('productTypes:id,product_type_name,product_type_image',
-                                         'supplier:id,first_name,last_name,contact_person,phone_number')
+                                         'supplier:id,first_name,last_name,contact_person,phone_number','branches:id,name')
                                          ->latest()
+                                         ->where('branch_id', $branchId)
                                          ->paginate(20);
 
                                          $priceNotification->getCollection()->transform(function ($Price) {
@@ -37,6 +39,7 @@ class PriceNotificationRepository
             'id' => $price->id,
             'product_type_name' => optional($price->productTypes)->product_type_name,
             'product_type_image' => optional($price->productTypes)->product_type_image,
+            'branch_name' => optional($store->branches)->name,
             'product_type_description' => optional($price->productTypes)->product_type_description,
             'cost_price' => $price->cost_price,
             'selling_price' => $price->selling_price,

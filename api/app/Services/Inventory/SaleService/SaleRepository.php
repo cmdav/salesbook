@@ -23,23 +23,25 @@ use Exception;
 class SaleRepository 
 {
    
-    private function query(){
+    private function query($branchId=''){
 
        return Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
                         //'store:id,product_type_id,quantity_available',
+                        'branches:id,name',
                         'customers:id,first_name,last_name,contact_person,phone_number',
                         'Price:id,selling_price,cost_price'
                         //'organization:id,organization_name,organization_logo'
                         // 'Price' => function ($query) {
                         //     $query->select('id', 'product_type_id', 'cost_price', 'selling_price', 'discount');
                         // }
-                        ])->latest();
+                        ])->where('branch_id', $branchId)
+                        ->latest();
     }
-    public function index()
+    public function index($request)
     {
-        
+        $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
        
-         $sale =$this->query()->paginate(20);
+         $sale =$this->query($branchId)->paginate(20);
                    
 
          $sale->getCollection()->transform(function($sale){
@@ -52,9 +54,10 @@ class SaleRepository
 
     }
     
-    public function searchSale($searchCriteria)
+    public function searchSale($searchCriteria, $request)
     {
-        $sale =$this->query()->where(function($query) use ($searchCriteria) {
+        $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+        $sale =$this->query($branchId)->where(function($query) use ($searchCriteria) {
             $query->whereHas('product', function($q) use ($searchCriteria) {
                 $q->where('product_type_name', 'like', '%' . $searchCriteria . '%');
             })
@@ -108,6 +111,7 @@ class SaleRepository
             'id' => $sale->id,
             'product_type_name' => optional($sale->product)->product_type_name,
             'product_type_description' => optional($sale->product)->product_type_description,
+            'branch_name' => optional($sale->branches)->name,
             'cost_price' =>  $cost_price,
             'price_sold_at' => $formatted_price_sold_at,
             'quantity' => $sale->quantity,
@@ -132,6 +136,7 @@ class SaleRepository
 
     public function downSalesReceipt($transactionId)
     {
+       
         $sales = $this->query()->where('transaction_id', $transactionId)->get();
 
         if ($sales->isEmpty()) {
@@ -171,6 +176,7 @@ class SaleRepository
         'created_at' => $sales->first()->created_at,
         'customer_detail' => optional($sales->first()->customers)->first_name . ' ' . optional($sales->first()->customers)->last_name . ' ' . optional($sales->first()->customers)->contact_person,
         'customer_phone_number' => optional($sales->first()->customers)->phone_number,
+        'branch_name' => optional($sales->branches)->name,
         'transaction_id' => $sales->first()->transaction_id,
         'transaction_amount' => 0, // Will be calculated below
         'organization_name' => $organizationDetails['organization_name'],

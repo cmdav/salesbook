@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Exception;
 
 class SaleUserController extends Controller
@@ -44,11 +45,15 @@ class SaleUserController extends Controller
                 ],
                 'first_name' => 'required|string|max:55',
                 'last_name' => 'required|string|max:55',
+                'branch_id' => 'required|integer',
                 'email' => ['required', 'email', 'max:55'],
             ]);
-        
+            $data=$request->all();
+            //$data['type']='sales_personnel';
+            $data['email_verified_at']=Now();
+            $data['organization_code'] =Auth::user()->organization_code;
           
-            $user = $this->userService->createUser($request->all());
+            $user = $this->userService->createUser($data);
            
         
             if (!$user) {

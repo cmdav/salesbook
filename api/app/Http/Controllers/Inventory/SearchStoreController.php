@@ -16,9 +16,9 @@ class SearchStoreController extends Controller
        $this->storeService = $storeService;
     }
    
-    public function show($id)
+    public function show($id, Request $request)
     {
-        $store =$this->storeService->searchStore($id);
+        $store =$this->storeService->searchStore($id, $request);
         return response()->json($store);
     }
 

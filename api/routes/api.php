@@ -53,6 +53,10 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('customers', App\Http\Controllers\Users\CustomerController::class);
         route::resource('suppliers', App\Http\Controllers\Users\SupplierController::class);
         route::resource('auth-supplier-products', App\Http\Controllers\Supply\AuthSupplierProductController::class)->only('index');
+        route::resource('business-branches', App\Http\Controllers\Security\BusinessBranchController::class);
+        route::get('list-business-branches', [App\Http\Controllers\Security\BusinessBranchController::class, 'listing']);
+        Route::resource('countries', App\Http\Controllers\Security\CountryController::class);
+        Route::resource('states', App\Http\Controllers\Security\StateController::class);
 
         //get endpoint
         route::get('get-price-by-product-type/{id}', App\Http\Controllers\Inventory\PriceByProductTypeController::class);
@@ -145,6 +149,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::resource('permissions', App\Http\Controllers\Security\PermissionController::class);
         Route::resource('subscriptions', App\Http\Controllers\Security\SubscriptionController::class);
         Route::resource('subscription-statuses', App\Http\Controllers\Security\SubscriptionStatusController::class);
+        
        
     });
     
@@ -153,6 +158,7 @@ Route::middleware('auth:sanctum')->group(function() {
 
 
 });
+
 
 
 

@@ -27,16 +27,16 @@ class CustomerService
         return $this->customerRepository->create($data);
        
     }
-    public function customerName()
+    public function customerName($request)
     {
     
-        return $this->customerRepository->customerName();
+        return $this->customerRepository->customerName($request);
        
     }
-    public function searchCustomer($criteria)
+    public function searchCustomer($criteria, $request)
     {
     
-        return $this->customerRepository->searchCustomer($criteria);
+        return $this->customerRepository->searchCustomer($criteria, $request);
        
     }
 

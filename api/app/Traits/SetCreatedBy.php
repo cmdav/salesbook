@@ -29,7 +29,16 @@ trait SetCreatedBy
                 if ($request->has('organization_id')) {
                     $model->organization_id = $request->input('organization_id');
                 } else {
-                    $model->organization_id = Auth::id();
+                    $model->organization_id = Auth::user()->organization_id;
+                }
+            }
+
+             // Check if the table has 'branch_id' column and set it
+             if (Auth::check() && Schema::hasColumn($model->getTable(), 'branch_id')) {
+                if ($request->has('branch_id')) {
+                    $model->branch_id = $request->input('branch_id');
+                } else {
+                    $model->branch_id = Auth::user()->branch_id; // Assuming the authenticated user has a branch_id property
                 }
             }
 

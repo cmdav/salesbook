@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\Log;
 
 class SupplierProductRepository 
 {
-    public function index()
+    public function index($request)
     {
-    
+       dd($request);
         return SupplierProduct::latest()->paginate(20);
 
     }

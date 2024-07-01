@@ -16,7 +16,7 @@ class AuthController extends Controller
     {
         
         $this->authService = $authService;
-
+       
         $response = $this->authService->authenticateUser($request->all());
         
         return $response;

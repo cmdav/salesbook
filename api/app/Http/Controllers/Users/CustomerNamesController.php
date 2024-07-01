@@ -11,11 +11,11 @@ class CustomerNamesController extends Controller
     
     protected CustomerService $CustomerService;
 
-    public function __invoke(CustomerService $CustomerService)
+    public function __invoke(CustomerService $CustomerService, Request $request)
     {
 
         $this->CustomerService = $CustomerService;
-        if($customerNames =$this->CustomerService->customerName()){
+        if($customerNames =$this->CustomerService->customerName($request->all())){
             return response()->json($customerNames);
         }
         return response()->json(['message'=>'JobRole not found'], 404);

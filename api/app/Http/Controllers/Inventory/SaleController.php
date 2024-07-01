@@ -17,25 +17,25 @@ class SaleController extends Controller
     {
         $this->saleService = $saleService;
     }
-    public function index()
+    public function index(Request $request)
     {
-        $sale = $this->saleService->getAllSale();
+        $sale = $this->saleService->getAllSale($request->all());
         return response()->json($sale);
     }
 
     public function store(SaleFormRequest $request)
     {
         
-        // try {
+         try {
             return $this->saleService->createSale($request->all());
            
-        // } catch (Exception $e) {
-        //     Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
-        //     return response()->json(['message' => $e->getMessage()], 500);
-        // }
+        } catch (Exception $e) {
+            Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
-    public function show($id)
+    public function show($id, Request $request)
     {
         $sale = $this->saleService->getSaleById($id);
         return response()->json($sale);

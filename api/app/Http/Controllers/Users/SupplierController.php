@@ -15,9 +15,9 @@ class SupplierController extends Controller
     {
         $this->supplierService = $supplierService;
     }
-    public function index()
+    public function index(Request $request)
     {
-        $supplier = $this->supplierService->getAllSupplier();
+        $supplier = $this->supplierService->getAllSupplier($request);
         return response()->json($supplier);
     }
 

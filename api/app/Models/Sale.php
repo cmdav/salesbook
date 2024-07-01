@@ -52,5 +52,9 @@ class Sale extends Model
     public function price() {
         return $this->belongsTo(Price::class,'price_id','id');
     }
+    public function branches(){
+
+        return $this->belongsTo(BusinessBranch::class,'branch_id', 'id');
+    }
    
 }

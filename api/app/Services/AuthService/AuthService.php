@@ -27,8 +27,9 @@ class AuthService
     public function authenticateUser(array $request)
     {
        // get user detail using their email
-        $user = $this->userRepository->authenticateUser($request);
        
+        $user = $this->userRepository->authenticateUser($request);
+        
       
         if (!$user) {
             
@@ -53,6 +54,7 @@ class AuthService
                 'user' => [
                     'type' => $user->type_id, 
                     'organization_id'=>$user->organization_id,
+                    'branch_id'=>$user->branch_id,
                     'organization_name'=>$user->company_name,
                     'role_id'=>$user->role_id,
                     'permission' => $this->userRepository->transformUser($user),
