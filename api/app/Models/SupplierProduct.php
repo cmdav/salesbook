@@ -19,7 +19,8 @@ class SupplierProduct extends Model
         // 'product_name',
         'created_by',
         'updated_by',
-        'supplier_id'
+        'supplier_id',
+        'branch_id'
     ];
 
     public function storeItem(){

@@ -16,6 +16,7 @@ class Price extends Model
         'cost_price',
         'selling_price',
         'batch_no',
+        'branch_id',
         'new_cost_price',
         'new_selling_price',
          'is_new',

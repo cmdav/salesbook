@@ -16,9 +16,10 @@ class StateController extends Controller
         $this->stateService = $stateService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return $this->stateService->index();
+      
+        return $this->stateService->index($request->country_id);
     }
 
     public function show($id)

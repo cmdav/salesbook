@@ -65,7 +65,7 @@ class UserRepository
         return $transformed;
     }
     private function returnUserDetail($user_id){
-    
+       
         $user= User::select( "id", 
                         "first_name",
                             "middle_name", 

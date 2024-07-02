@@ -27,10 +27,10 @@ class UserService
     {
         return $this->userRepository->allSupplier(); 
     }
-    public function getUser($type)
+    public function getUser($request)
     {
-
-        if($type === 'profile'){
+       
+        if($request['type'] === 'profile'){
             return $this->userRepository->authUser();
         }
         return $this->userRepository->getUser($type);

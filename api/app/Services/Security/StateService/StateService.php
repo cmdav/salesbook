@@ -13,9 +13,9 @@ class StateService
         $this->stateRepository = $stateRepository;
     }
 
-    public function index()
+    public function index($country_id)
     {
-        return $this->stateRepository->index();
+        return $this->stateRepository->index($country_id);
     }
 
     public function show($id)

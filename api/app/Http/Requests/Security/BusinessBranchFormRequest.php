@@ -12,10 +12,10 @@ class BusinessBranchFormRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'state_id' => 'required|integer|max:255',
+            'state_id' => 'required|integer',
             'postal_code' => 'required|string|max:20',
             'city' => 'required|string|max:255',
-            'country_id' => 'required|integer|max:255',
+            'country_id' => 'required|integer',
             'contact_person' => 'required|string|max:255',
             'phone_number' => 'required|string|max:20',
             'email' => [

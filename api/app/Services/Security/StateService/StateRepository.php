@@ -8,9 +8,9 @@ use Exception;
 
 class StateRepository
 {
-    public function index()
+    public function index($id)
     {
-        return State::select('id','name')->get();
+        return State::select('id','name')->where('country_id',$id)->get();
     }
 
     public function show($id)
