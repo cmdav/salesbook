@@ -33,7 +33,7 @@ class UserService
         if($request['type'] === 'profile'){
             return $this->userRepository->authUser();
         }
-        return $this->userRepository->getUser($type);
+        return $this->userRepository->getUser($request);
     }
    
     public function findById($id)

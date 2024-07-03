@@ -199,7 +199,7 @@ class UserRepository
                         // ->whereHas('supplierOrganization', function($query) {
                         //     $query->where('organization_id', Auth::user()->organization_id); 
                         // })
-                        ->latest()->paginate(2);
+                        ->latest()->paginate(20);
                          $user->getCollection()->transform(function ($user) {
                                     return $this->transformUsers($user);
                         });
