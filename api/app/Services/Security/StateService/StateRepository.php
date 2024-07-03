@@ -10,7 +10,10 @@ class StateRepository
 {
     public function index($id)
     {
-        return State::select('id','name')->where('country_id',$id)->get();
+        return State::select('id', 'name')
+        ->where('country_id', $id)
+        ->orderBy('name')
+        ->get();
     }
 
     public function show($id)

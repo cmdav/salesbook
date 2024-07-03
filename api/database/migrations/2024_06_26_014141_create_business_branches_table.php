@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('business_branches', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->string('state_id')->nullable();
             $table->string('postal_code')->nullable();
             $table->string('city')->nullable();
             $table->string('country_id')->nullable();
             $table->string('contact_person');
             $table->string('phone_number');
-            $table->string('email')->unique();
+            $table->string('email');
             $table->timestamps();
         });
     }

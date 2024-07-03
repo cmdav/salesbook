@@ -10,8 +10,16 @@ class BusinessBranchFormRequest extends FormRequest
    
     public function rules()
     {
+        $businessBranchId = $this->route('business_branch'); // Get the current business branch ID
+        //dd( $businessBranchId);
+    
         return [
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('business_branches')->ignore($businessBranchId),
+            ],
             'state_id' => 'required|integer',
             'postal_code' => 'required|string|max:20',
             'city' => 'required|string|max:255',
@@ -23,8 +31,9 @@ class BusinessBranchFormRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
-                Rule::unique('business_branches')->ignore($this->route('business_branch')),
+                Rule::unique('business_branches')->ignore($businessBranchId),
             ],
         ];
     }
+    
 }

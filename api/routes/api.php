@@ -112,7 +112,7 @@ Route::middleware('auth:sanctum')->group(function() {
         route::get('all-products', App\Http\Controllers\Product\AllProductController::class);
         route::get('all-product-sub-categories-by-category-id/{id}', App\Http\Controllers\Product\AllProductSubCategoryController::class);
         route::get('product-type-by-id/{id}', App\Http\Controllers\Product\ProductTypeByIdController::class);
-        route::get('all-product-type-name', App\Http\Controllers\Product\ProductTypeNameByIdController::class);
+        route::get('all-product-type-name', App\Http\Controllers\Product\ProductTypeNameByIdController::class);//use in sales page
         route::get('all-product-type', App\Http\Controllers\Product\AllProductTypeController::class);
         route::get('all-supplier-products', App\Http\Controllers\Supply\AllSupplierProductController::class);
         route::get('user-detail', App\Http\Controllers\Users\AllUserDetailController::class);

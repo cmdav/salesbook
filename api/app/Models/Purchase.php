@@ -38,7 +38,7 @@ class Purchase extends Model
                 $store = Store::where([['product_type_id', $purchase->product_type_id],
                     ['batch_no', $purchase->batch_no]])
                     
-                ->where('store_owner', auth()->check() ? auth()->user()->id : 123) 
+                ->where('branch_id', auth()->check() ? auth()->user()->branch_id : 0) 
                // ->where('price_id', $purchase->price_id)
                 ->first();
 
@@ -50,7 +50,7 @@ class Purchase extends Model
                     Store::create([
                         'product_type_id' => $purchase->product_type_id,
                         //'store_owner' => $purchase->purchase_by,
-                        'store_owner'=> auth()->check() ? auth()->user()->id : 123,
+                        'store_owner'=> auth()->check() ? auth()->user()->branch_id : 0,
                         'quantity_available' => $purchase->quantity,
                         'batch_no' => $purchase->batch_no,
                         'store_type' => auth()->check() ?auth()->user()->type_id:2,
