@@ -188,32 +188,50 @@ class UserRepository
         //return  $type;
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
         if($type == 'supplier')
-        {
-                        $user = User::select('id', 'first_name', 'last_name', 'organization_id', 'type_id', 'phone_number', 'email','branch_id')
-                        ->with('branches:id,name')
-                        ->where('type_id', 3) 
-                        ->where('branch_id', $branchId)
-                       
-                        //->where('organization_id', Auth::user()->organization_id)
-                        // ->with(['supplier:id,user_id,bank_name,account_name,account_number,state,address'])
-                        // ->whereHas('supplierOrganization', function($query) {
-                        //     $query->where('organization_id', Auth::user()->organization_id); 
-                        // })
-                        ->latest()->paginate(20);
-                         $user->getCollection()->transform(function ($user) {
-                                    return $this->transformUsers($user);
-                        });
-                        return $user;
+        {   
+           
+                $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+            
+                // Define the base query with common select and with clauses
+                $baseQuery = User::select('id', 'first_name', 'last_name', 'organization_id', 'type_id', 'phone_number', 'email', 'branch_id', 'created_at')
+                    ->with('branches:id,name');
+            
+                // Clone the base query for type and branch conditions
+                $usersByTypeAndBranch = (clone $baseQuery)
+                    ->where('type_id', 3);
+            
+                // Conditionally apply the where clause for branch_id
+                if ($branchId !== 'all' && auth()->user()->role->role_name !== 'admin') {
+                    $usersByTypeAndBranch->where('branch_id', $branchId);
+                }
+            
+                // Clone the base query for email condition
+                $usersByEmail = (clone $baseQuery)
+                    ->where('email', 'system_supplier@gmail.com');
+            
+                // Combine the results using union
+                $users = $usersByTypeAndBranch->union($usersByEmail)->latest()->paginate(20);
+            
+                $users->getCollection()->transform(function ($user) {
+                    return $this->transformUsers($user);
+                });
+            
+                return $users;
+            
             
 
         }else if($type == 'sales_personnel')
         {
-                        $user = User::select('id', 'first_name', 'last_name',  'email','role_id','organization_code','branch_id')
+                        $query = User::select('id', 'first_name', 'last_name',  'email','role_id','organization_code','branch_id')
                         ->where('type_id', 0) 
-                        ->with('role:id,role_name','branches:id,name')
-                         ->where('branch_id', $branchId)
+                        ->with('role:id,role_name','branches:id,name');
+                       
+                        if ($branchId !== 'all' && auth()->user()->role->role_name !== 'admin') {
+                            // Apply the where clause if branch_id is not 'all' and the user is not admin
+                            $query->where('branch_id', $branchId);
+                        }
                         //->where('organization_id', Auth::user()->organization_id)
-                        ->latest()->paginate(20);
+                       $user= $query->latest()->paginate(20);
                          $user->getCollection()->transform(function ($user) {
                                     return $this->transformSaleUsers($user);
                         });

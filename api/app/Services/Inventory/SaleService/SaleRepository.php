@@ -25,7 +25,7 @@ class SaleRepository
    
     private function query($branchId=''){
 
-       return Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
+       $query=Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
                         //'store:id,product_type_id,quantity_available',
                         'branches:id,name',
                         'customers:id,first_name,last_name,contact_person,phone_number',
@@ -34,8 +34,12 @@ class SaleRepository
                         // 'Price' => function ($query) {
                         //     $query->select('id', 'product_type_id', 'cost_price', 'selling_price', 'discount');
                         // }
-                        ])->where('branch_id', $branchId)
-                        ->latest();
+                    ]);
+                    if ($branchId !== 'all' && auth()->user()->role->role_name !== 'admin') {
+                        // Apply the where clause if branch_id is not 'all' and the user is not admin
+                        $query->where('branch_id', $branchId);
+                    }
+                    return $query->latest();
     }
     public function index($request)
     {

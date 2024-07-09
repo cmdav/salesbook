@@ -16,17 +16,22 @@ class PurchaseRepository
 {
     private function query($branchId)
         {
-            return Purchase::with('suppliers', 'currency', 'productType','branches:id,name')
-                        ->where('branch_id', $branchId)
-                        ->latest();
+          
+            $query = Purchase::with('suppliers', 'currency', 'productType','branches:id,name');
+                   
+                    if ($branchId !== 'all' && auth()->user()->role->role_name !== 'admin') {
+                        // Apply the where clause if branch_id is not 'all' and the user is not admin
+                        $query->where('branch_id', $branchId);
+                    }
+                    return $query->latest();
         }
 
         public function index($request)
         {
-           
+          
             
             $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
-          
+            
             $Purchase = $this->query($branchId)->paginate(20);
 
             $Purchase->getCollection()->transform(function($Purchase) {

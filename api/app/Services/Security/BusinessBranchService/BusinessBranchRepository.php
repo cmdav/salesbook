@@ -53,16 +53,20 @@ class BusinessBranchRepository
     {
         try { 
             $model = BusinessBranch::where('id',$id)->first();
+            
             if($model){
                 $model->delete();
             }
           
-            return $model;
+            return response()->json([
+                'success' => true,
+                'message' => 'Deletion successful'
+            ], 200);
         } catch (Exception $e) {
             Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
             return response()->json([
-                'success' => 'false',
-                'message' => 'Insertion error'
+                'success' => false,
+                'message' => 'This branch is already in use'
             ], 500);
         }
     }

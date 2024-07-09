@@ -15,12 +15,15 @@ class PriceNotificationRepository
     {
         //if(auth()->user()->type_id < 3){
             $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
-        $priceNotification= PriceNotification::select('id','product_type_id','supplier_id','cost_price','selling_price','status')
+        $query= PriceNotification::select('id','product_type_id','supplier_id','cost_price','selling_price','status')
                                   ->with('productTypes:id,product_type_name,product_type_image',
-                                         'supplier:id,first_name,last_name,contact_person,phone_number','branches:id,name')
-                                         ->latest()
-                                         ->where('branch_id', $branchId)
-                                         ->paginate(20);
+                                         'supplier:id,first_name,last_name,contact_person,phone_number','branches:id,name');
+                                        
+                                         if ($branchId !== 'all' && auth()->user()->role->role_name !== 'admin') {
+                                            // Apply the where clause if branch_id is not 'all' and the user is not admin
+                                            $query->where('branch_id', $branchId);
+                                        }
+                                        $priceNotification=$query->latest()->paginate(20);
 
                                          $priceNotification->getCollection()->transform(function ($Price) {
                                             return $this->transformProduct($Price);

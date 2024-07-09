@@ -11,7 +11,7 @@ class SupplierRepository
     public function index(Request $request)
     {
        
-        return Supplier::latest()->paginate(3);
+        return Supplier::latest()->paginate(20);
 
     }
     public function create(array $data)

@@ -42,8 +42,8 @@ class BusinessBranchController extends Controller
 
     public function destroy($id)
     {
-        $product= $this->businessBranchService->destroy($id);
-        return response()->json($product);
+        return $this->businessBranchService->destroy($id);
+       
     }
     public function listing()
     {
