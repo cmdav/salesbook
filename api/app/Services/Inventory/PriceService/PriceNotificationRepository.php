@@ -19,7 +19,7 @@ class PriceNotificationRepository
                                   ->with('productTypes:id,product_type_name,product_type_image',
                                          'supplier:id,first_name,last_name,contact_person,phone_number','branches:id,name');
                                         
-                                         if ($branchId !== 'all' && auth()->user()->role->role_name !== 'admin') {
+                                         if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
                                             // Apply the where clause if branch_id is not 'all' and the user is not admin
                                             $query->where('branch_id', $branchId);
                                         }

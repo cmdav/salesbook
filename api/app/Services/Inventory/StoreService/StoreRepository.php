@@ -15,7 +15,7 @@ class StoreRepository
     private function query($branchId){
 
         $query= Store::with('productType','branches:id,name');
-        if ($branchId !== 'all' && auth()->user()->role->role_name !== 'admin') {
+        if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
             // Apply the where clause if branch_id is not 'all' and the user is not admin
             $query->where('branch_id', $branchId);
         }

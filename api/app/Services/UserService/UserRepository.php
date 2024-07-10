@@ -222,13 +222,15 @@ class UserRepository
 
         }else if($type == 'sales_personnel')
         {
+          
                         $query = User::select('id', 'first_name', 'last_name',  'email','role_id','organization_code','branch_id')
                         ->where('type_id', 0) 
                         ->with('role:id,role_name','branches:id,name');
                        
-                        if ($branchId !== 'all' && auth()->user()->role->role_name !== 'admin') {
+                        if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
                             // Apply the where clause if branch_id is not 'all' and the user is not admin
                             $query->where('branch_id', $branchId);
+                        
                         }
                         //->where('organization_id', Auth::user()->organization_id)
                        $user= $query->latest()->paginate(20);

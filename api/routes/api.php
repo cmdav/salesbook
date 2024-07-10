@@ -80,7 +80,7 @@ Route::middleware('auth:sanctum')->group(function() {
 
         Route::get('last-batch-number', function(){
             $branchName = Auth::user()->branches->name;
-            $branchId = Auth::user()->id;
+            $branchId = Auth::user()->branch_id;
             $branchPrefix = strtoupper(substr($branchName, 0, 3));
             
             $lastBatchRecord = Purchase::select('batch_no')
