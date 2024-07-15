@@ -19,7 +19,7 @@ class PurchaseRepository
           
             $query = Purchase::with('suppliers', 'currency', 'productType','branches:id,name');
                    
-                    if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
+                    if ($branchId !== 'all') {
                         // Apply the where clause if branch_id is not 'all' and the user is not admin
                         $query->where('branch_id', $branchId);
                     }
@@ -30,7 +30,14 @@ class PurchaseRepository
         {
           
             
-            $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+            $branchId = 'all';
+            if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin'){
+                $branchId = $request['branch_id']; 
+            }
+            else if(auth()->user()->role->role_name != 'Admin'){
+                $branchId = auth()->user()->branch_id; 
+            }
+
             
             $Purchase = $this->query($branchId)->paginate(20);
 
@@ -44,7 +51,13 @@ class PurchaseRepository
     public function searchPurchase($searchCriteria, $request)
     {
        
-        $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+        $branchId = 'all';
+            if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin'){
+                $branchId = $request['branch_id']; 
+            }
+            else if(auth()->user()->role->role_name != 'Admin'){
+                $branchId = auth()->user()->branch_id; 
+            }
        $Purchase = $this->query($branchId)
        ->where(function($query) use ($searchCriteria) {
             $query->whereHas('productType', function($q) use ($searchCriteria) {

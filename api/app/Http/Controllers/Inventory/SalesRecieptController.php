@@ -15,9 +15,9 @@ class SalesRecieptController extends Controller
     {
         $this->saleService = $saleService;
     }
-    public function show($transactionId)
+    public function show($transactionId,Request $request)
     {
-        $sale = $this->saleService->downSalesReceipt($transactionId);
+        $sale = $this->saleService->downSalesReceipt($transactionId,$request);
         return response()->json(['data'=>$sale]);
     }
 

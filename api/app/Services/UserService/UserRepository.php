@@ -186,11 +186,16 @@ class UserRepository
       
         $type=$request['type'];
         //return  $type;
-        $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+        $branchId = 'all';
+        if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin'){
+            $branchId = $request['branch_id']; 
+        }
+        else if(auth()->user()->role->role_name != 'Admin'){
+            $branchId = auth()->user()->branch_id; 
+        }
         if($type == 'supplier')
         {   
            
-                $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
             
                 // Define the base query with common select and with clauses
                 $baseQuery = User::select('id', 'first_name', 'last_name', 'organization_id', 'type_id', 'phone_number', 'email', 'branch_id', 'created_at')
@@ -200,8 +205,10 @@ class UserRepository
                 $usersByTypeAndBranch = (clone $baseQuery)
                     ->where('type_id', 3);
             
-                // Conditionally apply the where clause for branch_id
-                if ($branchId !== 'all' && auth()->user()->role->role_name !== 'admin') {
+        
+                         
+                if ($branchId !== 'all') {
+                    // Apply the where clause if branch_id is not 'all' and the user is not admin
                     $usersByTypeAndBranch->where('branch_id', $branchId);
                 }
             
@@ -222,16 +229,18 @@ class UserRepository
 
         }else if($type == 'sales_personnel')
         {
+
+           
           
                         $query = User::select('id', 'first_name', 'last_name',  'email','role_id','organization_code','branch_id')
                         ->where('type_id', 0) 
                         ->with('role:id,role_name','branches:id,name');
                        
-                        if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
-                            // Apply the where clause if branch_id is not 'all' and the user is not admin
-                            $query->where('branch_id', $branchId);
-                        
-                        }
+                         
+                    if ($branchId !== 'all') {
+                        // Apply the where clause if branch_id is not 'all' and the user is not admin
+                        $query->where('branch_id', $branchId);
+                    }
                         //->where('organization_id', Auth::user()->organization_id)
                        $user= $query->latest()->paginate(20);
                          $user->getCollection()->transform(function ($user) {

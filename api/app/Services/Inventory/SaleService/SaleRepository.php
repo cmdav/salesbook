@@ -35,7 +35,7 @@ class SaleRepository
                         //     $query->select('id', 'product_type_id', 'cost_price', 'selling_price', 'discount');
                         // }
                     ]);
-                    if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
+                    if ($branchId !== 'all') {
                         // Apply the where clause if branch_id is not 'all' and the user is not admin
                         $query->where('branch_id', $branchId);
                     }
@@ -43,7 +43,13 @@ class SaleRepository
     }
     public function index($request)
     {
-        $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+        $branchId = 'all';
+            if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin'){
+                $branchId = $request['branch_id']; 
+            }
+            else if(auth()->user()->role->role_name != 'Admin'){
+                $branchId = auth()->user()->branch_id; 
+            }
        
          $sale =$this->query($branchId)->paginate(20);
                    
@@ -60,7 +66,13 @@ class SaleRepository
     
     public function searchSale($searchCriteria, $request)
     {
-        $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+        $branchId = 'all';
+            if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin'){
+                $branchId = $request['branch_id']; 
+            }
+            else if(auth()->user()->role->role_name != 'Admin'){
+                $branchId = auth()->user()->branch_id; 
+            }
         $sale =$this->query($branchId)->where(function($query) use ($searchCriteria) {
             $query->whereHas('product', function($q) use ($searchCriteria) {
                 $q->where('product_type_name', 'like', '%' . $searchCriteria . '%');
@@ -116,6 +128,7 @@ class SaleRepository
             'product_type_name' => optional($sale->product)->product_type_name,
             'product_type_description' => optional($sale->product)->product_type_description,
             'branch_name' => optional($sale->branches)->name,
+            'branch_id' => optional($sale->branches)->id,
             'cost_price' =>  $cost_price,
             'price_sold_at' => $formatted_price_sold_at,
             'quantity' => $sale->quantity,
@@ -138,15 +151,23 @@ class SaleRepository
         ];
     }
 
-    public function downSalesReceipt($transactionId)
+    public function downSalesReceipt($transactionId,  $request)
     {
-       
-        $sales = $this->query()->where('transaction_id', $transactionId)->get();
+        
+        $branchId = 'all';
+        if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin'){
+            $branchId = $request['branch_id']; 
+        }
+        else if(auth()->user()->role->role_name != 'Admin'){
+            $branchId = auth()->user()->branch_id; 
+        }
+     
+        $sales = $this->query($branchId)->where('transaction_id', $transactionId)->get();
 
         if ($sales->isEmpty()) {
             return response()->json(['message' => 'No sales found for this transaction.'], 404);
         }
-
+       
         $transformedData = $this->transformSalesReceipt($sales);
 
         return $transformedData;
@@ -180,7 +201,8 @@ class SaleRepository
         'created_at' => $sales->first()->created_at,
         'customer_detail' => optional($sales->first()->customers)->first_name . ' ' . optional($sales->first()->customers)->last_name . ' ' . optional($sales->first()->customers)->contact_person,
         'customer_phone_number' => optional($sales->first()->customers)->phone_number,
-        'branch_name' => optional($sales->branches)->name,
+        //'branch_name' => optional($sales->branches)->name,
+        'branch_name' => '',
         'transaction_id' => $sales->first()->transaction_id,
         'transaction_amount' => 0, // Will be calculated below
         'organization_name' => $organizationDetails['organization_name'],

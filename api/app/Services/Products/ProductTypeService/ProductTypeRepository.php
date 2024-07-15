@@ -13,30 +13,37 @@ use Exception;
 
 class ProductTypeRepository 
 {
-    private function query(){
-
+    private function query()
+    {
+        $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
         return ProductType::with([
             'product:id,category_id,product_name,vat,measurement_id,sub_category_id', 
             'product.measurement:id,measurement_name',
             'product.subCategory:id,sub_category_name',
-            // 'store:id,product_type_id,quantity_available',
             'suppliers:id,first_name,last_name,phone_number',
             'activePrice' => function ($query) {
-                $query->select('id',  'cost_price', 'selling_price','product_type_id');
+                $query->select('id',  'cost_price', 'selling_price', 'product_type_id');
             },
-            'store' => function ($query) {
+            'store' => function ($query) use ($branchId) {
                 $query->selectRaw('product_type_id, SUM(quantity_available) as total_quantity')
-                      ->where('status', 1)
-                      ->groupBy('product_type_id');
+                    ->where('status', 1);
+
+                if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
+                    // Apply the where clause if branch_id is not 'all' and the user is not admin
+                    $query->where('branch_id', $branchId);
+                }
+
+                $query->groupBy('product_type_id');
             }
         ])->latest();
     }
+
     public function index()
     {
         return $this->getProductTypes();
     }
     public function searchProductType($searchCriteria){
-
+      
         $query = $this->query()
             ->where('product_type_name', 'like', '%' . $searchCriteria . '%')
             ->Orwhere(function($query) use ($searchCriteria) {

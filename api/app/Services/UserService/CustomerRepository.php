@@ -13,11 +13,21 @@ use Illuminate\Support\Facades\Log;
 class CustomerRepository
 {
     public function index($request){
+
+        $branchId = 'all';
+        if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin'){
+            $branchId = $request['branch_id']; 
+        }
+        else if(auth()->user()->role->role_name != 'Admin'){
+            $branchId = auth()->user()->branch_id; 
+        }
+
         if (isset($request['type'])) {
-            $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+          
             $query = Customer::ofType($request['type'])
             ->with('branches:id,name');
-            if ($branchId !== 'all' && auth()->user()->role->role_name !== 'admin') {
+           
+            if ($branchId !== 'all') {
                 // Apply the where clause if branch_id is not 'all' and the user is not admin
                 $query->where('branch_id', $branchId);
             }
