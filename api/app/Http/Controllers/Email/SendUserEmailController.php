@@ -148,6 +148,7 @@ class SendUserEmailController extends Controller
                         'password' => 'none',
                         'organization_id' => $organization_id,
                         'token' =>time(),
+                        'type_id'=>3
                     ]);
                     
                     $this->supplierOrganizationService->createSupplierOrganization([

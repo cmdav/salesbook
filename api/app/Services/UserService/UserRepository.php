@@ -76,7 +76,7 @@ class UserRepository
                             "company_address",
                             'email',
                             'role_id',
-                            'organization_id')
+                            'organization_id','branch_id')
                            ->with('role:id,role_name','branches:id,name')
                               ->where('id', $user_id)
                               //->with('organization')->first();
@@ -137,7 +137,8 @@ class UserRepository
                                     "company_address",
                                      'email',
                                      'role_id',
-                                     'organization_id'
+                                     'organization_id',
+                                     'branch_id'
                                      )
              ->where('type_id', 0)
              ->get()
@@ -251,21 +252,7 @@ class UserRepository
 
         }
         
-        // else{
-        //     if($type == 'company_customer'){
-                
-        //         return  User::select('id','company_name','contact_person','type_id','phone_number','email')
-        //         ->where('role_id', 1)
-        //         ->where('organization_id', Auth::user()->organization_id)
-        //         ->latest()->paginate(20);
-        //     }
-        //      return  User::select('id','first_name','last_name','organization_id','type_id','phone_number','email','company_name','contact_person','company_address')
-        //                         ->where('type_id', 0)
-        //                         ->where('role_id', 0)
-        //                         ->where('organization_id', Auth::user()->organization_id)
-        //                         ->latest()->paginate(20);
-        // }
-
+       
         
 
     }
@@ -379,6 +366,7 @@ class UserRepository
 
             return null;
         }
+       
         $user->update($request);
     
         return $user; 
