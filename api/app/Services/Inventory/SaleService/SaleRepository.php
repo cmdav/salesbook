@@ -161,7 +161,7 @@ class SaleRepository
         else if(auth()->user()->role->role_name != 'Admin'){
             $branchId = auth()->user()->branch_id; 
         }
-     
+        //
         $sales = $this->query($branchId)->where('transaction_id', $transactionId)->get();
 
         if ($sales->isEmpty()) {

@@ -49,6 +49,7 @@ class UserFormRequest extends FormRequest
                 'middle_name' => 'nullable|string|max:55',
                 'dob' => 'nullable|date|date_format:Y-m-d',
                 'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
+                'company_address' => 'required|string|max:55',
             ]);
         }
 
