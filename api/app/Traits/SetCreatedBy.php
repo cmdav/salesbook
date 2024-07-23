@@ -5,6 +5,7 @@ namespace App\Traits;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use App\Models\User;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 
 trait SetCreatedBy
@@ -33,8 +34,8 @@ trait SetCreatedBy
                 }
             }
 
-             // Check if the table has 'branch_id' column and set it
-             if (Auth::check() && Schema::hasColumn($model->getTable(), 'branch_id')) {
+            // Check if the table has 'branch_id' column and set it
+            if (Auth::check() && Schema::hasColumn($model->getTable(), 'branch_id')) {
                 if ($request->has('branch_id')) {
                     $model->branch_id = $request->input('branch_id');
                 } else {
@@ -59,24 +60,26 @@ trait SetCreatedBy
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by')
-                    ->select(['id', \DB::raw("
+                    ->select(['users.id', \DB::raw("
                         CASE 
-                            WHEN contact_person IS NOT NULL AND contact_person != '' 
-                            THEN contact_person 
-                            ELSE CONCAT(first_name, ' ', last_name) 
+                            WHEN organizations.contact_person IS NOT NULL AND organizations.contact_person != '' 
+                            THEN organizations.contact_person 
+                            ELSE CONCAT(users.first_name, ' ', users.last_name) 
                         END as fullname
-                    ")]);
+                    ")])
+                    ->leftJoin('organizations', 'users.organization_id', '=', 'organizations.id');
     }
 
     public function updater()
     {
         return $this->belongsTo(User::class, 'updated_by')
-                    ->select(['id', \DB::raw("
+                    ->select(['users.id', \DB::raw("
                         CASE 
-                            WHEN contact_person IS NOT NULL AND contact_person != '' 
-                            THEN contact_person 
-                            ELSE CONCAT(first_name, ' ', last_name) 
+                            WHEN organizations.contact_person IS NOT NULL AND organizations.contact_person != '' 
+                            THEN organizations.contact_person 
+                            ELSE CONCAT(users.first_name, ' ', users.last_name) 
                         END as fullname
-                    ")]);
+                    ")])
+                    ->leftJoin('organizations', 'users.organization_id', '=', 'organizations.id');
     }
 }

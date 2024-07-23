@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('product_type_id'); 
             $table->uuid('supplier_id')->nullable();
             $table->integer('cost_price');
-            $table->integer('branch_id');
+            $table->integer('branch_id')->nullable();
             $table->integer('selling_price')->nullable();
             $table->boolean('status')->default(0)->comment('3 for active, 2 for rejected, 1 for pending');
             $table->uuid('created_by')->nullable();

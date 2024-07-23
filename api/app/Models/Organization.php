@@ -23,6 +23,9 @@ class Organization extends Model
         'id',
         'created_by',
         'updated_by',
+        'company_name', 
+        'contact_person', 
+        'company_address', 
     ];
    
 

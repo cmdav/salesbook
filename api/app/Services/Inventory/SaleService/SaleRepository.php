@@ -143,10 +143,10 @@ class SaleRepository
             'created_by' => optional($sale->creator)->fullname,
             'updated_by' => optional($sale->updater)->fullname,
 
-            'organization_name' => auth()->user()->company_name,
+            'organization_name' => optional(auth()->user()->organization)->organization_name,
             'organization_phone_number' => auth()->user()->phone_number,
             'organization_email' => auth()->user()->email,
-            'organization_address' => auth()->user()->company_address,
+            'organization_address' =>optional(auth()->user()->organization)->company_address,
                     
         ];
     }
@@ -187,10 +187,10 @@ class SaleRepository
     // Check if the user is authenticated
     if (Auth::check()) {
         $organizationDetails = [
-            'organization_name' => Auth::user()->company_name,
+           'organization_name' => optional(auth()->user()->organization)->organization_name,
             'organization_phone_number' => Auth::user()->phone_number,
             'organization_email' => Auth::user()->email,
-            'organization_address' => Auth::user()->company_address,
+            'organization_address' =>optional(auth()->user()->organization)->company_address,
         ];
     } else {
         $organizationDetails = $adminDetails;

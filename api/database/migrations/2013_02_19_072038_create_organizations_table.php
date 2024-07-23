@@ -19,6 +19,11 @@ return new class extends Migration
             $table->integer('organization_type')->default(1)->comment("0 sole proprietor, 1 for business");
             $table->string('organization_logo', 100);
             $table->string('organization_email', 200)->nullable();
+
+            $table->string('company_name', 55)->nullable();
+            $table->string('contact_person', 55)->nullable();
+            $table->string('company_address', 55)->nullable();
+
             $table->uuid('user_id');
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();

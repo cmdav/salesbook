@@ -14,21 +14,21 @@ class PriceNotificationRepository
     public function index($request)
     {
         //if(auth()->user()->type_id < 3){
-            $branchId = 'all';
-            if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin'){
-                $branchId = $request['branch_id']; 
-            }
-            else if(auth()->user()->role->role_name != 'Admin'){
-                $branchId = auth()->user()->branch_id; 
-            }
+            // $branchId = 'all';
+            // if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin'){
+            //     $branchId = $request['branch_id']; 
+            // }
+            // else if(auth()->user()->role->role_name != 'Admin'){
+            //     $branchId = auth()->user()->branch_id; 
+            // }
         $query= PriceNotification::select('id','product_type_id','supplier_id','cost_price','selling_price','status')
                                   ->with('productTypes:id,product_type_name,product_type_image',
-                                         'supplier:id,first_name,last_name,contact_person,phone_number','branches:id,name');
+                                         'supplier:id,first_name,last_name,phone_number','branches:id,name');
                                         
-                                         if ($branchId !== 'all') {
-                                            // Apply the where clause if branch_id is not 'all' and the user is not admin
-                                            $query->where('branch_id', $branchId);
-                                        }
+                                        //  if ($branchId !== 'all') {
+                                        //     // Apply the where clause if branch_id is not 'all' and the user is not admin
+                                        //     $query->where('branch_id', $branchId);
+                                        // }
                                         $priceNotification=$query->latest()->paginate(20);
 
                                          $priceNotification->getCollection()->transform(function ($Price) {
@@ -48,7 +48,7 @@ class PriceNotificationRepository
             'id' => $price->id,
             'product_type_name' => optional($price->productTypes)->product_type_name,
             'product_type_image' => optional($price->productTypes)->product_type_image,
-            'branch_name' => optional($store->branches)->name,
+            //'branch_name' => optional($store->branches)->name,
             'product_type_description' => optional($price->productTypes)->product_type_description,
             'cost_price' => $price->cost_price,
             'selling_price' => $price->selling_price,

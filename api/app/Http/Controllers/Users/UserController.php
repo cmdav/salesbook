@@ -137,6 +137,9 @@ class UserController extends Controller
                 }
             } else {
                 //Supplier
+                $Role = JobRole::where('role_name', 'Supplier')->first();
+                $userData['role_id'] = $Role->id;
+
                 $userData['type_id'] = 3; // Supplier type_id
                 $userData['email_verified_at'] = now();
                 $time = time(); 
@@ -160,19 +163,22 @@ class UserController extends Controller
         // Create Organization
         $organization = new Organization([
             'id' => Str::uuid(),
-            'organization_name' => $user->company_name,
+            'organization_name' =>$request->input('company_name'),
             'organization_code' => $user->organization_code,
             'organization_type' => $request->input('organization_type'),
             'organization_logo' => 'logo.png', 
             'user_id' => $user->id,
+            'company_address' =>$request->input('company_address'),
+            'contact_person' =>$request->input('contact_person'),
+            
         ]);
         $organization->save();
         
        
         // Create Business Branch
         $branch = new BusinessBranch([
-            'name' => $user->company_name,
-            'contact_person' => $user->first_name . ' ' . $user->last_name.' ' . $user->contact_person,
+            'name' =>$request->input('company_name'),
+            'contact_person' => $user->first_name . ' ' . $user->last_name.' ' .  $organization->contact_person,
             'email' => $user->email,
             'phone_number' => $user->phone_number,
         ]);

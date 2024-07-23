@@ -49,9 +49,9 @@ class UserRepository
             "phone_number" => $user->phone_number,
             "email" => $user->email,
 			'organization_id' => $user->organization_id,
-            "company_name" => $user->company_name,
-            "contact_person" => $user->contact_person,
-            "company_address" => $user->company_address,
+            "company_name" => optional($user->organization)->organization_name,
+            "contact_person" =>optional($user->organization)->contact_person,
+            "company_address" =>optional($user->organization)->company_address,
             // "organization_name" => optional($user->organization)->organization_name,
             "organization_code" =>optional($user->organization)->organization_code,
             "organization_logo" => optional($user->organization)->organization_logo,
@@ -71,18 +71,16 @@ class UserRepository
                             "middle_name", 
                             "last_name", 
                             "phone_number",
-                            "company_name",
-                            "contact_person",
-                            "company_address",
+                           
                             'email',
                             'role_id',
                             'organization_id','branch_id')
                            ->with('role:id,role_name','branches:id,name')
                               ->where('id', $user_id)
                               //->with('organization')->first();
-                              ->with('organization:id,organization_name,organization_code,organization_type,organization_logo,user_id')->first();
+                              ->with('organization:id,organization_name,organization_code,organization_type,organization_logo,user_id,contact_person')->first();
         
-           
+        //    return $user;
             if ($user) {
                 
             return $this->transformUsers($user);
@@ -132,9 +130,9 @@ class UserRepository
                                     "middle_name", 
                                     "last_name", 
                                     "phone_number",
-                                    "company_name",
-                                    "contact_person",
-                                    "company_address",
+                                 
+                                   
+                                   
                                      'email',
                                      'role_id',
                                      'organization_id',

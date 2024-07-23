@@ -73,7 +73,8 @@ class NewUserHasRegisterEmail extends Mailable
            
                
             //$this->frontendUrl = env('FRONTEND_URL');
-            $companyName = Auth::user()->company_name; // Retrieve authenticated user's company name
+           $companyName =  optional(auth()->user()->organization)->organization_name;
+            //$companyName =  "Te";
             $this->first_paragraph = "Thank you for your purchase from <b>{$companyName}</b>. Below are the details of the item bought.";
             $this->second_paragraph = $otherDetail;
             //$this->btn_label = "Join Company";
@@ -90,10 +91,10 @@ class NewUserHasRegisterEmail extends Mailable
         // Check if the user is authenticated
         if (Auth::check()) {
             $this->organizationDetails = [
-                'organization_name' => Auth::user()->company_name,
+                'organization_name' =>  optional(auth()->user()->organization)->organization_name,
                 'organization_phone_number' => Auth::user()->phone_number,
                 'organization_email' => Auth::user()->email,
-                'organization_address' => Auth::user()->company_address,
+                'organization_address' =>  optional(auth()->user()->organization)->company_address
             ];
         } else {
             

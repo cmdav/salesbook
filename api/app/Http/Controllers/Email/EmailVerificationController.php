@@ -24,6 +24,7 @@ class EmailVerificationController extends Controller
     
     public function __invoke($hash, Request $request)
     {
+       
         $token = EncryptDecryptService::decryptvalue($hash);
         if(!$token){
             return response()->json(['message' => 'token not found '], 404);

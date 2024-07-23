@@ -11,13 +11,13 @@ class JobRoleRepository
     public function index()
     {
         return JobRole::select('id', 'role_name')
-            ->whereNotIn('role_name', ['Super Admin', 'Admin'])
+            ->whereNotIn('role_name', ['Super Admin', 'Admin','Supplier'])
             ->paginate(20);
     }
 
     public function names()
     {
-        return JobRole::select('id', 'role_name')->where('role_name', "!=", 'Super Admin')->get();
+        return JobRole::select('id', 'role_name')->whereNotIn('role_name', ['Super Admin', 'Supplier'])->get();
       
     }
     

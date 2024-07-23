@@ -25,6 +25,9 @@ class OrganizationFactory extends Factory
             'organization_logo' => $this->faker->imageUrl(640, 480, 'business'),
             'created_by'=>'admin',
             'updated_by'=>'admin',
+            'company_name'=>$this->faker->company,
+            'company_address'=>'No 4, Allen Street',
+            'contact_person'=>'Admin account',
             'user_id'=>'admin',
         ];
     }

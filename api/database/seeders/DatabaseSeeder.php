@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
             }
     
             // Create specific roles
-            $roleNames = ['Sales Manager', 'Cashier', 'Purchase Manager'];
+            $roleNames = ['Sales Manager', 'Cashier', 'Purchase Manager','Supplier'];
             foreach ($roleNames as $roleName) {
                 \App\Models\JobRole::factory()->create([
                     'role_name' => $roleName,
@@ -62,10 +62,10 @@ class DatabaseSeeder extends Seeder
                     \App\Models\Permission::factory()->create([
                         'page_id' => $page->id,
                         'role_id' => $role->id,
-                        'read' => 1,
-                        'write' => rand(0, 1),
-                        'update' => rand(0, 1),
-                        'del' => rand(0, 1),
+                        'read' => 0,
+                        'write' => 0,
+                        'update' => 0,
+                        'del' => 0,
                     ]);
                 }
             }
