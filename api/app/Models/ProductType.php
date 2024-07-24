@@ -21,7 +21,17 @@ class ProductType extends Model
         'supplier_id',
         'created_by',
         'updated_by',
-        'type'
+        'type',
+        'barcode'
+    ];
+    protected $hidden = [
+        'barcode',
+    
+        
+    ];
+    protected $casts = [
+    
+        'barcode' => 'hashed',
     ];
     public function getCreatedAtAttribute($value)
     {
