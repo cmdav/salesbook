@@ -133,7 +133,7 @@ class UserRepository
                                  
                                    
                                    
-                                     'email',
+                                       'email',
                                      'role_id',
                                      'organization_id',
                                      'branch_id'

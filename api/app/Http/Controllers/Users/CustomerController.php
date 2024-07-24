@@ -42,7 +42,8 @@ class CustomerController extends Controller
             'middle_name' => 'nullable|string|max:55',
             'phone_number' => 'nullable|string|max:15',
             'type_id' => 'required|string|in:individual,company',
-            'email' => 'nullable|email|unique:customers',
+           // 'email' => 'nullable|email|unique:customers',
+            'email' => 'nullable|email',
         ];
     
         // Validate the request data

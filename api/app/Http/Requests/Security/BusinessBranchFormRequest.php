@@ -23,6 +23,7 @@ class BusinessBranchFormRequest extends FormRequest
             'state_id' => 'required|integer',
             'postal_code' => 'required|string|max:20',
             'city' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
             'country_id' => 'required|integer',
             'contact_person' => 'required|string|max:255',
             'phone_number' => 'required|string|max:20',

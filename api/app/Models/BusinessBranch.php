@@ -17,6 +17,7 @@ class BusinessBranch extends Model
         'contact_person',
         'phone_number',
         'email',
+        'address'
     ];
     protected $hidden = [
     //  'name'

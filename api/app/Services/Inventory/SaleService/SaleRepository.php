@@ -27,7 +27,7 @@ class SaleRepository
 
        $query=Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
                         //'store:id,product_type_id,quantity_available',
-                        'branches:id,name,state_id,country_id,city,phone_number,email',
+                        'branches:id,name,state_id,country_id,city,phone_number,email,address',
                         'customers:id,first_name,last_name,contact_person,phone_number',
                         'Price:id,selling_price,cost_price'
                         //'organization:id,organization_name,organization_logo'
@@ -206,6 +206,7 @@ class SaleRepository
         'branch_country' => optional($sales->first()->branches)->country_name,
         'branch_state' => optional($sales->first()->branches)->state_name,
         'branch_city' => optional($sales->first()->branches)->city,
+        'branch_address' => optional($sales->first()->branches)->address,
         'branch_email' => optional($sales->first()->branches)->email,
         'branch_phone_number' => optional($sales->first()->branches)->phone_number,
         
@@ -374,8 +375,6 @@ class SaleRepository
     }
     
 
-
-
     private function generateProductDetailsTable($productDetails, $totalPrice, $transactionId, $branch) {
 
         $transactionTime = Carbon::now()->format('Y-m-d H:i:s');
@@ -387,12 +386,14 @@ class SaleRepository
             'city' => $branch->city,
             'email' => $branch->email,
             'phone_number' => $branch->phone_number,
+            'address' => $branch->address,
         ] : [
             'name' => 'N/A',
             'state' => 'N/A',
             'city' => 'N/A',
             'email' => 'N/A',
             'phone_number' => 'N/A',
+            'address' => 'N/A',
         ];
     
         $tableHtml = "<table style='width: 100%; border-collapse: collapse; max-width: 100%;'>
@@ -414,7 +415,9 @@ class SaleRepository
                         </tr>
                         <tr>
                             <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Phone Number</strong></td>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;' colspan='4'><strong>{$branchDetails['phone_number']}</strong></td>
+                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>{$branchDetails['phone_number']}</strong></td>
+                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Address</strong></td>
+                            <td style='border: 1px solid black; padding: 8px; text-align: right;' colspan='2'><strong>{$branchDetails['address']}</strong></td>
                         </tr>
                         <tr>
                             <th style='border: 1px solid black; padding: 8px;'>Product Name</th>
@@ -457,6 +460,7 @@ class SaleRepository
         return $responsiveTableHtml;
     }
     
+
     
     
   
