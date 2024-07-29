@@ -77,8 +77,9 @@ class User extends Authenticatable
     }
     public function organization(){
 
-        return $this->hasOne(Organization::class, 'user_id','id');
+        return $this->hasOne(Organization::class, 'id','organization_id');
     }
+    
     public function branches(){
 
         return $this->belongsTo(BusinessBranch::class, 'branch_id','id');

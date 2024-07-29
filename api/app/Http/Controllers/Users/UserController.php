@@ -161,6 +161,7 @@ class UserController extends Controller
     private function createOrganizationAndBranch($user, $request)
     {
         // Create Organization
+       
         $organization = new Organization([
             'id' => Str::uuid(),
             'organization_name' =>$request->input('company_name'),
@@ -169,7 +170,9 @@ class UserController extends Controller
             'organization_logo' => 'logo.png', 
             'user_id' => $user->id,
             'company_address' =>$request->input('company_address'),
-            'contact_person' =>$request->input('contact_person'),
+             'contact_person' => $user->first_name . ' ' . $user->last_name.' ' .  $user->contact_person,
+            'company_email' =>$request->input('email'),
+            'company_phone_number' =>$request->input('phone_number'),
             
         ]);
         $organization->save();
@@ -178,8 +181,9 @@ class UserController extends Controller
         // Create Business Branch
         $branch = new BusinessBranch([
             'name' =>$request->input('company_name'),
-            'contact_person' => $user->first_name . ' ' . $user->last_name.' ' .  $organization->contact_person,
+            'contact_person' => $user->first_name . ' ' . $user->last_name.' ' .  $user->contact_person,
             'email' => $user->email,
+            'address' =>$request->input('company_address'),
             'phone_number' => $user->phone_number,
         ]);
         $branch->save();

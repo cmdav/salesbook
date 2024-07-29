@@ -186,11 +186,12 @@ class SaleRepository
 
     // Check if the user is authenticated
     if (Auth::check()) {
+       // dd(auth()->user()->organization);
         $organizationDetails = [
            'organization_name' => optional(auth()->user()->organization)->organization_name,
-            'organization_phone_number' => Auth::user()->phone_number,
-            'organization_email' => Auth::user()->email,
-            'organization_address' =>optional(auth()->user()->organization)->company_address,
+            'organization_phone_number' =>optional(auth()->user()->organization)->company_phone_number,
+            'organization_email' =>optional(auth()->user()->organization)->company_email,
+            'company_address' =>optional(auth()->user()->organization)->company_address,
         ];
     } else {
         $organizationDetails = $adminDetails;
@@ -216,7 +217,7 @@ class SaleRepository
         'organization_name' => $organizationDetails['organization_name'],
         'organization_phone_number' => $organizationDetails['organization_phone_number'],
         'organization_email' => $organizationDetails['organization_email'],
-        'organization_address' => $organizationDetails['organization_address'],
+        'organization_address' => $organizationDetails['company_address'],
         'payment_method' => $sales->first()->payment_method,
     ];
 

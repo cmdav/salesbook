@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('product_name', 50);
             $table->text('product_description')->nullable(); 
             $table->text('product_image')->nullable();
+            $table->text('barcode')->nullable();
             $table->boolean('vat')->default(0)->nullable();
             $table->uuid('measurement_id');
             $table->uuid('sub_category_id');

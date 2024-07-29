@@ -35,7 +35,12 @@ class UserFormRequest extends FormRequest
         if ($request->input('organization_type') == 'company') {
             $rules = array_merge($rules, [
                 'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
-                'company_name' => 'required|string|max:55',
+                'company_name' => [
+                    'required',
+                    'string',
+                    'max:55',
+                    Rule::unique('companies', 'company_name')->ignore($this->user),
+                ],
                 'company_address' => 'required|string|max:55',
                 'contact_person' => 'required|string|max:55',
                 'dob' => 'nullable|date|date_format:Y-m-d',

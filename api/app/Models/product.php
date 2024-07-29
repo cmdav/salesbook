@@ -21,7 +21,8 @@ class Product extends Model
         'sub_category_id',
         'created_by',
         'updated_by',
-        'category_id'
+        'category_id',
+        'barcode',
     ];
 
     protected static function booted()
