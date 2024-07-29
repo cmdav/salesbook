@@ -14,7 +14,7 @@ class ProductRepository
        // return \App\Models\Product::with('productType','measurement','product_category','subCategory','suppliers')->paginate(20);
     
        
-        $product =Product::latest()->with('measurement:id,measurement_name,unit', 'subCategory.category')
+        $product =Product::latest()->with('subCategory.category')
                                     ->withCount('productType')
                                     ->paginate(20);
        

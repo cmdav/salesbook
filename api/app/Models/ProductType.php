@@ -17,6 +17,7 @@ class ProductType extends Model
         'product_type_description',
         'vat',
         'organization_id',
+        'measurement_id',
         'selling_price',
         'supplier_id',
         'created_by',
