@@ -12,7 +12,6 @@ class UserFormRequest extends FormRequest
     public function rules(Request $request): array
     {
         $rules = [
-            
             'password' => [
                 'required',
                 'string',
@@ -39,7 +38,7 @@ class UserFormRequest extends FormRequest
                     'required',
                     'string',
                     'max:55',
-                    Rule::unique('companies', 'company_name')->ignore($this->user),
+                    Rule::unique('organizations', 'organization_name')->ignore($this->user),
                 ],
                 'company_address' => 'required|string|max:55',
                 'contact_person' => 'required|string|max:55',
@@ -55,9 +54,16 @@ class UserFormRequest extends FormRequest
                 'dob' => 'nullable|date|date_format:Y-m-d',
                 'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
                 'company_address' => 'required|string|max:55',
+                'company_name' => [
+                    'required',
+                    'string',
+                    'max:55',
+                    Rule::unique('organizations', 'organization_name')->ignore($this->user),
+                ],
             ]);
         }
 
+        // Uncomment this section if needed
         // if ($request->input('organization_type') == 'sales_personnel') {
         //     $rules = array_merge($rules, [
         //         'first_name' => 'required|string|max:55',
@@ -67,6 +73,7 @@ class UserFormRequest extends FormRequest
         //         'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
         //     ]);
         // }
+
         if ($request->input('organization_type') == 'supplier') {
             $rules = array_merge($rules, [
                 'first_name' => 'required|string|max:55',
@@ -98,8 +105,7 @@ class UserFormRequest extends FormRequest
     public function messages()
     {
         return [
-            'password.regex' => 'The :attribute must include at least one uppercase letter, 
-            one lowercase letter, one number, and one special character. Your password should be 8 to 30 characters long.',
+            'password.regex' => 'The :attribute must include at least one uppercase letter, one lowercase letter, one number, and one special character. Your password should be 8 to 30 characters long.',
         ];
     }
 }
