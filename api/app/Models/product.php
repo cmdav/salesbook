@@ -25,23 +25,7 @@ class Product extends Model
         //'barcode',
     ];
 
-    // protected static function booted()
-    // {
-    //     static::updated(function ($product) {
-            
-    //         $now = Carbon::now();
-    //         $product->productType()->update([
-    //             'product_type_name' => $product->product_name,
-    //             'product_type_image' => $product->product_image,
-    //             'product_type_description' => $product->product_description,
-    //             'updated_by' => $product->updated_by,
-    //             'updated_at' => $now,
-               
-    //         ]);
-    //     });
-
-       
-    // }
+   
     public function getVatAttribute($value)
     {
         switch ($value) {
