@@ -59,6 +59,11 @@ Route::middleware('auth:sanctum')->group(function() {
         route::get('list-business-branches', [App\Http\Controllers\Security\BusinessBranchController::class, 'listing']);
         Route::resource('countries', App\Http\Controllers\Security\CountryController::class);
         Route::resource('states', App\Http\Controllers\Security\StateController::class);
+       
+        Route::resource('container-types', App\Http\Controllers\Product\ContainerTypeController::class);
+        Route::resource('container-type-capacities', App\Http\Controllers\Product\ContainerTypeCapacityController::class);
+        Route::apiResource('list-all-containers', App\Http\Controllers\Product\ListAllContainerController::class);
+        Route::apiResource('container-with-capacities', App\Http\Controllers\Product\ContainerWithCapacityController::class);
 
         //get endpoint
         route::get('get-price-by-product-type/{id}', App\Http\Controllers\Inventory\PriceByProductTypeController::class);
@@ -200,6 +205,9 @@ Route::middleware('auth:sanctum')->group(function() {
 
 
 });
+
+
+
 
 
 

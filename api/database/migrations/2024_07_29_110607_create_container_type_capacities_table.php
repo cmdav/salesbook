@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('container_type_capacities', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('container_type_id');
-            $table->uuid('container_capacity');
+            $table->integer('container_capacity');
+            $table->uuid('created_by')->nullable();
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
         });
     }

@@ -19,6 +19,7 @@ class ProductType extends Model
         'organization_id',
         'measurement_id',
         'selling_price',
+        'container_type_capacity_id',
         'supplier_id',
         'created_by',
         'updated_by',

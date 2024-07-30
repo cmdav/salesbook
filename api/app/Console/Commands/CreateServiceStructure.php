@@ -112,24 +112,30 @@ class {$baseName}Repository
 {
     public function index()
     {
-        return {$model}::paginate(20);
+          \$model =  {$model}::paginate(20);
+         if(\$model){
+         return response()->json([ 'success' =>true, 'message' => 'Record retrieved successfully', 'data'=>\$model], 200);
+        }
+        return response()->json([ 'success' =>false, 'message' => 'No record found', 'data'=>\$model], 404);
     }
 
     public function show(\$id)
     {
-        return {$model}::where('id',\$id)->first();
+        \$model = {$model}::where('id',\$id)->first();
+        if(\$model){
+         return response()->json([ 'success' =>true, 'message' => 'Record retrieved successfully', 'data'=>\$model], 200);
+        }
+        return response()->json([ 'success' =>false, 'message' => 'No record found', 'data'=>\$model], 404);
     }
 
     public function store(\$data)
     {
         try {
-            return {$model}::create(\$data);
+             \$model =  {$model}::create(\$data);
+             return response()->json([ 'success' =>true, 'message' => 'Insertion successful', 'data'=>\$model], 200);
         } catch (Exception \$e) {
-            Log::channel('insertion_errors')->error('Error creating or updating user: ' . \$e->getMessage());
-            return response()->json([
-                'success' => 'false',
-                'message' => 'Insertion error'
-            ], 500);
+            //Log::channel('insertion_errors')->error('Error creating or updating user: ' . \$e->getMessage());
+            return response()->json([ 'success' => false, 'message' => 'Insertion error'], 500);
         }
         
     }
@@ -140,30 +146,21 @@ class {$baseName}Repository
         \$model = {$model}::where('id',\$id)->first();
             if(\$model){
                 \$model->update(\$data);
+                 return response()->json([ 'success' =>true, 'message' => 'Update successful', 'data'=>\$model], 200);
             }
-            return \$model;
+           
+             return response()->json([ 'success' =>false, 'message' => 'Record not found', 'data'=>\$model], 404);
         } catch (Exception \$e) {
-            Log::channel('insertion_errors')->error('Error creating or updating user: ' . \$e->getMessage());
-            return response()->json([
-                'success' => 'false',
-                'message' => 'Insertion error'
-            ], 500);
+            //Log::channel('insertion_errors')->error('Error creating or updating user: ' . \$e->getMessage());
+            return response()->json([ 'success' => false, 'message' => 'Insertion error'], 500);
         }
     }   
 
     public function destroy(\$id)
     {
-        try { 
-            \$model = {$model}::where('id',\$id)->first();
-            \$model->delete();
-            return \$model;
-        } catch (Exception \$e) {
-            Log::channel('insertion_errors')->error('Error creating or updating user: ' . \$e->getMessage());
-            return response()->json([
-                'success' => 'false',
-                'message' => 'Insertion error'
-            ], 500);
-        }
+        \$model = {$model}::findOrFail(\$id);
+        \$model->delete();
+        return \$model;
     }
 }
 ";

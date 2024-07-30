@@ -242,7 +242,7 @@ class ProductTypeRepository
      try{
         $data=ProductType::create($data);
         return response()->json([
-            'success' => false,
+            'success' => true,
             'message' => 'This Product type created successfully',
             'data' =>$data,
         ], 200);

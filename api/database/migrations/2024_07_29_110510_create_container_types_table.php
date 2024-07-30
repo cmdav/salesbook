@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('container_types', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('container_type_name', 50);
+            $table->uuid('created_by')->nullable();
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
         });
     }
