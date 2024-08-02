@@ -17,8 +17,8 @@ class ProductTypeRepository
     {
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
         return ProductType::with([
-            'product:id,category_id,product_name,vat,measurement_id,sub_category_id', 
-            'product.measurement:id,measurement_name',
+            'product:id,category_id,product_name,vat,sub_category_id', 
+            // 'product.measurement:id,measurement_name',
             'product.subCategory:id,sub_category_name',
             'suppliers:id,first_name,last_name,phone_number',
             'activePrice' => function ($query) {
@@ -204,12 +204,10 @@ class ProductTypeRepository
 
         return [
             'id' => $productType->id,
-            'product_id' => optional($productType->product)->product_name,
-            'product_ids' => optional($productType->product)->id,
+            'product_name' => optional($productType->product)->product_name,
             'product_type_name' => $productType->product_type_name,
             'product_type_image' => $productType->product_type_image,
             'product_type_description' => $productType->product_type_description,
-            'view_price' => 'view price',
             'vat' => optional($productType->product)->vat,
             'product_name' => optional($productType->product)->product_name,
             'product_description' => $productType->product_type_description,
@@ -217,14 +215,15 @@ class ProductTypeRepository
 
             'product_category' => optional(optional($productType->product)->product_category)->category_name,
             
-            'category_ids' => optional(optional($productType->product)->product_category)->id,
-            'category_id' => optional(optional($productType->product)->product_category)->category_name,
+            'category_id' => optional(optional($productType->product)->product_category)->id,
+            'category_name' => optional(optional($productType->product)->product_category)->category_name,
     
             'product_sub_category' => optional(optional($productType->product)->subCategory)->sub_category_name,
             'sub_category_id' => optional(optional($productType->product)->subCategory)->id,
             'quantity_available' => optional($productType->store)->total_quantity ?? 0,
-            "measurement_id" => optional(optional($productType->product)->measurement)->measurement_name,
-    
+            "measurement" => "Litre",
+            "container_type" => "Tank",
+            "container_type_capacity" =>50,
             'purchasing_price' => optional($productType->activePrice)->cost_price ?? 'Not set',
             'selling_price' => optional($productType->activePrice)->selling_price ?? 'Not set',
             'supplier_name' => trim((optional($productType->suppliers)->first_name ?? '') . ' ' . (optional($productType->suppliers)->last_name ?? '')) ?: 'None',

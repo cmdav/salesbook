@@ -52,7 +52,7 @@ class SaleUserController extends Controller
                 'required',
                 'email',
                 'max:55',
-                Rule::unique('users')->ignore($request->user()->id),
+                Rule::unique('users', 'email'), 
             ],
         ]);
         

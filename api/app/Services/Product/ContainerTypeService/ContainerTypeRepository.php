@@ -10,7 +10,7 @@ class ContainerTypeRepository
 {
     public function index()
     {
-          $model =  ContainerType::paginate(20);
+        $model =  ContainerType::select('id','container_type_name','created_by','updated_by')->with('containerCapacities:id,container_type_id,container_capacity')->paginate(20);
          
          if($model){
          return response()->json([ 'success' =>true, 'message' => 'Record retrieved successfully', 'data'=>$model], 200);
@@ -20,7 +20,7 @@ class ContainerTypeRepository
 
     public function show($id)
     {
-        $model = ContainerType::where('id',$id)->first();
+        $model = ContainerType::where('id',$id)->with('containerCapacities:id,container_type_id,container_capacity')->first();
         if($model){
          return response()->json([ 'success' =>true, 'message' => 'Record retrieved successfully', 'data'=>$model], 200);
         }
@@ -67,8 +67,33 @@ class ContainerTypeRepository
             return ContainerType::select("id","container_type_name")->get();
         }
 
-public function containerWithCapacity($id)
+       
+        public function containerWithCapacity($id)
         {
-            return ContainerType::where('id',$id)->first();
+            $containerType = ContainerType::select('id', 'container_type_name')
+                ->where('id', $id)
+                ->with(['containerCapacities' => function ($query) {
+                    $query->select('id', 'container_capacity', 'container_type_id');
+                }])
+                ->first();
+        
+            if ($containerType && $containerType->containerCapacities) {
+                $containerType->container_capacities = $containerType->containerCapacities->map(function ($capacity) {
+                    return collect($capacity)->except('container_type_id');
+                });
+            }
+        
+            return [
+            
+                    'id' => $containerType->id,
+                    'container_type_name' => $containerType->container_type_name,
+                    'container_capacities' => $containerType->container_capacities
+                
+            ];
         }
+        
+            
+        
+
+        
 }
