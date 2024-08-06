@@ -17,8 +17,11 @@ class PurchaseRepository
     private function query($branchId)
         {
           
-            $query = Purchase::with('suppliers', 'currency', 'productType','branches:id,name',
-                    'containerTypeCapacities:id,container_type_id,container_capacity','containerTypeCapacities.containerType');
+            $query = Purchase::with('suppliers:id,first_name,last_name', 'currency', 
+                    'productType:id,product_type_name,product_type_image,product_type_description,container_type_capacity_id','branches:id,name',
+                    'productType.containerCapacities:id,container_type_id,container_capacity',
+                    'productType.containerCapacities.containerType:id,container_type_name'
+                );
                    
                     if ($branchId !== 'all') {
                         // Apply the where clause if branch_id is not 'all' and the user is not admin
@@ -74,43 +77,43 @@ class PurchaseRepository
 
         
     }
-    private function transformProduct($purchase){
+    private function transformProduct($purchase)
+    {
         // Assuming $purchase is the purchase data returned from the API
-        $cost_price =  $purchase->price ? $purchase->price->cost_price : 0;
+        $cost_price = $purchase->price ? $purchase->price->cost_price : 0;
         $formatted_cost_price = number_format($cost_price, 2, '.', ',');
-
+    
         $selling_price = $purchase->price ? $purchase->price->selling_price : 0;
         $formatted_selling_price = number_format($selling_price, 2, '.', ',');
-
-        $firstContainerTypeCapacity = optional($purchase->containerTypeCapacities->first());
-
-    // Safely access container type name using optional
-    $containerTypeName = optional($firstContainerTypeCapacity->containerType)->container_type_name;
-
+    
+        // Access the first container type capacity
+        $firstContainerTypeCapacity = optional($purchase->productType->containerCapacities->first());
+    
+        // Extract container type name and capacity
+        $containerTypeName = optional($firstContainerTypeCapacity->containerType)->container_type_name;
+        $containerCapacity = $firstContainerTypeCapacity->container_capacity;
+    
         return [
             'id' => $purchase->id,
-          
             'product_type_name' => optional($purchase->productType)->product_type_name,
             'product_type_image' => optional($purchase->productType)->product_type_image,
             'product_type_description' => optional($purchase->productType)->product_type_description,
-            'container_type_name' => $containerTypeName ,
-            'container_type_capacity' => optional($purchase->containerTypeCapacities)->container_capacity,
-            
+            'container_type_name' => $containerTypeName,
+            'container_type_capacity' => $containerCapacity,
+            'container_qty' => $purchase->container_qty,
+            'capacity_qty' => $purchase->capacity_qty,
             'branch_name' => optional($purchase->branches)->name,
             'batch_no' => $purchase->batch_no,
             'quantity' => $purchase->quantity,
-
-            //'product_identifier' => $purchase->product_identifier,
             'expiry_date' => $purchase->expiry_date,
             'cost_price' => $formatted_cost_price,
             'selling_price' => $formatted_selling_price,
-            'supplier' =>optional($purchase->suppliers)->first_name." ". optional($purchase->suppliers)->last_name." ". optional($purchase->suppliers)->company_name,
+            'supplier' => optional($purchase->suppliers)->first_name . " " . optional($purchase->suppliers)->last_name,
             'created_by' => optional($purchase->creator)->fullname,
             'updated_by' => optional($purchase->updater)->fullname,
-
-          
         ];
     }
+    
     public function create(array $data)
     {
     DB::beginTransaction();
@@ -162,7 +165,8 @@ class PurchaseRepository
             $purchase->quantity = $purchaseData['quantity'];
             $purchase->product_identifier = $purchaseData['product_identifier'];
             $purchase->expiry_date = $purchaseData['expiry_date'];
-            $purchase->container_type_capacity_id = $purchaseData['container_type_capacity_id'];
+            $purchase->capacity_qty = $purchaseData['capacity_qty'];
+            $purchase->container_qty = $purchaseData['container_qty'];
 
             $purchase->save();
             

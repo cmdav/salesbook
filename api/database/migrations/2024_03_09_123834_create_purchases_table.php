@@ -18,10 +18,10 @@ return new class extends Migration
             $table->uuid('price_id')->nullable();
             $table->integer('branch_id');
             $table->string('batch_no', 50); 
-            $table->integer('quantity')->default(0); 
+            $table->integer('container_qty')->default(0); 
             $table->string('product_identifier', 50)->nullable(); 
             $table->date('expiry_date')->nullable();
-            $table->uuid('container_type_capacity_id');
+            $table->integer('capacity_qty');
             $table->integer('status')->default(1); 
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
