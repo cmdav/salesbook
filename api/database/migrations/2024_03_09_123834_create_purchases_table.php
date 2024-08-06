@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('quantity')->default(0); 
             $table->string('product_identifier', 50)->nullable(); 
             $table->date('expiry_date')->nullable();
-            $table->uuid('organization_id')->nullabe();
+            $table->uuid('container_type_capacity_id');
             $table->integer('status')->default(1); 
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();

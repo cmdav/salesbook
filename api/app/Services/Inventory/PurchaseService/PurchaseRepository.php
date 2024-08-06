@@ -17,7 +17,8 @@ class PurchaseRepository
     private function query($branchId)
         {
           
-            $query = Purchase::with('suppliers', 'currency', 'productType','branches:id,name');
+            $query = Purchase::with('suppliers', 'currency', 'productType','branches:id,name',
+                    'containerTypeCapacities:id,container_type_id,container_capacity','containerTypeCapacities.containerType');
                    
                     if ($branchId !== 'all') {
                         // Apply the where clause if branch_id is not 'all' and the user is not admin
@@ -80,12 +81,21 @@ class PurchaseRepository
 
         $selling_price = $purchase->price ? $purchase->price->selling_price : 0;
         $formatted_selling_price = number_format($selling_price, 2, '.', ',');
+
+        $firstContainerTypeCapacity = optional($purchase->containerTypeCapacities->first());
+
+    // Safely access container type name using optional
+    $containerTypeName = optional($firstContainerTypeCapacity->containerType)->container_type_name;
+
         return [
             'id' => $purchase->id,
           
             'product_type_name' => optional($purchase->productType)->product_type_name,
             'product_type_image' => optional($purchase->productType)->product_type_image,
             'product_type_description' => optional($purchase->productType)->product_type_description,
+            'container_type_name' => $containerTypeName ,
+            'container_type_capacity' => optional($purchase->containerTypeCapacities)->container_capacity,
+            
             'branch_name' => optional($purchase->branches)->name,
             'batch_no' => $purchase->batch_no,
             'quantity' => $purchase->quantity,
@@ -114,33 +124,23 @@ class PurchaseRepository
                 $price = new Price();
                 $price->product_type_id = $purchaseData['product_type_id'];
                 $price->supplier_id = $purchaseData['supplier_id'];
-                // $price->cost_price = $purchaseData['cost_price'];
-                // $price->selling_price = $purchaseData['selling_price'];
                 $price->batch_no = $purchaseData['batch_no'];
                 $price->status = 1;
-                // $price->save();
-                // $purchaseData['price_id'] = $price->id;
+            
                 //purchaseData price id will be empty for initial price
             if (empty($purchaseData['price_id'])) {  
-                   
-                // $price = new Price();
-                // $price->product_type_id = $purchaseData['product_type_id'];
-                // $price->supplier_id = $purchaseData['supplier_id'];
                 $price->cost_price = $purchaseData['cost_price'];
                 $price->selling_price = $purchaseData['selling_price'];
-                // $price->batch_no = $purchaseData['batch_no'];
-                // $price->status = 1;
                 $price->save();
                 $purchaseData['price_id'] = $price->id;
             }else{
                 $price->price_id = $purchaseData['price_id'];
                 $price->save();
-
             }
-            // return "price_id is not empty";
+           
           
             if (!empty($purchaseData['supplier_id'])) {
-                //check if it's a new supplier
+                //get and save new supplier into the supplier product table
                 $existingRecord = \App\Models\SupplierProduct::where('product_type_id', $purchaseData['product_type_id'])
                                                             ->where('supplier_id', $purchaseData['supplier_id'])
                                                             // ->where('batch_no', $purchaseData['batch_no'])
@@ -162,6 +162,8 @@ class PurchaseRepository
             $purchase->quantity = $purchaseData['quantity'];
             $purchase->product_identifier = $purchaseData['product_identifier'];
             $purchase->expiry_date = $purchaseData['expiry_date'];
+            $purchase->container_type_capacity_id = $purchaseData['container_type_capacity_id'];
+
             $purchase->save();
             
             $purchases[] = $purchase;

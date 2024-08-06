@@ -18,4 +18,8 @@ class ContainerTypeCapacity extends Model
         'created_by', 
         'updated_by'
     ];
+    public function containerType()
+    {
+        return $this->belongsTo(ContainerType::class, 'container_type_id', 'id');
+    }
 }   

@@ -151,7 +151,7 @@ Route::middleware('auth:sanctum')->group(function() {
 
         route::get('all-price-by-product-type/{id}', App\Http\Controllers\Inventory\AllPriceByProductTypeController::class);
         route::get('latest-product-type-price/{id}', App\Http\Controllers\Inventory\LatestPriceByProductTypeController::class);
-        route::get('latest-supplier-price/{product_type_id}/{supplier_id}', App\Http\Controllers\Inventory\LatestSupplierPriceController::class);
+        route::get('latest-supplier-price/{product_type_id}/{supplier_id}', App\Http\Controllers\Inventory\LatestSupplierPriceController::class);//use in purchase page
 
         //need modification
         route::get('get-suppliers-by-product-type-id/{product_type_id}', App\Http\Controllers\Inventory\SupplierByProductController ::class);

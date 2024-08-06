@@ -15,6 +15,7 @@ class PurchaseFormRequest extends FormRequest
             'purchases' => 'required|array|min:1',
             'purchases.*.product_type_id' => 'required|string',
             'purchases.*.supplier_id' => 'nullable|uuid',
+            'purchases.*.container_type_capacity_id' => 'nullable|uuid',
             'purchases.*.price_id' => 'required_without:purchases.*.cost_price,purchases.*.selling_price',
             'purchases.*.cost_price' => 'required_without:purchases.*.price_id',
             'purchases.*.selling_price' => 'required_without:purchases.*.price_id',

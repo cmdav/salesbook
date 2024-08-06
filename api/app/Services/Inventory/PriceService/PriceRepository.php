@@ -24,6 +24,7 @@ class PriceRepository
 
        
     }
+    //use in  purchase page
     public function getLatestSupplierPrice($product_type_id, $supplier_id)
     { 
        

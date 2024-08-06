@@ -20,7 +20,7 @@ class Purchase extends Model
         'quantity',
         'product_identifier',
         'expiry_date',
-        'organization_id',
+        'container_type_capacity_id',
         'status',
         'created_by',
         'branch_id',
@@ -81,6 +81,10 @@ class Purchase extends Model
     public function price(){
 
         return $this->belongsTo(Price::class);
+    }
+    public function containerTypeCapacities(){
+
+        return $this->belongsTo(ContainerTypeCapacity::class,'container_type_capacity_id','id');
     }
 
 }
