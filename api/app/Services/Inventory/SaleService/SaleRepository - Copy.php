@@ -119,9 +119,9 @@ class SaleRepository
         $formatted_total_price = number_format($total_price, 2, '.', ',');
         $formatted_price_sold_at = number_format($sale->price_sold_at, 2, '.', ',');
         
-        // $cost_price = optional($sale->price)->is_new == 1 
-        // ? (optional($sale->price)->new_cost_price ?? optional($sale->price->referencePrice)->new_cost_price) 
-        // : (optional($sale->price)->cost_price ?? optional($sale->price->referencePrice)->cost_price);
+        $cost_price = optional($sale->price)->is_new == 1 
+        ? (optional($sale->price)->new_cost_price ?? optional($sale->price->referencePrice)->new_cost_price) 
+        : (optional($sale->price)->cost_price ?? optional($sale->price->referencePrice)->cost_price);
         
         return [
             'id' => $sale->id,
@@ -129,7 +129,7 @@ class SaleRepository
             'product_type_description' => optional($sale->product)->product_type_description,
             'branch_name' => optional($sale->branches)->name,
             'branch_id' => optional($sale->branches)->id,
-            'cost_price' => "No set",
+            'cost_price' =>  $cost_price,
             'price_sold_at' => $formatted_price_sold_at,
             'quantity' => $sale->quantity,
             'batch_no' => $sale->batch_no,
@@ -291,43 +291,88 @@ class SaleRepository
     {
         $emailService = new EmailService();
         $transactionId =  time() . rand(1000, 9999);
-        //try {
-        
+        try {
             $response = DB::transaction(function () use ($data, $emailService, $transactionId) {
-                // $productDetails = [];
-                // $totalPrice = 0; // Initialize total price
-                // $branch = null; // Initialize branch
+                $productDetails = [];
+                $totalPrice = 0; // Initialize total price
+                $branch = null; // Initialize branch
     
                 foreach ($data['products'] as $product) {
     
-                    // $product['vat'];
+                    $batchNoParts = explode('->', $product['batch_no']);
+                    $batchNo = $batchNoParts[0];
+                  
+                    $latestPrice = Price::where([
+                        ['product_type_id', $product['product_type_id']],
+                        ['batch_no', $batchNo],
+                        ['status', 1]
+                    ])->firstOrFail();
+                  
+                    $store = Store::where([
+                        ['product_type_id', $product['product_type_id']],
+                        ['batch_no', $batchNo]
+                    ])->firstOrFail();
+    
+                    if ($store->quantity_available < $product['quantity']) {
+                        throw new Exception("Insufficient stock for batch {$batchNo}");
+                    }
+                    $store->quantity_available -= $product['quantity'];
+                    $store->save();
+    
                     $sale = new Sale();
                     $sale->fill([
                         'product_type_id' => $product['product_type_id'],
                         'customer_id' => $data['customer_id'],
                         'price_sold_at' => $product['price_sold_at'],
-                        'capacity_qty' => $product['capacity_qty'],
-                        'container_qty' => $product['container_qty'],
-                        // 'batch_no' => $batchNo,
+                        'quantity' => $product['quantity'],
+                        'batch_no' => $batchNo,
                         'vat' => $product['vat'],
                         'payment_method' => $data['payment_method'],
-                        'transaction_id' =>$transactionId,
-                        'price_id' =>1
+                        'transaction_id' =>$transactionId
                     ]);
-                    //$sale->price_id =  $latestPrice->id;
+                    $sale->price_id =  $latestPrice->id;
                    
                     $sale->save();
-
+    
+                    $amount = $product['price_sold_at'] * $product['quantity'];
+                    $vatValue = $product['vat'] == 1 ? ($amount * 0.075) : 0; // 7.5% VAT
+                    $amount += $vatValue;
+                    $totalPrice += $amount; 
+    
+                    $branch = $store->branches; // Fetch the branch details
+                    
+                    $productDetails[] = [
+                        "productTypeName" => $latestPrice->productType->product_type_name,
+                        'price' => $product['price_sold_at'],
+                        "quantity" => $product['quantity'],
+                        "vat" => $product['vat'] == 1 ? 'Yes' : 'No', 
+                        "amount" => $amount
+                    ];
                 }
     
-                
+                // Customer details for the email
+                $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
+                            ->where('id', $data['customer_id'])
+                            ->first();
+                if ($user) {
+                    $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
+    
+                    // Generate email content
+                    $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId, $branch);
+                    $emailService->sendEmail(
+                        ['email' => $user->email, 'first_name' => $customerDetail],
+                        "sales-receipt",
+                        $tableDetail
+                    );
+                }
+    
                 return true;
             });
             return response()->json(['success' => true,'message' => 'Sale successfully recorded: '], 200);
-        // } catch (Exception $e) {
-        //     Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
-        //     return response()->json(['success' => false, 'message' => 'Sale creation failed: ' . $e->getMessage()], 500);
-        // }
+        } catch (Exception $e) {
+            Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Sale creation failed: ' . $e->getMessage()], 500);
+        }
     }
     
 

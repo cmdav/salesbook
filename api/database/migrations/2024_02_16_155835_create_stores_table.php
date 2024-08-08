@@ -15,11 +15,11 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('product_type_id');
             $table->string('batch_no');
-            $table->uuid('store_owner'); 
+           // $table->uuid('store_owner'); 
             $table->integer('branch_id');
             $table->integer('container_qty_available')->default(0); 
-            $table->integer('capacity_qty_available')->default(0); 
-            $table->integer('store_type')->default(0)->comment("0 supplier, 1 company"); 
+            $table->integer('capacity_qty_available')->default(0);
+           // $table->integer('store_type')->default(0)->comment("0 supplier, 1 company"); 
             $table->integer('status')->default(0); 
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();

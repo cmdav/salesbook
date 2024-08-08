@@ -18,7 +18,8 @@ class Sale extends Model
         'customer_id',
         'price_id',
         'price_sold_at',
-        'quantity',
+        'capacity_qty',
+        'container_qty',
         'batch_no',
         'vat',
         'payment_method',
@@ -33,10 +34,6 @@ class Sale extends Model
         return Carbon::parse($value)->format('d-m-y H:i:s');
     }
     
-    // public function store(){
-
-    //     return $this->belongsTo(Store::class,'product_type_id','product_type_id');
-    // }
     public function product(){
 
         return $this->belongsTo(ProductType::class, 'product_type_id','id');

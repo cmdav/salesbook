@@ -19,9 +19,9 @@ return new class extends Migration
             $table->integer('branch_id');
             $table->string('batch_no', 50); 
             $table->integer('container_qty')->default(0); 
+            $table->integer('capacity_qty');
             $table->string('product_identifier', 50)->nullable(); 
             $table->date('expiry_date')->nullable();
-            $table->integer('capacity_qty');
             $table->integer('status')->default(1); 
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();

@@ -19,7 +19,8 @@ return new class extends Migration
             $table->uuid('price_id'); 
             $table->string('batch_no')->nullable();
             $table->integer('price_sold_at');
-            $table->integer('quantity');
+            $table->integer('capacity_qty')->default(0);
+            $table->integer('container_qty')->default(0);
             $table->integer('vat')->nullable()->comment('0->no, 1->yes');
             $table->string('payment_method')->default('cash');
             $table->string('transaction_id');

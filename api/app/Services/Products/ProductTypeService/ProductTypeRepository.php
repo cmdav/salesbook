@@ -24,17 +24,17 @@ class ProductTypeRepository
             'activePrice' => function ($query) {
                 $query->select('id',  'cost_price', 'selling_price', 'product_type_id');
             },
-            'store' => function ($query) use ($branchId) {
-                $query->selectRaw('product_type_id, SUM(quantity_available) as total_quantity')
-                    ->where('status', 1);
+            // 'store' => function ($query) use ($branchId) {
+            //     $query->selectRaw('product_type_id, SUM(quantity_available) as total_quantity')
+            //         ->where('status', 1);
 
-                if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
-                    // Apply the where clause if branch_id is not 'all' and the user is not admin
-                    $query->where('branch_id', $branchId);
-                }
+            //     if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
+            //         // Apply the where clause if branch_id is not 'all' and the user is not admin
+            //         $query->where('branch_id', $branchId);
+            //     }
 
-                $query->groupBy('product_type_id');
-            }
+            //     $query->groupBy('product_type_id');
+            // }
         ])->latest();
     }
 

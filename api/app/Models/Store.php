@@ -13,59 +13,17 @@ class Store extends Model
     
     protected $fillable = [
         'product_type_id',
-        'store_owner',
+       // 'store_owner',
         'batch_no',
         'capacity_qty_available',
         'container_qty_available',
-        'store_type',
+        //'store_type',
         'status',
         'created_by',
         'updated_by',
         'branch_id',
     ];
-    protected static function boot() {
-
-        parent::boot();
-        
-
-        static::created(function ($store) {
-            //supply to company
-            // if ($store->store_type == 1) {
-            //     SupplyToCompany::updateOrCreate(
-            //         [
-            //             'supplier_id' => auth()->user()->id,
-            //             'organization_id' => $store->store_owner,
-            //             'supplier_product_id' => $store->product_type_id,
-            //         ],
-            //         [
-            //             'supplier_id' => auth()->user()->id,
-            //             'organization_id' => $store->store_owner,
-            //             'supplier_product_id' => $store->supplier_product_id,
-            //         ]
-            //     );
-            // }
-            
-                
-        });
-
-        static::updated(function ($store) {
-            // If an existing store is updated, add the difference to the inventory
-            // $originalQuantity = $store->getOriginal('quantity');
-            // $newQuantity = $store->quantity;
-            // $quantityToAdd = $newQuantity - $originalQuantity; // Calculate the difference
-
-            // $inventory = Inventory::where('store_id', $store->id)
-            //                       ->where('supplier_product_id', $store->supplier_product_id)
-            //                       ->first();
-
-            // if ($inventory) {
-            //     // If inventory exists, update it
-            //     $inventory->quantity_available += $quantityToAdd;
-            //     $inventory->last_updated_by = auth()->user()->id;
-            //     $inventory->save();
-            // } 
-        });
-    }
+    
 
     public function supplier_product(){
 

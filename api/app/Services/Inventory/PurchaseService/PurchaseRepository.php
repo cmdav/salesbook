@@ -116,72 +116,100 @@ class PurchaseRepository
     
     public function create(array $data)
     {
-    DB::beginTransaction();
-    
-    try {
-        $purchases = [];
+        DB::beginTransaction();
         
-        foreach ($data['purchases'] as $purchaseData) {
-           
-            //Empty for new price
+        //try {
+            $purchases = [];
+            
+            foreach ($data['purchases'] as $purchaseData) {
+                // Empty for new price
                 $price = new Price();
                 $price->product_type_id = $purchaseData['product_type_id'];
                 $price->supplier_id = $purchaseData['supplier_id'];
                 $price->batch_no = $purchaseData['batch_no'];
                 $price->status = 1;
-            
-                //purchaseData price id will be empty for initial price
-            if (empty($purchaseData['price_id'])) {  
-                $price->cost_price = $purchaseData['cost_price'];
-                $price->selling_price = $purchaseData['selling_price'];
-                $price->save();
-                $purchaseData['price_id'] = $price->id;
-            }else{
-                $price->price_id = $purchaseData['price_id'];
-                $price->save();
-            }
-           
-          
-            if (!empty($purchaseData['supplier_id'])) {
-                //get and save new supplier into the supplier product table
-                $existingRecord = \App\Models\SupplierProduct::where('product_type_id', $purchaseData['product_type_id'])
-                                                            ->where('supplier_id', $purchaseData['supplier_id'])
-                                                            // ->where('batch_no', $purchaseData['batch_no'])
-                                                            ->first();
-                if (!$existingRecord) {
-                    $supplierProduct = new \App\Models\SupplierProduct();
-                    $supplierProduct->product_type_id = $purchaseData['product_type_id'];
-                    $supplierProduct->supplier_id = $purchaseData['supplier_id'];
-                    //$supplierProduct->batch_no = $purchaseData['batch_no'];
-                    $supplierProduct->save();
+                
+                // purchaseData price id will be empty for initial price
+                if (empty($purchaseData['price_id'])) {  
+                    $price->cost_price = $purchaseData['cost_price'];
+                    $price->selling_price = $purchaseData['selling_price'];
+                    $price->save();
+                    $purchaseData['price_id'] = $price->id;
+                } else {
+                    $price->price_id = $purchaseData['price_id'];
+                    $price->save();
                 }
+               
+                if (!empty($purchaseData['supplier_id'])) {
+                    // Get and save new supplier into the supplier product table
+                    $existingRecord = \App\Models\SupplierProduct::where('product_type_id', $purchaseData['product_type_id'])
+                                                                ->where('supplier_id', $purchaseData['supplier_id'])
+                                                                ->first();
+                    if (!$existingRecord) {
+                        $supplierProduct = new \App\Models\SupplierProduct();
+                        $supplierProduct->product_type_id = $purchaseData['product_type_id'];
+                        $supplierProduct->supplier_id = $purchaseData['supplier_id'];
+                        $supplierProduct->save();
+                    }
+                }
+    
+                $purchase = new Purchase();
+                $purchase->product_type_id = $purchaseData['product_type_id'];
+                $purchase->supplier_id = $purchaseData['supplier_id'];
+                $purchase->price_id = $purchaseData['price_id'];
+                $purchase->batch_no = $purchaseData['batch_no'];
+                // $purchase->quantity = $purchaseData['quantity'];
+                $purchase->product_identifier = $purchaseData['product_identifier'];
+                $purchase->expiry_date = $purchaseData['expiry_date'];
+                $purchase->capacity_qty = $purchaseData['capacity_qty'];
+                $purchase->container_qty = $purchaseData['container_qty'];
+    
+                $purchase->save();
+                
+                $productType = \App\Models\ProductType::find($purchaseData['product_type_id']);
+        
+                // Get the container capacity
+                $containerCapacity = \App\Models\ContainerTypeCapacity::where('id', $productType->container_type_capacity_id)->first();
+    
+                // Check if the store already exists
+                $store = \App\Models\Store::where('product_type_id', $purchaseData['product_type_id'])
+                                           //->where('batch_no', $purchaseData['batch_no'])
+                                           ->first();
+    
+                if (!$store) {
+                    $store = new \App\Models\Store();
+                    $store->product_type_id = $purchaseData['product_type_id'];
+                    $store->batch_no = $purchaseData['batch_no'];
+                    $store->branch_id = auth()->user()->branch_id;
+                }
+    
+                // Update the store capacity and container quantity
+               // dd([$purchaseData['capacity_qty'], $purchaseData['container_qty'], $containerCapacity->container_capacity]);
+                $store->capacity_qty_available += $purchaseData['capacity_qty'];
+                $store->container_qty_available += $purchaseData['container_qty'];
+               
+                 //break container capacity into container
+                 $totalCapacity = $store->capacity_qty_available;
+    
+                 if ($containerCapacity && $totalCapacity >= $containerCapacity->container_capacity) {
+                     $store->container_qty_available += intdiv($totalCapacity, $containerCapacity->container_capacity);
+                     $store->capacity_qty_available = $totalCapacity % $containerCapacity->container_capacity;
+                 }
+    
+                $store->save();
+                
+                $purchases[] = $purchase;
             }
-
-            $purchase = new Purchase();
-            $purchase->product_type_id = $purchaseData['product_type_id'];
-            $purchase->supplier_id = $purchaseData['supplier_id'];
-            $purchase->price_id = $purchaseData['price_id'];
-            $purchase->batch_no = $purchaseData['batch_no'];
-            $purchase->quantity = $purchaseData['quantity'];
-            $purchase->product_identifier = $purchaseData['product_identifier'];
-            $purchase->expiry_date = $purchaseData['expiry_date'];
-            $purchase->capacity_qty = $purchaseData['capacity_qty'];
-            $purchase->container_qty = $purchaseData['container_qty'];
-
-            $purchase->save();
-            
-            $purchases[] = $purchase;
-        }
-
-        DB::commit();
-        return response()->json(['data' =>$purchase ,'message' =>'Purchase record was added successfully'] , 201);
-    } catch (\Exception $e) {
-        Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
-        DB::rollBack();
-        return response()->json(['message' =>'Failed to create purchases'] , 500);
-        //return 'Failed to create purchases';
+    
+            DB::commit();
+            return response()->json(['data' => $purchases, 'message' => 'Purchase record was added successfully'], 201);
+        // } catch (\Exception $e) {
+        //     Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        //     DB::rollBack();
+        //     return response()->json(['message' => 'Failed to create purchases'], 500);
+        // }
     }
-}
+    
 
 
 
@@ -190,56 +218,56 @@ class PurchaseRepository
         return Purchase::find($id);
     }
 
-      public function update($id, array $data)
-    {
-        $purchase = Purchase::find($id);
+    //   public function update($id, array $data)
+    // {
+    //     $purchase = Purchase::find($id);
 
-        if ($purchase) {
-            $originalQuantity = $purchase->quantity;
-            $newQuantity = $data['quantity'];
-            $quantityDifference = $newQuantity - $originalQuantity;
+    //     if ($purchase) {
+    //         $originalQuantity = $purchase->quantity;
+    //         $newQuantity = $data['quantity'];
+    //         $quantityDifference = $newQuantity - $originalQuantity;
 
-            $purchase->update($data);
+    //         $purchase->update($data);
 
-            // Update store quantity
-            $store = Store::where('product_type_id', $purchase->product_type_id)
-                          ->where('batch_no', $purchase->batch_no)
-                          ->first();
+    //         // Update store quantity
+    //         $store = Store::where('product_type_id', $purchase->product_type_id)
+    //                       ->where('batch_no', $purchase->batch_no)
+    //                       ->first();
 
-            if ($store) {
-                $store->quantity_available += $quantityDifference;
-                if ($store->quantity_available < 0) {
-                    $store->quantity_available = 0;
-                }
-                $store->save();
-            }
-        }
+    //         if ($store) {
+    //             $store->quantity_available += $quantityDifference;
+    //             if ($store->quantity_available < 0) {
+    //                 $store->quantity_available = 0;
+    //             }
+    //             $store->save();
+    //         }
+    //     }
 
-        return $purchase;
-    }
+    //     return $purchase;
+    // }
 
-    public function delete($id)
-    {
-        $purchase = Purchase::find($id);
+    // public function delete($id)
+    // {
+    //     $purchase = Purchase::find($id);
 
-        if ($purchase) {
+    //     if ($purchase) {
           
-            $store = Store::where('product_type_id', $purchase->product_type_id)
-                          ->where('batch_no', $purchase->batch_no)
-                          ->first();
+    //         $store = Store::where('product_type_id', $purchase->product_type_id)
+    //                       ->where('batch_no', $purchase->batch_no)
+    //                       ->first();
 
-            if ($store) {
-                $store->quantity_available -= $purchase->quantity;
-                if ($store->quantity_available < 0) {
-                    $store->quantity_available = 0;
-                }
-                $store->save();
-            }
+    //         if ($store) {
+    //             $store->quantity_available -= $purchase->quantity;
+    //             if ($store->quantity_available < 0) {
+    //                 $store->quantity_available = 0;
+    //             }
+    //             $store->save();
+    //         }
 
-            return $purchase->delete();
-        }
+    //         return $purchase->delete();
+    //     }
 
-        return null;
-    }
+    //     return null;
+    // }
     
 }
