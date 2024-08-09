@@ -77,108 +77,69 @@ class ProductTypeRepository
         }
         return [];
     }
-    public function getProductTypeByName()
+    public function getProductTypeByName($product_id)
     {
+
         $branchId = auth()->user()->branch_id;
 
         // Base query for 'product_types'
         $query = DB::table('product_types')
-            ->select('product_types.id', 'product_types.product_type_name', 'product_types.product_id')
-
-            // Select a JSON object containing 'id' and 'vat' from the 'products' table where the 'product_id' matches
+            ->select('product_types.id', 'product_types.product_type_name', 'product_types.vat')
             ->addSelect(DB::raw("
-                (SELECT JSON_OBJECT(
-                    'id', products.id,
-                    'vat', products.vat
+            (
+               SELECT JSON_OBJECT(
+                    'product_type_id', stores.product_type_id,
+                    'container_qty_available', SUM(stores.container_qty_available),
+                    'capacity_qty_available', SUM(stores.capacity_qty_available)
                 )
-                FROM products
-                WHERE products.id = product_types.product_id
-                ) as product"));
-
-        // Conditional part for 'store'
-        $storeQuery = "
-            (SELECT JSON_OBJECT(
-                'product_type_id', stores.product_type_id,
-                'total_quantity', SUM(stores.quantity_available)
-            )
-            FROM stores
-            WHERE stores.product_type_id = product_types.id 
-            AND stores.status = 1 ";
-        if ($branchId) {
-            $storeQuery .= "AND stores.branch_id = $branchId ";
-        }
-        $storeQuery .= "GROUP BY stores.product_type_id
-            ) as store";
-
-        $query->addSelect(DB::raw($storeQuery));
-
-        // Conditional part for 'batches'
-        $batchesQuery = "
-            (SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                'id', stores.id,
-                'product_type_id', stores.product_type_id,
-                'batch_no', stores.batch_no,
-                'quantity_available', stores.quantity_available,
-                'selling_price', 
-                    COALESCE(
-                        (CASE WHEN prices.is_new = 1 AND prices.status = 1 THEN prices.new_selling_price ELSE prices.selling_price END),
-                        (SELECT CASE WHEN p.is_new = 1 THEN p.new_selling_price ELSE p.selling_price END FROM prices p WHERE p.id = prices.price_id)
-                    ),
-                'cost_price', 
-                    COALESCE(
-                        (CASE WHEN prices.is_new = 1 AND prices.status = 1 THEN prices.new_cost_price ELSE prices.cost_price END),
-                        (SELECT CASE WHEN p.is_new = 1 THEN p.new_cost_price ELSE p.cost_price END FROM prices p WHERE p.id = prices.price_id)
-                    )
-            ))
-            FROM stores
-            JOIN prices ON prices.batch_no = stores.batch_no AND prices.product_type_id = stores.product_type_id
-            WHERE stores.product_type_id = product_types.id 
-            AND stores.status = 1 
-            AND prices.status = 1
-            AND stores.quantity_available > 0 ";
-        if ($branchId) {
-            $batchesQuery .= "AND stores.branch_id = $branchId ";
-        }
-        $batchesQuery .= ") as batches";
-
-        $query->addSelect(DB::raw($batchesQuery));
+                FROM stores
+                WHERE stores.product_type_id = product_types.id
+                AND stores.status = 1
+                " . ($branchId ? "AND stores.branch_id = $branchId " : "") . "
+                GROUP BY stores.product_type_id
+                        ) as store
+            "))
+            ->addSelect(DB::raw("
+            (
+                SELECT JSON_OBJECT(
+                    'cost_price', prices.cost_price,
+                    'selling_price', prices.selling_price
+                )
+                FROM prices
+                WHERE prices.product_type_id = product_types.id
+                AND
+                prices.status = 1
+                ORDER BY prices.created_at DESC
+                LIMIT 1
+            ) as latest_price
+        "));
 
         // Execute the query and get the results
         $productTypes = $query->get();
 
         // Transform the results
-        $productTypes->transform(function ($item) {
-            // Decode the JSON fields
-            $item->product = json_decode($item->product);
-            $item->store = json_decode($item->store);
-            $item->batches = json_decode($item->batches);
+        // $productTypes->transform(function ($item) {
+        //     // Decode the JSON fields
+        //     $store = json_decode($item->store);
+        //     $latestPrice = json_decode($item->latest_price);
 
-            // Return a formatted array with the desired structure
-            return [
-                'id' => $item->id,
-                'product_type_name' => $item->product_type_name,
-                'vat_percentage' => 7.5, // Static VAT percentage
-                'cost_price' => $item->batches[0]->cost_price ?? 0, // Cost price from the first batch or 0 if not available
-                'selling_price' => $item->batches[0]->selling_price ?? 0, // Selling price from the first batch or 0 if not available
-                'quantity_available' => $item->store->total_quantity ?? 0, // Total quantity available from the store or 0 if not available
-                'vat' => $item->product->vat ?? 'No', // VAT value from the product or 'No' if not available
-                'batches' => collect($item->batches)->map(function ($batch) {
-                    // Create a label combining batch number and selling price
-                    $batchLabel = $batch->batch_no."->".$batch->selling_price;
-                    // Return a formatted array for each batch
-                    return [
-                        'id' => $batch->id,
-                        'batch_no' =>  $batchLabel,
-                        'batch_quantity_left' => $batch->quantity_available,
-                        'batch_selling_price' => $batch->selling_price
-                    ];
-                })->toArray()
-            ];
-        });
+        //     // Return a formatted array with the desired structure
+        //     return [
+        //         'id' => $item->id,
+        //         'product_type_name' => $item->product_type_name,
+        //         'vat_percentage' => 7.5, // Static VAT percentage
+        //         'cost_price' => $latestPrice->cost_price ?? 0, // Cost price from the latest price or 0 if not available
+        //         'selling_price' => $latestPrice->selling_price ?? 0, // Selling price from the latest price or 0 if not available
+        //         'container_qty_available' => $store->container_qty_available ?? 0, // Container quantity available or 0 if not available
+        //         'capacity_qty_available' => $store->capacity_qty_available ?? 0, // Capacity quantity available or 0 if not available
+        //         'vat' => $item->vat ? 'Yes' : 'No', // VAT value from the product or 'No' if not available
+        //     ];
+        // });
 
         // Return the transformed product types
         return $productTypes;
     }
+
 
     // public function getProductTypeByName()
     // {

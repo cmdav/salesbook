@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Products\ProductTypeService;
+
 use App\Services\Products\ProductTypeService\ProductTypeRepository;
 
-
-class ProductTypeService 
+class ProductTypeService
 {
     protected $ProductTypeRepository;
 
@@ -15,35 +15,35 @@ class ProductTypeService
 
     public function create(array $data)
     {
-       
+
         return $this->ProductTypeRepository->create($data);
     }
 
     public function index()
     {
-       
+
         return $this->ProductTypeRepository->index();
     }
-   
-    public function  getProductTypeByProductId($id)
+
+    public function getProductTypeByProductId($id)
     {
-       
+
         return $this->ProductTypeRepository->getProductTypeByProductId($id);
 
     }
-    public function  getProductTypeByName()
+    public function getProductTypeByName($product_id)
     {
-       
-        return $this->ProductTypeRepository->getProductTypeByName();
+
+        return $this->ProductTypeRepository->getProductTypeByName($product_id);
 
     }
-    public function  onlyProductTypeName()
+    public function onlyProductTypeName()
     {
-       
+
         return $this->ProductTypeRepository->onlyProductTypeName();
 
     }
-    
+
     public function show($id)
     {
         return $this->ProductTypeRepository->findById($id);
