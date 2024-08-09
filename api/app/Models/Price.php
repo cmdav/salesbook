@@ -9,7 +9,9 @@ use App\Traits\SetCreatedBy;
 
 class Price extends Model
 {
-    use  SetCreatedBy, HasUuids, HasFactory;
+    use  SetCreatedBy;
+    use HasUuids;
+    use HasFactory;
     protected $fillable = [
         'product_type_id',
         'supplier_id',
@@ -27,9 +29,9 @@ class Price extends Model
         'created_by',
         'updated_by',
         'status',
-        
+
     ];
-   
+
 
     public function getStatusAttribute($value)
     {
@@ -41,11 +43,13 @@ class Price extends Model
         return $this->belongsTo(ProductType::class);
     }
 
-    public function currency(){
+    public function currency()
+    {
 
         return $this->belongsTo(Currency::class);
     }
-    public function supplier(){
+    public function supplier()
+    {
 
         return $this->belongsTo(User::class);
     }
