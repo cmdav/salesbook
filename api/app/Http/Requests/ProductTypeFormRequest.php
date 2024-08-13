@@ -7,13 +7,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
 class ProductTypeFormRequest extends FormRequest
 {
-   
-
-   
-
     public function rules(Request $request): array
     {
         $productIdRule = 'required|string';
@@ -21,17 +16,17 @@ class ProductTypeFormRequest extends FormRequest
             'required',
             'string',
             'max:50',
-            
+
             Rule::unique('product_types')->where(function ($query) use ($request) {
                 return $query->where('product_id', $request->product_id);
             })
         ];
-    
+
         if ($this->getMethod() === 'PUT') {
             // When updating, exclude the current product's ID and product type
             $productTypeRule[] = Rule::ignore($this->route('product_type'));
         }
-    
+
         return [
             'product_id' => $productIdRule,
             'product_type_name' => $productTypeRule,
@@ -39,10 +34,14 @@ class ProductTypeFormRequest extends FormRequest
             'product_type_description' => 'required|string',
             'organization_id' => 'nullable|string',
             'supplier_id' => 'nullable|string',
+            'is_container_type' => 'required|in:no,yes',
+            'container_type_id' => 'required|uuid',
+            'container_type_capacity_id' => 'required|uuid',
+
         ];
     }
-    
 
-  
+
+
 
 }

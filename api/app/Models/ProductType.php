@@ -23,6 +23,7 @@ class ProductType extends Model
         'measurement_id',
         'selling_price',
         'container_type_capacity_id',
+        'container_type_id',
         'supplier_id',
         'created_by',
         'updated_by',
@@ -31,7 +32,7 @@ class ProductType extends Model
         'is_container_type'
     ];
     protected $hidden = [
-        'barcode',
+       // 'barcode',
 
 
     ];
@@ -39,6 +40,16 @@ class ProductType extends Model
 
         'barcode' => 'hashed',
     ];
+    public function getIsContainerTypeAttribute($value)
+    {
+        return $value == 1 ? 'Yes' : 'No';
+    }
+
+    // Mutator for is_container_type
+    public function setIsContainerTypeAttribute($value)
+    {
+        $this->attributes['is_container_type'] = strtolower($value) == 'yes' ? 1 : 0;
+    }
     public function getCreatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('d-m-y H:i:s');
@@ -86,5 +97,36 @@ class ProductType extends Model
     {
         return $this->belongsTo(ContainerTypeCapacity::class, 'container_type_capacity_id', 'id');
     }
+    public function getLatestPriceAttribute()
+    {
+        // Get the latest price record
+        $latestPrice = $this->price()->latest()->first();
+
+        // Check if price exists
+        if ($latestPrice) {
+            // If price_id is set, fetch the related price
+            if ($latestPrice->price_id) {
+                $referencePrice = Price::find($latestPrice->price_id);
+                if ($referencePrice) {
+                    return [
+                        'price_id' => $latestPrice->price_id,
+                        'cost_price' => $referencePrice->is_new ? $referencePrice->new_cost_price : $referencePrice->cost_price,
+                        'selling_price' => $referencePrice->is_new ? $referencePrice->new_selling_price : $referencePrice->selling_price,
+                    ];
+                }
+            }
+
+            // If price_id is not set, use the current price
+            return [
+                'price_id' => $latestPrice->id,
+                'cost_price' => $latestPrice->is_new ? $latestPrice->new_cost_price : $latestPrice->cost_price,
+                'selling_price' => $latestPrice->is_new ? $latestPrice->new_selling_price : $latestPrice->selling_price,
+            ];
+        }
+
+        // Return null if no price found
+        return null;
+    }
+
 
 }

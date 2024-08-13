@@ -77,8 +77,45 @@ class ProductTypeRepository
         }
         return [];
     }
+    public function saleProductDetail()
+    {
+        $response = ProductType::select(
+            'id',
+            'product_type_name',
+            'barcode',
+            'vat',
+            'is_container_type',
+            'container_type_id',
+            'container_type_capacity_id'
+        )->with('containerCapacities:id,container_capacity')->get();
+
+        if ($response) {
+            $response = $response->map(function ($item) {
+                // Add container_capacity to the response
+                $item->container_capacity = optional($item->containerCapacities)->container_capacity;
+                unset($item->containerCapacities);
+
+                // Add latest price information to the response
+                $latestPrice = $item->latest_price;
+                $item->price_id = $latestPrice ? $latestPrice['price_id'] : null;
+                $item->cost_price = $latestPrice ? $latestPrice['cost_price'] : null;
+                $item->selling_price = $latestPrice ? $latestPrice['selling_price'] : null;
+
+                return $item;
+            });
+
+            return response()->json(['data' => $response], 200);
+        }
+
+
+
+    }
     public function getProductTypeByName($product_id)
     {
+        if(!$product_id) {
+
+            return $this->saleProductDetail();
+        }
 
         $branchId = auth()->user()->branch_id;
 

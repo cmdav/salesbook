@@ -169,8 +169,11 @@ class PurchaseRepository
 
             $productType = \App\Models\ProductType::find($purchaseData['product_type_id']);
 
+
             // Get the container capacity
             $containerCapacity = \App\Models\ContainerTypeCapacity::where('id', $productType->container_type_capacity_id)->first();
+
+
 
             // Check if the store already exists
             $store = \App\Models\Store::where('product_type_id', $purchaseData['product_type_id'])

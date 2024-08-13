@@ -9,7 +9,7 @@ class ProductTypeNameByIdController extends Controller
 {
     protected $ProductTypeService;
 
-    public function __invoke(ProductTypeService $ProductTypeService, $product_id)
+    public function __invoke(ProductTypeService $ProductTypeService, $product_id = "")
     {
         $this->ProductTypeService = $ProductTypeService;
 

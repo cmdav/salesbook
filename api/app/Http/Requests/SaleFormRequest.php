@@ -3,9 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Models\Price;
-use App\Models\Store;
-use App\Models\ProductType;
 
 class SaleFormRequest extends FormRequest
 {
@@ -21,14 +18,12 @@ class SaleFormRequest extends FormRequest
                 'integer',
             ],
             'products.*.container_qty' => [
-                'required',
+                'required_without:products.*.capacity_qty',
                 'integer',
-               
             ],
             'products.*.capacity_qty' => [
-                'required',
+                'required_without:products.*.container_qty',
                 'integer',
-               
             ],
             'products.*.vat' => [
                 'required',
@@ -40,7 +35,8 @@ class SaleFormRequest extends FormRequest
     public function messages()
     {
         return [
-            // Custom validation messages can be added here
+            'products.*.container_qty.required_without' => 'The container quantity is required when capacity quantity is not provided.',
+            'products.*.capacity_qty.required_without' => 'The capacity quantity is required when container quantity is not provided.',
         ];
     }
 }

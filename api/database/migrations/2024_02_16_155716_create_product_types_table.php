@@ -18,9 +18,10 @@ return new class () extends Migration {
             $table->string('product_type_description');
             $table->string('barcode')->nullable();
             $table->uuid('measurement_id')->nullable();
-            $table->uuid('container_type_capacity_id');
+            $table->uuid('container_type_capacity_id')->nullable()->index();
+            $table->uuid('container_type_id')->index();
             $table->boolean('vat')->default(0)->nullable();
-            $table->boolean('is_container_type')->default(1)->nullable();
+            $table->boolean('is_container_type')->default(1);
             $table->string('type')->default(0)->comment('1=product 2 product_type');
             $table->uuid('organization_id', 32)->nullable();
             $table->uuid('supplier_id')->nullable();
