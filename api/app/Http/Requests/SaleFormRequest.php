@@ -26,8 +26,8 @@ class SaleFormRequest extends FormRequest
                 'integer',
             ],
             'products.*.vat' => [
-                'required',
-                'integer',
+                'nullable',
+                'string',
             ],
         ];
     }
