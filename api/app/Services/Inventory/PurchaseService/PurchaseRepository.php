@@ -110,7 +110,7 @@ class PurchaseRepository
             'product_type_name' => optional($purchase->productType)->product_type_name,
             'product_type_image' => optional($purchase->productType)->product_type_image,
             'product_type_description' => optional($purchase->productType)->product_type_description,
-            'container_type_name' => $containerTypeName,
+           // 'container_type_name' => $containerTypeName,
            // 'container_type_capacity' => optional($purchase->productType->containerCapacities)->container_capacity,
             //'container_qty' => $purchase->container_qty,
             'selling_unit_capacity' => optional($purchase->productType->sellingUnitCapacity)->selling_unit_capacity,
@@ -184,9 +184,6 @@ class PurchaseRepository
                 $purchase->save();
 
                 $productType = \App\Models\ProductType::find($purchaseData['product_type_id']);
-
-
-
 
 
                 // Check if the store already exists

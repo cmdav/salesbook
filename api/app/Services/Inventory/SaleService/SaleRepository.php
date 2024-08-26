@@ -285,47 +285,207 @@ class SaleRepository
     }
     public function create(array $data)
     {
-
         $emailService = new EmailService();
-        $transactionId =  time() . rand(1000, 9999);
-        //try {
+        $transactionId = time() . rand(1000, 9999);
 
         $response = DB::transaction(function () use ($data, $emailService, $transactionId) {
-            // $productDetails = [];
-            // $totalPrice = 0; // Initialize total price
-            // $branch = null; // Initialize branch
+            $productDetails = [];
+            $totalPrice = 0; // Initialize total price
+            $branch = null; // Initialize branch
 
             foreach ($data['products'] as $product) {
+                // Get latest price id
+                $latestPrice = Price::where([
+                        ['product_type_id', $product['product_type_id']],
+                        ['status', 1]
+                    ])->orderBy('created_at', 'desc')->firstOrFail();
 
-                // $product['vat'];
+                // Get all batches of the product, ordered by oldest first
+                $stores = Store::where('product_type_id', $product['product_type_id'])
+                               ->where('status', 1)
+                               ->orderBy('created_at', 'asc')
+                               ->select("id", "capacity_qty_available")
+                               ->get();
+
+                $remainingQuantity = $product['quantity'];
+                $totalAvailableQuantity = $stores->sum('capacity_qty_available');
+
+                // Check if there is enough stock across all batches
+                if ($totalAvailableQuantity < $remainingQuantity) {
+                    throw new Exception("Insufficient stock for the requested quantity.");
+                }
+
+                foreach ($stores as $store) {
+                    if ($remainingQuantity <= 0) {
+                        break;
+                    }
+
+                    if ($store->capacity_qty_available >= $remainingQuantity) {
+                        $store->capacity_qty_available -= $remainingQuantity;
+                        $remainingQuantity = 0;
+                    } else {
+                        $remainingQuantity -= $store->capacity_qty_available;
+                        $store->capacity_qty_available = 0;
+                    }
+
+                    if ($store->capacity_qty_available == 0) {
+                        $store->status = 0;
+                    }
+
+                    $store->save();
+                    $branch = $store->branches; // Fetch the branch details
+                }
+
+                // Save the sale record
                 $sale = new Sale();
                 $sale->fill([
                     'product_type_id' => $product['product_type_id'],
                     'customer_id' => $data['customer_id'],
                     'price_sold_at' => $product['price_sold_at'],
                     'quantity' => $product['quantity'],
-                   // 'container_qty' => $product['container_qty'],
-                    // 'batch_no' => $batchNo,
                     'vat' => $product['vat'],
                     'payment_method' => $data['payment_method'],
                     'transaction_id' => $transactionId,
-                    'price_id' => 1
                 ]);
-                //$sale->price_id =  $latestPrice->id;
-
+                $sale->price_id = $latestPrice->id;
                 $sale->save();
 
+                // Calculate the amount and VAT
+                $amount = $product['price_sold_at'] * $product['quantity'];
+                $vatValue = $product['vat'] == 1 ? ($amount * 0.075) : 0; // 7.5% VAT
+                $amount += $vatValue;
+                $totalPrice += $amount;
+
+                $productDetails[] = [
+                    "productTypeName" => $latestPrice->productType->product_type_name,
+                    'price' => $product['price_sold_at'],
+                    "quantity" => $product['quantity'],
+                    "vat" => $product['vat'] == 1 ? 'Yes' : 'No',
+                    "amount" => $amount
+                ];
             }
 
+            // Customer details for the email
+            $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
+                        ->where('id', $data['customer_id'])
+                        ->first();
+            if ($user) {
+                $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
 
-            return true;
+                // Generate email content
+                $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId, $branch);
+                $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
+            }
+
+            // Return the same response as downSalesReceipt after sale creation
+            // Call downSalesReceipt with the transaction ID to get the receipt data
+            $receiptData = $this->downSalesReceipt($transactionId, ['branch_id' => auth()->user()->branch_id]);
+
+            return $receiptData;
         });
-        return response()->json(['success' => true,'message' => 'Sale successfully recorded: '], 200);
-        // } catch (Exception $e) {
-        //     Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
-        //     return response()->json(['success' => false, 'message' => 'Sale creation failed: ' . $e->getMessage()], 500);
-        // }
+
+        return response()->json(['success' => true, 'data' => $response], 200);
     }
+
+    // public function create(array $data)
+    // {
+    //     $emailService = new EmailService();
+    //     $transactionId =  time() . rand(1000, 9999);
+
+    //     $response = DB::transaction(function () use ($data, $emailService, $transactionId) {
+    //         $productDetails = [];
+    //         $totalPrice = 0; // Initialize total price
+    //         $branch = null; // Initialize branch
+
+    //         foreach ($data['products'] as $product) {
+    //             //get latest price id
+    //             $latestPrice = Price::where([
+    //                     ['product_type_id', $product['product_type_id']],
+    //                     ['status', 1]
+    //                 ])->orderBy('created_at', 'desc')->firstOrFail();
+
+    //             // Get all batches of the product, ordered by oldest first
+    //             $stores = Store::where('product_type_id', $product['product_type_id'])
+    //                            ->where('status', 1)
+    //                            ->orderBy('created_at', 'asc')
+    //                            ->select("id", "capacity_qty_available")->get();
+
+    //             $remainingQuantity = $product['quantity'];
+    //             $totalAvailableQuantity = $stores->sum('capacity_qty_available');
+
+    //             // Check if there is enough stock across all batches
+    //             if ($totalAvailableQuantity < $remainingQuantity) {
+    //                 throw new Exception("Insufficient stock for the requested quantity.");
+    //             }
+
+    //             foreach ($stores as $store) {
+    //                 if ($remainingQuantity <= 0) {
+    //                     break;
+    //                 }
+
+    //                 if ($store->capacity_qty_available >= $remainingQuantity) {
+    //                     $store->capacity_qty_available -= $remainingQuantity;
+    //                     $remainingQuantity = 0;
+    //                 } else {
+    //                     $remainingQuantity -= $store->capacity_qty_available;
+    //                     $store->capacity_qty_available = 0;
+    //                 }
+
+    //                 if ($store->capacity_qty_available == 0) {
+    //                     $store->status = 0;
+    //                 }
+
+    //                 $store->save();
+    //                 $branch = $store->branches; // Fetch the branch details
+    //             }
+
+    //             // Save the sale record
+    //             $sale = new Sale();
+    //             $sale->fill([
+    //                 'product_type_id' => $product['product_type_id'],
+    //                 'customer_id' => $data['customer_id'],
+    //                 'price_sold_at' => $product['price_sold_at'],
+    //                 'quantity' => $product['quantity'],
+    //                 'vat' => $product['vat'],
+    //                 'payment_method' => $data['payment_method'],
+    //                 'transaction_id' => $transactionId,
+    //             ]);
+    //             $sale->price_id = $latestPrice->id;
+    //             $sale->save();
+
+    //             // Calculate the amount and VAT
+    //             $amount = $product['price_sold_at'] * $product['quantity'];
+    //             $vatValue = $product['vat'] == 1 ? ($amount * 0.075) : 0; // 7.5% VAT
+    //             $amount += $vatValue;
+    //             $totalPrice += $amount;
+
+    //             $productDetails[] = [
+    //                 "productTypeName" => $latestPrice->productType->product_type_name,
+    //                 'price' => $product['price_sold_at'],
+    //                 "quantity" => $product['quantity'],
+    //                 "vat" => $product['vat'] == 1 ? 'Yes' : 'No',
+    //                 "amount" => $amount
+    //             ];
+    //         }
+
+    //         // Customer details for the email
+    //         $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
+    //                     ->where('id', $data['customer_id'])
+    //                     ->first();
+    //         if ($user) {
+    //             $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
+
+    //             // Generate email content
+    //             $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId, $branch);
+    //             $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
+    //         }
+
+    //         return true;
+    //     });
+
+    //     return response()->json(['success' => true,'message' => 'Sale successfully recorded: '], 200);
+    // }
+
 
 
     private function generateProductDetailsTable($productDetails, $totalPrice, $transactionId, $branch)
