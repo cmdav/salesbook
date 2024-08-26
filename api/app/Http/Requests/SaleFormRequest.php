@@ -17,14 +17,11 @@ class SaleFormRequest extends FormRequest
                 'required',
                 'integer',
             ],
-            'products.*.container_qty' => [
-                'required_without:products.*.capacity_qty',
+            'products.*.quantity' => [
+                'required',
                 'integer',
             ],
-            'products.*.capacity_qty' => [
-                'required_without:products.*.container_qty',
-                'integer',
-            ],
+
             'products.*.vat' => [
                 'nullable',
                 'string',
@@ -32,11 +29,11 @@ class SaleFormRequest extends FormRequest
         ];
     }
 
-    public function messages()
-    {
-        return [
-            'products.*.container_qty.required_without' => 'The container quantity is required when capacity quantity is not provided.',
-            'products.*.capacity_qty.required_without' => 'The capacity quantity is required when container quantity is not provided.',
-        ];
-    }
+    // public function messages()
+    // {
+    //     // return [
+    //     //     'products.*.container_qty.required_without' => 'The container quantity is required when capacity quantity is not provided.',
+    //     //     'products.*.capacity_qty.required_without' => 'The capacity quantity is required when container quantity is not provided.',
+    //     // ];
+    // }
 }

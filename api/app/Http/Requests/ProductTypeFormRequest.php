@@ -34,9 +34,9 @@ class ProductTypeFormRequest extends FormRequest
             'product_type_description' => 'required|string',
             'organization_id' => 'nullable|string',
             'supplier_id' => 'nullable|string',
-            'is_container_type' => 'required|in:no,yes',
-            'container_type_id' => 'required|uuid',
-            'container_type_capacity_id' => 'required|uuid',
+            'vat' => 'required|in:0,1',
+            // 'container_type_id' => 'required|uuid',
+            'selling_unit_capacity_id' => 'required|integer',
 
         ];
     }

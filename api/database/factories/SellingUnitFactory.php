@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
+use App\Models\SellingUnit;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class Tested5Factory extends Factory
+class SellingUnitFactory extends Factory
 {
-    protected $model = User::class;
+    protected $model = SellingUnit::class;
 
     public function definition()
     {

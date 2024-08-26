@@ -20,14 +20,15 @@ class ProductType extends Model
         'product_type_description',
         'vat',
         'organization_id',
-        'measurement_id',
+       // 'measurement_id',
         'selling_price',
-        'container_type_capacity_id',
-        'container_type_id',
+        'selling_unit_capacity_id',
+       // 'container_type_capacity_id',
+       // 'container_type_id',
         'supplier_id',
         'created_by',
         'updated_by',
-        'type',
+       // 'type',
         'barcode',
         'is_container_type'
     ];
@@ -36,20 +37,20 @@ class ProductType extends Model
 
 
     ];
-    protected $casts = [
+    // protected $casts = [
 
-        'barcode' => 'hashed',
-    ];
-    public function getIsContainerTypeAttribute($value)
-    {
-        return $value == 1 ? 'Yes' : 'No';
-    }
+    //     'barcode' => 'hashed',
+    // ];
+    // public function getIsContainerTypeAttribute($value)
+    // {
+    //     return $value == 1 ? 'Yes' : 'No';
+    // }
 
     // Mutator for is_container_type
-    public function setIsContainerTypeAttribute($value)
-    {
-        $this->attributes['is_container_type'] = strtolower($value) == 'yes' ? 1 : 0;
-    }
+    // public function setIsContainerTypeAttribute($value)
+    // {
+    //     $this->attributes['is_container_type'] = strtolower($value) == 'yes' ? 1 : 0;
+    // }
     public function getCreatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('d-m-y H:i:s');
@@ -93,10 +94,14 @@ class ProductType extends Model
     {
         return $this->hasOne(Purchase::class, 'product_type_id', 'id')->latest('created_at');
     }
-    public function containerCapacities()
-    {
-        return $this->belongsTo(ContainerTypeCapacity::class, 'container_type_capacity_id', 'id');
-    }
+    // public function containerCapacities()
+    // {
+    //     return $this->belongsTo(ContainerTypeCapacity::class, 'container_type_capacity_id', 'id');
+    // }
+    // public function sellingUnitCapacities()
+    // {
+    //     return $this->belongsTo(SellingUnitCapacity::class, 'selling_unit_capacity_id', 'id');
+    // }
     public function getLatestPriceAttribute()
     {
         // Get the latest price record
@@ -127,6 +132,47 @@ class ProductType extends Model
         // Return null if no price found
         return null;
     }
+    public function sellingUnitCapacity()
+    {
+        return $this->belongsTo(SellingUnitCapacity::class, 'selling_unit_capacity_id', 'id');
+    }
+
+    public function sellingUnit()
+    {
+        return $this->hasOneThrough(
+            SellingUnit::class,
+            SellingUnitCapacity::class,
+            'id', // Foreign key on SellingUnitCapacity
+            'id', // Foreign key on SellingUnit
+            'selling_unit_capacity_id', // Local key on ProductType
+            'selling_unit_id' // Local key on SellingUnitCapacity
+        )->select('selling_units.id as selling_unit_id', 'selling_units.purchase_unit_id', 'selling_units.selling_unit_name');
+    }
+
+    public function purchaseUnit()
+    {
+        return $this->hasOneThrough(
+            PurchaseUnit::class,
+            SellingUnit::class,
+            'id', // Foreign key on SellingUnit
+            'id', // Foreign key on PurchaseUnit
+            'selling_unit_capacity_id', // Local key on ProductType
+            'purchase_unit_id' // Local key on SellingUnit
+        )->select('purchase_units.id as purchase_unit_id', 'purchase_units.purchase_unit_name');
+    }
+    public function getVatAttribute($value)
+    {
+        switch ($value) {
+            case 0:
+                return 'No';
+            case 1:
+                return 'Yes';
+            default:
+                return 'No';
+        }
+    }
+
+
 
 
 }

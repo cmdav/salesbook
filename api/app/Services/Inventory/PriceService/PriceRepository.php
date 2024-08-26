@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
-class PriceRepository 
+class PriceRepository
 {
     public function index()
     {
@@ -20,47 +20,48 @@ class PriceRepository
     }
     public function getAllPriceByProductType($id)
     {
-        return Price::select('id','cost_price')->where('product_type_id', $id)->get();
+        return Price::select('id', 'cost_price')->where('product_type_id', $id)->get();
 
-       
+
     }
-    //use in  purchase page
+    //use in  purchase page when a product is selected
     public function getLatestSupplierPrice($product_type_id, $supplier_id)
-    { 
-       
-        $data  = Price::select('id', 'selling_price','cost_price', 'batch_no')
-                            ->where([['product_type_id', $product_type_id],
+    {
+
+        $data  = Price::select('id', 'selling_price', 'cost_price', 'batch_no')
+                            ->where(
+                                [['product_type_id', $product_type_id],
                                     ['supplier_id', $supplier_id],
                                     ['status', 1],
                                     ['branch_id', auth()->user()->branch_id],
-                            
-                                        
-                                    ]
-                                     )->first();
-                                    
 
-        if($data){
-            return response()->json(['data' =>$data],200);
+
+                                    ]
+                            )->first();
+
+
+        if($data) {
+            return response()->json(['data' => $data], 200);
         }
         return [];
-      
-                                    //return $price;
+
+        //return $price;
 
 
     }
 
     public function getLatestPriceByProductType($id)
-        {
-           
-            $price = Price::select('id', 'selling_price')->where('product_type_id', $id)->where('status', 1)->first();
+    {
 
-            // If there is no such price, then just get the latest price regardless of the status.
-            if (is_null($price)) {
-                $price = Price::select('id', 'selling_price')->where('product_type_id', $id)->latest('created_at') ->first();
-            }
+        $price = Price::select('id', 'selling_price')->where('product_type_id', $id)->where('status', 1)->first();
 
-            return $price;
+        // If there is no such price, then just get the latest price regardless of the status.
+        if (is_null($price)) {
+            $price = Price::select('id', 'selling_price')->where('product_type_id', $id)->latest('created_at') ->first();
         }
+
+        return $price;
+    }
 
 
     public function getPriceByProductType($id)
@@ -88,19 +89,20 @@ class PriceRepository
         return $Price;
     }
 
-    private function transformProduct($price){
+    private function transformProduct($price)
+    {
 
         return [
-            'id'=>$price->id,
-            'product_type_id'=>optional($price->productType)->id,
-            'product_type_id'=>optional($price->productType)->product_type_name,
-            'product_type_image'=>optional($price->productType)->product_type_image,
-            'product_type_name'=>optional($price->productType)->product_type_name,
-            'product_type_description'=>optional($price->productType)->product_type_description,
-           
-            'cost_price'=>$price->cost_price,
-            'auto_generated_selling_price'=>$price->auto_generated_selling_price,
-            'selling_price'=>$price->selling_price,
+            'id' => $price->id,
+            'product_type_id' => optional($price->productType)->id,
+            'product_type_id' => optional($price->productType)->product_type_name,
+            'product_type_image' => optional($price->productType)->product_type_image,
+            'product_type_name' => optional($price->productType)->product_type_name,
+            'product_type_description' => optional($price->productType)->product_type_description,
+
+            'cost_price' => $price->cost_price,
+            'auto_generated_selling_price' => $price->auto_generated_selling_price,
+            'selling_price' => $price->selling_price,
             //'currency'=>optional($price->currency)->currency_name."(".optional($price->currency)->currency_symbol .")",
             //'discount'=>$price->discount,
             //'status'=>$price->status,
@@ -112,26 +114,26 @@ class PriceRepository
 
     public function create(array $data)
     {
-        DB::beginTransaction(); 
-    
+        DB::beginTransaction();
+
         try {
-            $price = Price::create($data); 
+            $price = Price::create($data);
 
             if ($data['status'] == 1) {
                 Price::where('product_type_id', $data['product_type_id'])
-                     ->where('id', '!=', $price->id) 
+                     ->where('id', '!=', $price->id)
                      ->update(['status' => 0]);
             }
-    
-            DB::commit(); 
-    
-            return $price; 
+
+            DB::commit();
+
+            return $price;
         } catch (\Exception $e) {
-            DB::rollBack(); 
-            throw $e; 
+            DB::rollBack();
+            throw $e;
         }
     }
-    
+
 
     public function findById($id)
     {
@@ -141,7 +143,7 @@ class PriceRepository
     public function update($id, array $data)
     {
         $Price = $this->findById($id);
-      
+
         if ($Price) {
 
             $Price->update($data);
@@ -153,7 +155,7 @@ class PriceRepository
     {
         $Price = $this->findById($id);
         if ($Price) {
-            
+
             return $Price->delete();
         }
         return null;

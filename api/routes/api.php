@@ -60,10 +60,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::resource('countries', App\Http\Controllers\Security\CountryController::class);
         Route::resource('states', App\Http\Controllers\Security\StateController::class);
 
-        Route::resource('container-types', App\Http\Controllers\Product\ContainerTypeController::class);
-        Route::resource('container-type-capacities', App\Http\Controllers\Product\ContainerTypeCapacityController::class);
-        Route::apiResource('list-all-containers', App\Http\Controllers\Product\ListAllContainerController::class);
-        Route::apiResource('container-with-capacities', App\Http\Controllers\Product\ContainerWithCapacityController::class);
+        // Route::resource('container-types', App\Http\Controllers\Product\ContainerTypeController::class);
+        // Route::resource('container-type-capacities', App\Http\Controllers\Product\ContainerTypeCapacityController::class);
+        Route::resource('purchase-units', App\Http\Controllers\SellingUnit\PurchaseUnitController::class);
+        Route::resource('selling-units', App\Http\Controllers\SellingUnit\SellingUnitController::class);
+        Route::resource('selling-unit-capacities', App\Http\Controllers\SellingUnit\SellingUnitCapacityController::class);
+        Route::apiResource('list-purchase-units', App\Http\Controllers\SellingUnit\ListPurchaseUnitController::class);
+
+        // Route::apiResource('list-all-containers', App\Http\Controllers\Product\ListAllContainerController::class);
+        // Route::apiResource('container-with-capacities', App\Http\Controllers\Product\ContainerWithCapacityController::class);
 
         //get endpoint
         route::get('get-price-by-product-type/{id}', App\Http\Controllers\Inventory\PriceByProductTypeController::class);
@@ -128,7 +133,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         route::get('all-price-by-product-type/{id}', App\Http\Controllers\Inventory\AllPriceByProductTypeController::class);
         route::get('latest-product-type-price/{id}', App\Http\Controllers\Inventory\LatestPriceByProductTypeController::class);
-        route::get('latest-supplier-price/{product_type_id}/{supplier_id}', App\Http\Controllers\Inventory\LatestSupplierPriceController::class);//use in purchase page
+        route::get('all-product-type', App\Http\Controllers\Product\AllProductTypeController::class);//use in purchase to load product type
+        //use in purchase page drop down when an item is selected from the all-product-type
+        route::get('latest-supplier-price/{product_type_id}/{supplier_id}', App\Http\Controllers\Inventory\LatestSupplierPriceController::class);
 
         //need modification
         route::get('get-suppliers-by-product-type-id/{product_type_id}', App\Http\Controllers\Inventory\SupplierByProductController::class);
@@ -136,9 +143,10 @@ Route::middleware('auth:sanctum')->group(function () {
         route::get('all-products', App\Http\Controllers\Product\AllProductController::class);
         route::get('all-product-sub-categories-by-category-id/{id}', App\Http\Controllers\Product\AllProductSubCategoryController::class);
         route::get('product-type-by-id/{id}', App\Http\Controllers\Product\ProductTypeByIdController::class);
-        route::get('all-product-type-name/{id}', App\Http\Controllers\Product\ProductTypeNameByIdController::class);//use in sales page
-        route::get('all-product-type-name', App\Http\Controllers\Product\ProductTypeNameByIdController::class);//use in sales page
-        route::get('all-product-type', App\Http\Controllers\Product\AllProductTypeController::class);
+        // route::get('all-product-type-name/{id}', App\Http\Controllers\Product\ProductTypeNameByIdController::class);//use in sales page
+        //use in sales page to get
+        route::get('all-product-type-name', App\Http\Controllers\Product\ProductTypeNameByIdController::class);
+
         route::get('all-supplier-products', App\Http\Controllers\Supply\AllSupplierProductController::class);
         route::get('user-detail', App\Http\Controllers\Users\AllUserDetailController::class);
         route::get('all-job-roles', App\Http\Controllers\Security\AllJobRoleController::class);
@@ -178,7 +186,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     });
 
-    //php artisan make:import PriceImport --model=Price
+
 
 
 

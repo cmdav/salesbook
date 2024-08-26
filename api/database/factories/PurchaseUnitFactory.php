@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\ContainerTypeCapacity;
+use App\Models\PurchaseUnit;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ContainerTypeCapacityFactory extends Factory
+class PurchaseUnitFactory extends Factory
 {
-    protected $model = ContainerTypeCapacity::class;
+    protected $model = PurchaseUnit::class;
 
     public function definition()
     {

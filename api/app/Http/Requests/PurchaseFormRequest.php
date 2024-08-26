@@ -11,12 +11,12 @@ class PurchaseFormRequest extends FormRequest
     public function rules(Request $request): array
     {
         return [
-            
+
             'purchases' => 'required|array|min:1',
             'purchases.*.product_type_id' => 'required|string',
             'purchases.*.supplier_id' => 'nullable|uuid',
            // 'purchases.*.container_capacity_id' => 'required',
-            'purchases.*.container_qty' => 'required|integer',
+            //'purchases.*.container_qty' => 'required|integer',
             'purchases.*.capacity_qty' => 'nullable|integer',
             'purchases.*.price_id' => 'required_without:purchases.*.cost_price,purchases.*.selling_price',
             'purchases.*.cost_price' => 'required_without:purchases.*.price_id',

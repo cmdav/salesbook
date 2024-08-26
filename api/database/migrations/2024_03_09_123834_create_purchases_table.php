@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
@@ -17,20 +16,23 @@ return new class extends Migration
             $table->uuid('supplier_id')->nullable();
             $table->uuid('price_id')->nullable();
             $table->integer('branch_id');
-            $table->string('batch_no', 50); 
-            $table->integer('container_qty')->default(0); 
-            $table->integer('capacity_qty');
-            $table->string('product_identifier', 50)->nullable(); 
+            $table->string('batch_no', 50);
+            // $table->integer('container_qty')->default(0);
+            // $table->integer('capacity_qty')->default(0);
+            //$table->integer('selling_unit_qty')->default(0);
+            $table->integer('capacity_qty')->default(0);
+
+            $table->string('product_identifier', 50)->nullable();
             $table->date('expiry_date')->nullable();
-            $table->integer('status')->default(1); 
+            $table->integer('status')->default(1);
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();
 
-            // $table->foreign('price_id')->references('id')->on('prices')->onDelete('restrict'); 
-            // $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('restrict'); 
-            // $table->foreign('product_type_id')->references('id')->on('product_types')->onDelete('restrict'); 
-            
+            // $table->foreign('price_id')->references('id')->on('prices')->onDelete('restrict');
+            // $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('restrict');
+            // $table->foreign('product_type_id')->references('id')->on('product_types')->onDelete('restrict');
+
         });
     }
 

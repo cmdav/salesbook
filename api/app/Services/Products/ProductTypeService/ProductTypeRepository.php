@@ -18,7 +18,15 @@ class ProductTypeRepository
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
         return ProductType::with([
             'product:id,category_id,product_name,vat,sub_category_id',
-            // 'product.measurement:id,measurement_name',
+            'sellingUnitCapacity:id,selling_unit_id,selling_unit_capacity',
+            'sellingUnit' => function ($query) {
+                $query->select('selling_units.id', 'selling_units.purchase_unit_id', 'selling_units.selling_unit_name');
+            },
+            'sellingUnit.purchaseUnit' => function ($query) {
+                $query->select('purchase_units.id', 'purchase_units.purchase_unit_name');
+            },
+        'product.subCategory:id,sub_category_name',
+
             'product.subCategory:id,sub_category_name',
             'suppliers:id,first_name,last_name,phone_number',
             'activePrice' => function ($query) {
@@ -79,27 +87,36 @@ class ProductTypeRepository
     }
     public function saleProductDetail()
     {
+        $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
         $response = ProductType::select(
             'id',
             'product_type_name',
             'barcode',
             'vat',
-            'is_container_type',
-            'container_type_id',
-            'container_type_capacity_id'
-        )->with('containerCapacities:id,container_capacity')->get();
+        )
+        //->with('containerCapacities:id,container_capacity')
+        ->with(['store' => function ($query) use ($branchId) {
+            $query->selectRaw('product_type_id, SUM(capacity_qty_available) as total_quantity')
+                ->where('status', 1);
+
+            if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
+                // Apply the where clause if branch_id is not 'all' and the user is not admin
+                $query->where('branch_id', $branchId);
+            }
+            $query->groupBy('product_type_id');
+        }])
+        ->get();
 
         if ($response) {
             $response = $response->map(function ($item) {
-                // Add container_capacity to the response
-                $item->container_capacity = optional($item->containerCapacities)->container_capacity;
-                unset($item->containerCapacities);
 
                 // Add latest price information to the response
                 $latestPrice = $item->latest_price;
                 $item->price_id = $latestPrice ? $latestPrice['price_id'] : null;
                 $item->cost_price = $latestPrice ? $latestPrice['cost_price'] : null;
                 $item->selling_price = $latestPrice ? $latestPrice['selling_price'] : null;
+                $item->quantity_available = optional($item->store)->total_quantity;
+                unset($item->store);
 
                 return $item;
             });
@@ -126,7 +143,6 @@ class ProductTypeRepository
             (
                SELECT JSON_OBJECT(
                     'product_type_id', stores.product_type_id,
-                    'container_qty_available', SUM(stores.container_qty_available),
                     'capacity_qty_available', SUM(stores.capacity_qty_available)
                 )
                 FROM stores
@@ -306,28 +322,39 @@ class ProductTypeRepository
         return [
             'id' => $productType->id,
             'product_name' => optional($productType->product)->product_name,
+            //'product_image' => $productType->product_type_image,
+           // 'category_name' => optional(optional($productType->product)->product_category)->category_name,
+            'product_sub_category' => optional(optional($productType->product)->subCategory)->sub_category_name,
+            //'product_description' => $productType->product_type_description,
+
             'product_type_name' => $productType->product_type_name,
             'product_type_image' => $productType->product_type_image,
             'product_type_description' => $productType->product_type_description,
             'vat' => optional($productType->product)->vat,
-            'product_name' => optional($productType->product)->product_name,
-            'product_description' => $productType->product_type_description,
-            'product_image' => $productType->product_type_image,
 
-            'product_category' => optional(optional($productType->product)->product_category)->category_name,
 
-            'category_id' => optional(optional($productType->product)->product_category)->id,
-            'category_name' => optional(optional($productType->product)->product_category)->category_name,
 
-            'product_sub_category' => optional(optional($productType->product)->subCategory)->sub_category_name,
-            'sub_category_id' => optional(optional($productType->product)->subCategory)->id,
-            'quantity_available' => optional($productType->store)->total_quantity ?? 0,
-            "measurement" => "Litre",
-            "container_type" => "Tank",
-            "container_type_capacity" => 50,
+
+           'product_category' => optional(optional($productType->product)->product_category)->category_name,
+
+
+
+
+           // 'sub_category_id' => optional(optional($productType->product)->subCategory)->id,
+            'quantity_available' => optional($productType->store)->capacity_qty_available ?? 0,
+           // "measurement" => "",
+            // "container_type" =>  optional($productType->containertype)->container_type_name ?? 0,
+            // "container_type_capacity" =>  optional($productType->containerCapacities)->container_capacity ?? 0,
             'purchasing_price' => optional($productType->activePrice)->cost_price ?? 'Not set',
             'selling_price' => optional($productType->activePrice)->selling_price ?? 'Not set',
+
+            'selling_unit_capacity' => optional($productType->sellingUnitCapacity)->selling_unit_capacity,
+            'purchase_unit_name' => optional($productType->sellingUnit->purchaseUnit)->purchase_unit_name,
+            'selling_unit_name' => optional($productType->sellingUnit)->selling_unit_name,
+
+
             'supplier_name' => trim((optional($productType->suppliers)->first_name ?? '') . ' ' . (optional($productType->suppliers)->last_name ?? '')) ?: 'None',
+
             'supplier_phone_number' => optional($productType->suppliers)->phone_number ?? 'None',
             'date_created' => $productType->created_at,
             'created_by' => optional($productType->creator)->fullname,
