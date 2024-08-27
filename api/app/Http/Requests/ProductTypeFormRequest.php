@@ -34,7 +34,7 @@ class ProductTypeFormRequest extends FormRequest
             'product_type_description' => 'required|string',
             'organization_id' => 'nullable|string',
             'supplier_id' => 'nullable|string',
-            'vat' => 'required|in:0,1',
+            //'vat' => 'required|in:0,1',
             // 'container_type_id' => 'required|uuid',
             'selling_unit_capacity_id' => 'required|integer',
 
