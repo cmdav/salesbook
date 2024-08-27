@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Inventory;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SaleFormRequest;
 use App\Services\Inventory\SaleService\SaleService;
@@ -25,14 +26,14 @@ class SaleController extends Controller
 
     public function store(SaleFormRequest $request)
     {
-        
-         try {
-            return $this->saleService->createSale($request->all());
-           
-        } catch (Exception $e) {
-            Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+
+        // try {
+        return $this->saleService->createSale($request->all());
+
+        // } catch (Exception $e) {
+        //     Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
+        //     return response()->json(['message' => $e->getMessage()], 500);
+        // }
     }
 
     public function show($id, Request $request)
@@ -43,7 +44,7 @@ class SaleController extends Controller
 
     public function update($id, Request $request)
     {
-       
+
         $sale = $this->saleService->updateSale($id, $request->all());
         return response()->json($sale);
     }
