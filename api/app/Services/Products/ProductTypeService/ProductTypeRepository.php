@@ -101,14 +101,16 @@ class ProductTypeRepository
 
     public function saleProductDetail()
     {
+
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
         $response = ProductType::select(
             'id',
             'product_type_name',
             'barcode',
             'vat',
+            'selling_unit_id'
         )
-        //->with('containerCapacities:id,container_capacity')
+        ->with('unitselling:id,selling_unit_name')
         ->with(['store' => function ($query) use ($branchId) {
             $query->selectRaw('product_type_id, SUM(capacity_qty_available) as total_quantity')
                 ->where('status', 1);
@@ -130,7 +132,9 @@ class ProductTypeRepository
                 $item->cost_price = $latestPrice ? $latestPrice['cost_price'] : null;
                 $item->selling_price = $latestPrice ? $latestPrice['selling_price'] : null;
                 $item->quantity_available = optional($item->store)->total_quantity;
+                $item->selling_unit_name = optional($item->unitselling)->selling_unit_name;
                 unset($item->store);
+                unset($item->unitselling);
 
                 return $item;
             });
@@ -140,9 +144,10 @@ class ProductTypeRepository
 
 
 
-    }
+    }//use in sale page drop down
     public function getProductTypeByName($product_id)
     {
+
         if(!$product_id) {
 
             return $this->saleProductDetail();

@@ -24,6 +24,7 @@ class ProductType extends Model
         'selling_price',
         'selling_unit_capacity_id',
         'purchase_unit_id',
+        'selling_unit_id',
        // 'container_type_capacity_id',
        // 'container_type_id',
         'supplier_id',
@@ -165,6 +166,11 @@ class ProductType extends Model
     {
 
         return $this->belongsTo(PurchaseUnit::class, "purchase_unit_id", "id");
+    }
+    public function unitSelling()
+    {
+
+        return $this->belongsTo(SellingUnit::class, "selling_unit_id", "id");
     }
     public function getVatAttribute($value)
     {

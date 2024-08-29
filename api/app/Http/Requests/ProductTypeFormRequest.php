@@ -49,6 +49,7 @@ class ProductTypeFormRequest extends FormRequest
             'supplier_id' => 'nullable|string',
             'selling_unit_capacity_id' => 'required|integer',
             'purchase_unit_id' => 'required',
+            'selling_unit_id' => 'required',
         ];
     }
 }
