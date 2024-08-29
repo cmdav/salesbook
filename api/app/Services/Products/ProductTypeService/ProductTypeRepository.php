@@ -19,12 +19,13 @@ class ProductTypeRepository
         return ProductType::with([
             'product:id,category_id,product_name,vat,sub_category_id',
             'sellingUnitCapacity:id,selling_unit_id,selling_unit_capacity',
+            'unitPurchase:id,purchase_unit_name',
             'sellingUnit' => function ($query) {
                 $query->select('selling_units.id', 'selling_units.purchase_unit_id', 'selling_units.selling_unit_name');
             },
-            'sellingUnit.purchaseUnit' => function ($query) {
-                $query->select('purchase_units.id', 'purchase_units.purchase_unit_name');
-            },
+            // 'sellingUnit.purchaseUnit' => function ($query) {
+            //     $query->select('purchase_units.id', 'purchase_units.purchase_unit_name');
+            // },
         'product.subCategory:id,sub_category_name',
 
             'product.subCategory:id,sub_category_name',
@@ -79,12 +80,25 @@ class ProductTypeRepository
     }
     public function onlyProductTypeName()
     {
-        $response = ProductType::select('id', 'product_type_name')->get();
+        $response = ProductType::select('id', 'product_type_name', 'purchase_unit_id')
+            ->with('unitPurchase:id,purchase_unit_name')
+            ->get()
+            ->transform(function ($productType) {
+                return [
+                    'id' => $productType->id,
+                    'product_type_name' => $productType->product_type_name,
+                    'purchase_unit_id' => $productType->purchase_unit_id,
+                    'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name, // Use optional to handle null cases
+                ];
+            });
+
         if($response) {
             return response()->json(['data' => $response], 200);
         }
+
         return [];
     }
+
     public function saleProductDetail()
     {
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
@@ -349,7 +363,7 @@ class ProductTypeRepository
             'selling_price' => optional($productType->activePrice)->selling_price ?? 'Not set',
 
             'selling_unit_capacity' => optional($productType->sellingUnitCapacity)->selling_unit_capacity,
-            'purchase_unit_name' => optional($productType->sellingUnit->purchaseUnit)->purchase_unit_name,
+            'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name,
             'selling_unit_name' => optional($productType->sellingUnit)->selling_unit_name,
 
 

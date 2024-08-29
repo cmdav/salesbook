@@ -22,12 +22,11 @@ class PurchaseRepository
             'currency',
             'productType:id,product_type_name,product_type_image,product_type_description,selling_unit_capacity_id',
             'productType.sellingUnitCapacity:id,selling_unit_id,selling_unit_capacity',
+            'productType.unitPurchase:id,purchase_unit_name',
             'productType.sellingUnit' => function ($q) {
                 $q->select('selling_units.id', 'selling_units.purchase_unit_id', 'selling_units.selling_unit_name');
             },
-            'productType.sellingUnit.purchaseUnit' => function ($q) {
-                $q->select('purchase_units.id', 'purchase_units.purchase_unit_name');
-            },
+
             'branches:id,name',
             // 'productType.containerCapacities:id,container_type_id,container_capacity',
             // 'productType.containertype:id,container_type_name'
@@ -115,7 +114,7 @@ class PurchaseRepository
             //'container_qty' => $purchase->container_qty,
             'selling_unit_capacity' => optional($purchase->productType->sellingUnitCapacity)->selling_unit_capacity,
             'selling_unit_name' => optional($purchase->productType->sellingUnit)->selling_unit_name,
-            'purchase_unit_name' => optional($purchase->productType->sellingUnit->purchaseUnit)->purchase_unit_name,
+            'purchase_unit_name' => optional($purchase->productType->unitPurchase)->purchase_unit_name,
 
             'capacity_qty' => $purchase->capacity_qty,
             'branch_name' => optional($purchase->branches)->name,
@@ -185,16 +184,15 @@ class PurchaseRepository
                 // Retrieve product type with related selling and purchase units
                 $productType = \App\Models\ProductType::with([
                     'sellingUnitCapacity:id,selling_unit_id,selling_unit_capacity',
+                    'unitPurchase:id,purchase_unit_name',
                     'sellingUnit' => function ($query) {
                         $query->select('selling_units.id', 'selling_units.purchase_unit_id', 'selling_units.selling_unit_name');
                     },
-                    'sellingUnit.purchaseUnit' => function ($query) {
-                        $query->select('purchase_units.id', 'purchase_units.purchase_unit_name');
-                    },
+
                 ])->find($purchaseData['product_type_id']);
 
                 // If purchase unit name is not the same as selling unit name
-                if ($productType->sellingUnit->purchaseUnit->purchase_unit_name !== $productType->sellingUnit->selling_unit_name) {
+                if ($productType->unitPurchase->purchase_unit_name !== $productType->sellingUnit->selling_unit_name) {
                     // Multiply the capacity quantity by selling unit capacity
                     $purchaseData['capacity_qty'] *= $productType->sellingUnitCapacity->selling_unit_capacity;
                 }

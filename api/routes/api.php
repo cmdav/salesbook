@@ -66,6 +66,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::resource('selling-units', App\Http\Controllers\SellingUnit\SellingUnitController::class);
         Route::resource('selling-unit-capacities', App\Http\Controllers\SellingUnit\SellingUnitCapacityController::class);
         Route::apiResource('list-purchase-units', App\Http\Controllers\SellingUnit\ListPurchaseUnitController::class);
+        Route::get('all-purchase-units', [App\Http\Controllers\SellingUnit\ListPurchaseUnitController::class, 'measurement']);
+
 
         // Route::apiResource('list-all-containers', App\Http\Controllers\Product\ListAllContainerController::class);
         // Route::apiResource('container-with-capacities', App\Http\Controllers\Product\ContainerWithCapacityController::class);

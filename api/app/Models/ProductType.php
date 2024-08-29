@@ -23,6 +23,7 @@ class ProductType extends Model
        // 'measurement_id',
         'selling_price',
         'selling_unit_capacity_id',
+        'purchase_unit_id',
        // 'container_type_capacity_id',
        // 'container_type_id',
         'supplier_id',
@@ -159,6 +160,11 @@ class ProductType extends Model
             'selling_unit_capacity_id', // Local key on ProductType
             'purchase_unit_id' // Local key on SellingUnit
         )->select('purchase_units.id as purchase_unit_id', 'purchase_units.purchase_unit_name');
+    }
+    public function unitPurchase()
+    {
+
+        return $this->belongsTo(PurchaseUnit::class, "purchase_unit_id", "id");
     }
     public function getVatAttribute($value)
     {

@@ -18,6 +18,7 @@ class PurchaseUnitService
         return $this->purchaseUnitRepository->index();
     }
 
+
     public function show($id)
     {
         return $this->purchaseUnitRepository->show($id);

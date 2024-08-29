@@ -16,7 +16,6 @@ class ProductTypeFormRequest extends FormRequest
             'required',
             'string',
             'max:50',
-
             Rule::unique('product_types')->where(function ($query) use ($request) {
                 return $query->where('product_id', $request->product_id);
             })
@@ -27,21 +26,29 @@ class ProductTypeFormRequest extends FormRequest
             $productTypeRule[] = Rule::ignore($this->route('product_type'));
         }
 
+        $barcodeRule = [
+            'nullable',
+            'string',
+            Rule::unique('product_types')->where(function ($query) use ($request) {
+                return $query->where('product_id', $request->product_id);
+            })
+        ];
+
+        if ($this->getMethod() === 'PUT') {
+            // When updating, exclude the current product's barcode from the uniqueness check
+            $barcodeRule[] = Rule::ignore($this->route('product_type'), 'barcode');
+        }
+
         return [
             'product_id' => $productIdRule,
             'product_type_name' => $productTypeRule,
             'product_type_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'product_type_description' => 'required|string',
+            'barcode' => $barcodeRule,
             'organization_id' => 'nullable|string',
             'supplier_id' => 'nullable|string',
-            //'vat' => 'required|in:0,1',
-            // 'container_type_id' => 'required|uuid',
             'selling_unit_capacity_id' => 'required|integer',
-
+            'purchase_unit_id' => 'required',
         ];
     }
-
-
-
-
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Product;
+
 use App\Http\Controllers\Controller;
 use App\Services\Product\ListAllContainerService\ListAllContainerService;
 use App\Http\Requests\Product\ListAllContainerFormRequest;

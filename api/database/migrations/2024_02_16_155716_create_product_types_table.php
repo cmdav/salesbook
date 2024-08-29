@@ -19,6 +19,7 @@ return new class () extends Migration {
             $table->string('barcode')->nullable();
             $table->uuid('measurement_id')->nullable();
             $table->uuid('selling_unit_capacity_id')->nullable()->index();
+            $table->uuid('purchase_unit_id')->nullable()->index();
             // $table->uuid('container_type_id')->default(1)->index();
             $table->boolean('vat')->default(0)->nullable();
             // $table->boolean('is_container_type')->default(1);

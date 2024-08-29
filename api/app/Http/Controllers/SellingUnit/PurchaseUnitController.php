@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\SellingUnit;
+
 use App\Http\Controllers\Controller;
 use App\Services\SellingUnit\PurchaseUnitService\PurchaseUnitService;
 use App\Http\Requests\SellingUnit\PurchaseUnitFormRequest;
@@ -25,6 +26,7 @@ class PurchaseUnitController extends Controller
     {
         return $this->purchaseUnitService->show($id);
     }
+
 
     public function store(PurchaseUnitFormRequest $request)
     {
