@@ -15,22 +15,20 @@ class ProductType extends Model
     use HasFactory;
     protected $fillable = [
         'product_type_name',
-        'product_id',
+        // 'product_id',
         'product_type_image',
         'product_type_description',
         'vat',
+        'sub_category_id',
+        'category_id',
         'organization_id',
-       // 'measurement_id',
         'selling_price',
         'selling_unit_capacity_id',
         'purchase_unit_id',
         'selling_unit_id',
-       // 'container_type_capacity_id',
-       // 'container_type_id',
         'supplier_id',
         'created_by',
         'updated_by',
-       // 'type',
         'barcode',
         'is_container_type'
     ];
@@ -182,6 +180,21 @@ class ProductType extends Model
             default:
                 return 'No';
         }
+    }
+    //////
+
+    public function subCategory()
+    {
+
+        return $this->belongsTo(ProductSubCategory::class, 'sub_category_id', 'id');
+
+    }
+
+    public function product_category()
+    {
+
+        return $this->belongsTo(ProductCategory::class, 'category_id', 'id');
+
     }
 
 

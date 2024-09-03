@@ -10,7 +10,7 @@ class SupplierProductRepository
 {
     public function index($request)
     {
-        dd($request);
+
         return SupplierProduct::latest()->paginate(20);
 
     }
@@ -20,13 +20,13 @@ class SupplierProductRepository
         // return auth()->user()->id;
         $productTypes = SupplierProduct::select('id', 'product_type_id', 'supplier_id')
                             ->with([
-                                'producttypes:id,product_id,product_type_name,product_type_image,purchase_unit_id',
-                                'producttypes.product:id,category_id,product_name,sub_category_id',
+                                'producttypes:id,product_type_name,product_type_image,purchase_unit_id',
+                                'producttypes.subCategory:id,sub_category_name',
                                 'producttypes.unitPurchase:id,purchase_unit_name',
                                 'producttypes.pricenotification' => function ($query) {
                                     $query->select('id', 'product_type_id', 'cost_price', 'status')->where('supplier_id', auth()->user()->id);
                                 },
-                                'producttypes.product.subCategory:id,sub_category_name',
+
                                 'producttypes.activePrice' => function ($query) {
                                     $query->select('id', 'product_type_id', 'cost_price')->where('supplier_id', auth()->user()->id);
                                 }
@@ -51,8 +51,8 @@ class SupplierProductRepository
             'supplier_id' => $productType->supplier_id,
             'product_type_name' => optional($productType->producttypes)->product_type_name,
             'product_type_image' => optional($productType->producttypes)->product_type_image,
-            'product_category_name' => optional(optional($productType->producttypes)->product)->category_id,
-            'product_sub_category_name' => optional(optional(optional($productType->producttypes)->product)->subCategory)->sub_category_name,
+            'product_category_name' => optional($productType->product_category)->category_name,
+            'product_sub_category_name' => optional($productType->subCategory)->sub_category_name,
             // 'measurement_name' => optional($productType->unitPurchase)->purchase_unit_name,
             'measurement_name' => optional(optional($productType->producttypes)->unitPurchase)->purchase_unit_name,
 

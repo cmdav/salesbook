@@ -91,52 +91,111 @@ class PurchaseUnitRepository
 
         return $data;
     }
+    ///////////////////////////////////////////////end of data
+    // public function index()
+    // {
+
+    //     // Define the number of items per page
+    //     $perPage = 20;
+
+    //     // Fetch the paginated data
+    //     $purchaseUnits = PurchaseUnit::select("id", "purchase_unit_name")
+    //         ->with([
+    //             'sellingUnits:id,purchase_unit_id,selling_unit_name',
+    //             'sellingUnits.sellingUnitCapacities:id,selling_unit_id,selling_unit_capacity'
+    //         ])
+    //         ->paginate($perPage);
+
+    //     // Map the paginated data
+    //     $data = $purchaseUnits->getCollection()->map(function ($purchaseUnit) {
+    //         return [
+    //             'id' => $purchaseUnit->id,
+    //             'purchase_unit_name' => $purchaseUnit->purchase_unit_name,
+    //             'selling_units' => $purchaseUnit->sellingUnits->map(function ($sellingUnit) {
+    //                 return [
+    //                     'id' => $sellingUnit->id,
+    //                     //'purchase_unit_id' => $sellingUnit->purchase_unit_id,
+    //                     'selling_unit_name' => $sellingUnit->selling_unit_name,
+    //                     'selling_unit_capacities' => $sellingUnit->sellingUnitCapacities->map(function ($capacity) {
+    //                         return [
+    //                             'id' => $capacity->id,
+    //                             // 'selling_unit_id' => $capacity->selling_unit_id,
+    //                             'selling_unit_capacity' => $capacity->selling_unit_capacity,
+    //                         ];
+    //                     }),
+    //                 ];
+    //             }),
+    //         ];
+    //     });
+
+    //     // Replace the collection in the paginator with the mapped data
+    //     $paginatedData = new \Illuminate\Pagination\LengthAwarePaginator(
+    //         $data,
+    //         $purchaseUnits->total(),
+    //         $purchaseUnits->perPage(),
+    //         $purchaseUnits->currentPage(),
+    //         ['path' => $purchaseUnits->path()]
+    //     );
+
+    //     return $paginatedData;
+    // }
     public function index()
     {
+        // Fetch the paginated data using the reusable query method
+        $purchaseUnits = $this->getPurchaseUnitsQuery()->paginate(20);
 
-        // Define the number of items per page
-        $perPage = 20;
+        // Transform the paginated data
+        $purchaseUnits->getCollection()->transform(function ($purchaseUnit) {
+            return $this->transformPurchaseUnit($purchaseUnit);
+        });
 
-        // Fetch the paginated data
-        $purchaseUnits = PurchaseUnit::select("id", "purchase_unit_name")
+        return $purchaseUnits;
+    }
+
+    public function getSearchPurchaseUnit($search)
+    {
+        // Fetch the filtered paginated data using the reusable query method
+        $purchaseUnits = $this->getPurchaseUnitsQuery()
+            ->where('purchase_unit_name', 'LIKE', '%' . $search . '%')
+            ->orWhereHas('sellingUnits', function ($query) use ($search) {
+                $query->where('selling_unit_name', 'LIKE', '%' . $search . '%');
+            })
+            ->paginate(20);
+
+        // Transform the paginated data
+        $purchaseUnits->getCollection()->transform(function ($purchaseUnit) {
+            return $this->transformPurchaseUnit($purchaseUnit);
+        });
+
+        return $purchaseUnits;
+    }
+
+    private function getPurchaseUnitsQuery()
+    {
+        return PurchaseUnit::select("id", "purchase_unit_name")
             ->with([
                 'sellingUnits:id,purchase_unit_id,selling_unit_name',
                 'sellingUnits.sellingUnitCapacities:id,selling_unit_id,selling_unit_capacity'
-            ])
-            ->paginate($perPage);
-
-        // Map the paginated data
-        $data = $purchaseUnits->getCollection()->map(function ($purchaseUnit) {
-            return [
-                'id' => $purchaseUnit->id,
-                'purchase_unit_name' => $purchaseUnit->purchase_unit_name,
-                'selling_units' => $purchaseUnit->sellingUnits->map(function ($sellingUnit) {
-                    return [
-                        'id' => $sellingUnit->id,
-                        //'purchase_unit_id' => $sellingUnit->purchase_unit_id,
-                        'selling_unit_name' => $sellingUnit->selling_unit_name,
-                        'selling_unit_capacities' => $sellingUnit->sellingUnitCapacities->map(function ($capacity) {
-                            return [
-                                'id' => $capacity->id,
-                                // 'selling_unit_id' => $capacity->selling_unit_id,
-                                'selling_unit_capacity' => $capacity->selling_unit_capacity,
-                            ];
-                        }),
-                    ];
-                }),
-            ];
-        });
-
-        // Replace the collection in the paginator with the mapped data
-        $paginatedData = new \Illuminate\Pagination\LengthAwarePaginator(
-            $data,
-            $purchaseUnits->total(),
-            $purchaseUnits->perPage(),
-            $purchaseUnits->currentPage(),
-            ['path' => $purchaseUnits->path()]
-        );
-
-        return $paginatedData;
+            ]);
     }
 
+    protected function transformPurchaseUnit($purchaseUnit)
+    {
+        return [
+            'id' => $purchaseUnit->id,
+            'purchase_unit_name' => $purchaseUnit->purchase_unit_name,
+            'selling_units' => $purchaseUnit->sellingUnits->map(function ($sellingUnit) {
+                return [
+                    'id' => $sellingUnit->id,
+                    'selling_unit_name' => $sellingUnit->selling_unit_name,
+                    'selling_unit_capacities' => $sellingUnit->sellingUnitCapacities->map(function ($capacity) {
+                        return [
+                            'id' => $capacity->id,
+                            'selling_unit_capacity' => $capacity->selling_unit_capacity,
+                        ];
+                    }),
+                ];
+            }),
+        ];
+    }
 }

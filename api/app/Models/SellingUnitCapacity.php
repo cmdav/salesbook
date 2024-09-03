@@ -13,6 +13,7 @@ class SellingUnitCapacity extends Model
     protected $fillable = [
         'selling_unit_id',
         'selling_unit_capacity',
+        'piece_name',
     ];
     public function sellingUnit()
     {

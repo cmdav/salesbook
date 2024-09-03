@@ -2,11 +2,11 @@
 
 namespace App\Imports;
 
-use App\Models\Product;
 use App\Models\ProductType;
 use App\Models\ProductCategory;
 use App\Models\ProductSubCategory;
-use App\Models\Measurement;
+use App\Models\SellingUnitCapacity;
+use App\Models\SellingUnit;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -18,60 +18,56 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
 {
     public function model(array $row)
     {
+        // Retrieve the category and subcategory based on names
         $category = ProductCategory::where('category_name', trim($row['category_name']))->first();
         $subCategory = ProductSubCategory::where('sub_category_name', trim($row['sub_category_name']))->first();
-        $measurement = Measurement::where('measurement_name', trim($row['measurement_name']))->first();
 
-        if (!$category || !$subCategory || !$measurement) {
+        // Retrieve the selling unit capacity based on piece_name
+        $sellingUnitCapacity = SellingUnitCapacity::where('piece_name', trim($row['piece_name']))->first();
+
+        if (!$category || !$subCategory || !$sellingUnitCapacity) {
             return null;
         }
-        $product = null;
 
-        DB::transaction(function () use ($row, $category, $subCategory, $measurement) {
-            $product = new Product([
-                'product_name' => Str::limit(trim($row['product_name']), 50),
-                'product_description' => Str::limit(trim($row['product_description']), 200),
-                'product_image' => null, // You might need to handle image uploading separately or modify this accordingly
-                'measurement_id' => $measurement->id,
-                'category_id' => $category->id,
+        // Retrieve the selling unit and purchase unit
+        $sellingUnit = $sellingUnitCapacity->sellingUnit;
+        $purchaseUnit = $sellingUnit->purchaseUnit;
+
+        // Convert VAT value to 0 or 1
+        $vatValue = strtolower(trim($row['vat'])) === 'yes' ? 1 : 0;
+
+        $productType = null;
+
+        DB::transaction(function () use ($row, $category, $subCategory, $sellingUnitCapacity, $sellingUnit, $purchaseUnit, $vatValue) {
+            $productType = new ProductType([
+                'product_type_name' => Str::limit(trim($row['product_type_name']), 50),
+                'product_type_description' => Str::limit(trim($row['product_type_description']), 200),
+                'product_type_image' => null, // You might need to handle image uploading separately
+                'vat' => $vatValue,
                 'sub_category_id' => $subCategory->id,
+                'category_id' => $category->id,
+                'selling_unit_capacity_id' => $sellingUnitCapacity->id,
+                'selling_unit_id' => $sellingUnit->id,
+                'purchase_unit_id' => $purchaseUnit->id,
                 // 'created_by' and 'updated_by' fields should be set based on your application logic
                 // 'created_by' => ?,
                 // 'updated_by' => ?,
             ]);
-            $product->save();
-
-            $productTypeData = [
-                'product_id' => $product->id,
-                'product_type_name' => $product->product_name,
-                'product_type_image' => $product->product_image, // Ensure you have handled the image upload appropriately
-                'product_type_description' => $product->product_description,
-                'organization_id' => null,
-                'supplier_id' => null,
-                // 'created_by' and 'updated_by' fields should be set based on your application logic
-                // 'created_by' => $product->created_by,
-                // 'updated_by' => $product->updated_by,
-            ];
-
-            $productType = new ProductType($productTypeData);
             $productType->save();
         });
 
-        // Since ToModel should return a model instance, you can return the Product instance here,
-        // but keep in mind that the ProductType instance is also created within the transaction.
-        // This return value doesn't have a direct effect since we're handling both creations manually.
-        return $product;
+        return $productType;
     }
 
     public function rules(): array
     {
         return [
-            'product_name' => 'required|string|max:50|unique:products|regex:/^[^\s]/',
-            'product_description' => 'required|string|max:200',
-            'measurement_name' => 'required|string|exists:measurements,measurement_name',
+            'product_type_name' => 'required|string|max:50|unique:product_types|regex:/^[^\s]/',
+            'product_type_description' => 'required|string|max:200',
+            'piece_name' => 'required|string|exists:selling_unit_capacities,piece_name',
             'category_name' => 'required|string|exists:product_categories,category_name',
             'sub_category_name' => 'required|string|exists:product_sub_categories,sub_category_name',
-           
+            'vat' => 'required|string|in:yes,no',
         ];
     }
 
@@ -80,9 +76,8 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
         return [
             'category_name.exists' => 'The specified product category does not exist.',
             'sub_category_name.exists' => 'The specified product subcategory does not exist.',
-            'measurement_name.exists' => 'The specified measurement does not exist.',
-            'category_name.regex' => 'The category name must not start or end with a space.',
-            'product_name.regex' => 'The category name must not start with a space.',
+            'piece_name.exists' => 'The specified piece name does not exist in the selling unit capacities.',
+            'vat.in' => 'The VAT field must be either "yes" or "no".',
         ];
     }
 }

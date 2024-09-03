@@ -9,7 +9,9 @@ use App\Traits\SetCreatedBy;
 
 class Purchase extends Model
 {
-    use  SetCreatedBy, HasUuids, HasFactory;
+    use  SetCreatedBy;
+    use HasUuids;
+    use HasFactory;
 
     protected $fillable = [
         'product_type_id',
@@ -28,30 +30,36 @@ class Purchase extends Model
         'updated_by',
     ];
 
-  
-    public function suppliers(){
+
+    public function suppliers()
+    {
 
         return $this->belongsTo(User::class, 'supplier_id', 'id');
     }
-    public function currency(){
+    public function currency()
+    {
 
         return $this->belongsTo(Currency::class);
     }
-    public function branches(){
+    public function branches()
+    {
 
-        return $this->belongsTo(BusinessBranch::class,'branch_id', 'id');
+        return $this->belongsTo(BusinessBranch::class, 'branch_id', 'id');
     }
-    public function productType(){
+    public function productType()
+    {
 
         return $this->belongsTo(ProductType::class);
     }
-    public function price(){
+    public function price()
+    {
 
         return $this->belongsTo(Price::class);
     }
-    public function containerTypeCapacities(){
+    public function containerTypeCapacities()
+    {
 
-        return $this->belongsTo(ContainerTypeCapacity::class,'container_type_capacity_id','id');
+        return $this->belongsTo(ContainerTypeCapacity::class, 'container_type_capacity_id', 'id');
     }
 
 }

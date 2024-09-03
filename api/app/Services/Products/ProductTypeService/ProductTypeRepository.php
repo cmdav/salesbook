@@ -17,33 +17,18 @@ class ProductTypeRepository
     {
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
         return ProductType::with([
-            'product:id,category_id,product_name,vat,sub_category_id',
             'sellingUnitCapacity:id,selling_unit_id,selling_unit_capacity',
             'unitPurchase:id,purchase_unit_name',
             'sellingUnit' => function ($query) {
                 $query->select('selling_units.id', 'selling_units.purchase_unit_id', 'selling_units.selling_unit_name');
             },
-            // 'sellingUnit.purchaseUnit' => function ($query) {
-            //     $query->select('purchase_units.id', 'purchase_units.purchase_unit_name');
-            // },
-        'product.subCategory:id,sub_category_name',
+        'subCategory:id,sub_category_name',
 
-            'product.subCategory:id,sub_category_name',
             'suppliers:id,first_name,last_name,phone_number',
             'activePrice' => function ($query) {
                 $query->select('id', 'cost_price', 'selling_price', 'product_type_id');
             },
-            // 'store' => function ($query) use ($branchId) {
-            //     $query->selectRaw('product_type_id, SUM(quantity_available) as total_quantity')
-            //         ->where('status', 1);
 
-            //     if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
-            //         // Apply the where clause if branch_id is not 'all' and the user is not admin
-            //         $query->where('branch_id', $branchId);
-            //     }
-
-            //     $query->groupBy('product_type_id');
-            // }
         ])->latest();
     }
 
@@ -60,9 +45,7 @@ class ProductTypeRepository
                 $query->whereHas('product', function ($q) use ($searchCriteria) {
                     $q->where('product_name', 'like', '%' . $searchCriteria . '%');
                 });
-                // ->orWhereHas('product.product_category', function($q) use ($searchCriteria) {
-                //     $q->where('category_name', 'like', '%' . $searchCriteria . '%');
-                // });
+
             });
 
         $productTypes = $query->get();
@@ -189,24 +172,7 @@ class ProductTypeRepository
         // Execute the query and get the results
         $productTypes = $query->get();
 
-        // Transform the results
-        // $productTypes->transform(function ($item) {
-        //     // Decode the JSON fields
-        //     $store = json_decode($item->store);
-        //     $latestPrice = json_decode($item->latest_price);
 
-        //     // Return a formatted array with the desired structure
-        //     return [
-        //         'id' => $item->id,
-        //         'product_type_name' => $item->product_type_name,
-        //         'vat_percentage' => 7.5, // Static VAT percentage
-        //         'cost_price' => $latestPrice->cost_price ?? 0, // Cost price from the latest price or 0 if not available
-        //         'selling_price' => $latestPrice->selling_price ?? 0, // Selling price from the latest price or 0 if not available
-        //         'container_qty_available' => $store->container_qty_available ?? 0, // Container quantity available or 0 if not available
-        //         'capacity_qty_available' => $store->capacity_qty_available ?? 0, // Capacity quantity available or 0 if not available
-        //         'vat' => $item->vat ? 'Yes' : 'No', // VAT value from the product or 'No' if not available
-        //     ];
-        // });
 
         // Return the transformed product types
         return $productTypes;
@@ -340,40 +306,20 @@ class ProductTypeRepository
 
         return [
             'id' => $productType->id,
-            'product_name' => optional($productType->product)->product_name,
-            //'product_image' => $productType->product_type_image,
-           // 'category_name' => optional(optional($productType->product)->product_category)->category_name,
-            'product_sub_category' => optional(optional($productType->product)->subCategory)->sub_category_name,
-            //'product_description' => $productType->product_type_description,
 
+            'product_sub_category' => optional($productType->subCategory)->sub_category_name,
             'product_type_name' => $productType->product_type_name,
             'product_type_image' => $productType->product_type_image,
             'product_type_description' => $productType->product_type_description,
-            'vat' => optional($productType->product)->vat,
-
-
-
-
-           'product_category' => optional(optional($productType->product)->product_category)->category_name,
-
-
-
-
-           // 'sub_category_id' => optional(optional($productType->product)->subCategory)->id,
+            'vat' => $productType->vat,
+           'product_category' => optional($productType->product_category)->category_name,
             'quantity_available' => optional($productType->store)->capacity_qty_available ?? 0,
-           // "measurement" => "",
-            // "container_type" =>  optional($productType->containertype)->container_type_name ?? 0,
-            // "container_type_capacity" =>  optional($productType->containerCapacities)->container_capacity ?? 0,
             'purchasing_price' => optional($productType->activePrice)->cost_price ?? 'Not set',
             'selling_price' => optional($productType->activePrice)->selling_price ?? 'Not set',
-
             'selling_unit_capacity' => optional($productType->sellingUnitCapacity)->selling_unit_capacity,
             'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name,
             'selling_unit_name' => optional($productType->sellingUnit)->selling_unit_name,
-
-
             'supplier_name' => trim((optional($productType->suppliers)->first_name ?? '') . ' ' . (optional($productType->suppliers)->last_name ?? '')) ?: 'None',
-
             'supplier_phone_number' => optional($productType->suppliers)->phone_number ?? 'None',
             'date_created' => $productType->created_at,
             'created_by' => optional($productType->creator)->fullname,
@@ -439,40 +385,13 @@ class ProductTypeRepository
                     'message' => "No product found"
                 ], 404);
             }
+            $ProductType->delete();
+            return response()->json([
+                'success' => true,
+                'message' => "Deletion successful"
+            ], 200);
 
-            // Check if type is a product
-            if ($ProductType->type == 1) {
-                $product = \App\Models\Product::find($ProductType->product_id);
-                if ($product) {
-                    // Check if the product has more than one product type
-                    $productTypes = ProductType::where('product_id', $product->id);
-                    if ($productTypes->count() > 1) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => "This Record is already in use"
-                        ], 500);
-                    } else {
-                        // Delete the only product and product type
-                        $ProductType->delete();
-                        $product->delete();
-                        return response()->json([
-                            'success' => true,
-                            'message' => 'Deletion successful',
-                        ], 200);
-                    }
-                }
-                $ProductType->delete();
-                return response()->json([
-                    'success' => true,
-                    'message' => "Deletion successful"
-                ], 200);
-            } else {
-                $ProductType->delete();
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Deletion successful',
-                ], 200);
-            }
+
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -480,5 +399,48 @@ class ProductTypeRepository
             ], 500);
         }
     }
+    public function getlistExpiredProduct()
+    {
+        $today = now();
+        $nextWeek = now()->addDays(7);
+
+        // Query for product types with related purchase, store (for quantity), and other relationships
+        $expiredProducts = \App\Models\Purchase::whereBetween('expiry_date', [$today, $nextWeek])
+            ->with([
+                'productType' => function ($query) {
+                    $query->select('id', 'product_type_name', 'sub_category_id', 'purchase_unit_id', 'selling_unit_id', 'created_at');
+                },
+                'productType.subCategory:id,sub_category_name',
+                'productType.unitPurchase:id,purchase_unit_name',
+                'productType.unitSelling:id,selling_unit_name',
+                'productType.store' => function ($query) {
+                    $query->select('product_type_id', 'batch_no', 'capacity_qty_available');
+                }
+            ])
+            ->select('product_type_id', 'expiry_date', 'batch_no')
+            ->groupBy('product_type_id', 'expiry_date', 'batch_no')
+            ->get();
+
+        // Transform the result to return the specific fields required
+        $response = $expiredProducts->map(function ($purchase) {
+            $productType = $purchase->productType;
+            $store = $productType->store->where('batch_no', $purchase->batch_no)->first();
+
+            return [
+                'product_sub_category' => optional($productType->subCategory)->sub_category_name,
+                'product_type_name' => $productType->product_type_name,
+                'quantity_available' => $store->capacity_qty_available ?? 0,
+                'batch_no' => $purchase->batch_no ?? '',
+                'expiry_date' => $purchase->expiry_date,
+                'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name,
+                'selling_unit_name' => optional($productType->unitSelling)->selling_unit_name,
+                //'date_created' => $productType->created_at->format('d-m-y H:i:s'),
+            ];
+        });
+
+        return $response;
+    }
+
+
 
 }

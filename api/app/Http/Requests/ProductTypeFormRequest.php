@@ -11,14 +11,12 @@ class ProductTypeFormRequest extends FormRequest
 {
     public function rules(Request $request): array
     {
-        $productIdRule = 'required|string';
+
         $productTypeRule = [
             'required',
             'string',
             'max:50',
-            Rule::unique('product_types')->where(function ($query) use ($request) {
-                return $query->where('product_id', $request->product_id);
-            })
+            Rule::unique('product_types')->ignore($this->route('product_type'))
         ];
 
         if ($this->getMethod() === 'PUT') {
@@ -29,9 +27,7 @@ class ProductTypeFormRequest extends FormRequest
         $barcodeRule = [
             'nullable',
             'string',
-            Rule::unique('product_types')->where(function ($query) use ($request) {
-                return $query->where('product_id', $request->product_id);
-            })
+            Rule::unique('product_types')->ignore($this->route('product_type'))
         ];
 
         if ($this->getMethod() === 'PUT') {
@@ -40,7 +36,7 @@ class ProductTypeFormRequest extends FormRequest
         }
 
         return [
-            'product_id' => $productIdRule,
+
             'product_type_name' => $productTypeRule,
             'product_type_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'product_type_description' => 'required|string',
@@ -50,6 +46,8 @@ class ProductTypeFormRequest extends FormRequest
             'selling_unit_capacity_id' => 'required|integer',
             'purchase_unit_id' => 'required',
             'selling_unit_id' => 'required',
+            'category_id' => 'required|uuid',
+            'sub_category_id' => 'required|',
         ];
     }
 }

@@ -12,7 +12,7 @@ return new class () extends Migration {
     {
         Schema::create('product_types', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('product_id');
+
             $table->string('product_type_name', 50);
             $table->string('product_type_image', 150)->nullable();
             $table->string('product_type_description');
@@ -21,7 +21,9 @@ return new class () extends Migration {
             $table->uuid('selling_unit_capacity_id')->nullable()->index();
             $table->uuid('purchase_unit_id')->nullable()->index();
             $table->uuid('selling_unit_id')->nullable()->index();
-            // $table->uuid('container_type_id')->default(1)->index();
+            $table->uuid('sub_category_id');
+            $table->uuid('category_id');
+
             $table->boolean('vat')->default(0)->nullable();
             // $table->boolean('is_container_type')->default(1);
             // $table->string('type')->default(0)->comment('1=product 2 product_type');
@@ -31,7 +33,8 @@ return new class () extends Migration {
             $table->uuid('updated_by', 32)->nullable();
             $table->timestamps();
 
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('restrict');
+            $table->foreign('sub_category_id')->references('id')->on('product_sub_categories')->onDelete('restrict');
+            $table->foreign('category_id')->references('id')->on('product_categories')->onDelete('restrict');
             // $table->foreign('measurement_id')->references('id')->on('measurements')->onDelete('restrict');
         });
     }

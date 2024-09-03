@@ -20,7 +20,7 @@ class PurchaseRepository
         $query = Purchase::with([
             'suppliers:id,first_name,last_name',
             'currency',
-            'productType:id,product_type_name,product_type_image,product_type_description,selling_unit_capacity_id',
+            'productType:id,product_type_name,product_type_image,product_type_description,selling_unit_capacity_id,purchase_unit_id',
             'productType.sellingUnitCapacity:id,selling_unit_id,selling_unit_capacity',
             'productType.unitPurchase:id,purchase_unit_name',
             'productType.sellingUnit' => function ($q) {
@@ -109,9 +109,7 @@ class PurchaseRepository
             'product_type_name' => optional($purchase->productType)->product_type_name,
             'product_type_image' => optional($purchase->productType)->product_type_image,
             'product_type_description' => optional($purchase->productType)->product_type_description,
-           // 'container_type_name' => $containerTypeName,
-           // 'container_type_capacity' => optional($purchase->productType->containerCapacities)->container_capacity,
-            //'container_qty' => $purchase->container_qty,
+
             'selling_unit_capacity' => optional($purchase->productType->sellingUnitCapacity)->selling_unit_capacity,
             'selling_unit_name' => optional($purchase->productType->sellingUnit)->selling_unit_name,
             'purchase_unit_name' => optional($purchase->productType->unitPurchase)->purchase_unit_name,
