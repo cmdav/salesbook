@@ -87,25 +87,7 @@ class SaleRepository
 
         return $sale;
     }
-    public function dailySale()
-    {
 
-        $startOfDay = Carbon::now()->startOfDay();
-        $endOfDay = Carbon::now()->endOfDay();
-
-
-        $sale =  Sale::select("id", "quantity", "product_type_id", "price_id", "price_sold_at", "batch_no")
-                     ->with(['product:id,product_type_name','Price:id,selling_price' ])
-                     ->latest()->whereBetween('created_at', [$startOfDay, $endOfDay])->paginate(20);
-
-
-        // Transform the collection to apply any needed transformations
-        $sale->getCollection()->transform(function ($sale) {
-            return $this->transformDailySales($sale);
-        });
-
-        return $sale;
-    }
 
 
 
@@ -399,105 +381,6 @@ class SaleRepository
     }
 
 
-    // public function create(array $data)
-    // {
-    //     $emailService = new EmailService();
-    //     $transactionId =  time() . rand(1000, 9999);
-
-    //     $response = DB::transaction(function () use ($data, $emailService, $transactionId) {
-    //         $productDetails = [];
-    //         $totalPrice = 0; // Initialize total price
-    //         $branch = null; // Initialize branch
-
-    //         foreach ($data['products'] as $product) {
-    //             //get latest price id
-    //             $latestPrice = Price::where([
-    //                     ['product_type_id', $product['product_type_id']],
-    //                     ['status', 1]
-    //                 ])->orderBy('created_at', 'desc')->firstOrFail();
-
-    //             // Get all batches of the product, ordered by oldest first
-    //             $stores = Store::where('product_type_id', $product['product_type_id'])
-    //                            ->where('status', 1)
-    //                            ->orderBy('created_at', 'asc')
-    //                            ->select("id", "capacity_qty_available")->get();
-
-    //             $remainingQuantity = $product['quantity'];
-    //             $totalAvailableQuantity = $stores->sum('capacity_qty_available');
-
-    //             // Check if there is enough stock across all batches
-    //             if ($totalAvailableQuantity < $remainingQuantity) {
-    //                 throw new Exception("Insufficient stock for the requested quantity.");
-    //             }
-
-    //             foreach ($stores as $store) {
-    //                 if ($remainingQuantity <= 0) {
-    //                     break;
-    //                 }
-
-    //                 if ($store->capacity_qty_available >= $remainingQuantity) {
-    //                     $store->capacity_qty_available -= $remainingQuantity;
-    //                     $remainingQuantity = 0;
-    //                 } else {
-    //                     $remainingQuantity -= $store->capacity_qty_available;
-    //                     $store->capacity_qty_available = 0;
-    //                 }
-
-    //                 if ($store->capacity_qty_available == 0) {
-    //                     $store->status = 0;
-    //                 }
-
-    //                 $store->save();
-    //                 $branch = $store->branches; // Fetch the branch details
-    //             }
-
-    //             // Save the sale record
-    //             $sale = new Sale();
-    //             $sale->fill([
-    //                 'product_type_id' => $product['product_type_id'],
-    //                 'customer_id' => $data['customer_id'],
-    //                 'price_sold_at' => $product['price_sold_at'],
-    //                 'quantity' => $product['quantity'],
-    //                 'vat' => $product['vat'],
-    //                 'payment_method' => $data['payment_method'],
-    //                 'transaction_id' => $transactionId,
-    //             ]);
-    //             $sale->price_id = $latestPrice->id;
-    //             $sale->save();
-
-    //             // Calculate the amount and VAT
-    //             $amount = $product['price_sold_at'] * $product['quantity'];
-    //             $vatValue = $product['vat'] == 1 ? ($amount * 0.075) : 0; // 7.5% VAT
-    //             $amount += $vatValue;
-    //             $totalPrice += $amount;
-
-    //             $productDetails[] = [
-    //                 "productTypeName" => $latestPrice->productType->product_type_name,
-    //                 'price' => $product['price_sold_at'],
-    //                 "quantity" => $product['quantity'],
-    //                 "vat" => $product['vat'] == 1 ? 'Yes' : 'No',
-    //                 "amount" => $amount
-    //             ];
-    //         }
-
-    //         // Customer details for the email
-    //         $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
-    //                     ->where('id', $data['customer_id'])
-    //                     ->first();
-    //         if ($user) {
-    //             $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
-
-    //             // Generate email content
-    //             $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId, $branch);
-    //             $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
-    //         }
-
-    //         return true;
-    //     });
-
-    //     return response()->json(['success' => true,'message' => 'Sale successfully recorded: '], 200);
-    // }
-
 
 
     private function generateProductDetailsTable($productDetails, $totalPrice, $transactionId, $branch)
@@ -585,15 +468,100 @@ class SaleRepository
 
         return $responsiveTableHtml;
     }
+    public function dailySale()
+    {
+        $startOfDay = Carbon::now()->startOfDay();
+        $endOfDay = Carbon::now()->endOfDay();
+
+        $sales = $this->querySales($startOfDay, $endOfDay)->paginate(20);
+
+        // Transform the collection to apply any needed transformations
+        $sales->getCollection()->transform(function ($sale) {
+            return $this->transformDailySales($sale);
+        });
+
+        return $sales;
+    }
+
+    public function gettotalSaleReport($request)
+    {
+        // Retrieve start and end date from the request
+        $startDate = isset($request['start_date']) ? Carbon::parse($request['start_date'])->startOfDay() : null;
+        $endDate = isset($request['end_date']) ? Carbon::parse($request['end_date'])->endOfDay() : null;
+
+        if (!$startDate || !$endDate) {
+            return response()->json(['success' => false, 'message' => 'Start date and end date are required'], 400);
+        }
+
+        // Query for sales data within the time frame
+        $salesQuery = $this->querySales($startDate, $endDate);
+
+        // Check if 'all' == true in the request to return all data without pagination
+        if (isset($request['all']) && $request['all'] == true) {
+            $sales = $salesQuery->get(); // Get all sales data without pagination
+
+            // Transform the collection to apply any needed transformations
+            $response = $sales->map(function ($sale) {
+                return $this->transformDailySales($sale);
+            });
+
+            return $response;
+
+        }
+
+        // Otherwise, paginate the results
+        $sales = $salesQuery->paginate(20);
+
+        // Transform the paginated collection
+        $sales->getCollection()->transform(function ($sale) {
+            return $this->transformDailySales($sale);
+        });
+
+        return $sales;
+    }
+
+
+    public function getmonthlySaleReport($request)
+    {
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        // Query for sales data for the current month
+        $salesQuery = $this->querySales($startOfMonth, $endOfMonth);
+
+        // Check if 'all' == true in the request to return all data without pagination
+        if (isset($request['all']) && $request['all'] == true) {
+            $sales = $salesQuery->get(); // Get all sales data without pagination
+
+            // Transform the collection
+            $response = $sales->map(function ($sale) {
+                return $this->transformDailySales($sale);
+            });
+
+            return $response;
+        }
+
+        // Otherwise, paginate the results
+        $sales = $salesQuery->paginate(20);
+
+        // Transform the paginated collection
+        $sales->getCollection()->transform(function ($sale) {
+            return $this->transformDailySales($sale);
+        });
+
+        return $sales;
+    }
 
 
 
 
-
-
-
-
-
+    private function querySales($startDate, $endDate)
+    {
+        return Sale::select("id", "quantity", "product_type_id", "price_id", "price_sold_at", "batch_no")
+                   ->with(['product:id,product_type_name', 'Price:id,selling_price'])
+                   ->whereBetween('created_at', [$startDate, $endDate])
+                   ->latest();
+    }
 
 
 }

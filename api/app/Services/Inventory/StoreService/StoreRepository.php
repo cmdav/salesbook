@@ -81,37 +81,9 @@ class StoreRepository
             'quantity_available' => $store->capacity_qty_available,
             //'store_type' => $store->store_type,
             'status' => $store->capacity_qty_available > 0 ? 'Available' : 'Not Available',
-            // 'created_by' => $store->created_by,
-            // 'updated_by' => $store->updated_by,
-            // 'created_at' => $store->created_at,
-            // 'updated_at' => $store->updated_at,
-            // Flatten price details
 
-            // 'price_organization_id' => optional($store->price)->organization_id,
-            // 'price_created_by' => optional($store->price)->created_by,
-            // 'price_updated_by' => optional($store->price)->updated_by,
-            // 'price_created_at' => optional($store->price)->created_at,
-            // 'price_updated_at' => optional($store->price)->updated_at,
-            // Flatten product type details
-            //'product_type_product_id' => optional($store->productType)->product_id,
-
-            // 'product_type_image' => optional($store->productType)->product_type_image,
-            // 'product_type_description' => optional($store->productType)->product_type_description,
-            // 'product_type_organization_id' => optional($store->productType)->organization_id,
-            // 'product_type_supplier_id' => optional($store->productType)->supplier_id,
-            // 'product_type_created_by' => optional($store->productType)->created_by,
-            // 'product_type_updated_by' => optional($store->productType)->updated_by,
-            // 'product_type_created_at' => optional($store->productType)->created_at,
-            // 'product_type_updated_at' => optional($store->productType)->updated_at
         ];
     }
-
-
-
-
-
-
-
 
     public function create(array $data)
     {
@@ -143,4 +115,50 @@ class StoreRepository
         }
         return null;
     }
+    public function getitemList($request)
+    {
+        // Fetch the branch ID as done in the index method
+        $branchId = 'all';
+        if (isset($request['branch_id']) && auth()->user()->role->role_name == 'Admin') {
+            $branchId = $request['branch_id'];
+        } elseif (auth()->user()->role->role_name != 'Admin') {
+            $branchId = auth()->user()->branch_id;
+        }
+
+        // Fetch the start and end date from the request
+        $startDate = isset($request['start_date']) ? $request['start_date'] : null;
+        $endDate = isset($request['end_date']) ? $request['end_date'] : null;
+
+        // Create the query and apply filters
+        $storeQuery = $this->query($branchId);
+
+        if ($startDate && $endDate) {
+            // Apply date filters on 'created_at' or any other date column you want to filter on
+            $storeQuery->whereBetween('created_at', [$startDate, $endDate]);
+        }
+
+        // Check if the 'all' parameter is present in the request
+        if (isset($request['all']) && $request['all'] == true) {
+
+            // Return all data for the given duration without pagination
+            $store = $storeQuery->get();
+            // Transform the entire collection
+            $transformedStore = $store->map(function ($store) {
+                return $this->transformProduct($store);
+            });
+
+            return $transformedStore;
+        }
+
+        // Paginate and transform the store data if 'all' is not present
+        $store = $storeQuery->paginate(20);
+
+        $store->getCollection()->transform(function ($store) {
+            return $this->transformProduct($store);
+        });
+
+        return $store;
+    }
+
+
 }

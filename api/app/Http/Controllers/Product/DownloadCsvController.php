@@ -15,6 +15,7 @@ class DownloadCsvController extends Controller
         'product_category',
         'product_sub_category',
         'purchase_unit',
+        'product'
     ];
 
     public function __invoke(Request $request, $fileName)

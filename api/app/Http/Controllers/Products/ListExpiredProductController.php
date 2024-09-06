@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Products;
+
 use App\Http\Controllers\Controller;
 use App\Services\Products\ListExpiredProductService\ListExpiredProductService;
 use App\Http\Requests\Products\ListExpiredProductFormRequest;
@@ -19,8 +20,8 @@ class ListExpiredProductController extends Controller
     public function index()
     {
         $data = $this->listExpiredProductService->index();
-         if (!$data->isEmpty()) {
-            return response()->json(['success' => true, 'message' => 'Record retrieved successfully', 'data' => $data], 200);
+        if (!$data->isEmpty()) {
+            return response()->json(['success' => true, 'message' => 'The generated record has been sent via email', 'data' => $data], 200);
         }
         return response()->json(['success' => false, 'message' => 'No record found'], 404);
     }

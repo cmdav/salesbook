@@ -94,14 +94,7 @@ class ProductType extends Model
     {
         return $this->hasOne(Purchase::class, 'product_type_id', 'id')->latest('created_at');
     }
-    // public function containerCapacities()
-    // {
-    //     return $this->belongsTo(ContainerTypeCapacity::class, 'container_type_capacity_id', 'id');
-    // }
-    // public function sellingUnitCapacities()
-    // {
-    //     return $this->belongsTo(SellingUnitCapacity::class, 'selling_unit_capacity_id', 'id');
-    // }
+
     public function getLatestPriceAttribute()
     {
         // Get the latest price record

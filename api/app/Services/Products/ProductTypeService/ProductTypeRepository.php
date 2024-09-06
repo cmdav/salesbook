@@ -9,6 +9,7 @@ use App\Models\Sale;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 use Exception;
 
 class ProductTypeRepository
@@ -39,14 +40,8 @@ class ProductTypeRepository
     public function searchProductType($searchCriteria)
     {
 
-        $query = $this->query()
-            ->where('product_type_name', 'like', '%' . $searchCriteria . '%')
-            ->Orwhere(function ($query) use ($searchCriteria) {
-                $query->whereHas('product', function ($q) use ($searchCriteria) {
-                    $q->where('product_name', 'like', '%' . $searchCriteria . '%');
-                });
+        $query = $this->query()->where('product_type_name', 'like', '%' . $searchCriteria . '%');
 
-            });
 
         $productTypes = $query->get();
 
@@ -287,7 +282,7 @@ class ProductTypeRepository
     {
         $query = $this->query();
         if ($productId) {
-            $query->where('product_id', $productId);
+            $query->where('id', $productId);
         };
 
         $productTypes = $query->paginate(20);
@@ -331,6 +326,7 @@ class ProductTypeRepository
 
     public function create(array $data)
     {
+
         try {
             $data = ProductType::create($data);
             return response()->json([
@@ -440,6 +436,140 @@ class ProductTypeRepository
 
         return $response;
     }
+
+    public function getexpiredProductByDate($request)
+    {
+        // Parse the start and end date from the request
+        $startDate = Carbon::parse($request['start_date'])->startOfDay();
+        $endDate = Carbon::parse($request['end_date'])->endOfDay();
+
+        // Create the query for expired products within the date range
+        $expiredProductsQuery = \App\Models\Purchase::whereBetween('expiry_date', [$startDate, $endDate])
+            ->with([
+                'productType' => function ($query) {
+                    $query->select('id', 'product_type_name', 'sub_category_id', 'purchase_unit_id', 'selling_unit_id', 'created_at');
+                },
+                'productType.subCategory:id,sub_category_name',
+                'productType.unitPurchase:id,purchase_unit_name',
+                'productType.unitSelling:id,selling_unit_name',
+                'productType.store' => function ($query) {
+                    $query->select('product_type_id', 'batch_no', 'capacity_qty_available');
+                }
+            ])
+            ->select('product_type_id', 'expiry_date', 'batch_no')
+            ->groupBy('product_type_id', 'expiry_date', 'batch_no');
+
+        // Check if 'all' parameter is passed and return all data without pagination
+        if (isset($request['all']) && $request['all'] == true) {
+            // Get all results without pagination
+            $expiredProducts = $expiredProductsQuery->get();
+
+            // Transform the result
+            $response = $expiredProducts->map(function ($purchase) {
+                $productType = $purchase->productType;
+                $store = $productType->store->where('batch_no', $purchase->batch_no)->first();
+
+                return [
+                    'product_sub_category' => optional($productType->subCategory)->sub_category_name,
+                    'product_type_name' => $productType->product_type_name,
+                    'quantity_available' => $store->capacity_qty_available ?? 0,
+                    'batch_no' => $purchase->batch_no ?? '',
+                    'expiry_date' => $purchase->expiry_date,
+                    'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name,
+                    'selling_unit_name' => optional($productType->unitSelling)->selling_unit_name,
+                ];
+            });
+
+            return  $response;
+
+        }
+
+        // Otherwise, paginate the results
+        $expiredProducts = $expiredProductsQuery->paginate(20);
+
+        // Transform the paginated result
+        $response = $expiredProducts->getCollection()->map(function ($purchase) {
+            $productType = $purchase->productType;
+            $store = $productType->store->where('batch_no', $purchase->batch_no)->first();
+
+            return [
+                'product_sub_category' => optional($productType->subCategory)->sub_category_name,
+                'product_type_name' => $productType->product_type_name,
+                'quantity_available' => $store->capacity_qty_available ?? 0,
+                'batch_no' => $purchase->batch_no ?? '',
+                'expiry_date' => $purchase->expiry_date,
+                'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name,
+                'selling_unit_name' => optional($productType->unitSelling)->selling_unit_name,
+            ];
+        });
+
+        // Replace the original collection with the transformed collection
+        $expiredProducts->setCollection($response);
+
+        return $expiredProducts;
+    }
+
+    public function getproductPriceList($request)
+    {
+        // Query for unique products with their latest active price
+        $productsQuery = ProductType::with(['activePrice' => function ($query) {
+            $query->select('product_type_id', 'cost_price', 'selling_price', 'new_cost_price', 'new_selling_price', 'is_new', 'status', 'created_at');
+        }]);
+
+        // Check if the request has 'all' == true, and return all results without pagination
+        if (isset($request['all']) && $request['all'] == true) {
+            // Get all results without pagination
+            $products = $productsQuery->get();
+
+            // Transform each product to include the required data
+            $response = $products->map(function ($product) {
+                $activePrice = $product->activePrice;
+
+                if ($activePrice) {
+                    $costPrice = $activePrice->is_new ? $activePrice->new_cost_price : $activePrice->cost_price;
+                    $sellingPrice = $activePrice->is_new ? $activePrice->new_selling_price : $activePrice->selling_price;
+                } else {
+                    $costPrice = 'No price available';
+                    $sellingPrice = 'No price available';
+                }
+
+                return [
+                    'product_type_name' => $product->product_type_name,
+                    'product_description' => $product->product_type_description,
+                    'cost_price' => $costPrice,
+                    'selling_price' => $sellingPrice,
+                ];
+            });
+
+            return $response;
+        }
+
+        // Otherwise, paginate the results
+        $products = $productsQuery->paginate(20); // Paginate 20 per page
+
+        // Transform each product to include the required data
+        $products->getCollection()->transform(function ($product) {
+            $activePrice = $product->activePrice;
+
+            if ($activePrice) {
+                $costPrice = $activePrice->is_new ? $activePrice->new_cost_price : $activePrice->cost_price;
+                $sellingPrice = $activePrice->is_new ? $activePrice->new_selling_price : $activePrice->selling_price;
+            } else {
+                $costPrice = 'No price available';
+                $sellingPrice = 'No price available';
+            }
+
+            return [
+                'product_type_name' => $product->product_type_name,
+                'product_description' => $product->product_type_description,
+                'cost_price' => $costPrice,
+                'selling_price' => $sellingPrice,
+            ];
+        });
+
+        return $products;
+    }
+
 
 
 

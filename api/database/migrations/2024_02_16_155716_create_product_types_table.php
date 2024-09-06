@@ -35,7 +35,8 @@ return new class () extends Migration {
 
             $table->foreign('sub_category_id')->references('id')->on('product_sub_categories')->onDelete('restrict');
             $table->foreign('category_id')->references('id')->on('product_categories')->onDelete('restrict');
-            // $table->foreign('measurement_id')->references('id')->on('measurements')->onDelete('restrict');
+            $table->foreign('purchase_unit_id')->references('id')->on('purchase_units')->onDelete('restrict');
+            $table->foreign('selling_unit_id')->references('id')->on('selling_units')->onDelete('restrict');
         });
     }
 

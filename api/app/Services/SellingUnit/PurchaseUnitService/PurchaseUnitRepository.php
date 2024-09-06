@@ -56,10 +56,30 @@ class PurchaseUnitRepository
 
     public function destroy($id)
     {
-        $model = PurchaseUnit::findOrFail($id);
-        $model->delete();
-        return $model;
+        try {
+            // Find the model or throw a 404 error if not found
+            $model = PurchaseUnit::findOrFail($id);
+
+            // Attempt to delete the model
+            $model->delete();
+
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Purchase Unit deleted successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            // Log the error
+            // Log::channel('deletion_errors')->error('Error deleting Purchase Unit: ' . $e->getMessage());
+
+            // Return error response if deletion fails, particularly when it's in use
+            return response()->json([
+                'success' => false,
+                'message' => 'This Purchase Unit is already in use and cannot be deleted',
+            ], 500);
+        }
     }
+
     public function listPurchaseUnit()
     {
         $purchaseUnits = PurchaseUnit::select("id", "purchase_unit_name")
@@ -91,58 +111,11 @@ class PurchaseUnitRepository
 
         return $data;
     }
-    ///////////////////////////////////////////////end of data
-    // public function index()
-    // {
 
-    //     // Define the number of items per page
-    //     $perPage = 20;
-
-    //     // Fetch the paginated data
-    //     $purchaseUnits = PurchaseUnit::select("id", "purchase_unit_name")
-    //         ->with([
-    //             'sellingUnits:id,purchase_unit_id,selling_unit_name',
-    //             'sellingUnits.sellingUnitCapacities:id,selling_unit_id,selling_unit_capacity'
-    //         ])
-    //         ->paginate($perPage);
-
-    //     // Map the paginated data
-    //     $data = $purchaseUnits->getCollection()->map(function ($purchaseUnit) {
-    //         return [
-    //             'id' => $purchaseUnit->id,
-    //             'purchase_unit_name' => $purchaseUnit->purchase_unit_name,
-    //             'selling_units' => $purchaseUnit->sellingUnits->map(function ($sellingUnit) {
-    //                 return [
-    //                     'id' => $sellingUnit->id,
-    //                     //'purchase_unit_id' => $sellingUnit->purchase_unit_id,
-    //                     'selling_unit_name' => $sellingUnit->selling_unit_name,
-    //                     'selling_unit_capacities' => $sellingUnit->sellingUnitCapacities->map(function ($capacity) {
-    //                         return [
-    //                             'id' => $capacity->id,
-    //                             // 'selling_unit_id' => $capacity->selling_unit_id,
-    //                             'selling_unit_capacity' => $capacity->selling_unit_capacity,
-    //                         ];
-    //                     }),
-    //                 ];
-    //             }),
-    //         ];
-    //     });
-
-    //     // Replace the collection in the paginator with the mapped data
-    //     $paginatedData = new \Illuminate\Pagination\LengthAwarePaginator(
-    //         $data,
-    //         $purchaseUnits->total(),
-    //         $purchaseUnits->perPage(),
-    //         $purchaseUnits->currentPage(),
-    //         ['path' => $purchaseUnits->path()]
-    //     );
-
-    //     return $paginatedData;
-    // }
     public function index()
     {
         // Fetch the paginated data using the reusable query method
-        $purchaseUnits = $this->getPurchaseUnitsQuery()->paginate(20);
+        $purchaseUnits = $this->getPurchaseUnitsQuery()->paginate(5);
 
         // Transform the paginated data
         $purchaseUnits->getCollection()->transform(function ($purchaseUnit) {

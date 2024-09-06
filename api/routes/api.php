@@ -187,6 +187,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::resource('subscription-statuses', App\Http\Controllers\Security\SubscriptionStatusController::class);
         Route::apiResource('search-purchase-units', App\Http\Controllers\SellingUnit\SearchPurchaseUnitController::class);
         Route::apiResource('list-expired-products', App\Http\Controllers\Products\ListExpiredProductController::class);
+        //Report API
+        Route::apiResource('item-lists', App\Http\Controllers\Products\ItemListController::class);
+        Route::apiResource('expired-product-by-dates', App\Http\Controllers\Products\ExpiredProductByDateController::class);
+        Route::apiResource('product-price-lists', App\Http\Controllers\Products\ProductPriceListController::class);
+        Route::apiResource('total-sale-reports', App\Http\Controllers\Products\TotalSaleReportController::class);
+        Route::apiResource('monthly-sale-reports', App\Http\Controllers\Products\MonthlySaleReportController::class);
+        Route::apiResource('user-org-and-branch-details', App\Http\Controllers\UserService\UserOrgAndBranchDetailController::class);
+
+
+
 
 
     });
