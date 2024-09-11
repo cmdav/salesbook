@@ -47,7 +47,7 @@ class PurchaseRepository
         $branchId = 'all';
         if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin') {
             $branchId = $request['branch_id'];
-        } elseif(auth()->user()->role->role_name != 'Admin') {
+        } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
 
@@ -67,7 +67,7 @@ class PurchaseRepository
         $branchId = 'all';
         if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin') {
             $branchId = $request['branch_id'];
-        } elseif(auth()->user()->role->role_name != 'Admin') {
+        } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
         $Purchase = $this->query($branchId)
@@ -122,8 +122,9 @@ class PurchaseRepository
             'cost_price' => $formatted_cost_price,
             'selling_price' => $formatted_selling_price,
             'supplier' => optional($purchase->suppliers)->first_name . " " . optional($purchase->suppliers)->last_name,
-            'created_by' => optional($purchase->creator)->fullname,
-            'updated_by' => optional($purchase->updater)->fullname,
+            'created_by' => optional($purchase->creator)->first_name . "  " .  optional($purchase->creator)->last_name,
+            'updated_by' => optional($purchase->updater)->first_name . "  " .  optional($purchase->updater)->last_name,
+            //'updated_by' => optional($purchase->updater)->fullname,
         ];
     }
 

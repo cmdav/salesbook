@@ -27,7 +27,7 @@ class StoreRepository
         $branchId = 'all';
         if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin') {
             $branchId = $request['branch_id'];
-        } elseif(auth()->user()->role->role_name != 'Admin') {
+        } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
         $store = $this->query($branchId)->paginate(20);
@@ -48,7 +48,7 @@ class StoreRepository
         $branchId = 'all';
         if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin') {
             $branchId = $request['branch_id'];
-        } elseif(auth()->user()->role->role_name != 'Admin') {
+        } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
         $store = $this->query($branchId)->where(function ($query) use ($searchCriteria) {
@@ -118,12 +118,9 @@ class StoreRepository
     public function getitemList($request)
     {
         // Fetch the branch ID as done in the index method
-        $branchId = 'all';
-        if (isset($request['branch_id']) && auth()->user()->role->role_name == 'Admin') {
-            $branchId = $request['branch_id'];
-        } elseif (auth()->user()->role->role_name != 'Admin') {
-            $branchId = auth()->user()->branch_id;
-        }
+        // $branchId = 'all';
+        $branchId = auth()->user()->branch_id;
+
 
         // Fetch the start and end date from the request
         $startDate = isset($request['start_date']) ? $request['start_date'] : null;

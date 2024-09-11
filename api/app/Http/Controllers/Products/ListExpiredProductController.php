@@ -17,11 +17,13 @@ class ListExpiredProductController extends Controller
         $this->listExpiredProductService = $listExpiredProductService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $data = $this->listExpiredProductService->index();
-        if (!$data->isEmpty()) {
-            return response()->json(['success' => true, 'message' => 'The generated record has been sent via email', 'data' => $data], 200);
+        $data = $this->listExpiredProductService->index($request->all());
+        // return $data;
+
+        if (count($data['response']) > 0) {
+            return response()->json(['success' => true, 'message' => $data['responseMsg'], 'data' => $data['response']], 200);
         }
         return response()->json(['success' => false, 'message' => 'No record found'], 404);
     }

@@ -15,7 +15,7 @@ class CustomerRepository
         $branchId = 'all';
         if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin') {
             $branchId = $request['branch_id'];
-        } elseif(auth()->user()->role->role_name != 'Admin') {
+        } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
 

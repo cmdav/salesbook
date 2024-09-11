@@ -43,7 +43,7 @@ class SaleRepository
         $branchId = 'all';
         if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin') {
             $branchId = $request['branch_id'];
-        } elseif(auth()->user()->role->role_name != 'Admin') {
+        } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
 
@@ -65,7 +65,7 @@ class SaleRepository
         $branchId = 'all';
         if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin') {
             $branchId = $request['branch_id'];
-        } elseif(auth()->user()->role->role_name != 'Admin') {
+        } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
         $sale = $this->query($branchId)->where(function ($query) use ($searchCriteria) {
@@ -118,8 +118,10 @@ class SaleRepository
             'customer_detail' => optional($sale->customers)->first_name . ' ' . optional($sale->customers)->last_name . ' ' . optional($sale->customers)->contact_person,
             'transaction_id' => $sale->transaction_id,
             'customer_phone_number' => optional($sale->customers)->phone_number,
-            'created_by' => optional($sale->creator)->fullname,
-            'updated_by' => optional($sale->updater)->fullname,
+            // 'created_by' => optional($sale->creator)->fullname,
+            // 'updated_by' => optional($sale->updater)->fullname,
+            'created_by' => optional($sale->creator)->first_name . "  " .  optional($sale->creator)->last_name,
+            'updated_by' => optional($sale->updater)->first_name . "  " .  optional($sale->updater)->last_name,
 
             'organization_name' => optional(auth()->user()->organization)->organization_name,
             'organization_phone_number' => auth()->user()->phone_number,
@@ -135,7 +137,7 @@ class SaleRepository
         $branchId = 'all';
         if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin') {
             $branchId = $request['branch_id'];
-        } elseif(auth()->user()->role->role_name != 'Admin') {
+        } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
         //
@@ -485,6 +487,13 @@ class SaleRepository
 
     public function gettotalSaleReport($request)
     {
+        // $branchId = 'all';
+        // if (isset($request['branch_id']) && auth()->user()->role->role_name == 'Admin') {
+        //     $branchId = $request['branch_id'];
+        // } elseif (auth()->user()->role->role_name != 'Admin') {
+        //     $branchId = auth()->user()->branch_id;
+        // }
+
         // Retrieve start and end date from the request
         $startDate = isset($request['start_date']) ? Carbon::parse($request['start_date'])->startOfDay() : null;
         $endDate = isset($request['end_date']) ? Carbon::parse($request['end_date'])->endOfDay() : null;
@@ -523,6 +532,13 @@ class SaleRepository
 
     public function getmonthlySaleReport($request)
     {
+        // $branchId = 'all';
+        // if (isset($request['branch_id']) && auth()->user()->role->role_name == 'Admin') {
+        //     $branchId = $request['branch_id'];
+        // } elseif (auth()->user()->role->role_name != 'Admin') {
+        //     $branchId = auth()->user()->branch_id;
+        // }
+
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
 
@@ -557,10 +573,24 @@ class SaleRepository
 
     private function querySales($startDate, $endDate)
     {
-        return Sale::select("id", "quantity", "product_type_id", "price_id", "price_sold_at", "batch_no")
-                   ->with(['product:id,product_type_name', 'Price:id,selling_price'])
-                   ->whereBetween('created_at', [$startDate, $endDate])
-                   ->latest();
+        $branchId = 'all';
+        $branchId = auth()->user()->branch_id;
+        // if (isset($request['branch_id']) && auth()->user()->role->role_name == 'Admin') {
+        //     $branchId = $request['branch_id'];
+        // } elseif (auth()->user()->role->role_name != 'Admin') {
+        //     $branchId = auth()->user()->branch_id;
+        // }
+
+        $query = Sale::select("id", "quantity", "product_type_id", "price_id", "price_sold_at", "batch_no")
+                     ->with(['product:id,product_type_name', 'Price:id,selling_price'])
+                     ->whereBetween('created_at', [$startDate, $endDate]);
+
+        // Add branch filtering condition
+        if ($branchId !== 'all') {
+            $query->where('branch_id', $branchId);
+        }
+
+        return $query->latest();
     }
 
 

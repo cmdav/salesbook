@@ -90,30 +90,29 @@ class UserRepository
     }
     public function allSupplier()
     {
-
         $users = User::select(
             "id",
             "first_name",
             "last_name",
-            "phone_number",
+            "phone_number"
         )
-             ->where('type_id', 3)
-             ->get()
-             ->map(function ($user) {
-                 return [
-                     'id' => $user->id,
-                     'supplier_detail' =>  $user->first_name." " .$user->last_name." ". $user->phone_number,
+            ->where('type_id', 3) // Only users with type_id 3
+            ->whereNotNull('email_verified_at') // Only users with verified emails
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'supplier_detail' => $user->first_name . " " . $user->last_name . " " . $user->phone_number,
+                ];
+            });
 
-                 ];
-             });
-
-        if($users) {
+        if ($users) {
             return response()->json(['data' => $users], 200);
         }
-        return [];
 
-
+        return response()->json(['data' => []], 200); // Return empty array if no users found
     }
+
     public function userDetail()
     {
 
@@ -168,7 +167,8 @@ class UserRepository
         $branchId = 'all';
         if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin') {
             $branchId = $request['branch_id'];
-        } elseif(auth()->user()->role->role_name != 'Admin') {
+        } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
+
             $branchId = auth()->user()->branch_id;
         }
         if($type == 'supplier') {
@@ -367,8 +367,11 @@ class UserRepository
             ], 500);
         }
     }
-    public function getuserOrgAndBranchDetail($user_id)
+    public function getuserOrgAndBranchDetail($user_id = null)
     {
+        // dd($user_id);
+        // return $user_id;
+        // Use the passed $user_id, or fallback to the authenticated user's ID
         $user_id = auth()->user()->id;
 
         $user = User::select('organization_id', 'id', 'branch_id')
