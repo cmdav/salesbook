@@ -143,6 +143,7 @@ class SaleRepository
         //
         $sales = $this->query($branchId)->where('transaction_id', $transactionId)->get();
 
+
         if ($sales->isEmpty()) {
             return response()->json(['message' => 'No sales found for this transaction.'], 404);
         }
@@ -155,6 +156,7 @@ class SaleRepository
 
     private function transformSalesReceipt($sales)
     {
+
         // Define admin details
         $adminDetails = [
             'organization_name' => 'iSalesbook',
@@ -201,8 +203,9 @@ class SaleRepository
         ];
 
         $items = $sales->map(function ($sale) use (&$transactionDetails) {
+
             $total_price = $sale->price_sold_at * $sale->quantity;
-            $vatAmount = $sale->vat == 1 ? $total_price * 0.075 : 0; // Assuming VAT is 7.5%
+            $vatAmount = $sale->vat == "yes" ? $total_price * 0.075 : 0; // Assuming VAT is 7.5%
             $total_price_with_vat = $total_price + $vatAmount;
             $formatted_total_price = number_format($total_price_with_vat, 2, '.', ',');
 
@@ -214,7 +217,7 @@ class SaleRepository
                 'product_type_name' => optional($sale->product)->product_type_name,
                 'product_type_description' => optional($sale->product)->product_type_description,
                 'price_sold_at' => $sale->price_sold_at,
-                //'vat' => $sale->vat,
+                'vat_state' => $sale->vat,//yes or no
                 'quantity' => $sale->quantity,
                 'amount' => $total_price,
                 'vat' => $vatAmount,
@@ -285,17 +288,18 @@ class SaleRepository
                             ['status', 1]
                         ])->orderBy('created_at', 'desc')->firstOrFail();
 
-                    // Get all batches of the product, ordered by oldest first
+                    // Get all batches of the product in the specific branch, ordered by oldest first
                     $stores = Store::where('product_type_id', $product['product_type_id'])
+                                   ->where('branch_id', auth()->user()->branch_id) // Filter by authenticated user's branch
                                    ->where('status', 1)
                                    ->orderBy('created_at', 'asc')
-                                   ->select("id", "capacity_qty_available")
+                                   ->select("id", "capacity_qty_available", "branch_id")
                                    ->get();
 
                     $remainingQuantity = $product['quantity'];
                     $totalAvailableQuantity = $stores->sum('capacity_qty_available');
 
-                    // Check if there is enough stock across all batches
+                    // Check if there is enough stock across all batches in the branch
                     if ($totalAvailableQuantity < $remainingQuantity) {
                         throw new \Exception("Insufficient stock for the requested quantity.", 400);
                     }
@@ -337,7 +341,7 @@ class SaleRepository
 
                     // Calculate the amount and VAT
                     $amount = $product['price_sold_at'] * $product['quantity'];
-                    $vatValue = $product['vat'] == 1 ? ($amount * 0.075) : 0; // 7.5% VAT
+                    $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0; // 7.5% VAT
                     $amount += $vatValue;
                     $totalPrice += $amount;
 
@@ -345,7 +349,7 @@ class SaleRepository
                         "productTypeName" => $latestPrice->productType->product_type_name,
                         'price' => $product['price_sold_at'],
                         "quantity" => $product['quantity'],
-                        "vat" => $product['vat'] == 1 ? 'Yes' : 'No',
+                        "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
                         "amount" => $amount
                     ];
                 }

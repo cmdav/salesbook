@@ -159,8 +159,8 @@ class PurchaseRepository
                 // If supplier_id is not empty, check and save new supplier into supplier_product table
                 if (!empty($purchaseData['supplier_id'])) {
                     $existingRecord = \App\Models\SupplierProduct::where('product_type_id', $purchaseData['product_type_id'])
-                                                                ->where('supplier_id', $purchaseData['supplier_id'])
-                                                                ->first();
+                        ->where('supplier_id', $purchaseData['supplier_id'])
+                        ->first();
                     if (!$existingRecord) {
                         $supplierProduct = new \App\Models\SupplierProduct();
                         $supplierProduct->product_type_id = $purchaseData['product_type_id'];
@@ -190,16 +190,17 @@ class PurchaseRepository
 
                 ])->find($purchaseData['product_type_id']);
 
-                // If purchase unit name is not the same as selling unit name
-                if ($productType->unitPurchase->purchase_unit_name !== $productType->sellingUnit->selling_unit_name) {
+                // Case-insensitive comparison for purchase unit name and selling unit name
+                if (strcasecmp($productType->unitPurchase->purchase_unit_name, $productType->sellingUnit->selling_unit_name) !== 0) {
                     // Multiply the capacity quantity by selling unit capacity
                     $purchaseData['capacity_qty'] *= $productType->sellingUnitCapacity->selling_unit_capacity;
                 }
 
-                // Check if the store already exists
+                // Check if the store already exists for the specific branch
                 $store = \App\Models\Store::where('product_type_id', $purchaseData['product_type_id'])
-                                           ->where('batch_no', $purchaseData['batch_no'])
-                                           ->first();
+                    ->where('batch_no', $purchaseData['batch_no'])
+                    ->where('branch_id', auth()->user()->branch_id) // Ensure store is for the user's branch
+                    ->first();
 
                 if (!$store) {
                     // Create a new Store instance if not exists
@@ -207,6 +208,7 @@ class PurchaseRepository
                     $store->product_type_id = $purchaseData['product_type_id'];
                     $store->batch_no = $purchaseData['batch_no'];
                     $store->branch_id = auth()->user()->branch_id;
+                    $store->capacity_qty_available = 0; // Initialize the quantity if store doesn't exist
                 }
 
                 // Update the store capacity with the adjusted quantity

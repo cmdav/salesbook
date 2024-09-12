@@ -35,12 +35,19 @@ class Sale extends Model
     ];
     public function getVatAttribute($value)
     {
-        return $value ? 'yes' : 'no';
+        switch ($value) {
+            case 0:
+                return 'no';
+            case 1:
+                return 'yes';
+            default:
+                return 'No';
+        }
     }
 
     public function setVatAttribute($value)
     {
-        $this->attributes['vat'] = $value === 'yes' ? 1 : 0;
+        $this->attributes['vat'] = $value == 'yes' ? 1 : 0;
     }
 
     public function getCreatedAtAttribute($value)

@@ -26,6 +26,7 @@ class ProductTypeRepository
     }
     private function query()
     {
+
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
         return ProductType::with([
             'sellingUnitCapacity:id,selling_unit_id,selling_unit_capacity',
@@ -45,6 +46,7 @@ class ProductTypeRepository
 
     public function index()
     {
+
         return $this->getProductTypes();
     }
     public function searchProductType($searchCriteria)
@@ -308,21 +310,33 @@ class ProductTypeRepository
 
     private function transformProductType($productType)
     {
+        // Get the authenticated user's branch ID
+        $branchId = auth()->user()->branch_id;
+
+        // Sum up all quantities available for the product type in the specified branch
+        $quantityAvailable = \App\Models\Store::where('product_type_id', $productType->id)
+            ->where('branch_id', $branchId)
+            ->sum('capacity_qty_available'); // Summing the total available quantity for that branch
+
+        // Retrieve price data filtered by the branch ID
+        $activePrice = $productType->activePrice()->where('branch_id', $branchId)->first();
 
         return [
             'id' => $productType->id,
-
             'product_sub_category' => optional($productType->subCategory)->sub_category_name,
             'product_sub_category_id' => optional($productType->subCategory)->id,
             'product_type_name' => $productType->product_type_name,
             'product_type_image' => $productType->product_type_image,
             'product_type_description' => $productType->product_type_description,
             'vat' => $productType->vat,
-           'product_category' => optional($productType->product_category)->category_name,
-           'product_category_id' => optional($productType->product_category)->id,
-            'quantity_available' => optional($productType->store)->capacity_qty_available ?? 0,
-            'purchasing_price' => optional($productType->activePrice)->cost_price ?? 'Not set',
-            'selling_price' => optional($productType->activePrice)->selling_price ?? 'Not set',
+            'product_category' => optional($productType->product_category)->category_name,
+            'product_category_id' => optional($productType->product_category)->id,
+
+            // Using the sum of all quantities available
+            'quantity_available' => $quantityAvailable > 0 ? $quantityAvailable : 'Not available',
+
+            'purchasing_price' => $activePrice ? $activePrice->cost_price : 'Not set',
+            'selling_price' => $activePrice ? $activePrice->selling_price : 'Not set',
             'selling_unit_capacity' => optional($productType->sellingUnitCapacity)->selling_unit_capacity,
             'selling_unit_capacity_id' => optional($productType->sellingUnitCapacity)->id,
             'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name,
@@ -332,13 +346,9 @@ class ProductTypeRepository
             'supplier_name' => trim((optional($productType->suppliers)->first_name ?? '') . ' ' . (optional($productType->suppliers)->last_name ?? '')) ?: 'None',
             'supplier_phone_number' => optional($productType->suppliers)->phone_number ?? 'None',
             'date_created' => $productType->created_at,
-            // 'created_by' => optional($productType->creator)->fullname,
-            // 'updated_by' => optional($productType->updater)->fullname,
-            'created_by' => optional($productType->creator)->first_name . "  " .  optional($productType->creator)->last_name,
-            'updated_by' => optional($productType->updater)->first_name . "  " .  optional($productType->updater)->last_name,
+            'created_by' => optional($productType->creator)->first_name . " " . optional($productType->creator)->last_name,
+            'updated_by' => optional($productType->updater)->first_name . " " . optional($productType->updater)->last_name,
         ];
-
-
     }
 
     public function create(array $data)

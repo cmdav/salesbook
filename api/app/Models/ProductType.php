@@ -37,20 +37,7 @@ class ProductType extends Model
 
 
     ];
-    // protected $casts = [
 
-    //     'barcode' => 'hashed',
-    // ];
-    // public function getIsContainerTypeAttribute($value)
-    // {
-    //     return $value == 1 ? 'Yes' : 'No';
-    // }
-
-    // Mutator for is_container_type
-    // public function setIsContainerTypeAttribute($value)
-    // {
-    //     $this->attributes['is_container_type'] = strtolower($value) == 'yes' ? 1 : 0;
-    // }
     public function getCreatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('d-m-y H:i:s');
@@ -81,15 +68,30 @@ class ProductType extends Model
 
         return $this->hasOne(PriceNotification::class);
     }
+    // public function store()
+    // {
+
+    //     return $this->hasOne(Store::class, 'product_type_id', 'id');
+    // }
     public function store()
     {
-
-        return $this->hasOne(Store::class, 'product_type_id', 'id');
+        // Add branch filtering here
+        return $this->hasOne(Store::class, 'product_type_id', 'id')
+                    ->where('branch_id', auth()->user()->branch_id);
     }
     public function activePrice()
     {
-        return $this->hasOne(Price::class)->where('status', 1)->latest('created_at');
+        // Add branch filtering here
+        return $this->hasOne(Price::class)
+                    ->where('status', 1)
+                    ->where('branch_id', auth()->user()->branch_id)
+                    ->latest('created_at');
     }
+
+    // public function activePrice()
+    // {
+    //     return $this->hasOne(Price::class)->where('status', 1)->latest('created_at');
+    // }
     public function latestPurchase()
     {
         return $this->hasOne(Purchase::class, 'product_type_id', 'id')->latest('created_at');
