@@ -23,6 +23,7 @@ class SaleRepository
     {
 
         $query = Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
+                            'payment_details:id,payment_identifier',
                          //'store:id,product_type_id,quantity_available',
                          'branches:id,name,state_id,country_id,city,phone_number,email,address',
                          'customers:id,first_name,last_name,contact_person,phone_number',
@@ -112,7 +113,7 @@ class SaleRepository
             'quantity' => $sale->quantity,
             'batch_no' => $sale->batch_no,
             'total_price' => $formatted_total_price,
-            'payment_method' => $sale->payment_method,
+            'payment_method' => $sale->payment_details->payment_identifier ?? null,
             'created_at' => $sale->created_at,
 
             'customer_detail' => optional($sale->customers)->first_name . ' ' . optional($sale->customers)->last_name . ' ' . optional($sale->customers)->contact_person,

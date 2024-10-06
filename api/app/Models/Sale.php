@@ -33,6 +33,11 @@ class Sale extends Model
         'branch_id',
         'updated_by'
     ];
+    public function payment_details()
+    {
+
+        return $this->belongsTo(PaymentDetail::class, 'payment_method', 'id');
+    }
     public function getVatAttribute($value)
     {
         switch ($value) {

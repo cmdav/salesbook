@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Auth;
 
 // unprotected route
 Route::group(['prefix' => 'v1'], function () {
+    Route::get('network-check', function () {
+        return response()->json(['message' => 'API is reachable'], 200);
+    });
 
     route::resource('all-customers', App\Http\Controllers\Users\CustomerController::class)->only('index', 'show');
     route::post('login', App\Http\Controllers\Auth\AuthController::class);
@@ -194,6 +197,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('total-sale-reports', App\Http\Controllers\Products\TotalSaleReportController::class);
         Route::apiResource('monthly-sale-reports', App\Http\Controllers\Products\MonthlySaleReportController::class);
         Route::apiResource('user-org-and-branch-details', App\Http\Controllers\UserService\UserOrgAndBranchDetailController::class);
+        Route::resource('payment-methods', App\Http\Controllers\Security\PaymentMethodController::class);
+        Route::resource('payment-details', App\Http\Controllers\Security\PaymentDetailController::class);
+        Route::apiResource('list-payment-methods', App\Http\Controllers\PaymentMethod\ListPaymentMethodController::class);
 
 
 

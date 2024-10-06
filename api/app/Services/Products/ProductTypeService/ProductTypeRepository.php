@@ -139,7 +139,7 @@ class ProductTypeRepository
     {
 
         if(!$product_id) {
-
+            //currently in use in the sales page
             return $this->saleProductDetail();
         }
 

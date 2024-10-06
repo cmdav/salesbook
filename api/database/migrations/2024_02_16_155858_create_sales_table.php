@@ -22,7 +22,7 @@ return new class () extends Migration {
             //$table->integer('capacity_qty')->default(0);
             // $table->integer('container_qty')->default(0);
             $table->integer('vat')->nullable()->comment('0->no, 1->yes');
-            $table->string('payment_method')->default('cash');
+            $table->uuid('payment_method');
             $table->string('transaction_id');
             //$table->uuid('sales_owner');
             $table->uuid('created_by')->nullable();
