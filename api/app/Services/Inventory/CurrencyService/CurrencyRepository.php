@@ -24,11 +24,13 @@ class CurrencyRepository
                 'currency_name' => $currency->currency_name,
                 'currency_symbol' => $currency->currency_symbol,
                 'status' => $currency->status,
-                // 'created_by' => $currency->creator->first_name ?? '',
-                // 'updated_by' => $currency->updater->last_name ?? ''
-                'created_by' => isset($currency->creator) ? $currency->creator->first_name . ' ' . $currency->creator->last_name : '',
-                // Concatenating first_name and last_name for updated_by
-                'updated_by' => isset($currency->updater) ? $currency->updater->first_name . ' ' . $currency->updater->last_name : ''
+                'created_by' => optional($currency->creator)->first_name ? optional($currency->creator)->first_name . " " . optional($currency->creator)->last_name : optional($currency->creator->organization)->organization_name,
+
+                'updated_by' => optional($currency->updater)->first_name ? optional($currency->updater)->first_name . " " . optional($currency->updater)->last_name : optional($currency->updater->organization)->organization_name,
+
+                // 'created_by' => isset($currency->creator) ? $currency->creator->first_name . ' ' . $currency->creator->last_name : '',
+                // // Concatenating first_name and last_name for updated_by
+                // 'updated_by' => isset($currency->updater) ? $currency->updater->first_name . ' ' . $currency->updater->last_name : ''
             ];
         });
 

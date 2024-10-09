@@ -31,7 +31,8 @@ class Sale extends Model
         'sales_owner',
         'created_by',
         'branch_id',
-        'updated_by'
+        'updated_by',
+        'is_offline'
     ];
     public function payment_details()
     {

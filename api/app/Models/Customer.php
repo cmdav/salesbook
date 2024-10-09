@@ -9,9 +9,11 @@ use App\Traits\SetCreatedBy;
 
 class Customer extends Model
 {
-    use  SetCreatedBy, HasUuids, HasFactory;
+    use  SetCreatedBy;
+    use HasUuids;
+    use HasFactory;
 
-   
+
 
     /**
      * The attributes that are mass assignable.
@@ -19,6 +21,7 @@ class Customer extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'first_name',
         'middle_name',
         'last_name',
@@ -31,12 +34,12 @@ class Customer extends Model
         'type_id', // assuming 'type_id' is the correct column name in your database
         'created_by' // only include this if you still need it
     ];
-    
-     public function getTypeIdAttribute($value)
+
+    public function getTypeIdAttribute($value)
     {
-        
+
         switch ($value) {
-        
+
             case 0:
                 return 'others';
             case 1:
@@ -44,7 +47,7 @@ class Customer extends Model
             case 2:
                 return 'company';
             default:
-                return 'others'; 
+                return 'others';
         }
     }
     public function setTypeIdAttribute($value)
@@ -60,13 +63,13 @@ class Customer extends Model
                 $this->attributes['type_id'] = 2;
                 break;
             default:
-                $this->attributes['type_id'] = 1; 
+                $this->attributes['type_id'] = 1;
         }
     }
     public function scopeOfType($query, $type)
     {
         $typeId = 0; // Default type_id for 'other'
-    
+
         switch ($type) {
             case 'company':
                 $typeId = 2;
@@ -75,14 +78,15 @@ class Customer extends Model
                 $typeId = 1;
                 break;
         }
-    
+
         return $query->where('type_id', $typeId);
     }
-    public function branches(){
+    public function branches()
+    {
 
-        return $this->belongsTo(BusinessBranch::class,'branch_id', 'id');
+        return $this->belongsTo(BusinessBranch::class, 'branch_id', 'id');
     }
-    
-   
+
+
 
 }

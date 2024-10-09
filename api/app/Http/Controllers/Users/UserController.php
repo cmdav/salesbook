@@ -193,7 +193,6 @@ class UserController extends Controller
         // Update user's organization and branch id
         $user->organization_id = $organization->id;
         $user->branch_id = $branch->id;
-        $user->first_name = $request->input('contact_person');
         $user->save();
 
     }

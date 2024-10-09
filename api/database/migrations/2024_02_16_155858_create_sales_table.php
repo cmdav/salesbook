@@ -27,6 +27,7 @@ return new class () extends Migration {
             //$table->uuid('sales_owner');
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
+            $table->boolean('is_offline')->default(0);
 
             $table->timestamps();
 

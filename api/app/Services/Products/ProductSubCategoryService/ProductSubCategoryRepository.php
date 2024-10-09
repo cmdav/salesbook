@@ -123,8 +123,10 @@ class ProductSubCategoryRepository
             'category_id' => optional($productSubCategory->category)->category_name,
             // 'created_by' => optional($productSubCategory->creator)->fullname,
             // 'updated_by' => optional($productSubCategory->updater)->fullname,
-            'created_by' => optional($productSubCategory->creator)->first_name . "  " .  optional($productSubCategory->creator)->last_name,
-            'updated_by' => optional($productSubCategory->updater)->first_name . "  " .  optional($productSubCategory->updater)->last_name,
+            'created_by' => optional($productSubCategory->creator)->first_name ? optional($productSubCategory->creator)->first_name . " " . optional($productSubCategory->creator)->last_name : optional($productSubCategory->creator->organization)->organization_name,
+
+            'updated_by' => optional($productSubCategory->updater)->first_name ? optional($productSubCategory->updater)->first_name . " " . optional($productSubCategory->updater)->last_name : optional($productSubCategory->updater->organization)->organization_name,
+
         ];
     }
 }

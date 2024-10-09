@@ -15,9 +15,13 @@ use Auth;
 
 class User extends Authenticatable
 {
-    use SetCreatedBy, HasUuids, HasApiTokens, HasFactory, Notifiable;
+    use SetCreatedBy;
+    use HasUuids;
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
 
-   
+
 
     /**
      * The attributes that are mass assignable.
@@ -39,7 +43,7 @@ class User extends Authenticatable
         'password',
         'token',
         'email_verified_at',
-     
+
     ];
 
     /**
@@ -50,7 +54,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        
+
     ];
 
     /**
@@ -62,27 +66,32 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-   
-    public function supplier(){
+
+    public function supplier()
+    {
 
         return $this->hasOne(Supplier::class);
     }
-    public function supplierOrganization(){
+    public function supplierOrganization()
+    {
 
-        return $this->hasMany(SupplierOrganization::class, "supplier_id","id");
+        return $this->hasMany(SupplierOrganization::class, "supplier_id", "id");
     }
-    public function role(){
+    public function role()
+    {
 
-        return $this->hasOne(JobRole::class, 'id','role_id');
+        return $this->hasOne(JobRole::class, 'id', 'role_id');
     }
-    public function organization(){
+    public function organization()
+    {
 
-        return $this->hasOne(Organization::class, 'id','organization_id');
+        return $this->hasOne(Organization::class, 'id', 'organization_id');
     }
-    
-    public function branches(){
 
-        return $this->belongsTo(BusinessBranch::class, 'branch_id','id');
+    public function branches()
+    {
+
+        return $this->belongsTo(BusinessBranch::class, 'branch_id', 'id');
     }
     // public function organization()
     // {

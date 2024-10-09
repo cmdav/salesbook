@@ -28,11 +28,13 @@ class ProductCategoryRepository
                 'id' => $productCategory->id,
                 'category_name' => $productCategory->category_name,
                 'category_description' => $productCategory->category_description,
-                // 'created_by' => $productCategory->creator->fullname ?? '',
-                // 'updated_by' => $productCategory->updater->fullname ?? ''
-                   'created_by' => isset($productCategory->creator) ? $productCategory->creator->first_name . ' ' . $productCategory->creator->last_name : '',
-                // Concatenating first_name and last_name for updated_by
-                'updated_by' => isset($productCategory->updater) ? $productCategory->updater->first_name . ' ' . $productCategory->updater->last_name : ''
+                'created_by' => optional($productCategory->creator)->first_name ? optional($productCategory->creator)->first_name . " " . optional($productCategory->creator)->last_name : optional($productCategory->creator->organization)->organization_name,
+
+                'updated_by' => optional($productCategory->updater)->first_name ? optional($productCategory->updater)->first_name . " " . optional($productCategory->updater)->last_name : optional($productCategory->updater->organization)->organization_name,
+
+                //    'created_by' => isset($productCategory->creator) ? $productCategory->creator->first_name . ' ' . $productCategory->creator->last_name : '',
+                // // Concatenating first_name and last_name for updated_by
+                // 'updated_by' => isset($productCategory->updater) ? $productCategory->updater->first_name . ' ' . $productCategory->updater->last_name : ''
             ];
         });
 

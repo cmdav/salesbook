@@ -121,8 +121,9 @@ class SaleRepository
             'customer_phone_number' => optional($sale->customers)->phone_number,
             // 'created_by' => optional($sale->creator)->fullname,
             // 'updated_by' => optional($sale->updater)->fullname,
-            'created_by' => optional($sale->creator)->first_name . "  " .  optional($sale->creator)->last_name,
-            'updated_by' => optional($sale->updater)->first_name . "  " .  optional($sale->updater)->last_name,
+             'created_by' => optional($sale->creator)->first_name ? optional($sale->creator)->first_name . " " . optional($sale->creator)->last_name : optional($sale->creator->organization)->organization_name,
+
+            'updated_by' => optional($sale->updater)->first_name ? optional($sale->updater)->first_name . " " . optional($sale->updater)->last_name : optional($sale->updater->organization)->organization_name,
 
             'organization_name' => optional(auth()->user()->organization)->organization_name,
             'organization_phone_number' => auth()->user()->phone_number,
@@ -336,6 +337,7 @@ class SaleRepository
                         'vat' => $product['vat'],
                         'payment_method' => $data['payment_method'],
                         'transaction_id' => $transactionId,
+                        'is_offline' => isset($data['is_offline']) ? $data['is_offline'] : 0,
                     ]);
                     $sale->price_id = $latestPrice->id;
                     $sale->save();

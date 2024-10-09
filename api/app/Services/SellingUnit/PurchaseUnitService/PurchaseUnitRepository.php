@@ -115,7 +115,7 @@ class PurchaseUnitRepository
     public function index()
     {
         // Fetch the paginated data using the reusable query method
-        $purchaseUnits = $this->getPurchaseUnitsQuery()->paginate(5);
+        $purchaseUnits = $this->getPurchaseUnitsQuery()->paginate(6);
 
         // Transform the paginated data
         $purchaseUnits->getCollection()->transform(function ($purchaseUnit) {

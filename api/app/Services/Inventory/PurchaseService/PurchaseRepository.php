@@ -122,8 +122,10 @@ class PurchaseRepository
             'cost_price' => $formatted_cost_price,
             'selling_price' => $formatted_selling_price,
             'supplier' => optional($purchase->suppliers)->first_name . " " . optional($purchase->suppliers)->last_name,
-            'created_by' => optional($purchase->creator)->first_name . "  " .  optional($purchase->creator)->last_name,
-            'updated_by' => optional($purchase->updater)->first_name . "  " .  optional($purchase->updater)->last_name,
+            'created_by' => optional($purchase->creator)->first_name ? optional($purchase->creator)->first_name . " " . optional($purchase->creator)->last_name : optional($purchase->creator->organization)->organization_name,
+
+            'updated_by' => optional($purchase->updater)->first_name ? optional($purchase->updater)->first_name . " " . optional($purchase->updater)->last_name : optional($purchase->updater->organization)->organization_name,
+
             //'updated_by' => optional($purchase->updater)->fullname,
         ];
     }
@@ -191,10 +193,10 @@ class PurchaseRepository
                 ])->find($purchaseData['product_type_id']);
 
                 // Case-insensitive comparison for purchase unit name and selling unit name
-                if (strcasecmp($productType->unitPurchase->purchase_unit_name, $productType->sellingUnit->selling_unit_name) !== 0) {
-                    // Multiply the capacity quantity by selling unit capacity
-                    $purchaseData['capacity_qty'] *= $productType->sellingUnitCapacity->selling_unit_capacity;
-                }
+                //if (strcasecmp($productType->unitPurchase->purchase_unit_name, $productType->sellingUnit->selling_unit_name) !== 0) {
+                // Multiply the capacity quantity by selling unit capacity
+                $purchaseData['capacity_qty'] *= $productType->sellingUnitCapacity->selling_unit_capacity;
+                //}
 
                 // Check if the store already exists for the specific branch
                 $store = \App\Models\Store::where('product_type_id', $purchaseData['product_type_id'])
