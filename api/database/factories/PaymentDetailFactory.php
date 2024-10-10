@@ -12,7 +12,14 @@ class PaymentDetailFactory extends Factory
     public function definition()
     {
         return [
-            // Define model properties here
+            'payment_method_id' => $this->faker->uuid(),
+            'account_name' => "",
+            'account_number' => "",
+            'payment_identifier' => 'payment name',
+            'created_by' => $this->faker->uuid(),
+            'updated_by' => $this->faker->uuid(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }

@@ -147,14 +147,28 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
+        $cashPaymentMethod =  \App\Models\PaymentMethod::factory()->create([
+            'payment_name' => 'cash'
+        ]);
+
+        // Create a PaymentDetail linked to the 'cash' payment method
+        \App\Models\PaymentDetail::factory()->create([
+            'payment_method_id' => $cashPaymentMethod->id,
+            'payment_identifier' => 'cash',
+            'created_by' => "System",
+            'updated_by' => "System",
+        ]);
+
         $currencies = [["name" => "Naira", "symbol" => "NGN", "status" => 1]];
 
         foreach ($currencies as $currency) {
             \App\Models\Currency::factory()->create([
                 'currency_name' => $currency['name'],
                 'currency_symbol' => $currency['symbol'],
-                'created_by' => $user->id,
-                'updated_by' => $user->id
+                // 'created_by' => $user->id,
+                // 'updated_by' => $user->id
+                'created_by' => "System",
+                'updated_by' => "System",
             ]);
         }
     }

@@ -12,7 +12,7 @@ class PaymentMethodFactory extends Factory
     public function definition()
     {
         return [
-            'id' => (string) Str::uuid(), // Generate a UUID for each payment method
+
             'payment_name' => $this->faker->unique()->word(), // Generate a unique payment name
         ];
     }
