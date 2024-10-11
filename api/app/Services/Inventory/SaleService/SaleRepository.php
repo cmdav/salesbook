@@ -159,6 +159,10 @@ class SaleRepository
     private function transformSalesReceipt($sales)
     {
 
+
+
+        $paymentDetail = \App\Models\PaymentDetail::where('id', $sales->first()->payment_method)->first();
+        $paymentIdentifier = optional($paymentDetail)->payment_identifier;
         // Define admin details
         $adminDetails = [
             'organization_name' => 'iSalesbook',
@@ -201,7 +205,7 @@ class SaleRepository
             'organization_phone_number' => $organizationDetails['organization_phone_number'],
             'organization_email' => $organizationDetails['organization_email'],
             'organization_address' => $organizationDetails['company_address'],
-            'payment_method' => $sales->first()->payment_method,
+            'payment_method' => $paymentIdentifier,
         ];
 
         $items = $sales->map(function ($sale) use (&$transactionDetails) {

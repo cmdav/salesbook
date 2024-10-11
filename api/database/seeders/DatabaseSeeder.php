@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             'suppliers',
             'dashboards',
             'settings',
+            'dashboards',
             'subscriptions',
             'c-subscriptions' // for customer
         ];
@@ -165,10 +166,10 @@ class DatabaseSeeder extends Seeder
             \App\Models\Currency::factory()->create([
                 'currency_name' => $currency['name'],
                 'currency_symbol' => $currency['symbol'],
-                // 'created_by' => $user->id,
-                // 'updated_by' => $user->id
-                'created_by' => "System",
-                'updated_by' => "System",
+                'created_by' => $user->id,
+                'updated_by' => $user->id
+                // 'created_by' => "System",
+                // 'updated_by' => "System",
             ]);
         }
     }

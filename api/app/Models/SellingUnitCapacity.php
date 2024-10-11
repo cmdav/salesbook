@@ -9,11 +9,14 @@ use App\Traits\SetCreatedBy;
 
 class SellingUnitCapacity extends Model
 {
+    use  SetCreatedBy;
     use HasFactory;
     protected $fillable = [
         'selling_unit_id',
         'selling_unit_capacity',
         'piece_name',
+          'created_by',
+        'updated_by'
     ];
     public function sellingUnit()
     {

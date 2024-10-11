@@ -8,21 +8,21 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Carbon\CarbonPeriod;
 
-class DashboardStatRepository 
+class DashboardStatRepository
 {
     public function index($request)
     {
         try {
             $user = Auth::user(); // Get the authenticated user
-           
-             $branchId = $user->branch_id; // Assuming branch_id is a property of the user
+
+            $branchId = $user->branch_id; // Assuming branch_id is a property of the user
 
             if (is_array($request) && isset($request['start_date'])) {
                 $startDate = $request['start_date'];
-                $endDate = \Carbon\Carbon::parse($startDate)->addDays(6)->toDateString(); 
+                $endDate = \Carbon\Carbon::parse($startDate)->addDays(6)->toDateString();
             } else {
-                $endDate = now(); 
-                $startDate = now()->subDays(6)->startOfDay()->toDateString(); 
+                $endDate = now();
+                $startDate = now()->subDays(6)->startOfDay()->toDateString();
             }
 
             // Apply branch_id filter to relevant queries
@@ -40,9 +40,9 @@ class DashboardStatRepository
                 //->where('branch_id', $branchId)
                 ->count();
 
-            $totalProduct = DB::table('products')
-                //->where('branch_id', $branchId)
-                ->count();
+            //$totalProduct = DB::table('products')
+            //->where('branch_id', $branchId)
+            //  ->count();
 
             $totalProductType = DB::table('product_types')
                 //->where('branch_id', $branchId)
@@ -53,7 +53,7 @@ class DashboardStatRepository
                 ->where('branch_id', $branchId)
                 ->whereDate('created_at', now()->toDateString())
                 ->sum('quantity');
-            
+
             // Daily profit made
             $totalProductTypeDailyProfits = DB::table('sales')
                 ->join('prices', 'sales.price_id', '=', 'prices.id')
@@ -67,11 +67,11 @@ class DashboardStatRepository
                 '));
 
             // // Retrieve sales data from the last 7 days
-            $salesData = DB::table('sales') 
+            $salesData = DB::table('sales')
                 ->where('branch_id', $branchId)
-                ->whereBetween('created_at', [$startDate, $endDate]) 
+                ->whereBetween('created_at', [$startDate, $endDate])
                 ->groupBy(DB::raw('Date(created_at)'))
-                ->select(DB::raw('Date(created_at) as day'), DB::raw('SUM(quantity) as daily_sales')) 
+                ->select(DB::raw('Date(created_at) as day'), DB::raw('SUM(quantity) as daily_sales'))
                 ->get()
                 ->keyBy('day');
 
@@ -96,7 +96,7 @@ class DashboardStatRepository
             foreach ($period as $date) {
                 $formattedDate = $date->format('Y-m-d');
                 $dayOfWeek = $date->format('l'); // Get the full name of the day of the week
-                
+
                 $weeklyProductTypeSalesMadePerDay[] = [
                     'day' => $formattedDate . ' (' . $dayOfWeek . ')',
                     'daily_sales' => $salesData->has($formattedDate) ? $salesData->get($formattedDate)->daily_sales : 0
@@ -112,7 +112,7 @@ class DashboardStatRepository
                 "active_users" => $activeUsers,
                  "customers" => $customers,
                  "suppliers" => $suppliers,
-                "total_product" => $totalProduct,
+                "total_product" => "",
                 "total_product_type" => $totalProductType,
                 "daily_product_type_quantity_sold" => $dailyProductTypeQuantitySold,
                 "total_product_type_daily_profits" => $totalProductTypeDailyProfits . " NGN",

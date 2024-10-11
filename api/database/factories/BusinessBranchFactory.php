@@ -12,8 +12,8 @@ class BusinessBranchFactory extends Factory
     public function definition()
     {
         return [
-           
-            'name' => $this->faker->company,
+
+            'name' => 'system',
             'state_id' => 306,
             'postal_code' => $this->faker->postcode,
             'city' => $this->faker->city,

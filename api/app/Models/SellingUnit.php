@@ -9,12 +9,15 @@ use App\Traits\SetCreatedBy;
 
 class SellingUnit extends Model
 {
+    use  SetCreatedBy;
     use HasUuids;
     use HasFactory;
     protected $fillable = [
         'id',
         'purchase_unit_id',
         'selling_unit_name',
+          'created_by',
+        'updated_by'
     ];
 
     public function purchaseUnit()

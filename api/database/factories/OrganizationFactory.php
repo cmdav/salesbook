@@ -18,7 +18,7 @@ class OrganizationFactory extends Factory
     {
         return [
 
-            'organization_name' => $this->faker->company,
+            'organization_name' => 'system',
            // 'organization_url' => "http://google.com",
             'organization_code' => 123456,
             'company_email' => 'test@gmail.com',

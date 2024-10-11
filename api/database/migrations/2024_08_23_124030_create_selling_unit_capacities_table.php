@@ -15,6 +15,8 @@ return new class () extends Migration {
             $table->uuid('selling_unit_id')->index();
             $table->integer('selling_unit_capacity');
             $table->string('piece_name')->unique()->nullable();
+            $table->uuid('created_by')->nullable();
+            $table->uuid('updated_by')->nullable();
 
             $table->timestamps();
         });

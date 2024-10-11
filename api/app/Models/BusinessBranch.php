@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\SetCreatedBy;
 
 class BusinessBranch extends Model
 {
+    use SetCreatedBy;
     use HasFactory;
     protected $fillable = [
         'name',
@@ -17,13 +19,15 @@ class BusinessBranch extends Model
         'contact_person',
         'phone_number',
         'email',
-        'address'
+        'address',
+        'created_by',
+        'updated_by'
     ];
     protected $hidden = [
     //  'name'
         'country',
         'state'
-      
+
     ];
     public function country()
     {
@@ -48,5 +52,5 @@ class BusinessBranch extends Model
         return $this->state ? $this->state->name : null;
     }
     protected $appends = ['country_name', 'state_name'];
-    
+
 }

@@ -14,6 +14,8 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
             $table->uuid('purchase_unit_id')->index();
             $table->string('selling_unit_name', 50);
+            $table->uuid('created_by')->nullable();
+            $table->uuid('updated_by')->nullable();
             $table->timestamps();
         });
     }
