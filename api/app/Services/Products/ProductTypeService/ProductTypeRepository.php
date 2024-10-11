@@ -117,7 +117,7 @@ class ProductTypeRepository
             $response = $response->map(function ($item) {
 
                 // Add latest price information to the response
-                $latestPrice = $item->latest_price;
+                $latestPrice = $item->latest_price; //latest price accessor
                 $item->price_id = $latestPrice ? $latestPrice['price_id'] : null;
                 $item->cost_price = $latestPrice ? $latestPrice['cost_price'] : null;
                 $item->selling_price = $latestPrice ? $latestPrice['selling_price'] : null;

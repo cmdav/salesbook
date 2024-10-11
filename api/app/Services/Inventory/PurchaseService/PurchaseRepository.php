@@ -138,6 +138,18 @@ class PurchaseRepository
         try {
             $purchases = [];
 
+            // dd($data['purchases'][0]);
+            //get latest price
+            $currentPrice = \App\Models\Price::where('product_type_id', $data['purchases'][0]['product_type_id'])
+            ->where('branch_id', auth()->user()->branch_id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+            $stores = \App\Models\Store::where('product_type_id', $data['purchases'][0]['product_type_id'])->where('branch_id', auth()->user()->branch_id)
+            ->where('status', 1)->orderBy('created_at', 'asc')->get();
+
+            $totalAvailableQuantity = $stores->sum('capacity_qty_available');
+
             foreach ($data['purchases'] as $purchaseData) {
                 // Create a new Price instance
                 $price = new Price();
@@ -146,16 +158,37 @@ class PurchaseRepository
                 $price->batch_no = $purchaseData['batch_no'];
                 $price->status = 1;
 
+
                 // If price_id is empty, this is the initial price, so set cost and selling prices
                 if (empty($purchaseData['price_id'])) {
                     $price->cost_price = $purchaseData['cost_price'];
                     $price->selling_price = $purchaseData['selling_price'];
                     $price->save();
+
                     $purchaseData['price_id'] = $price->id;
+                    /**********update the exist price data if there's a change in the price**********/
+
+                    // Check if there is a latest price, and update it if necessary
+                    if (!empty($currentPrice) && $totalAvailableQuantity > 0) {
+                        //dd([$purchaseData['cost_price'], $currentPrice->cost_price, $purchaseData['selling_price'], $currentPrice->selling_price ]);
+
+                        if ($purchaseData['cost_price'] != $currentPrice->cost_price || $purchaseData['selling_price'] != $currentPrice->selling_price) {
+                            // Update the exiting price to track
+                            $currentPrice->price_id = $price->id;
+                            $currentPrice->is_new = 1;
+                            $currentPrice->save();
+
+
+                        }
+                    }
+
                 } else {
                     // Else, set the price_id
                     $price->price_id = $purchaseData['price_id'];
                     $price->save();
+
+
+
                 }
 
                 // If supplier_id is not empty, check and save new supplier into supplier_product table
