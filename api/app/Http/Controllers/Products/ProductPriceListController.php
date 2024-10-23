@@ -19,10 +19,18 @@ class ProductPriceListController extends Controller
 
     public function index(Request $request)
     {
-        $data = $this->productPriceListService->index($request);
-        if (!$data->isEmpty()) {
-            return response()->json(['success' => true, 'message' => 'Record retrieved successfully', 'data' => $data], 200);
+        $response = $this->productPriceListService->index($request);
+        if ($response["isPdf"]) {
+            return $response["data"];
+        } else {
+            if(count($response["data"]) > 0) {
+                return response()->json(['success' => true, 'message' => 'Record retrieved successfully', 'data' => $response["data"]], 200);
+            }
+            return response()->json(['success' => false, 'message' => 'No record found'], 404);
         }
-        return response()->json(['success' => false, 'message' => 'No record found'], 404);
+        // if (!$data->isEmpty()) {
+        //     return response()->json(['success' => true, 'message' => 'Record retrieved successfully', 'data' => $data], 200);
+        // }
+        // return response()->json(['success' => false, 'message' => 'No record found'], 404);
     }
 }

@@ -20,8 +20,10 @@ class UserRepository
             "last_name" => $user->last_name,
             "email" => $user->email,
             "organization_code" => $user->organization_code,
-            "role" => optional($user->role)->role_name,
-            "branch" => optional($user->branches)->name,
+            "role_name" => optional($user->role)->role_name,
+            //"role_id" => optional($user->role)->id,
+            "branch_name" => optional($user->branches)->name,
+            //"branch_id" => optional($user->branches)->id,
 
         ];
 
@@ -97,7 +99,7 @@ class UserRepository
             "phone_number"
         )
             ->where('type_id', 3) // Only users with type_id 3
-            ->whereNotNull('email_verified_at') // Only users with verified emails
+           // ->whereNotNull('email_verified_at') // Only users with verified emails
             ->get()
             ->map(function ($user) {
                 return [
@@ -342,6 +344,10 @@ class UserRepository
 
             return null;
         }
+        // if (isset($request['password'])) {
+        //     $request['password'] = Hash::make($request['password']);
+        // }
+
 
         $user->update($request);
 
@@ -380,6 +386,7 @@ class UserRepository
                 'organization:id,organization_name,organization_logo,company_address,company_phone_number,company_email',
                 'branches:id,name,address,email,phone_number,state_id,country_id'
             )->first();
+
 
         // Flatten the data and remove unwanted fields
         if ($user) {

@@ -68,11 +68,7 @@ class ProductType extends Model
 
         return $this->hasOne(PriceNotification::class);
     }
-    // public function store()
-    // {
 
-    //     return $this->hasOne(Store::class, 'product_type_id', 'id');
-    // }
     public function store()
     {
         // Add branch filtering here
@@ -88,10 +84,6 @@ class ProductType extends Model
                     ->latest('created_at');
     }
 
-    // public function activePrice()
-    // {
-    //     return $this->hasOne(Price::class)->where('status', 1)->latest('created_at');
-    // }
     public function latestPurchase()
     {
         return $this->hasOne(Purchase::class, 'product_type_id', 'id')->latest('created_at');

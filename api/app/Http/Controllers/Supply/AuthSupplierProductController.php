@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Supply;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupplierProductFormRequest;
 use App\Services\Supply\SupplierProductService\SupplierProductService;
@@ -9,13 +10,13 @@ use App\Services\FileUploadService;
 
 class AuthSupplierProductController extends Controller
 {
-      protected $supplierProductService;
-      
+    protected $supplierProductService;
+
 
     public function __construct(SupplierProductService $supplierProductService)
     {
         $this->supplierProductService = $supplierProductService;
-       
+
     }
     public function index()
     {
@@ -33,7 +34,7 @@ class AuthSupplierProductController extends Controller
 
     // public function update($id, Request $request)
     // {
-       
+
     //     $supplierProduct = $this->supplierProductService->updateSupplierProduct($id, $request->all());
     //     return response()->json($supplierProduct);
     // }
@@ -44,4 +45,3 @@ class AuthSupplierProductController extends Controller
     //     return response()->json(null, 204);
     // }
 }
-

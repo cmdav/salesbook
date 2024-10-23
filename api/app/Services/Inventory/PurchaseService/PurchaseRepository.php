@@ -140,15 +140,15 @@ class PurchaseRepository
 
             // dd($data['purchases'][0]);
             //get latest price
-            $currentPrice = \App\Models\Price::where('product_type_id', $data['purchases'][0]['product_type_id'])
-            ->where('branch_id', auth()->user()->branch_id)
-            ->orderBy('created_at', 'desc')
-            ->first();
+            // $currentPrice = \App\Models\Price::where('product_type_id', $data['purchases'][0]['product_type_id'])
+            // ->where('branch_id', auth()->user()->branch_id)
+            // ->orderBy('created_at', 'desc')
+            // ->first();
 
-            $stores = \App\Models\Store::where('product_type_id', $data['purchases'][0]['product_type_id'])->where('branch_id', auth()->user()->branch_id)
-            ->where('status', 1)->orderBy('created_at', 'asc')->get();
+            // $stores = \App\Models\Store::where('product_type_id', $data['purchases'][0]['product_type_id'])->where('branch_id', auth()->user()->branch_id)
+            // ->where('status', 1)->orderBy('created_at', 'asc')->get();
 
-            $totalAvailableQuantity = $stores->sum('capacity_qty_available');
+            // $totalAvailableQuantity = $stores->sum('capacity_qty_available');
 
             foreach ($data['purchases'] as $purchaseData) {
                 // Create a new Price instance
@@ -169,18 +169,18 @@ class PurchaseRepository
                     /**********update the exist price data if there's a change in the price**********/
 
                     // Check if there is a latest price, and update it if necessary
-                    if (!empty($currentPrice) && $totalAvailableQuantity > 0) {
-                        //dd([$purchaseData['cost_price'], $currentPrice->cost_price, $purchaseData['selling_price'], $currentPrice->selling_price ]);
+                    // if (!empty($currentPrice) && $totalAvailableQuantity > 0) {
+                    //     //dd([$purchaseData['cost_price'], $currentPrice->cost_price, $purchaseData['selling_price'], $currentPrice->selling_price ]);
 
-                        if ($purchaseData['cost_price'] != $currentPrice->cost_price || $purchaseData['selling_price'] != $currentPrice->selling_price) {
-                            // Update the exiting price to track
-                            $currentPrice->price_id = $price->id;
-                            $currentPrice->is_new = 1;
-                            $currentPrice->save();
+                    //     if ($purchaseData['cost_price'] != $currentPrice->cost_price || $purchaseData['selling_price'] != $currentPrice->selling_price) {
+                    //         // Update the exiting price to track
+                    //         $currentPrice->price_id = $price->id;
+                    //         $currentPrice->is_new = 1;
+                    //         $currentPrice->save();
 
 
-                        }
-                    }
+                    //     }
+                    // }
 
                 } else {
                     // Else, set the price_id

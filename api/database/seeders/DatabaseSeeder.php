@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $pageNames = [
+            'dashboards',
             'currencies',
             'measurements',
             'product-categories',
@@ -32,9 +33,8 @@ class DatabaseSeeder extends Seeder
             'customers',
             'supplier-products',
             'suppliers',
-            'dashboards',
+
             'settings',
-            'dashboards',
             'subscriptions',
             'c-subscriptions' // for customer
         ];

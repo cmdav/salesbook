@@ -7,12 +7,11 @@ use Illuminate\Validation\Rule;
 
 class BusinessBranchFormRequest extends FormRequest
 {
-   
     public function rules()
     {
         $businessBranchId = $this->route('business_branch'); // Get the current business branch ID
         //dd( $businessBranchId);
-    
+
         return [
             'name' => [
                 'required',
@@ -32,9 +31,9 @@ class BusinessBranchFormRequest extends FormRequest
                 'string',
                 'email',
                 'max:255',
-                Rule::unique('business_branches')->ignore($businessBranchId),
+                //Rule::unique('business_branches')->ignore($businessBranchId),
             ],
         ];
     }
-    
+
 }

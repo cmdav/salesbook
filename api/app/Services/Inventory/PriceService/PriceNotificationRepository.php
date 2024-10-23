@@ -13,17 +13,10 @@ class PriceNotificationRepository
 {
     public function index($request)
     {
-        //if(auth()->user()->type_id < 3){
-        // $branchId = 'all';
-        // if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin'){
-        //     $branchId = $request['branch_id'];
-        // }
-        // else if(auth()->user()->role->role_name != 'Admin'){
-        //     $branchId = auth()->user()->branch_id;
-        // }
+
         $query = PriceNotification::select('id', 'product_type_id', 'supplier_id', 'cost_price', 'selling_price', 'status')
                                   ->with(
-                                      'productTypes:id,product_type_name,product_type_image',
+                                      'productTypes:id,product_type_name,product_type_image,product_type_description',
                                       'supplier:id,first_name,last_name,phone_number',
                                       'branches:id,name'
                                   );

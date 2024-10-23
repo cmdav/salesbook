@@ -19,10 +19,17 @@ class ItemListController extends Controller
 
     public function index(Request $request)
     {
-        $data = $this->itemListService->index($request->all());
-        if (!$data->isEmpty()) {
-            return response()->json(['success' => true, 'message' => 'Record retrieved successfully', 'data' => $data], 200);
+        $response = $this->itemListService->index($request->all());
+        //return $response["isPdf"];
+
+        if ($response["isPdf"]) {
+            return $response["data"];
+        } else {
+            if(count($response["data"]) > 0) {
+                return response()->json(['success' => true, 'message' => 'Record retrieved successfully', 'data' => $response["data"]], 200);
+            }
+            return response()->json(['success' => false, 'message' => 'No record found'], 404);
         }
-        return response()->json(['success' => false, 'message' => 'No record found'], 404);
+
     }
 }

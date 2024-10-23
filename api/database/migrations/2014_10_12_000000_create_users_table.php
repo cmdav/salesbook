@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
@@ -28,14 +27,15 @@ return new class extends Migration
             $table->string('active', 10)->default('active')->comment('active, suspended');
             $table->date('dob', 10)->nullable();
             $table->string('email', 55)->unique();
+            $table->boolean('is_profile_complete')->default(0);
             $table->timestamp('email_verified_at')->nullable();
             $table->uuid('token')->nullable();
-            $table->string('password',60)->default('p');
+            $table->string('password', 60)->default('p');
             $table->rememberToken();
             $table->timestamps();
 
-            $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('restrict'); 
-            $table->foreign('branch_id')->references('id')->on('business_branches')->onDelete('restrict'); 
+            $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('restrict');
+            $table->foreign('branch_id')->references('id')->on('business_branches')->onDelete('restrict');
         });
     }
 

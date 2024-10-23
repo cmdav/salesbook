@@ -131,9 +131,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         });
 
-        // route::get('download-sales-receipt/{id}', function(){
-        //     return 'download in process';
-        // });
+
         route::resource('download-sales-receipts', App\Http\Controllers\Inventory\SalesRecieptController::class)->only('show');
 
         route::get('all-price-by-product-type/{id}', App\Http\Controllers\Inventory\AllPriceByProductTypeController::class);

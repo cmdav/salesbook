@@ -33,7 +33,8 @@ class Sale extends Model
         'branch_id',
         'updated_by',
         'is_offline',
-        'new_price'
+        'new_price',
+        'old_price_id'
     ];
     public function payment_details()
     {

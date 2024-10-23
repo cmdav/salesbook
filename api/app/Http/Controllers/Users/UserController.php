@@ -187,6 +187,7 @@ class UserController extends Controller
             'email' => $user->email,
             'address' => $request->input('company_address'),
             'phone_number' => $user->phone_number,
+            'created_by' => $user->id,
         ]);
         $branch->save();
 

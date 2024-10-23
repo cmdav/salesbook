@@ -19,12 +19,19 @@ class ListExpiredProductController extends Controller
 
     public function index(Request $request)
     {
-        $data = $this->listExpiredProductService->index($request->all());
-        // return $data;
-
-        if (count($data['response']) > 0) {
-            return response()->json(['success' => true, 'message' => $data['responseMsg'], 'data' => $data['response']], 200);
+        $response = $this->listExpiredProductService->index($request->all());
+        if ($response["isPdf"]) {
+            return $response["data"];
+        } else {
+            if(count($response["data"]) > 0) {
+                return response()->json(['success' => true, 'message' => 'Record retrieved successfully', 'data' => $response["data"]], 200);
+            }
+            return response()->json(['success' => false, 'message' => 'No record found'], 404);
         }
-        return response()->json(['success' => false, 'message' => 'No record found'], 404);
+        // if (count($data['response']) > 0) {
+
+        //     return response()->json(['success' => true, 'message' => $data['responseMsg'], 'data' => $data['response']], 200);
+        // }
+        // return response()->json(['success' => false, 'message' => 'No record found'], 404);
     }
 }

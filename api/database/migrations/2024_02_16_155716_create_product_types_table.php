@@ -15,9 +15,8 @@ return new class () extends Migration {
 
             $table->string('product_type_name', 50);
             $table->string('product_type_image', 150)->nullable();
-            $table->string('product_type_description');
+            $table->text('product_type_description');
             $table->string('barcode')->nullable();
-            $table->uuid('measurement_id')->nullable();
             $table->uuid('selling_unit_capacity_id')->nullable()->index();
             $table->uuid('purchase_unit_id')->nullable()->index();
             $table->uuid('selling_unit_id')->nullable()->index();

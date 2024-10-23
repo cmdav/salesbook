@@ -15,30 +15,74 @@ use App\Models\ProductType;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use App\Services\GeneratePdf;
 use Exception;
 
 class SaleRepository
 {
+    protected GeneratePdf $generatePdf;
+
+
+    public function __construct(GeneratePdf $generatePdf)
+    {
+        $this->generatePdf = $generatePdf;
+
+    }
+
+    //index to select all sales
     private function query($branchId = '')
     {
+        $query = Sale::with([
+            'product:id,product_type_name,product_type_image,product_type_description',
+            'payment_details:id,payment_identifier',
+            'branches:id,name,state_id,country_id,city,phone_number,email,address',
+            'customers:id,first_name,last_name,contact_person,phone_number',
+            'Price:id,selling_price,cost_price'
+        ])
+        ->selectRaw('transaction_id,
+                     SUM(quantity) as total_quantity,
+                     price_id,
+                     branch_id,
+                     payment_method,
+                     product_type_id,
+                     customer_id,
+                     created_at,
+                     SUM(quantity) as quantity,
+                     MAX(batch_no) as batch_no,
+                     MAX(price_sold_at) as price_sold_at,
+                     MAX(vat) as vat,
+                     MAX(created_by) as created_by,
+                     MAX(updated_by) as updated_by,
+                    
+                     MAX(updated_at) as updated_at,
+                     MAX(old_price_id) as old_price_id')
+        ->groupBy('transaction_id', 'price_id', 'branch_id', 'payment_method', 'product_type_id', 'customer_id', 'created_at');
 
-        $query = Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
-                            'payment_details:id,payment_identifier',
-                         //'store:id,product_type_id,quantity_available',
-                         'branches:id,name,state_id,country_id,city,phone_number,email,address',
-                         'customers:id,first_name,last_name,contact_person,phone_number',
-                         'Price:id,selling_price,cost_price'
-                         //'organization:id,organization_name,organization_logo'
-                         // 'Price' => function ($query) {
-                         //     $query->select('id', 'product_type_id', 'cost_price', 'selling_price', 'discount');
-                         // }
-                     ]);
+        // Apply the where clause if branch_id is not 'all'
         if ($branchId !== 'all') {
-            // Apply the where clause if branch_id is not 'all' and the user is not admin
             $query->where('branch_id', $branchId);
         }
+
         return $query->latest();
     }
+
+
+    // private function query($branchId = '')
+    // {
+
+    //     $query = Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
+    //                         'payment_details:id,payment_identifier',
+    //                      //'store:id,product_type_id,quantity_available',
+    //                      'branches:id,name,state_id,country_id,city,phone_number,email,address',
+    //                      'customers:id,first_name,last_name,contact_person,phone_number',
+    //                      'Price:id,selling_price,cost_price'
+    //                  ]);
+    //     if ($branchId !== 'all') {
+    //         // Apply the where clause if branch_id is not 'all' and the user is not admin
+    //         $query->where('branch_id', $branchId);
+    //     }
+    //     return $query->latest();
+    // }
     public function index($request)
     {
         $branchId = 'all';
@@ -49,7 +93,7 @@ class SaleRepository
         }
 
         $sale = $this->query($branchId)->paginate(20);
-
+        //return $sale;
 
         $sale->getCollection()->transform(function ($sale) {
 
@@ -97,10 +141,6 @@ class SaleRepository
         $total_price = $sale->price_sold_at * $sale->quantity;
         $formatted_total_price = number_format($total_price, 2, '.', ',');
         $formatted_price_sold_at = number_format($sale->price_sold_at, 2, '.', ',');
-
-        // $cost_price = optional($sale->price)->is_new == 1
-        // ? (optional($sale->price)->new_cost_price ?? optional($sale->price->referencePrice)->new_cost_price)
-        // : (optional($sale->price)->cost_price ?? optional($sale->price->referencePrice)->cost_price);
 
         return [
             'id' => $sale->id,
@@ -220,8 +260,8 @@ class SaleRepository
 
             return [
                 'id' => $sale->id,
-                'product_type_name' => optional($sale->product)->product_type_name,
-                'product_type_description' => optional($sale->product)->product_type_description,
+                'product_name' => optional($sale->product)->product_type_name,
+                'product_description' => optional($sale->product)->product_type_description,
                 'price_sold_at' => $sale->price_sold_at,
                 'vat_state' => $sale->vat,//yes or no
                 'quantity' => $sale->quantity,
@@ -240,18 +280,26 @@ class SaleRepository
         ];
     }
 
-    private function transformDailySales($sale)
+    private function transformDailySales($sale, $isPdf = false)
     {
         $total_price = $sale->price_sold_at * $sale->quantity;
         $formatted_total_price = number_format($total_price, 2, '.', ',');
-        return [
-            'id' => $sale->id,
-            'product_type_id' => optional($sale->product)->product_type_name,
+
+        $data = [
+            'product_name' => optional($sale->product)->product_type_name,
             'price_sold_at' => $sale->price_sold_at,
             'quantity' => $sale->quantity,
             'total_price' => $formatted_total_price,
         ];
+
+        // Add the 'id' only if $isPdf is false
+        if (!$isPdf) {
+            $data['id'] = $sale->id;
+        }
+
+        return $data;
     }
+
     public function findById($id)
     {
         return Sale::find($id);
@@ -288,7 +336,7 @@ class SaleRepository
                 $branch = null; // Initialize branch
 
                 foreach ($data['products'] as $product) {
-                    // Get latest price id
+                    // Get latest price id for the product
                     $latestPrice = Price::where([
                             ['product_type_id', $product['product_type_id']],
                             ['status', 1]
@@ -299,7 +347,7 @@ class SaleRepository
                                    ->where('branch_id', auth()->user()->branch_id) // Filter by authenticated user's branch
                                    ->where('status', 1)
                                    ->orderBy('created_at', 'asc')
-                                   ->select("id", "capacity_qty_available", "branch_id")
+                                   ->select("id", "capacity_qty_available", "branch_id", "batch_no")
                                    ->get();
 
                     $remainingQuantity = $product['quantity'];
@@ -315,50 +363,63 @@ class SaleRepository
                             break;
                         }
 
+                        // Retrieve the old price id based on the batch number
+                        $oldPrice = Price::where('batch_no', $store->batch_no)
+                                        ->where('product_type_id', $product['product_type_id'])
+                                        ->first();
+                        $oldPriceId = $oldPrice ? $oldPrice->id : null; // Get the price id or null if not found
+
+                        // Determine how much quantity to deduct from the current batch
+                        $soldQuantityFromBatch = 0;
                         if ($store->capacity_qty_available >= $remainingQuantity) {
+                            // Decrement the full remaining quantity from the current batch
+                            $soldQuantityFromBatch = $remainingQuantity;
                             $store->capacity_qty_available -= $remainingQuantity;
                             $remainingQuantity = 0;
                         } else {
+                            // Deplete the entire batch and move to the next one
+                            $soldQuantityFromBatch = $store->capacity_qty_available;
                             $remainingQuantity -= $store->capacity_qty_available;
                             $store->capacity_qty_available = 0;
                         }
 
                         if ($store->capacity_qty_available == 0) {
+                            // If the batch is depleted, mark it as inactive
                             $store->status = 0;
                         }
 
                         $store->save();
-                        $branch = $store->branches; // Fetch the branch details
+
+                        // Save the partial sale record for this batch
+                        $sale = new Sale();
+                        $sale->fill([
+                            'product_type_id' => $product['product_type_id'],
+                            'customer_id' => $data['customer_id'],
+                            'price_sold_at' => $product['price_sold_at'],
+                            'quantity' => $soldQuantityFromBatch, // Quantity sold from this batch
+                            'vat' => $product['vat'],
+                            'payment_method' => $data['payment_method'],
+                            'transaction_id' => $transactionId, // Same transaction ID for all partial sales
+                            'is_offline' => isset($data['is_offline']) ? $data['is_offline'] : 0,
+                            'old_price_id' => $oldPriceId,  // Set the old price ID for this batch
+                        ]);
+                        $sale->price_id = $latestPrice->id;
+                        $sale->save();
+
+                        // Calculate the amount and VAT for this batch
+                        $amount = $product['price_sold_at'] * $soldQuantityFromBatch;
+                        $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0; // 7.5% VAT
+                        $amount += $vatValue;
+                        $totalPrice += $amount;
+
+                        $productDetails[] = [
+                            "productTypeName" => $latestPrice->productType->product_type_name,
+                            'price' => $product['price_sold_at'],
+                            "quantity" => $soldQuantityFromBatch,
+                            "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
+                            "amount" => $amount
+                        ];
                     }
-
-                    // Save the sale record
-                    $sale = new Sale();
-                    $sale->fill([
-                        'product_type_id' => $product['product_type_id'],
-                        'customer_id' => $data['customer_id'],
-                        'price_sold_at' => $product['price_sold_at'],
-                        'quantity' => $product['quantity'],
-                        'vat' => $product['vat'],
-                        'payment_method' => $data['payment_method'],
-                        'transaction_id' => $transactionId,
-                        'is_offline' => isset($data['is_offline']) ? $data['is_offline'] : 0,
-                    ]);
-                    $sale->price_id = $latestPrice->id;
-                    $sale->save();
-
-                    // Calculate the amount and VAT
-                    $amount = $product['price_sold_at'] * $product['quantity'];
-                    $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0; // 7.5% VAT
-                    $amount += $vatValue;
-                    $totalPrice += $amount;
-
-                    $productDetails[] = [
-                        "productTypeName" => $latestPrice->productType->product_type_name,
-                        'price' => $product['price_sold_at'],
-                        "quantity" => $product['quantity'],
-                        "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
-                        "amount" => $amount
-                    ];
                 }
 
                 // Customer details for the email
@@ -498,12 +559,7 @@ class SaleRepository
 
     public function gettotalSaleReport($request)
     {
-        // $branchId = 'all';
-        // if (isset($request['branch_id']) && auth()->user()->role->role_name == 'Admin') {
-        //     $branchId = $request['branch_id'];
-        // } elseif (auth()->user()->role->role_name != 'Admin') {
-        //     $branchId = auth()->user()->branch_id;
-        // }
+
 
         // Retrieve start and end date from the request
         $startDate = isset($request['start_date']) ? Carbon::parse($request['start_date'])->startOfDay() : null;
@@ -522,10 +578,12 @@ class SaleRepository
 
             // Transform the collection to apply any needed transformations
             $response = $sales->map(function ($sale) {
-                return $this->transformDailySales($sale);
+                return $this->transformDailySales($sale, true);
             });
 
-            return $response;
+            $pdf = $this->generatePdf->generatePdf($response, "Total Sales ");
+
+            return ["data" => $pdf, "isPdf" => true];
 
         }
 
@@ -536,19 +594,13 @@ class SaleRepository
         $sales->getCollection()->transform(function ($sale) {
             return $this->transformDailySales($sale);
         });
-
-        return $sales;
+        return ["data" => $sales, "isPdf" => false];
+        //return $sales;
     }
 
 
     public function getmonthlySaleReport($request)
     {
-        // $branchId = 'all';
-        // if (isset($request['branch_id']) && auth()->user()->role->role_name == 'Admin') {
-        //     $branchId = $request['branch_id'];
-        // } elseif (auth()->user()->role->role_name != 'Admin') {
-        //     $branchId = auth()->user()->branch_id;
-        // }
 
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
@@ -562,10 +614,16 @@ class SaleRepository
 
             // Transform the collection
             $response = $sales->map(function ($sale) {
-                return $this->transformDailySales($sale);
+                return $this->transformDailySales($sale, true);
             });
 
-            return $response;
+            $startOfMonthFormatted = date('F Y', strtotime($startOfMonth));
+            $endOfMonthFormatted = date('F Y', strtotime($endOfMonth));
+
+            $pdf = $this->generatePdf->generatePdf($response, "Monthly Sales ($startOfMonthFormatted - $endOfMonthFormatted)");
+
+
+            return ["data" => $pdf, "isPdf" => true];
         }
 
         // Otherwise, paginate the results
@@ -575,8 +633,8 @@ class SaleRepository
         $sales->getCollection()->transform(function ($sale) {
             return $this->transformDailySales($sale);
         });
-
-        return $sales;
+        return ["data" => $sales, "isPdf" => false];
+        //return $sales;
     }
 
 
@@ -584,25 +642,31 @@ class SaleRepository
 
     private function querySales($startDate, $endDate)
     {
-        $branchId = 'all';
+        // $branchId = auth()->user()->branch_id;
         $branchId = auth()->user()->branch_id;
-        // if (isset($request['branch_id']) && auth()->user()->role->role_name == 'Admin') {
-        //     $branchId = $request['branch_id'];
-        // } elseif (auth()->user()->role->role_name != 'Admin') {
-        //     $branchId = auth()->user()->branch_id;
-        // }
+        $query = Sale::with([
+            'product:id,product_type_name',
+            'Price:id,selling_price'
+        ])
+        ->selectRaw('transaction_id,
+                     SUM(quantity) as quantity,
+                     MAX(id) as id,
+                     product_type_id,
+                     price_id,
+                     MAX(price_sold_at) as price_sold_at,
+                     MAX(batch_no) as batch_no,
+                     MAX(created_at) as created_at')
+        ->whereBetween('created_at', [$startDate, $endDate])
+        ->groupBy('transaction_id', 'product_type_id', 'price_id');
 
-        $query = Sale::select("id", "quantity", "product_type_id", "price_id", "price_sold_at", "batch_no")
-                     ->with(['product:id,product_type_name', 'Price:id,selling_price'])
-                     ->whereBetween('created_at', [$startDate, $endDate]);
-
-        // Add branch filtering condition
+        // Apply branch filtering if necessary
         if ($branchId !== 'all') {
             $query->where('branch_id', $branchId);
         }
 
         return $query->latest();
     }
+
 
 
 }

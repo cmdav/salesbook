@@ -11,17 +11,21 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use App\Services\Email\EmailService;
 use App\Services\UserService\UserRepository;
+use App\Services\GeneratePdf;
 use Carbon\Carbon;
 use Exception;
 
 class ProductTypeRepository
 {
     protected UserRepository $userRepository;
+    protected GeneratePdf $generatePdf;
 
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository, GeneratePdf $generatePdf)
     {
         $this->userRepository = $userRepository;
+        $this->generatePdf = $generatePdf;
+
 
     }
     private function query()
@@ -186,109 +190,6 @@ class ProductTypeRepository
     }
 
 
-    // public function getProductTypeByName()
-    // {
-    //     $branchId = auth()->user()->branch_id;
-
-    //     // Base query for 'product_types'
-    //     $query = DB::table('product_types')
-    //         ->select('product_types.id', 'product_types.product_type_name', 'product_types.product_id')
-
-    //         // Select a JSON object containing 'id' and 'vat' from the 'products' table where the 'product_id' matches
-    //         ->addSelect(DB::raw("
-    //             (SELECT JSON_OBJECT(
-    //                 'id', products.id,
-    //                 'vat', products.vat
-    //             )
-    //             FROM products
-    //             WHERE products.id = product_types.product_id
-    //             ) as product"));
-
-    //     // Conditional part for 'store'
-    //     $storeQuery = "
-    //         (SELECT JSON_OBJECT(
-    //             'product_type_id', stores.product_type_id,
-    //             'total_quantity', SUM(stores.quantity_available)
-    //         )
-    //         FROM stores
-    //         WHERE stores.product_type_id = product_types.id
-    //         AND stores.status = 1 ";
-    //     if ($branchId) {
-    //         $storeQuery .= "AND stores.branch_id = $branchId ";
-    //     }
-    //     $storeQuery .= "GROUP BY stores.product_type_id
-    //         ) as store";
-
-    //     $query->addSelect(DB::raw($storeQuery));
-
-    //     // Conditional part for 'batches'
-    //     $batchesQuery = "
-    //         (SELECT JSON_ARRAYAGG(JSON_OBJECT(
-    //             'id', stores.id,
-    //             'product_type_id', stores.product_type_id,
-    //             'batch_no', stores.batch_no,
-    //             'quantity_available', stores.quantity_available,
-    //             'selling_price',
-    //                 COALESCE(
-    //                     (CASE WHEN prices.is_new = 1 AND prices.status = 1 THEN prices.new_selling_price ELSE prices.selling_price END),
-    //                     (SELECT CASE WHEN p.is_new = 1 THEN p.new_selling_price ELSE p.selling_price END FROM prices p WHERE p.id = prices.price_id)
-    //                 ),
-    //             'cost_price',
-    //                 COALESCE(
-    //                     (CASE WHEN prices.is_new = 1 AND prices.status = 1 THEN prices.new_cost_price ELSE prices.cost_price END),
-    //                     (SELECT CASE WHEN p.is_new = 1 THEN p.new_cost_price ELSE p.cost_price END FROM prices p WHERE p.id = prices.price_id)
-    //                 )
-    //         ))
-    //         FROM stores
-    //         JOIN prices ON prices.batch_no = stores.batch_no AND prices.product_type_id = stores.product_type_id
-    //         WHERE stores.product_type_id = product_types.id
-    //         AND stores.status = 1
-    //         AND prices.status = 1
-    //         AND stores.quantity_available > 0 ";
-    //     if ($branchId) {
-    //         $batchesQuery .= "AND stores.branch_id = $branchId ";
-    //     }
-    //     $batchesQuery .= ") as batches";
-
-    //     $query->addSelect(DB::raw($batchesQuery));
-
-    //     // Execute the query and get the results
-    //     $productTypes = $query->get();
-
-    //     // Transform the results
-    //     $productTypes->transform(function ($item) {
-    //         // Decode the JSON fields
-    //         $item->product = json_decode($item->product);
-    //         $item->store = json_decode($item->store);
-    //         $item->batches = json_decode($item->batches);
-
-    //         // Return a formatted array with the desired structure
-    //         return [
-    //             'id' => $item->id,
-    //             'product_type_name' => $item->product_type_name,
-    //             'vat_percentage' => 7.5, // Static VAT percentage
-    //             'cost_price' => $item->batches[0]->cost_price ?? 0, // Cost price from the first batch or 0 if not available
-    //             'selling_price' => $item->batches[0]->selling_price ?? 0, // Selling price from the first batch or 0 if not available
-    //             'quantity_available' => $item->store->total_quantity ?? 0, // Total quantity available from the store or 0 if not available
-    //             'vat' => $item->product->vat ?? 'No', // VAT value from the product or 'No' if not available
-    //             'batches' => collect($item->batches)->map(function ($batch) {
-    //                 // Create a label combining batch number and selling price
-    //                 $batchLabel = $batch->batch_no."->".$batch->selling_price;
-    //                 // Return a formatted array for each batch
-    //                 return [
-    //                     'id' => $batch->id,
-    //                     'batch_no' =>  $batchLabel,
-    //                     'batch_quantity_left' => $batch->quantity_available,
-    //                     'batch_selling_price' => $batch->selling_price
-    //                 ];
-    //             })->toArray()
-    //         ];
-    //     });
-
-    //     // Return the transformed product types
-    //     return $productTypes;
-    // }
-
 
     private function getProductTypes($productId = null)
     {
@@ -325,9 +226,9 @@ class ProductTypeRepository
             'id' => $productType->id,
             'product_sub_category' => optional($productType->subCategory)->sub_category_name,
             'product_sub_category_id' => optional($productType->subCategory)->id,
-            'product_type_name' => $productType->product_type_name,
-            'product_type_image' => $productType->product_type_image,
-            'product_type_description' => $productType->product_type_description,
+            'product_name' => $productType->product_type_name,
+            'product_image' => $productType->product_type_image,
+            'product_description' => $productType->product_type_description,
             'vat' => $productType->vat,
             'product_category' => optional($productType->product_category)->category_name,
             'product_category_id' => optional($productType->product_category)->id,
@@ -465,23 +366,27 @@ class ProductTypeRepository
 
             return [
                 'product_sub_category' => optional($productType->subCategory)->sub_category_name,
-                'product_type_name' => $productType->product_type_name,
+                'product_name' => $productType->product_type_name,
                 'quantity_available' => $store->capacity_qty_available ?? 0,
                 'batch_no' => $purchase->batch_no ?? '',
                 'expiry_date' => $purchase->expiry_date,
                 'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name,
                 'selling_unit_name' => optional($productType->unitSelling)->selling_unit_name,
-                'branch_id' => $purchase->branch_id // Include branch_id in the response
+                //'branch_id' => $purchase->branch_id // Include branch_id in the response
             ];
         });
 
         $responseMsg = "Record retrieved successfully";
 
+
         // Check if the request has download set to true
         if (!isset($request['download'])) {
             // Send email only if download is not set to true
+            $isPdf = false;
             $emailService = new EmailService();
             $responseData = $this->userRepository->getuserOrgAndBranchDetail();
+
+
 
             // Generate the email table content
             $tableDetail = $this->generateExpiredProductTable($responseData, $response);
@@ -493,9 +398,15 @@ class ProductTypeRepository
                 "getExpiredProduct",
                 $tableDetail
             );
+        } else {
+
+            $pdf = $this->generatePdf->generatePdf($response, "Products that about to expire in 7 days");
+            $isPdf = true;
+            return ["data" => $pdf, "responseMsg" => $responseMsg, "isPdf" => $isPdf];
         }
 
-        return ["response" => $response, "responseMsg" => $responseMsg];
+
+        return ["data" => $response, "responseMsg" => $responseMsg, "isPdf" => $isPdf];
     }
 
 
@@ -503,6 +414,8 @@ class ProductTypeRepository
     private function generateExpiredProductTable($responseData, $productDetails)
     {
         // Organization and branch details table (header)
+        // <strong>State:</strong> {$responseData['state_name']}<br>
+        //<strong>Country:</strong> {$responseData['country_name']}
         $headerTable = "
         <table style='width: 100%; border-collapse: collapse;'>
             <tr>
@@ -510,8 +423,7 @@ class ProductTypeRepository
                     <strong>Branch Name:</strong> {$responseData['branch_name']}<br>
                     <strong>Branch Email:</strong> {$responseData['branch_email']}<br>
                     <strong>Branch Phone:</strong> {$responseData['branch_phone_number']}<br>
-                    <strong>State:</strong> {$responseData['state_name']}<br>
-                    <strong>Country:</strong> {$responseData['country_name']}
+                   
                 </td>
                 <td style='padding: 8px; text-align: right;'>
                   
@@ -546,7 +458,7 @@ class ProductTypeRepository
             $productTable .= "
             <tr>
                 <td style='border: 1px solid black; padding: 8px;'>{$product['product_sub_category']}</td>
-                <td style='border: 1px solid black; padding: 8px;'>{$product['product_type_name']}</td>
+                <td style='border: 1px solid black; padding: 8px;'>{$product['product_name']}</td>
                 <td style='border: 1px solid black; padding: 8px;'>{$product['quantity_available']}</td>
                 <td style='border: 1px solid black; padding: 8px;'>{$product['batch_no']}</td>
                 <td style='border: 1px solid black; padding: 8px;'>{$product['expiry_date']}</td>
@@ -567,16 +479,21 @@ class ProductTypeRepository
 
     public function getexpiredProductByDate($request)
     {
-        // Parse the start and end date from the request
+
+
+
         $startDate = Carbon::parse($request['start_date'])->startOfDay();
         $endDate = Carbon::parse($request['end_date'])->endOfDay();
 
-        // Branch filter logic
-        //$branchId = 'all';
+        //Log::info('Start Date:', ['startDate' => $startDate->toDateTimeString()]);
+        //Log::info('End Date:', ['endDate' => $endDate->toDateTimeString()]);
+
+
+
         $branchId = auth()->user()->branch_id;
 
 
-        // Create the query for expired products within the date range
+
         $expiredProductsQuery = \App\Models\Purchase::whereBetween('expiry_date', [$startDate, $endDate])
             ->with([
                 'productType' => function ($query) {
@@ -596,19 +513,22 @@ class ProductTypeRepository
             ->select('product_type_id', 'expiry_date', 'batch_no')
             ->groupBy('product_type_id', 'expiry_date', 'batch_no');
 
-        // Check if 'all' parameter is passed and return all data without pagination
-        if (isset($request['all']) && $request['all'] == true) {
-            // Get all results without pagination
-            $expiredProducts = $expiredProductsQuery->get();
 
-            // Transform the result
+        if (isset($request['all']) && $request['all'] == true) {
+
+            $expiredProducts = $expiredProductsQuery->get();
             $response = $expiredProducts->map(function ($purchase) {
                 $productType = $purchase->productType;
-                $store = $productType->store->where('batch_no', $purchase->batch_no)->first();
+                $store = null;
+
+                if ($productType->store) {
+                    $store = $productType->store->where('batch_no', $purchase->batch_no)->first();
+                }
+
 
                 return [
                     'product_sub_category' => optional($productType->subCategory)->sub_category_name,
-                    'product_type_name' => $productType->product_type_name,
+                    'product_name' => $productType->product_type_name,
                     'quantity_available' => $store->capacity_qty_available ?? 0,
                     'batch_no' => $purchase->batch_no ?? '',
                     'expiry_date' => $purchase->expiry_date,
@@ -617,21 +537,31 @@ class ProductTypeRepository
                 ];
             });
 
-            return $response;
+            $startDateFormatted = date('d-m-y', strtotime($startDate));
+            $endDateFormatted = date('d-m-y', strtotime($endDate));
+
+            $pdf = $this->generatePdf->generatePdf($response, " Expired Products ($startDateFormatted - $endDateFormatted)");
+
+
+
+            return ["data" => $pdf, "isPdf" => true];
 
         }
 
-        // Otherwise, paginate the results
         $expiredProducts = $expiredProductsQuery->paginate(20);
-
-        // Transform the paginated result
+        //log::info($expiredProducts);
         $response = $expiredProducts->getCollection()->map(function ($purchase) {
             $productType = $purchase->productType;
-            $store = $productType->store->where('batch_no', $purchase->batch_no)->first();
+            $store = null;
+
+            if ($productType->store) {
+                $store = $productType->store->where('batch_no', $purchase->batch_no)->first();
+            }
+
 
             return [
                 'product_sub_category' => optional($productType->subCategory)->sub_category_name,
-                'product_type_name' => $productType->product_type_name,
+                'product_name' => $productType->product_type_name,
                 'quantity_available' => $store->capacity_qty_available ?? 0,
                 'batch_no' => $purchase->batch_no ?? '',
                 'expiry_date' => $purchase->expiry_date,
@@ -639,12 +569,10 @@ class ProductTypeRepository
                 'selling_unit_name' => optional($productType->unitSelling)->selling_unit_name,
             ];
         });
-
-        // Replace the original collection with the transformed collection
         $expiredProducts->setCollection($response);
-
-        return $expiredProducts;
+        return ["data" => $expiredProducts, "isPdf" => false];
     }
+
     public function getproductPriceList($request)
     {
         // Query for unique products with their latest active price
@@ -667,30 +595,25 @@ class ProductTypeRepository
 
         // Check if the request has 'all' == true, and return all results without pagination
         if (isset($request['all']) && $request['all'] == true) {
+
             // Get all results without pagination
             $products = $productsQuery->get();
 
+
             // Transform each product to include the required data
             $response = $products->map(function ($product) {
-                $activePrice = $product->activePrice;
 
-                if ($activePrice) {
-                    $costPrice = $activePrice->is_new ? $activePrice->new_cost_price : $activePrice->cost_price;
-                    $sellingPrice = $activePrice->is_new ? $activePrice->new_selling_price : $activePrice->selling_price;
-                } else {
-                    $costPrice = 'No price available';
-                    $sellingPrice = 'No price available';
-                }
+                $latestPrice = $product->latest_price;
 
                 return [
-                    'product_type_name' => $product->product_type_name,
-                    'product_description' => $product->product_type_description,
-                    'cost_price' => $costPrice,
-                    'selling_price' => $sellingPrice,
+                    'product_name' => $product->product_type_name,
+                    'cost_price' => $latestPrice ? $latestPrice['cost_price'] : '',
+                    'selling_price' => $latestPrice ? $latestPrice['selling_price'] : '',
                 ];
             });
-
-            return $response;
+            $pdf = $this->generatePdf->generatePdf($response, " Price Lists");
+            return ["data" => $pdf, "isPdf" => true];
+            //return $response;
         }
 
         // Otherwise, paginate the results
@@ -698,25 +621,17 @@ class ProductTypeRepository
 
         // Transform each product to include the required data
         $products->getCollection()->transform(function ($product) {
-            $activePrice = $product->activePrice;
-
-            if ($activePrice) {
-                $costPrice = $activePrice->is_new ? $activePrice->new_cost_price : $activePrice->cost_price;
-                $sellingPrice = $activePrice->is_new ? $activePrice->new_selling_price : $activePrice->selling_price;
-            } else {
-                $costPrice = 'No price available';
-                $sellingPrice = 'No price available';
-            }
+            $latestPrice = $product->latest_price;
 
             return [
-                'product_type_name' => $product->product_type_name,
+                'product_name' => $product->product_type_name,
                 'product_description' => $product->product_type_description,
-                'cost_price' => $costPrice,
-                'selling_price' => $sellingPrice,
+                'cost_price' => $latestPrice ? $latestPrice['cost_price'] : 'No price available',
+                'selling_price' => $latestPrice ? $latestPrice['selling_price'] : 'No price available',
             ];
         });
-
-        return $products;
+        return ["data" => $products, "isPdf" => false];
+        // return $products;
     }
 
 

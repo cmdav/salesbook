@@ -9,9 +9,20 @@ use App\Models\Sale;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use App\Services\GeneratePdf;
+use App\Services;
 
 class StoreRepository
 {
+    protected GeneratePdf $generatePdf;
+
+
+    public function __construct(GeneratePdf $generatePdf)
+    {
+        $this->generatePdf = $generatePdf;
+
+    }
+
     private function query($branchId)
     {
 
@@ -68,22 +79,23 @@ class StoreRepository
         //return Store::latest()->paginate(3);
 
     }
-    private function transformProduct($store)
+    private function transformProduct($store, $isPdf = false)
     {
-        return [
-            'id' => $store->id,
-
-            'product_type' => optional($store->productType)->product_type_name,
-            'product_description' => optional($store->productType)->product_type_description,
+        return array_filter([
+            'id' => $isPdf ? null : $store->id, // Exclude id if isPdf is true
+            'product_name' => optional($store->productType)->product_type_name,
+            'product_description' => $isPdf ? null : optional($store->productType)->product_type_description, // Exclude product description if isPdf is true
             //'store_owner' => $store->store_owner,
             'batch_no' => $store->batch_no,
-            'branch_name' => optional($store->branches)->name,
+            'branch_name' =>  $isPdf ? null : optional($store->branches)->name,
             'quantity_available' => $store->capacity_qty_available,
             //'store_type' => $store->store_type,
             'status' => $store->capacity_qty_available > 0 ? 'Available' : 'Not Available',
-
-        ];
+        ], function ($value) {
+            return $value !== null;
+        });
     }
+
 
     public function create(array $data)
     {
@@ -141,10 +153,11 @@ class StoreRepository
             $store = $storeQuery->get();
             // Transform the entire collection
             $transformedStore = $store->map(function ($store) {
-                return $this->transformProduct($store);
+                return $this->transformProduct($store, true);
             });
+            $pdf = $this->generatePdf->generatePdf($transformedStore, "Item List Report");
 
-            return $transformedStore;
+            return ["data" => $pdf, "isPdf" => true];
         }
 
         // Paginate and transform the store data if 'all' is not present
@@ -154,7 +167,8 @@ class StoreRepository
             return $this->transformProduct($store);
         });
 
-        return $store;
+        //return $store;
+        return ["data" => $store, "isPdf" => false];
     }
 
 

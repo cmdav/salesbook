@@ -60,7 +60,7 @@ trait SetCreatedBy
     public function creator()
     {
 
-        return $this->belongsTo(User::class, "created_by", "id");
+        return $this->belongsTo(User::class, "created_by", "id")->select("id", "first_name", "last_name");
         // return $this->belongsTo(User::class, 'created_by');
         // ->select(['users.id', \DB::raw("
         //     CASE
@@ -74,7 +74,7 @@ trait SetCreatedBy
 
     public function updater()
     {
-        return $this->belongsTo(User::class, "updated_by", "id");
+        return $this->belongsTo(User::class, "updated_by", "id")->select("id", "first_name", "last_name");
         // return $this->belongsTo(User::class, 'updated_by');
         // ->select(['users.id', \DB::raw("
         //     CASE

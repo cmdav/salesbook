@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Users;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -15,23 +16,22 @@ use Exception;
 
 class SaleUserController extends Controller
 {
-    
     protected UserService $userService;
 
-   
+
 
     public function __construct(UserService $userService)
     {
         $this->userService = $userService;
 
-     
+
     }
-    
-    	
+
+
     public function store(Request $request)
-    { 	
-       
-     
+    {
+
+
 
         $request->validate([
             'password' => [
@@ -52,33 +52,34 @@ class SaleUserController extends Controller
                 'required',
                 'email',
                 'max:55',
-                Rule::unique('users', 'email'), 
+                Rule::unique('users', 'email'),
             ],
         ]);
-        
-            $data=$request->all();
-            //$data['type']='sales_personnel';
-            $data['email_verified_at']=Now();
-            $data['organization_code'] =Auth::user()->organization_code;
-          
-            $user = $this->userService->createUser($data);
-           
-        
-            if (!$user) {
 
-                return response()->json(['message' => 'User creation failed.'], 500);
-            }
-          
-    
-          
-          
-            return response()->json(['message' => "User created successfully.", 'data' =>$user], 201);
-            
-        
+        $data = $request->all();
+        //$data['type']='sales_personnel';
+        $data['email_verified_at'] = Now();
+        $data['organization_code'] = Auth::user()->organization_code;
+        $data['is_profile_complete'] = 1;
+
+        $user = $this->userService->createUser($data);
+
+
+        if (!$user) {
+
+            return response()->json(['message' => 'User creation failed.'], 500);
+        }
+
+
+
+
+        return response()->json(['message' => "User created successfully.", 'data' => $user], 201);
+
+
     }
     public function update(Request $request, $id)
     {
-       
+
         $request->validate([
             'first_name' => 'nullable|string|max:55',
             'last_name' => 'nullable|string|max:55',
@@ -90,7 +91,7 @@ class SaleUserController extends Controller
                 Rule::unique('users')->ignore($id),
             ],
             'password' => [
-                'nullable',
+                'required',
                 'string',
                 'min:8',
                 'max:30',
@@ -102,7 +103,7 @@ class SaleUserController extends Controller
             ],
         ]);
 
-      
+
         $data['organization_code'] = Auth::user()->organization_code;
 
         $user = $this->userService->updateUserById($id, $request->all());
@@ -113,6 +114,6 @@ class SaleUserController extends Controller
 
         return response()->json(['message' => "User updated successfully.", 'data' => $user], 200);
     }
-   
-   
+
+
 }

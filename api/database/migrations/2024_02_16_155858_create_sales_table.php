@@ -29,6 +29,7 @@ return new class () extends Migration {
             $table->uuid('updated_by')->nullable();
             $table->boolean('is_offline')->default(0);
             $table->boolean('new_price')->default(0);
+            $table->uuid('old_price_id')->nullable();
 
             $table->timestamps();
 

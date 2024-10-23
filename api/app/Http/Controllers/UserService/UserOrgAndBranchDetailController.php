@@ -20,6 +20,7 @@ class UserOrgAndBranchDetailController extends Controller
     public function index(Request $request)
     {
         $data = $this->userOrgAndBranchDetailService->index($request);
+        return $data;
 
         if (count($data) > 0) {
             return response()->json(['success' => true, 'message' => 'Record retrieved successfully', 'data' => $data], 200);

@@ -56,16 +56,14 @@ class DashboardStatRepository
 
             // Daily profit made
             $totalProductTypeDailyProfits = DB::table('sales')
-    ->join('prices as current_price', 'sales.price_id', '=', 'current_price.id')
-    ->leftJoin('prices as referenced_price', 'current_price.price_id', '=', 'referenced_price.id')
-    ->where('sales.branch_id', $branchId)
-    ->whereDate('sales.created_at', now()->toDateString())
-    ->sum(DB::raw('
-        (sales.price_sold_at - CASE 
-            WHEN current_price.price_id IS NOT NULL THEN COALESCE(referenced_price.selling_price, current_price.new_cost_price)
-            ELSE current_price.cost_price 
-        END) * sales.quantity
-    '));
+            ->join('prices as current_price', 'sales.price_id', '=', 'current_price.id')
+            ->leftJoin('prices as old_price', 'sales.old_price_id', '=', 'old_price.id') // Join with old_price based on old_price_id
+            ->where('sales.branch_id', $branchId)
+            ->whereDate('sales.created_at', now()->toDateString())
+            ->sum(DB::raw('
+                (sales.price_sold_at - COALESCE(old_price.cost_price, current_price.cost_price)) * sales.quantity
+            '));
+
 
 
             // // Retrieve sales data from the last 7 days
