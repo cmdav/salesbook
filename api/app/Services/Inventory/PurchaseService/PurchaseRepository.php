@@ -14,6 +14,35 @@ use Illuminate\Support\Facades\Log;
 
 class PurchaseRepository
 {
+    //   public function update($id, array $data)
+    // {
+    //     $purchase = Purchase::find($id);
+
+    //     if ($purchase) {
+    //         $originalQuantity = $purchase->quantity;
+    //         $newQuantity = $data['quantity'];
+    //         $quantityDifference = $newQuantity - $originalQuantity;
+
+    //         $purchase->update($data);
+
+    //         // Update store quantity
+    //         $store = Store::where('product_type_id', $purchase->product_type_id)
+    //                       ->where('batch_no', $purchase->batch_no)
+    //                       ->first();
+
+    //         if ($store) {
+    //             $store->quantity_available += $quantityDifference;
+    //             if ($store->quantity_available < 0) {
+    //                 $store->quantity_available = 0;
+    //             }
+    //             $store->save();
+    //         }
+    //     }
+
+    //     return $purchase;
+    // }
+
+
     private function query($branchId)
     {
 
@@ -270,56 +299,35 @@ class PurchaseRepository
         return Purchase::find($id);
     }
 
-    //   public function update($id, array $data)
-    // {
-    //     $purchase = Purchase::find($id);
+    public function delete($id)
+    {
+        $purchase = Purchase::find($id);
+        try {
+            if ($purchase) {
+                // Delete matching entries in the Store table
+                Store::where('product_type_id', $purchase->product_type_id)
+                    ->where('batch_no', $purchase->batch_no)
+                    ->delete();
 
-    //     if ($purchase) {
-    //         $originalQuantity = $purchase->quantity;
-    //         $newQuantity = $data['quantity'];
-    //         $quantityDifference = $newQuantity - $originalQuantity;
+                $purchase->delete();
 
-    //         $purchase->update($data);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Deletion successful',
+                ], 200);
+            }
 
-    //         // Update store quantity
-    //         $store = Store::where('product_type_id', $purchase->product_type_id)
-    //                       ->where('batch_no', $purchase->batch_no)
-    //                       ->first();
+        } catch (QueryException $e) {
+            // This will catch SQL constraint violations or other query-related errors
+            Log::channel('insertion_errors')->error('Error deleting purchase: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'This Purchase is already in use',
+            ], 500);
 
-    //         if ($store) {
-    //             $store->quantity_available += $quantityDifference;
-    //             if ($store->quantity_available < 0) {
-    //                 $store->quantity_available = 0;
-    //             }
-    //             $store->save();
-    //         }
-    //     }
+        }
+    }
 
-    //     return $purchase;
-    // }
 
-    // public function delete($id)
-    // {
-    //     $purchase = Purchase::find($id);
-
-    //     if ($purchase) {
-
-    //         $store = Store::where('product_type_id', $purchase->product_type_id)
-    //                       ->where('batch_no', $purchase->batch_no)
-    //                       ->first();
-
-    //         if ($store) {
-    //             $store->quantity_available -= $purchase->quantity;
-    //             if ($store->quantity_available < 0) {
-    //                 $store->quantity_available = 0;
-    //             }
-    //             $store->save();
-    //         }
-
-    //         return $purchase->delete();
-    //     }
-
-    //     return null;
-    // }
 
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Services\Email\EmailService;
+use App\Services\UserService\UserRepository;
 use App\Models\Price;
 use App\Models\Store;
 use App\Models\Sale;
@@ -20,15 +21,17 @@ use Exception;
 
 class SaleRepository
 {
+    protected UserRepository $userRepository;
     protected GeneratePdf $generatePdf;
 
 
-    public function __construct(GeneratePdf $generatePdf)
+    public function __construct(UserRepository $userRepository, GeneratePdf $generatePdf)
     {
+        $this->userRepository = $userRepository;
         $this->generatePdf = $generatePdf;
 
-    }
 
+    }
     //index to select all sales
     private function query($branchId = '')
     {
@@ -402,6 +405,7 @@ class SaleRepository
                             'transaction_id' => $transactionId, // Same transaction ID for all partial sales
                             'is_offline' => isset($data['is_offline']) ? $data['is_offline'] : 0,
                             'old_price_id' => $oldPriceId,  // Set the old price ID for this batch
+                            'batch_no' => $store->batch_no,
                         ]);
                         $sale->price_id = $latestPrice->id;
                         $sale->save();
@@ -430,8 +434,10 @@ class SaleRepository
                     $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
 
                     // Generate email content
-                    $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId, $branch);
-                    $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
+                    $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId);
+                    if(!isset($data['is_offline'])) {
+                        $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
+                    }
                 }
 
                 // Return the same response as downSalesReceipt after sale creation
@@ -457,90 +463,70 @@ class SaleRepository
 
 
 
-    private function generateProductDetailsTable($productDetails, $totalPrice, $transactionId, $branch)
+    private function generateProductDetailsTable($productDetails, $totalPrice, $transactionId)
     {
 
         $transactionTime = Carbon::now()->format('Y-m-d H:i:s');
+        $branch = $this->userRepository->getuserOrgAndBranchDetail();
+
+
+
 
         // Include branch details
-        $branchDetails = $branch ? [
-            'name' => $branch->name,
-            'state' => $branch->state_name,
-            'city' => $branch->city,
-            'email' => $branch->email,
-            'phone_number' => $branch->phone_number,
-            'address' => $branch->address,
-        ] : [
-            'name' => 'N/A',
-            'state' => 'N/A',
-            'city' => 'N/A',
-            'email' => 'N/A',
-            'phone_number' => 'N/A',
-            'address' => 'N/A',
-        ];
+        //         $centeredInfo = "
+        //     <div style='text-align: center; margin-bottom: 20px;'>
+        //         <p><strong>Transaction Time</strong>: {$transactionTime}<br>
+        //         <strong>Branch Name</strong>: {$branch['branch_name']}<br>
+        //         <strong>State</strong>: {$branch['state_name']}<br>
+        //         <strong>Email</strong>: {$branch['branch_email']}<br>
+        //         <strong>Phone Number</strong>: {$branch['branch_phone_number']}<br>
+        //         <strong>Address</strong>: {$branch['branch_address']}</p>
+        //     </div>
+        // ";
 
-        $tableHtml = "<table style='width: 100%; border-collapse: collapse; max-width: 100%;'>
-                        <tr>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Transaction Time</strong></td>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;' colspan='4'><strong>{$transactionTime}</strong></td>
-                        </tr>
-                        <tr>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Branch Name</strong></td>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>{$branchDetails['name']}</strong></td>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>City</strong></td>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;' colspan='2'><strong>{$branchDetails['city']}</strong></td>
-                        </tr>
-                        <tr>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>State</strong></td>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>{$branchDetails['state']}</strong></td>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Email</strong></td>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'  colspan='2'><strong>{$branchDetails['email']}</strong></td>
-                        </tr>
-                        <tr>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Phone Number</strong></td>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>{$branchDetails['phone_number']}</strong></td>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Address</strong></td>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;' colspan='2'><strong>{$branchDetails['address']}</strong></td>
-                        </tr>
-                        <tr>
-                            <th style='border: 1px solid black; padding: 8px;'>Product Name</th>
-                            <th style='border: 1px solid black; padding: 8px;'>Price</th>
-                            <th style='border: 1px solid black; padding: 8px;'>Quantity</th>
-                            <th style='border: 1px solid black; padding: 8px;'>VAT</th>
-                            <th style='border: 1px solid black; padding: 8px;'>Total</th>
-                        </tr>";
+        // $tableHtml = "{$centeredInfo}
+        $tableHtml = "
+<table style='width: 100%; max-width: 100%; border-collapse: collapse; border: 1px solid black;'>
+    <tr>
+        <th style='border: 1px solid black; padding: 8px; font-size: 14px'>Product Name</th>
+        <th style='border: 1px solid black; padding: 8px; font-size: 14px'>Price</th>
+        <th style='border: 1px solid black; padding: 8px; font-size: 14px'>Quantity</th>
+        <th style='border: 1px solid black; padding: 8px; font-size: 14px'>VAT</th>
+        <th style='border: 1px solid black; padding: 8px; font-size: 14px'>Total</th>
+    </tr>";
 
         foreach ($productDetails as $detail) {
             // Format the price and total for each product
             $formattedPrice = number_format($detail['price'], 2, '.', ',');
             $formattedTotal = number_format($detail['amount'], 2, '.', ',');
-            $vatValue = number_format($detail['amount'] - ($detail['price'] * $detail['quantity']), 2, '.', ','); // Calculate the VAT value
+            $vatValue = number_format($detail['amount'] - ($detail['price'] * $detail['quantity']), 2, '.', ',');
 
             $tableHtml .= "<tr>
-                                <td style='border: 1px solid black; padding: 8px;'>{$detail['productTypeName']}</td>
-                                <td style='border: 1px solid black; padding: 8px;'>₦{$formattedPrice}</td>
-                                <td style='border: 1px solid black; padding: 8px;'>{$detail['quantity']}</td>
-                                <td style='border: 1px solid black; padding: 8px;'>₦{$vatValue}</td>
-                                <td style='border: 1px solid black; padding: 8px;'>₦{$formattedTotal}</td>
-                           </tr>";
+        <td style='border: 1px solid black; padding: 8px; font-size: 14px;'>{$detail['productTypeName']}</td>
+        <td style='border: 1px solid black; padding: 8px; font-size: 14px;'>₦{$formattedPrice}</td>
+        <td style='border: 1px solid black; padding: 8px; font-size: 14px;'>{$detail['quantity']}</td>
+        <td style='border: 1px solid black; padding: 8px; font-size: 14px;'>₦{$vatValue}</td>
+        <td style='border: 1px solid black; padding: 8px; font-size: 14px;'>₦{$formattedTotal}</td>
+    </tr>";
         }
 
         // Format the grand total price
         $formattedGrandTotal = number_format($totalPrice, 2, '.', ',');
 
         $tableHtml .= "<tr>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Transaction Id</strong></td>
-                            <td style='border: 1px solid black; padding: 8px; text-align: right;'><strong>$transactionId</strong></td>
-                            <td colspan='2' style='border: 1px solid black; padding: 8px; text-align: right;'><strong>Total:</strong></td>
-                            <td style='border: 1px solid black; padding: 8px;'><strong>₦{$formattedGrandTotal}</strong></td>
-                       </tr>";
+    <td style='border: 1px solid black; padding: 8px; text-align: right; font-size: 14px;'><strong>Transaction Id</strong></td>
+    <td style='border: 1px solid black; padding: 8px; text-align: right; font-size: 14px;'><strong>$transactionId</strong></td>
+    <td colspan='2' style='border: 1px solid black; padding: 8px; text-align: right; font-size: 14px;'><strong>Total:</strong></td>
+    <td style='border: 1px solid black; padding: 8px; font-size: 14px;'><strong>₦{$formattedGrandTotal}</strong></td>
+</tr>";
 
         $tableHtml .= "</table>";
 
         // Wrap the table in a responsive container
-        $responsiveTableHtml = "<div style='width: 100%; overflow-x: auto;'>$tableHtml</div>";
 
-        return $responsiveTableHtml;
+
+        return $tableHtml;
+
     }
     public function dailySale()
     {

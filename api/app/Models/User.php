@@ -43,7 +43,9 @@ class User extends Authenticatable
         'password',
         'token',
         'email_verified_at',
-        'is_profile_complete'
+        'is_profile_complete',
+        'state_id',
+        'country_id'
 
     ];
 

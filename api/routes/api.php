@@ -25,6 +25,8 @@ Route::group(['prefix' => 'v1'], function () {
 
     route::resource('users', App\Http\Controllers\Users\UserController::class)->only('store');
     route::resource('contact-forms', App\Http\Controllers\Users\ContactFormController::class);
+    Route::resource('countries', App\Http\Controllers\Security\CountryController::class);
+    Route::resource('states', App\Http\Controllers\Security\StateController::class);
     //testing route
 
 });
@@ -60,8 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
         route::resource('auth-supplier-products', App\Http\Controllers\Supply\AuthSupplierProductController::class)->only('index');
         route::resource('business-branches', App\Http\Controllers\Security\BusinessBranchController::class);
         route::get('list-business-branches', [App\Http\Controllers\Security\BusinessBranchController::class, 'listing']);
-        Route::resource('countries', App\Http\Controllers\Security\CountryController::class);
-        Route::resource('states', App\Http\Controllers\Security\StateController::class);
+
 
         // Route::resource('container-types', App\Http\Controllers\Product\ContainerTypeController::class);
         // Route::resource('container-type-capacities', App\Http\Controllers\Product\ContainerTypeCapacityController::class);

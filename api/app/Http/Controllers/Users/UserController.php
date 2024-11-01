@@ -188,6 +188,8 @@ class UserController extends Controller
             'address' => $request->input('company_address'),
             'phone_number' => $user->phone_number,
             'created_by' => $user->id,
+            'state_id' => $user->state_id,
+            'country_id' => $user->country_id,
         ]);
         $branch->save();
 

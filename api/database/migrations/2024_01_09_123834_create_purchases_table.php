@@ -16,10 +16,7 @@ return new class () extends Migration {
             $table->uuid('supplier_id')->nullable();
             $table->uuid('price_id')->nullable();
             $table->integer('branch_id');
-            $table->string('batch_no', 50);
-            // $table->integer('container_qty')->default(0);
-            // $table->integer('capacity_qty')->default(0);
-            //$table->integer('selling_unit_qty')->default(0);
+            $table->string('batch_no')->index();
             $table->integer('capacity_qty')->default(0);
 
             $table->string('product_identifier', 50)->nullable();
@@ -32,6 +29,7 @@ return new class () extends Migration {
             // $table->foreign('price_id')->references('id')->on('prices')->onDelete('restrict');
             // $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('restrict');
             // $table->foreign('product_type_id')->references('id')->on('product_types')->onDelete('restrict');
+
 
         });
     }

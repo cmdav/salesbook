@@ -29,6 +29,7 @@ class UserFormRequest extends FormRequest
                 'in:sole_properietor,company,sales_personnel,supplier'
             ],
             'phone_number' => 'required|string',
+
         ];
 
         if ($request->input('organization_type') == 'company') {
@@ -43,6 +44,8 @@ class UserFormRequest extends FormRequest
                 'company_address' => 'required|string|max:55',
                 'contact_person' => 'required|string|max:55',
                 'dob' => 'nullable|date|date_format:Y-m-d',
+                'state_id' => 'required',
+                'country_id' => 'required',
             ]);
         }
 
@@ -52,6 +55,8 @@ class UserFormRequest extends FormRequest
                 'last_name' => 'required|string|max:55',
                 'middle_name' => 'nullable|string|max:55',
                 'dob' => 'nullable|date|date_format:Y-m-d',
+                'state_id' => 'required',
+                'country_id' => 'required',
                 'email' => ['required', 'email', 'max:55', Rule::unique('users')->ignore($this->user)],
                 'company_address' => 'required|string|max:55',
                 'company_name' => [

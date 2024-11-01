@@ -16,7 +16,7 @@ return new class () extends Migration {
             $table->uuid('customer_id')->nullable();
             $table->integer('branch_id');
             $table->uuid('price_id');
-            $table->string('batch_no')->nullable();
+            $table->string('batch_no')->index();
             $table->integer('price_sold_at');
             $table->integer('quantity')->default(0);
             //$table->integer('capacity_qty')->default(0);
@@ -30,6 +30,7 @@ return new class () extends Migration {
             $table->boolean('is_offline')->default(0);
             $table->boolean('new_price')->default(0);
             $table->uuid('old_price_id')->nullable();
+            $table->foreign('batch_no')->references('batch_no')->on('purchases')->onDelete('restrict');
 
             $table->timestamps();
 

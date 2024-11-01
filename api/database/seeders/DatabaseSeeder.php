@@ -122,21 +122,21 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $organization = \App\Models\Organization::factory(1)->create()->first();
-        $businessbranch = \App\Models\BusinessBranch::factory(1)->create()->first();
+        // $organization = \App\Models\Organization::factory(1)->create()->first();
+        // $businessbranch = \App\Models\BusinessBranch::factory(1)->create()->first();
 
-        $user = \App\Models\User::factory()->create([
-            'first_name' => 'Test',
-            'email' => 'admin@gmail.com',
-            'password' => bcrypt('test123'),
-            'type_id' => 2,
-            'token'  => 2671234,
-            'branch_id' => $businessbranch->id,
-            'role_id' =>  $superAdminRole->id,
-            'email_verified_at' => now(),
-            'organization_id'  => $organization->id,
-            'organization_code'  => $organization->organization_code,
-        ]);
+        // $user = \App\Models\User::factory()->create([
+        //     'first_name' => 'Test',
+        //     'email' => 'admin@gmail.com',
+        //     'password' => bcrypt('test123'),
+        //     'type_id' => 2,
+        //     'token'  => 2671234,
+        //     'branch_id' => $businessbranch->id,
+        //     'role_id' =>  $superAdminRole->id,
+        //     'email_verified_at' => now(),
+        //     'organization_id'  => $organization->id,
+        //     'organization_code'  => $organization->organization_code,
+        // ]);
 
         \App\Models\User::factory()->create([
             'first_name' => 'No supplier',
@@ -166,8 +166,8 @@ class DatabaseSeeder extends Seeder
             \App\Models\Currency::factory()->create([
                 'currency_name' => $currency['name'],
                 'currency_symbol' => $currency['symbol'],
-                'created_by' => $user->id,
-                'updated_by' => $user->id
+                'created_by' => 'System',
+                'updated_by' => "System"
                 // 'created_by' => "System",
                 // 'updated_by' => "System",
             ]);
