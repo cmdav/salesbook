@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Security;
+
 use App\Http\Controllers\Controller;
 use App\Services\Security\LogService\LogService;
 use App\Http\Requests\Security\LogFormRequest;
@@ -16,9 +17,9 @@ class LogController extends Controller
         $this->logService = $logService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return $this->logService->index();
+        return $this->logService->index($request);
     }
 
     public function show($id)

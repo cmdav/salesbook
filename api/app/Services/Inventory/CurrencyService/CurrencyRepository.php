@@ -5,9 +5,20 @@ namespace App\Services\Inventory\CurrencyService;
 use App\Models\Currency;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use App\Services\Security\LogService\LogRepository;
 
 class CurrencyRepository
 {
+    protected $logRepository;
+    protected $username;
+
+
+    public function __construct(LogRepository $logRepository)
+    {
+        $this->logRepository = $logRepository;
+
+    }
+
     private function query()
     {
 
@@ -15,8 +26,11 @@ class CurrencyRepository
     }
     public function index()
     {
+        $user = auth()->user();
+        $this->username = $user ? $user->first_name . ' ' . $user->last_name : 'Guest';
 
         $currencies = Currency::select("id", "currency_name", "currency_symbol", "status", "created_by", "updated_by")->with('creator', 'updater')->get();
+        $this->logRepository->logEvent('currencies', 'view', " ", 'Currency', "$this->username view currency", []);
 
         $transformed = $currencies->map(function ($currency) {
             return [
@@ -48,13 +62,12 @@ class CurrencyRepository
     }
     public function create(array $data)
     {
+        $user = auth()->user();
+        $this->username = $user ? $user->first_name . ' ' . $user->last_name : 'Guest';
         try {
             $data = Currency::create($data);
-            return response()->json([
-                'success' => true,
-                'message' => 'Currency created successfully',
-                'data' => $data,
-            ], 200);
+            $this->logRepository->logEvent('currencies', 'create', $data->id, 'Currency', "$this->username added $data->currency_name");
+            return response()->json(['success' => true,'message' => 'Currency created successfully','data' => $data], 200);
         } catch (Exception $e) {
             Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
             return response()->json([

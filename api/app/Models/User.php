@@ -45,7 +45,8 @@ class User extends Authenticatable
         'email_verified_at',
         'is_profile_complete',
         'state_id',
-        'country_id'
+        'country_id',
+        'is_super_admin'
 
     ];
 

@@ -136,6 +136,7 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
             'organization_id'  => $organization->id,
             'organization_code'  => $organization->organization_code,
+            'is_super_admin' => 1
         ]);
 
         \App\Models\User::factory()->create([

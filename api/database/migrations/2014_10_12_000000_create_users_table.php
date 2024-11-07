@@ -30,6 +30,7 @@ return new class () extends Migration {
             $table->date('dob', 10)->nullable();
             $table->string('email', 55)->unique();
             $table->boolean('is_profile_complete')->default(0);
+            $table->boolean('is_super_admin')->default(0);
             $table->timestamp('email_verified_at')->nullable();
             $table->uuid('token')->nullable();
             $table->string('password', 60)->default('p');

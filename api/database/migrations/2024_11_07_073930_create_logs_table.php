@@ -12,11 +12,12 @@ return new class () extends Migration {
     {
         Schema::create('logs', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->unsignedBigInteger('user_id')->nullable();
+            $table->uuid('user_id')->nullable();
+            $table->string('route')->nullable();
             $table->string('event')->nullable();//eg.g read, create, delete, purchase
-            $table->string('model_id')->nullable();
-            $table->string('model')->nullable();
-            $table->string('activity')->nullable();
+            $table->string('model_id')->nullable();//eg affected id
+            $table->string('model')->nullable(); //model name e.g Current
+            $table->string('activity')->nullable(); //This user created a currency
             $table->json('payload')->nullable(); // Stores request or action details
             $table->timestamps();
         });

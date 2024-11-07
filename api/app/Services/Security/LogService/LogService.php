@@ -13,9 +13,9 @@ class LogService
         $this->logRepository = $logRepository;
     }
 
-    public function index()
+    public function index($request)
     {
-        return $this->logRepository->index();
+        return $this->logRepository->index($request);
     }
 
     public function show($id)
