@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::group(['prefix' => 'v1'], function () {
         route::post('log-out', App\Http\Controllers\Auth\LogOutController::class);
         route::resource('sale-users', App\Http\Controllers\Users\SaleUserController::class)->only('store', 'update');
+        route::post('auth-send-user-email', App\Http\Controllers\Email\SendUserEmailController::class);
 
         //resource
         // route::resource('currencies', App\Http\Controllers\Inventory\CurrencyController::class);
@@ -131,10 +132,7 @@ Route::middleware('auth:sanctum')->group(function () {
             return [];
 
         });
-
-
         route::resource('download-sales-receipts', App\Http\Controllers\Inventory\SalesRecieptController::class)->only('show');
-
         route::get('all-price-by-product-type/{id}', App\Http\Controllers\Inventory\AllPriceByProductTypeController::class);
         route::get('latest-product-type-price/{id}', App\Http\Controllers\Inventory\LatestPriceByProductTypeController::class);
         route::get('all-product-type', App\Http\Controllers\Product\AllProductTypeController::class);//use in purchase to load product type
@@ -156,19 +154,13 @@ Route::middleware('auth:sanctum')->group(function () {
         route::get('all-job-roles', App\Http\Controllers\Security\AllJobRoleController::class);
         route::get('all-suppliers', App\Http\Controllers\Users\AllSupplierController::class);
         route::resource('auth-supplier-products', App\Http\Controllers\Supply\AuthSupplierProductController::class);
-
-
         route::get('all-pages', App\Http\Controllers\Security\AllPageController::class);
-
         route::get('dashboard-stat', App\Http\Controllers\Product\DashboardStatController::class);
         route::post('process-csv', App\Http\Controllers\Product\CsvController::class);
         route::get('download-csv/{fileName}', App\Http\Controllers\Product\DownloadCsvController::class);
-
         route::resource('users', App\Http\Controllers\Users\UserController::class)->only('index', 'show', 'update', 'destroy');
-
         route::resource('customers', App\Http\Controllers\Users\CustomerController::class)->only('index', 'show');
         route::get('customer-names', App\Http\Controllers\Users\CustomerNamesController::class);
-
         route::resource('daily-sales', App\Http\Controllers\Inventory\DailySaleController::class)->only('index');
 
         // Search endpoints
@@ -199,6 +191,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::resource('payment-methods', App\Http\Controllers\Security\PaymentMethodController::class);
         Route::resource('payment-details', App\Http\Controllers\Security\PaymentDetailController::class);
         Route::apiResource('list-payment-methods', App\Http\Controllers\PaymentMethod\ListPaymentMethodController::class);
+        Route::resource('logs', App\Http\Controllers\Security\LogController::class);
 
 
 

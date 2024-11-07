@@ -49,6 +49,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
                 'selling_unit_capacity_id' => $sellingUnitCapacity->id,
                 'selling_unit_id' => $sellingUnit->id,
                 'purchase_unit_id' => $purchaseUnit->id,
+                'barcode' => Str::limit(trim($row['barcode']), 200),
                 // 'created_by' and 'updated_by' fields should be set based on your application logic
                 // 'created_by' => ?,
                 // 'updated_by' => ?,

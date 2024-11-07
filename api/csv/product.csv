@@ -1,3 +1,3 @@
-product_type_name,product_type_description,piece_name,category_name,sub_category_name,vat
-Second products,testing product,small coke,Food,carbohydate,yes
-third products,testing product,big fanta,Food,carbohydate,no
+product_type_name,product_type_description,piece_name,category_name,sub_category_name,vat,barcode
+Second products,testing product,small co,Food,sample sub category,yes,12345
+third products,testing product,big fanta,Food,sample sub category,no,

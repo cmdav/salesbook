@@ -14,35 +14,6 @@ use Illuminate\Support\Facades\Log;
 
 class PurchaseRepository
 {
-    //   public function update($id, array $data)
-    // {
-    //     $purchase = Purchase::find($id);
-
-    //     if ($purchase) {
-    //         $originalQuantity = $purchase->quantity;
-    //         $newQuantity = $data['quantity'];
-    //         $quantityDifference = $newQuantity - $originalQuantity;
-
-    //         $purchase->update($data);
-
-    //         // Update store quantity
-    //         $store = Store::where('product_type_id', $purchase->product_type_id)
-    //                       ->where('batch_no', $purchase->batch_no)
-    //                       ->first();
-
-    //         if ($store) {
-    //             $store->quantity_available += $quantityDifference;
-    //             if ($store->quantity_available < 0) {
-    //                 $store->quantity_available = 0;
-    //             }
-    //             $store->save();
-    //         }
-    //     }
-
-    //     return $purchase;
-    // }
-
-
     private function query($branchId)
     {
 

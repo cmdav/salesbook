@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 
-
 class SendUserEmailController extends Controller
 {
     protected UserService $userService;
@@ -25,62 +24,65 @@ class SendUserEmailController extends Controller
 
     protected $email;
 
-   
+
 
     protected $organization_code;
 
-    public function __invoke(EmailFormRequest $request,
-                            UserService $userService,
-                            EmailService $emailService, 
-                            OrganizationService $organizationService,
-                            SupplierOrganizationService $supplierOrganizationService
-                        )
-    {
-        
+    public function __invoke(
+        EmailFormRequest $request,
+        UserService $userService,
+        EmailService $emailService,
+        OrganizationService $organizationService,
+        SupplierOrganizationService $supplierOrganizationService
+    ) {
+
         $this->userService = $userService;
-        $this->emailService = $emailService; 
+        $this->emailService = $emailService;
         $this->email = $request->email;
         $this->organizationService = $organizationService;
         $this->supplierOrganizationService = $supplierOrganizationService;
         $this->reqs = $request;
-       
 
-        if($request->type === 'resend'){
 
-           return  $this->resendEmail();
-        }
-        else if($request->type === 'reset-password'){
+        if($request->type === 'resend') {
+
+            return  $this->resendEmail();
+        } elseif($request->type === 'reset-password') {
 
             return  $this->passwordResetEmail();
-         }
-         else if($request->type === 'invitation'){
+        } elseif($request->type === 'invitation') {
 
             $request->validate([
                 'email' => ['required', 'email', Rule::unique('users', 'email')],
-                'organization_id' => [ 'required',  'uuid',Rule::exists('organizations', 'id')],
+                'organization_id' => ['nullable', 'uuid', Rule::exists('organizations', 'id')],
                 'type' => [ 'required','in:invitation'],
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255'
             ]);
 
-            $this->organization_code = $request->organization_code;
-            return  $this->InvitationEmail($request->organization_id,$request->first_name,$request->last_name);
-         }
-       
-      
+            $this->organization_code = isset($request->organization_code) && $request->organization_code
+    ? $request->organization_code
+    : (auth()->check() ? auth()->user()->organization_id : null);
+
+            return $this->InvitationEmail($this->organization_code, $request->first_name, $request->last_name);
+
+        }
+
+
 
     }
-    private function resendEmail(){
+    private function resendEmail()
+    {
 
         $user = $this->userService->authenticateUser($this->email);
-    
+
         if ($user && !$user->email_verified_at) {
-          
+
             $newToken = \Str::uuid()->toString();
-    
-         
+
+
             $this->userService->updateUserToken($user, $newToken);
-    
+
             // Proceed to resend the email
             if ($this->emailService->sendEmail($user, 'resend', $newToken)) {
 
@@ -94,15 +96,16 @@ class SendUserEmailController extends Controller
             return response()->json(['message' => 'Email already verified or user does not exist.'], 422);
         }
     }
-    
-    private function passwordResetEmail(){
+
+    private function passwordResetEmail()
+    {
         $user = $this->userService->authenticateUser($this->email);
-    
+
         if ($user && $user->email_verified_at) {
-           
+
             $newToken = \Str::uuid()->toString();
-    
-            
+
+
             $this->userService->updateUserToken($user, $newToken);
             //proceed to send password reset email
             if ($this->emailService->sendEmail($user, 'reset-password', $newToken)) {
@@ -119,24 +122,25 @@ class SendUserEmailController extends Controller
             return response()->json(['message' => 'Email has not verified or user does not exist.'], 422);
         }
     }
-    
-    
-    private function invitationEmail($organization_id, $first_name, $last_name){
-    
-       
-        $organizationInfo =$this->organizationService->getOrganizationById($organization_id);
 
-        $data=[
-            'organization_name'=>$organizationInfo->organization_name,
-            'organization_id'=>$organization_id
+
+    private function invitationEmail($organization_id, $first_name, $last_name)
+    {
+
+
+        $organizationInfo = $this->organizationService->getOrganizationById($organization_id);
+
+        $data = [
+            'organization_name' => $organizationInfo->organization_name,
+            'organization_id' => $organization_id
         ];
-        
-       
+
+
         $user = $this->userService->authenticateUser($this->email);
-       
+
         //new user;
         if (!$user || is_null($user->email_verified_at)) {
-         
+
             try {
                 if (!$user || is_null($user->email_verified_at)) {
 
@@ -147,15 +151,15 @@ class SendUserEmailController extends Controller
                         'last_name' => $last_name,
                         'password' => 'none',
                         'organization_id' => $organization_id,
-                        'token' =>time(),
-                        'type_id'=>3
+                        'token' => time(),
+                        'type_id' => 3
                     ]);
-                    
+
                     $this->supplierOrganizationService->createSupplierOrganization([
                         'supplier_id' => $newUser->id,
                         'organization_id' => $organization_id,
                     ]);
-                  
+
                     if ($this->emailService->sendEmail($newUser, "new-supplier", $data)) {
                         return response()->json(['message' => 'Invitation email has been sent to this supplier.']);
                     } else {
@@ -165,29 +169,29 @@ class SendUserEmailController extends Controller
             } catch (\Exception $e) {
                 return response()->json(['message' => $e->getMessage()], 500);
             }
-            
+
         }// existing user
-        else{
-                $this->supplierOrganizationService->createSupplierOrganization([
+        else {
+            $this->supplierOrganizationService->createSupplierOrganization([
 
-                    'supplier_id' =>$user->id,
-                    'organization_id'=>$organization_id,
-                
-                ]);
-            
-                if ($this->emailService->sendEmail($user, 'old-supplier',  $data)) {
+                'supplier_id' => $user->id,
+                'organization_id' => $organization_id,
 
-            
-                    return response()->json(['message' => 'Invitation email has been sent to this supplier.']);
-        
-                } else {
-                
-                    return response()->json(['message' => 'Network error.'], 500);
-                }
+            ]);
+
+            if ($this->emailService->sendEmail($user, 'old-supplier', $data)) {
+
+
+                return response()->json(['message' => 'Invitation email has been sent to this supplier.']);
+
+            } else {
+
+                return response()->json(['message' => 'Network error.'], 500);
+            }
         }
-        
-    
+
+
     }
-        
+
 
 }

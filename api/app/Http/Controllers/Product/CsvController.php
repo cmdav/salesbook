@@ -27,17 +27,17 @@ class CsvController extends Controller
        'ProductCategory' => ProductCategoryImport::class,
        'ProductSubCategory' => ProductSubCategoryImport::class,
        'Product' => ProductImport::class,
-       'ProductType' => ProductTypeImport::class,
+       //'ProductType' => ProductTypeImport::class,
        'Sale' => SaleImport::class,
        'Purchase' => PurchaseImport::class,
        'Price' => PriceImport::class,
        'PurchaseUnit' => PurchaseUnitImport::class,
      ];
 
-    public function __invoke(CsvService $csvService, Request $request)
+    public function __invoke(Request $request)
     {
 
-        $this->csvService = $csvService;
+        //$this->csvService = $csvService;
 
 
         $request->validate([
