@@ -34,7 +34,8 @@ class Sale extends Model
         'updated_by',
         'is_offline',
         'new_price',
-        'old_price_id'
+        'old_price_id',
+        'selling_unit_id',
     ];
     public function payment_details()
     {

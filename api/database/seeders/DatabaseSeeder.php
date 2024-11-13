@@ -33,7 +33,7 @@ class DatabaseSeeder extends Seeder
             'customers',
             'supplier-products',
             'suppliers',
-
+            'logs',
             'settings',
             'subscriptions',
             'c-subscriptions' // for customer

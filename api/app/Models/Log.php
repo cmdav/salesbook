@@ -48,6 +48,7 @@ class Log extends Model
     // Accessor for created_at to return human-readable format
     public function getCreatedAtAttribute($value)
     {
-        return Carbon::parse($value)->diffForHumans();
+        return Carbon::parse($value)->format('d-m-Y H:i:s');
     }
+
 }

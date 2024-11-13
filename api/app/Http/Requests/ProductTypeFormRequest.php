@@ -39,16 +39,25 @@ class ProductTypeFormRequest extends FormRequest
 
             'product_type_name' => $productTypeRule,
             'product_type_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-              'product_type_description' => 'required|string|max:65535',
+            'product_type_description' => 'required|string|max:65535',
 
             'barcode' => $barcodeRule,
             'organization_id' => 'nullable|uuid|exists:organizations,id',
-'supplier_id' => 'nullable|uuid|exists:suppliers,id',
-'selling_unit_capacity_id' => 'required|integer|exists:selling_unit_capacities,id',
-'purchase_unit_id' => 'required|uuid|exists:purchase_units,id',
-'selling_unit_id' => 'required|uuid|exists:selling_units,id',
-'category_id' => 'required|uuid|exists:product_categories,id',
-'sub_category_id' => 'required|uuid|exists:product_sub_categories,id',
+            'supplier_id' => 'nullable|uuid|exists:suppliers,id',
+            'category_id' => 'nullable|uuid|exists:product_categories,id',
+            'sub_category_id' => 'nullable|uuid|exists:product_sub_categories,id',
+
+            'selling_unit_capacity_id' => 'required|array',
+            'selling_unit_capacity_id.*' => 'integer|exists:selling_unit_capacities,id',
+
+            'purchase_unit_id' => 'required|array',
+            'purchase_unit_id.*' => 'uuid|exists:purchase_units,id',
+
+            'selling_unit_id' => 'required|array',
+            'selling_unit_id.*' => 'uuid|exists:selling_units,id',
+
+            'category_id' => 'required|uuid|exists:product_categories,id',
+            'sub_category_id' => 'required|uuid|exists:product_sub_categories,id',
 
         ];
     }

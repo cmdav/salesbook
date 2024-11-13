@@ -20,8 +20,8 @@ return new class () extends Migration {
             $table->uuid('selling_unit_capacity_id')->nullable()->index();
             $table->uuid('purchase_unit_id')->nullable()->index();
             $table->uuid('selling_unit_id')->nullable()->index();
-            $table->uuid('sub_category_id');
-            $table->uuid('category_id');
+            $table->uuid('sub_category_id')->nullable()->index();
+            $table->uuid('category_id')->nullable()->index();
 
             $table->boolean('vat')->default(0)->nullable();
             // $table->boolean('is_container_type')->default(1);

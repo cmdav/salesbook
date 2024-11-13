@@ -21,6 +21,7 @@ class Price extends Model
         'branch_id',
         'new_cost_price',
         'new_selling_price',
+        'product_measurement_id',
          'is_new',
         //'auto_generated_selling_price',
         'currency_id',
@@ -57,4 +58,9 @@ class Price extends Model
     {
         return $this->belongsTo(Price::class, 'price_id');
     }
+    public function productMeasurement()
+    {
+        return $this->belongsTo(ProductMeasurement::class, 'product_measurement_id', 'id');
+    }
+
 }

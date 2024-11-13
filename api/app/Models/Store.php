@@ -20,6 +20,7 @@ class Store extends Model
         'capacity_qty_available',
         //'container_qty_available',
         //'store_type',
+        'product_measurement_id',
         'status',
         'created_by',
         'updated_by',
@@ -51,6 +52,10 @@ class Store extends Model
     {
 
         return $this->belongsTo(BusinessBranch::class, 'branch_id', 'id');
+    }
+    public function productMeasurement()
+    {
+        return $this->belongsTo(ProductMeasurement::class, 'product_measurement_id', 'id');
     }
 
 }

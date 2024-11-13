@@ -16,7 +16,7 @@ class LogRepository
 
 
         if ($activity) {
-            $model = Log::where('activity', 'like', '%' . $activity . '%')->get();
+            $model = Log::where('activity', 'like', '%' . $activity . '%')->latest()->get();
 
             if ($model->isNotEmpty()) {
                 return response()->json([
@@ -35,7 +35,7 @@ class LogRepository
 
 
             /////////
-            $model =  Log::paginate(20);
+            $model =  Log::latest()->paginate(20);
             if($model) {
                 return response()->json([ 'success' => true, 'message' => 'Record retrieved successfully', 'data' => $model], 200);
             }

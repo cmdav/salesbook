@@ -135,20 +135,10 @@ class PurchaseRepository
     {
         DB::beginTransaction();
 
+
         try {
             $purchases = [];
 
-            // dd($data['purchases'][0]);
-            //get latest price
-            // $currentPrice = \App\Models\Price::where('product_type_id', $data['purchases'][0]['product_type_id'])
-            // ->where('branch_id', auth()->user()->branch_id)
-            // ->orderBy('created_at', 'desc')
-            // ->first();
-
-            // $stores = \App\Models\Store::where('product_type_id', $data['purchases'][0]['product_type_id'])->where('branch_id', auth()->user()->branch_id)
-            // ->where('status', 1)->orderBy('created_at', 'asc')->get();
-
-            // $totalAvailableQuantity = $stores->sum('capacity_qty_available');
 
             foreach ($data['purchases'] as $purchaseData) {
                 // Create a new Price instance
@@ -166,21 +156,7 @@ class PurchaseRepository
                     $price->save();
 
                     $purchaseData['price_id'] = $price->id;
-                    /**********update the exist price data if there's a change in the price**********/
 
-                    // Check if there is a latest price, and update it if necessary
-                    // if (!empty($currentPrice) && $totalAvailableQuantity > 0) {
-                    //     //dd([$purchaseData['cost_price'], $currentPrice->cost_price, $purchaseData['selling_price'], $currentPrice->selling_price ]);
-
-                    //     if ($purchaseData['cost_price'] != $currentPrice->cost_price || $purchaseData['selling_price'] != $currentPrice->selling_price) {
-                    //         // Update the exiting price to track
-                    //         $currentPrice->price_id = $price->id;
-                    //         $currentPrice->is_new = 1;
-                    //         $currentPrice->save();
-
-
-                    //     }
-                    // }
 
                 } else {
                     // Else, set the price_id
@@ -211,7 +187,7 @@ class PurchaseRepository
                 $purchase->price_id = $purchaseData['price_id'];
                 $purchase->batch_no = $purchaseData['batch_no'];
                 $purchase->product_identifier = $purchaseData['product_identifier'];
-                $purchase->expiry_date = $purchaseData['expiry_date'];
+                $purchase->expiry_date = isset($purchaseData['expiry_date']) && !empty($purchaseData['expiry_date']) ? $purchaseData['expiry_date'] : null;
                 $purchase->capacity_qty = $purchaseData['capacity_qty'];
                 $purchase->save();
 
@@ -225,11 +201,7 @@ class PurchaseRepository
 
                 ])->find($purchaseData['product_type_id']);
 
-                // Case-insensitive comparison for purchase unit name and selling unit name
-                //if (strcasecmp($productType->unitPurchase->purchase_unit_name, $productType->sellingUnit->selling_unit_name) !== 0) {
-                // Multiply the capacity quantity by selling unit capacity
                 $purchaseData['capacity_qty'] *= $productType->sellingUnitCapacity->selling_unit_capacity;
-                //}
 
                 // Check if the store already exists for the specific branch
                 $store = \App\Models\Store::where('product_type_id', $purchaseData['product_type_id'])
@@ -255,11 +227,12 @@ class PurchaseRepository
             }
 
             DB::commit();
-            return response()->json(['data' => $purchases, 'message' => 'Purchase record was added successfully'], 201);
+
+            return response()->json(['data' => $purchases, 'message' => 'Purchase record was added successfully','state' => true], 201);
         } catch (\Exception $e) {
             Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
             DB::rollBack();
-            return response()->json(['message' => 'Failed to create purchases'], 500);
+            return response()->json(['message' => 'Failed to create purchases','state' => false], 500);
         }
     }
 

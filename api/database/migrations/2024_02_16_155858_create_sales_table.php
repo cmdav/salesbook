@@ -14,6 +14,7 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
             $table->uuid('product_type_id');
             $table->uuid('customer_id')->nullable();
+            $table->uuid('selling_unit_id')->nullable();
             $table->integer('branch_id');
             $table->uuid('price_id');
             $table->string('batch_no')->index();

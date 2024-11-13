@@ -58,6 +58,12 @@ class ProductType extends Model
 
         return $this->hasMany(Store::class, 'product_type_id', 'id')->select('id', 'product_type_id', 'batch_no', 'quantity_available');
     }
+    public function productMeasurement()
+    {
+
+        return $this->hasMany(ProductMeasurement::class, 'product_type_id', 'id')
+            ->select('id', 'product_type_id', 'selling_unit_capacity_id', 'purchasing_unit_id', 'selling_unit_id');
+    }
     public function price()
     {
 
