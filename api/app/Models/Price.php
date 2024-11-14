@@ -22,6 +22,7 @@ class Price extends Model
         'new_cost_price',
         'new_selling_price',
         'product_measurement_id',
+        'selling_unit_id',
         'purchase_unit_id',
          'is_new',
         //'auto_generated_selling_price',

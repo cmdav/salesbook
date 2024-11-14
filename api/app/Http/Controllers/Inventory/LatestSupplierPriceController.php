@@ -11,11 +11,11 @@ class LatestSupplierPriceController extends Controller
 {
     protected $priceService;
 
-    public function __invoke(PriceService $priceService, $product_type_id, $supplier_id, $product_measurement_id)
+    public function __invoke(PriceService $priceService, $product_type_id, $supplier_id, $purchase_unit_id)
     {
         $this->priceService = $priceService;
 
-        return $this->priceService->getLatestSupplierPrice($product_type_id, $supplier_id, $product_measurement_id);
+        return $this->priceService->getLatestSupplierPrice($product_type_id, $supplier_id, $purchase_unit_id);
     }
 
 

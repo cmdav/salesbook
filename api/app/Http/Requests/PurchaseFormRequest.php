@@ -11,16 +11,9 @@ class PurchaseFormRequest extends FormRequest
     public function rules(Request $request): array
     {
         return [
-
             'purchases' => 'required|array|min:1',
             'purchases.*.product_type_id' => 'required|string',
             'purchases.*.supplier_id' => 'nullable|uuid',
-           // 'purchases.*.container_capacity_id' => 'required',
-            //'purchases.*.container_qty' => 'required|integer',
-            'purchases.*.capacity_qty' => 'nullable|integer',
-            'purchases.*.price_id' => 'required_without:purchases.*.cost_price,purchases.*.selling_price',
-            'purchases.*.cost_price' => 'required_without:purchases.*.price_id',
-            'purchases.*.selling_price' => 'required_without:purchases.*.price_id',
             'purchases.*.batch_no' => 'required|string|max:50',
             'purchases.*.purchase_unit_id' => 'required|uuid|max:50',
             'purchases.*.product_identifier' => 'nullable|string|max:50',
@@ -29,8 +22,15 @@ class PurchaseFormRequest extends FormRequest
                 'date',
                 'after_or_equal:today'
             ],
+            'purchases.*.selling_unit_data' => 'required|array',
+            'purchases.*.selling_unit_data.*' => 'array',
+            'purchases.*.selling_unit_data.*.selling_unit_id' => 'required|uuid',
+            'purchases.*.selling_unit_data.*.cost_price' => 'nullable|numeric|min:0|required_without:purchases.*.selling_unit_data.*.price_id',
+            'purchases.*.selling_unit_data.*.selling_price' => 'nullable|numeric|min:0|required_without:purchases.*.selling_unit_data.*.price_id',
+            'purchases.*.selling_unit_data.*.price_id' => 'nullable|uuid|required_without_all:purchases.*.selling_unit_data.*.cost_price,purchases.*.selling_unit_data.*.selling_price'
         ];
     }
+
 
     public function messages()
     {

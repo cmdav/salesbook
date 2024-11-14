@@ -25,32 +25,50 @@ class PriceRepository
 
     }
     //use in  purchase page when a product is selected
-    public function getLatestSupplierPrice($product_type_id, $supplier_id, $product_measurement_id)
+    public function getLatestSupplierPrice($product_type_id, $supplier_id, $purchase_unit_id)
     {
+        $branchId = auth()->user()->branch_id;
 
-        $data  = Price::select('id', 'selling_price', 'cost_price', 'batch_no')
-                            ->where(
-                                [
-                                    ['product_type_id', $product_type_id],
-                                    ['supplier_id', $supplier_id],
-                                    ['purchase_unit_id', $purchase_unit_id],
-                                    ['status', 1],
-                                    ['branch_id', auth()->user()->branch_id],
+        // Fetch all price entries for the given conditions
+        $prices = Price::select('id', 'selling_price', 'cost_price', 'batch_no', 'price_id', 'selling_unit_id')
+                    ->where([
+                        ['product_type_id', $product_type_id],
+                        ['supplier_id', $supplier_id],
+                        ['purchase_unit_id', $purchase_unit_id],
+                        ['status', 1],
+                        ['branch_id', $branchId]
+                    ])
+                    ->get();
 
+        // Initialize selling_unit_data array
+        $sellingUnitData = $prices->map(function ($price) {
+            // If selling_price or cost_price is null, retrieve from related price record using price_id
+            if (is_null($price->selling_price) || is_null($price->cost_price)) {
 
-                                    ]
-                            )->first();
+                // Fetch related price using price_id if cost_price or selling_price is null
+                $relatedPrice = Price::select('cost_price', 'selling_price')
+                                    ->where('id', $price->price_id)
+                                    ->first();
 
+                return [
+                    'selling_unit_id' => $price->selling_unit_id,
+                    'cost_price' => $relatedPrice->cost_price,
+                    'selling_price' => $price->selling_price ?? ($relatedPrice ? $relatedPrice->selling_price : null),
+                ];
+            }
 
-        if($data) {
-            return response()->json(['data' => $data], 200);
-        }
-        return [];
+            // Return data directly if cost_price and selling_price are available
+            return [
+                'selling_unit_id' => $price->selling_unit_id,
+                'cost_price' => $price->cost_price,
+                'selling_price' => $price->selling_price,
+            ];
+        });
 
-        //return $price;
-
-
+        // Prepare response with selling_unit_data
+        return response()->json($sellingUnitData, 200);
     }
+
 
     public function getLatestPriceByProductType($id)
     {

@@ -16,6 +16,7 @@ return new class () extends Migration {
             $table->uuid('supplier_id')->nullable();
             $table->uuid('price_id')->nullable();
             $table->uuid('purchase_unit_id')->nullable();
+            $table->uuid('selling_unit_id')->nullable();
             $table->integer('branch_id');
             $table->string('batch_no')->index();
             $table->integer('capacity_qty')->default(0);

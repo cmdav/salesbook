@@ -92,27 +92,64 @@ class ProductTypeRepository
     // }
     public function onlyProductTypeName()
     {
-        $response = ProductType::with([
-                'productMeasurement.sellingUnitCapacity.sellingUnit.purchaseUnit:id,purchase_unit_name'
-            ])
-            ->get()
-            ->transform(function ($productType) {
-                $purchasingUnits = $productType->productMeasurement->map(function ($measurement) {
+        $response = ProductType::select("id", "product_type_name")
+    ->with([
+        'productMeasurement' => function ($query) {
+            $query->select('id', 'product_type_id', 'selling_unit_capacity_id');
+        },
+        'productMeasurement.sellingUnitCapacity.sellingUnit.purchaseUnit' => function ($query) {
+            $query->select('id', 'purchase_unit_name');
+        },
+        'productMeasurement.sellingUnitCapacity.sellingUnit.purchaseUnit.sellingUnits' => function ($query) {
+            $query->select('id', 'purchase_unit_id', 'selling_unit_name');
+        }
+    ])
+    ->get()
+        ->transform(function ($productType) {
+            return [
+                'id' => $productType->id,
+                'product_type_name' => $productType->product_type_name,
+                'product_measurement' => $productType->productMeasurement->map(function ($measurement) {
+                    $purchaseUnit = optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->purchaseUnit;
+
                     return [
-                        'purchase_unit_id' => $measurement->purchasing_unit_id,
-                        'purchase_unit_name' => optional($measurement->sellingUnitCapacity->sellingUnit->purchaseUnit)->purchase_unit_name,
+                        'purchase_unit_id' => optional($purchaseUnit)->id,
+                        'purchase_unit_name' => optional($purchaseUnit)->purchase_unit_name,
+                        'selling_units' => collect(optional($purchaseUnit)->sellingUnits)->map(function ($sellingUnit) {
+                            return [
+                                'id' => $sellingUnit->id,
+                                //'purchase_unit_id' => $sellingUnit->purchase_unit_id,
+                                'selling_unit_name' => $sellingUnit->selling_unit_name,
+                            ];
+                        })->values(),
                     ];
-                })->filter(); // Filters out any null purchase units
+                })->unique('purchase_unit_name')->values(), // Ensures unique purchase units and resets array keys
+            ];
+        });
 
-                // Remove duplicates by `purchase_unit_id`
-                $uniquePurchasingUnits = $purchasingUnits->unique('purchase_unit_id')->values();
+        return response()->json(['data' => $response]);
 
-                return [
-                    'id' => $productType->id,
-                    'product_type_name' => $productType->product_type_name,
-                    'purchasing_units' => $uniquePurchasingUnits,
-                ];
-            });
+
+
+
+        // ->transform(function ($productType) {
+        //     $purchasingUnits = $productType->productMeasurement->map(function ($measurement) {
+        //         return [
+        //             'purchase_unit_id' => $measurement->purchasing_unit_id,
+        //             'purchase_unit_name' => optional($measurement->sellingUnitCapacity->sellingUnit->purchaseUnit)->purchase_unit_name,
+        //         ];
+        //     })->filter();
+        // Filters out any null purchase units
+
+        // Remove duplicates by `purchase_unit_id`
+        // $uniquePurchasingUnits = $purchasingUnits->unique('purchase_unit_id')->values();
+
+        // return [
+        //     'id' => $productType->id,
+        //     'product_type_name' => $productType->product_type_name,
+        //     'purchasing_units' => $uniquePurchasingUnits,
+        // ];
+        // });
 
         if ($response) {
             return response()->json(['data' => $response], 200);
@@ -347,8 +384,8 @@ class ProductTypeRepository
                 if ($purchaseUnitId && $sellingUnitId && $sellingUnitCapacity) {
                     \App\Models\ProductMeasurement::create([
                         'product_type_id' => $productType->id,
-                        //'selling_unit_capacity_id' => $sellingUnitCapacity,
-                        'purchasing_unit_id' => $purchaseUnitId,
+                        'selling_unit_capacity_id' => $sellingUnitCapacity,
+                        //'purchasing_unit_id' => $purchaseUnitId,
                         //'selling_unit_id' => $sellingUnitId,
                     ]);
                 }

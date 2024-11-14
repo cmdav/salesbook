@@ -28,7 +28,8 @@ class Purchase extends Model
         'created_by',
         'branch_id',
         'updated_by',
-        'purchasing_unit_id'
+        'purchasing_unit_id',
+        'selling_unit_id'
     ];
 
 
