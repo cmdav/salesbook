@@ -12,6 +12,7 @@ class ProductTypeFormRequest extends FormRequest
     public function rules(Request $request): array
     {
 
+
         $productTypeRule = [
             'required',
             'string',
@@ -56,8 +57,7 @@ class ProductTypeFormRequest extends FormRequest
             'selling_unit_id' => 'required|array',
             'selling_unit_id.*' => 'uuid|exists:selling_units,id',
 
-            'category_id' => 'required|uuid|exists:product_categories,id',
-            'sub_category_id' => 'required|uuid|exists:product_sub_categories,id',
+
 
         ];
     }

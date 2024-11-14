@@ -14,7 +14,7 @@ return new class () extends Migration {
 
             $table->uuid('id')->primary();
             $table->uuid('product_type_id')->index();
-            $table->uuid('selling_unit_capacity_id')->index();
+            $table->uuid('selling_unit_capacity_id')->nullable()->index();
             $table->uuid('purchasing_unit_id')->nullable()->index();
             $table->uuid('selling_unit_id')->nullable()->index();
             $table->timestamps();

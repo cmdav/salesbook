@@ -25,13 +25,15 @@ class PriceRepository
 
     }
     //use in  purchase page when a product is selected
-    public function getLatestSupplierPrice($product_type_id, $supplier_id)
+    public function getLatestSupplierPrice($product_type_id, $supplier_id, $product_measurement_id)
     {
 
         $data  = Price::select('id', 'selling_price', 'cost_price', 'batch_no')
                             ->where(
-                                [['product_type_id', $product_type_id],
+                                [
+                                    ['product_type_id', $product_type_id],
                                     ['supplier_id', $supplier_id],
+                                    ['purchase_unit_id', $purchase_unit_id],
                                     ['status', 1],
                                     ['branch_id', auth()->user()->branch_id],
 

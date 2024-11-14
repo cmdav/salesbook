@@ -22,6 +22,7 @@ class PurchaseFormRequest extends FormRequest
             'purchases.*.cost_price' => 'required_without:purchases.*.price_id',
             'purchases.*.selling_price' => 'required_without:purchases.*.price_id',
             'purchases.*.batch_no' => 'required|string|max:50',
+            'purchases.*.purchase_unit_id' => 'required|uuid|max:50',
             'purchases.*.product_identifier' => 'nullable|string|max:50',
             'purchases.*.expiry_date' => [
                 'nullable',

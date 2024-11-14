@@ -135,10 +135,8 @@ class PurchaseRepository
     {
         DB::beginTransaction();
 
-
         try {
             $purchases = [];
-
 
             foreach ($data['purchases'] as $purchaseData) {
                 // Create a new Price instance
@@ -146,8 +144,8 @@ class PurchaseRepository
                 $price->product_type_id = $purchaseData['product_type_id'];
                 $price->supplier_id = $purchaseData['supplier_id'];
                 $price->batch_no = $purchaseData['batch_no'];
+                $price->purchase_unit_id = $purchaseData['purchase_unit_id'];
                 $price->status = 1;
-
 
                 // If price_id is empty, this is the initial price, so set cost and selling prices
                 if (empty($purchaseData['price_id'])) {
@@ -156,18 +154,13 @@ class PurchaseRepository
                     $price->save();
 
                     $purchaseData['price_id'] = $price->id;
-
-
                 } else {
                     // Else, set the price_id
                     $price->price_id = $purchaseData['price_id'];
                     $price->save();
-
-
-
                 }
 
-                // If supplier_id is not empty, check and save new supplier into supplier_product table
+                // Check and save new supplier into supplier_product table
                 if (!empty($purchaseData['supplier_id'])) {
                     $existingRecord = \App\Models\SupplierProduct::where('product_type_id', $purchaseData['product_type_id'])
                         ->where('supplier_id', $purchaseData['supplier_id'])
@@ -186,6 +179,7 @@ class PurchaseRepository
                 $purchase->supplier_id = $purchaseData['supplier_id'];
                 $purchase->price_id = $purchaseData['price_id'];
                 $purchase->batch_no = $purchaseData['batch_no'];
+                $purchase->purchase_unit_id = $purchaseData['purchase_unit_id'];
                 $purchase->product_identifier = $purchaseData['product_identifier'];
                 $purchase->expiry_date = isset($purchaseData['expiry_date']) && !empty($purchaseData['expiry_date']) ? $purchaseData['expiry_date'] : null;
                 $purchase->capacity_qty = $purchaseData['capacity_qty'];
@@ -193,20 +187,20 @@ class PurchaseRepository
 
                 // Retrieve product type with related selling and purchase units
                 $productType = \App\Models\ProductType::with([
-                    'sellingUnitCapacity:id,selling_unit_id,selling_unit_capacity',
-                    'unitPurchase:id,purchase_unit_name',
-                    'sellingUnit' => function ($query) {
-                        $query->select('selling_units.id', 'selling_units.purchase_unit_id', 'selling_units.selling_unit_name');
-                    },
-
+                    'productMeasurement.sellingUnitCapacity:id,selling_unit_id,selling_unit_capacity',
+                    'productMeasurement.sellingUnitCapacity.sellingUnit:id,selling_unit_name,purchase_unit_id',
+                    'productMeasurement.sellingUnitCapacity.sellingUnit.purchaseUnit:id,purchase_unit_name',
                 ])->find($purchaseData['product_type_id']);
 
-                $purchaseData['capacity_qty'] *= $productType->sellingUnitCapacity->selling_unit_capacity;
+                // Multiply capacity_qty with each selling_unit_capacity for each measurement
+                foreach ($productType->productMeasurement as $measurement) {
+                    $purchaseData['capacity_qty'] *= optional($measurement->sellingUnitCapacity)->selling_unit_capacity;
+                }
 
                 // Check if the store already exists for the specific branch
                 $store = \App\Models\Store::where('product_type_id', $purchaseData['product_type_id'])
                     ->where('batch_no', $purchaseData['batch_no'])
-                    ->where('branch_id', auth()->user()->branch_id) // Ensure store is for the user's branch
+                    ->where('branch_id', auth()->user()->branch_id)
                     ->first();
 
                 if (!$store) {
@@ -215,12 +209,11 @@ class PurchaseRepository
                     $store->product_type_id = $purchaseData['product_type_id'];
                     $store->batch_no = $purchaseData['batch_no'];
                     $store->branch_id = auth()->user()->branch_id;
-                    $store->capacity_qty_available = 0; // Initialize the quantity if store doesn't exist
+                    $store->capacity_qty_available = 0;
                 }
 
                 // Update the store capacity with the adjusted quantity
                 $store->capacity_qty_available += $purchaseData['capacity_qty'];
-
                 $store->save();
 
                 $purchases[] = $purchase;
@@ -228,13 +221,14 @@ class PurchaseRepository
 
             DB::commit();
 
-            return response()->json(['data' => $purchases, 'message' => 'Purchase record was added successfully','state' => true], 201);
+            return response()->json(['data' => $purchases, 'message' => 'Purchase record was added successfully', 'state' => true], 201);
         } catch (\Exception $e) {
             Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
             DB::rollBack();
-            return response()->json(['message' => 'Failed to create purchases','state' => false], 500);
+            return response()->json(['message' => 'Failed to create purchases', 'state' => false], 500);
         }
     }
+
 
 
 

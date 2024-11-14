@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Inventory\PriceService;
+
 use App\Services\Inventory\PriceService\PriceRepository;
 
-
-class PriceService 
+class PriceService
 {
     protected $PriceRepository;
 
@@ -15,13 +15,13 @@ class PriceService
 
     public function createPrice(array $data)
     {
-       
+
         return $this->PriceRepository->create($data);
     }
 
     public function getAllPrice()
     {
-       
+
         return $this->PriceRepository->index();
     }
 
@@ -41,9 +41,9 @@ class PriceService
     {
         return $this->PriceRepository->getLatestPriceByProductType($id);
     }
-    public function getLatestSupplierPrice($product_type_id, $supplier_id)
+    public function getLatestSupplierPrice($product_type_id, $supplier_id, $product_measurement_id)
     {
-        return $this->PriceRepository->getLatestSupplierPrice($product_type_id, $supplier_id);
+        return $this->PriceRepository->getLatestSupplierPrice($product_type_id, $supplier_id, $product_measurement_id);
     }
     public function updatePrice($id, array $data)
     {

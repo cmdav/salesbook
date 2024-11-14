@@ -347,9 +347,9 @@ class ProductTypeRepository
                 if ($purchaseUnitId && $sellingUnitId && $sellingUnitCapacity) {
                     \App\Models\ProductMeasurement::create([
                         'product_type_id' => $productType->id,
-                        'selling_unit_capacity_id' => $sellingUnitCapacity,
+                        //'selling_unit_capacity_id' => $sellingUnitCapacity,
                         'purchasing_unit_id' => $purchaseUnitId,
-                        'selling_unit_id' => $sellingUnitId,
+                        //'selling_unit_id' => $sellingUnitId,
                     ]);
                 }
             }
