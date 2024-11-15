@@ -36,6 +36,7 @@ class Sale extends Model
         'new_price',
         'old_price_id',
         'selling_unit_id',
+        'is_actual'
     ];
     public function payment_details()
     {

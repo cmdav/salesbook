@@ -21,10 +21,13 @@ class Store extends Model
         //'container_qty_available',
         //'store_type',
         'product_measurement_id',
+        'selling_unit_id',
+        'purchase_unit_id',
         'status',
         'created_by',
         'updated_by',
         'branch_id',
+        'is_actual'
     ];
 
 

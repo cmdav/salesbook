@@ -31,6 +31,7 @@ return new class () extends Migration {
             $table->boolean('is_offline')->default(0);
             $table->boolean('new_price')->default(0);
             $table->uuid('old_price_id')->nullable();
+            $table->integer('is_actual')->default(0);
             $table->foreign('batch_no')->references('batch_no')->on('purchases')->onDelete('restrict');
 
             $table->timestamps();

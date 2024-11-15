@@ -17,13 +17,15 @@ return new class () extends Migration {
 
             // $table->uuid('store_owner');
             $table->integer('branch_id');
-            // $table->integer('selling_unit_qty_available')->default(0);
+            $table->integer('selling_unit_id')->default(0);
+            $table->integer('purchase_unit_id')->default(0);
             $table->integer('capacity_qty_available')->default(0);
             $table->uuid('product_measurement_id')->nullable();
             // $table->integer('store_type')->default(0)->comment("0 supplier, 1 company");
             $table->integer('status')->default(1);
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
+            $table->integer('is_actual')->default(0);
             $table->timestamps();
 
             $table->foreign('product_type_id')->references('id')->on('product_types')->onDelete('restrict');
