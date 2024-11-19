@@ -21,13 +21,22 @@ class SaleFormRequest extends FormRequest
                 'required',
                 'integer',
             ],
-
             'products.*.vat' => [
                 'nullable',
                 'string',
             ],
+            'products.*.selling_unit_id' => [
+                'required',
+                'uuid',
+            ],
+            'products.*.purchase_unit_id' => [
+                'required',
+                'uuid',
+            ],
         ];
     }
+
+
 
     // public function messages()
     // {

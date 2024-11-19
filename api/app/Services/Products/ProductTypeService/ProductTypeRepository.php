@@ -70,26 +70,7 @@ class ProductTypeRepository
     {
         return $this->getProductTypes($id);
     }
-    // public function onlyProductTypeName()
-    // {
-    //     $response = ProductType::select('id', 'product_type_name', 'purchase_unit_id')
-    //         ->with('unitPurchase:id,purchase_unit_name')
-    //         ->get()
-    //         ->transform(function ($productType) {
-    //             return [
-    //                 'id' => $productType->id,
-    //                 'product_type_name' => $productType->product_type_name,
-    //                 'purchase_unit_id' => $productType->purchase_unit_id,
-    //                 'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name, // Use optional to handle null cases
-    //             ];
-    //         });
 
-    //     if($response) {
-    //         return response()->json(['data' => $response], 200);
-    //     }
-
-    //     return [];
-    // }
     public function onlyProductTypeName()
     {
         $response = ProductType::select("id", "product_type_name")
@@ -129,28 +110,6 @@ class ProductTypeRepository
 
         return response()->json(['data' => $response]);
 
-
-
-
-        // ->transform(function ($productType) {
-        //     $purchasingUnits = $productType->productMeasurement->map(function ($measurement) {
-        //         return [
-        //             'purchase_unit_id' => $measurement->purchasing_unit_id,
-        //             'purchase_unit_name' => optional($measurement->sellingUnitCapacity->sellingUnit->purchaseUnit)->purchase_unit_name,
-        //         ];
-        //     })->filter();
-        // Filters out any null purchase units
-
-        // Remove duplicates by `purchase_unit_id`
-        // $uniquePurchasingUnits = $purchasingUnits->unique('purchase_unit_id')->values();
-
-        // return [
-        //     'id' => $productType->id,
-        //     'product_type_name' => $productType->product_type_name,
-        //     'purchasing_units' => $uniquePurchasingUnits,
-        // ];
-        // });
-
         if ($response) {
             return response()->json(['data' => $response], 200);
         }
@@ -163,42 +122,66 @@ class ProductTypeRepository
     {
 
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
+
         $response = ProductType::select(
             'id',
             'product_type_name',
             'barcode',
-            'vat',
-            'selling_unit_id'
+            'vat'
         )
-        ->with('unitselling:id,selling_unit_name')
-        ->with(['store' => function ($query) use ($branchId) {
-            $query->selectRaw('product_type_id, SUM(capacity_qty_available) as total_quantity')
-                ->where('status', 1);
+            ->with([
+                'productMeasurement',
+                'productMeasurement.sellingUnitCapacity:id,selling_unit_id,selling_unit_capacity',
+                'productMeasurement.sellingUnitCapacity.sellingUnit:id,selling_unit_name,purchase_unit_id',
+                'productMeasurement.sellingUnitCapacity.sellingUnit.purchaseUnit:id,purchase_unit_name',
+                'subCategory:id,sub_category_name',
+                'activePrice' => function ($query) {
+                    $query->select('id', 'cost_price', 'selling_price', 'product_type_id');
+                },
+                'store' => function ($query) use ($branchId) {
+                    $query->selectRaw('product_type_id, SUM(capacity_qty_available) as total_quantity')
+                        ->where('status', 1);
 
-            if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
-                // Apply the where clause if branch_id is not 'all' and the user is not admin
-                $query->where('branch_id', $branchId);
-            }
-            $query->groupBy('product_type_id');
-        }])
-        ->get();
+                    if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
+                        $query->where('branch_id', $branchId);
+                    }
+                    $query->groupBy('product_type_id');
+                },
+            ])
+            ->get();
+
 
         if ($response) {
             $response = $response->map(function ($item) {
-
                 // Add latest price information to the response
-                $latestPrice = $item->latest_price; //latest price accessor
-                $item->price_id = $latestPrice ? $latestPrice['price_id'] : null;
-                $item->cost_price = $latestPrice ? $latestPrice['cost_price'] : null;
-                $item->selling_price = $latestPrice ? $latestPrice['selling_price'] : null;
-                $item->quantity_available = optional($item->store)->total_quantity;
-                $item->selling_unit_name = optional($item->unitselling)->selling_unit_name;
-                unset($item->store);
-                unset($item->unitselling);
+                $latestPrice = $item->activePrice->first(); // Assuming activePrice contains the latest price
+                // $item->price_id = $latestPrice ? $latestPrice->id : null;
+                // $item->cost_price = $latestPrice ? $latestPrice->cost_price : null;
+                // $item->selling_price = $latestPrice ? $latestPrice->selling_price : null;
+                // $item->quantity_available = optional($item->store)->total_quantity;
+
+                // Combine purchase and selling unit details
+                $measurements = $item->productMeasurement->map(function ($measurement) {
+                    return [
+                        'selling_unit_id' => optional($measurement->sellingUnitCapacity->sellingUnit)->id,
+                        'selling_unit_name' => optional($measurement->sellingUnitCapacity->sellingUnit)->selling_unit_name,
+                        'purchase_unit_id' => optional($measurement->sellingUnitCapacity->sellingUnit->purchaseUnit)->id,
+                        'selling_unit_capacity' => optional($measurement->sellingUnitCapacity)->selling_unit_capacity,
+                        'price_id' => "9d7de6b9-dcf3-4401-915c-c84f14206ba2",
+                        'cost_price' => 50,
+                        'selling_price' => 90,
+                        'capacity_quantity_available' => 190,
+                    ];
+                });
+
+                $item->selling_units = $measurements;
+
+                // Remove unnecessary relationships
+                unset($item->store, $item->productMeasurement, $item->activePrice);
 
                 return $item;
             });
-
+            // dd($response);
             return response()->json(['data' => $response], 200);
         }
 
@@ -209,6 +192,7 @@ class ProductTypeRepository
     {
 
         if(!$product_id) {
+
             //currently in use in the sales page
             return $this->saleProductDetail();
         }

@@ -332,133 +332,257 @@ class SaleRepository
         $emailService = new EmailService();
         $transactionId = time() . rand(1000, 9999);
 
-        try {
-            $response = DB::transaction(function () use ($data, $emailService, $transactionId) {
-                $productDetails = [];
-                $totalPrice = 0; // Initialize total price
-                $branch = null; // Initialize branch
 
-                foreach ($data['products'] as $product) {
-                    // Get latest price id for the product
-                    $latestPrice = Price::where([
-                            ['product_type_id', $product['product_type_id']],
-                            ['status', 1]
-                        ])->orderBy('created_at', 'desc')->firstOrFail();
+        //try {
+        $response = DB::transaction(function () use ($data, $emailService, $transactionId) {
+            $productDetails = [];
+            $totalPrice = 0;
 
-                    // Get all batches of the product in the specific branch, ordered by oldest first
-                    $stores = Store::where('product_type_id', $product['product_type_id'])
-                                   ->where('branch_id', auth()->user()->branch_id) // Filter by authenticated user's branch
-                                   ->where('status', 1)
-                                   ->orderBy('created_at', 'asc')
-                                   ->select("id", "capacity_qty_available", "branch_id", "batch_no")
-                                   ->get();
+            foreach ($data['products'] as $product) {
+                //dd('re');
+                // Get the latest price for the product with purchase_unit_id
+                $latestPrice = Price::where([
+                        ['product_type_id', $product['product_type_id']],
+                        ['purchase_unit_id', $product['purchase_unit_id']],
+                        ['status', 1]
+                    ])->orderBy('created_at', 'desc')->firstOrFail();
 
-                    $remainingQuantity = $product['quantity'];
-                    $totalAvailableQuantity = $stores->sum('capacity_qty_available');
+                // Get all batches of the product in the branch
+                $stores = Store::where('product_type_id', $product['product_type_id'])
+                               ->where('purchase_unit_id', $product['purchase_unit_id'])
+                               ->where('branch_id', auth()->user()->branch_id)
+                               ->where('status', 1)
+                               ->orderBy('created_at', 'asc')
+                               ->select("id", "capacity_qty_available", "branch_id", "batch_no")
+                               ->get();
 
-                    // Check if there is enough stock across all batches in the branch
-                    if ($totalAvailableQuantity < $remainingQuantity) {
-                        throw new \Exception("Insufficient stock for the requested quantity.", 400);
-                    }
+                $remainingQuantity = $product['quantity'];
+                $totalAvailableQuantity = $stores->sum('capacity_qty_available');
 
-                    foreach ($stores as $store) {
-                        if ($remainingQuantity <= 0) {
-                            break;
-                        }
-
-                        // Retrieve the old price id based on the batch number
-                        $oldPrice = Price::where('batch_no', $store->batch_no)
-                                        ->where('product_type_id', $product['product_type_id'])
-                                        ->first();
-                        $oldPriceId = $oldPrice ? $oldPrice->id : null; // Get the price id or null if not found
-
-                        // Determine how much quantity to deduct from the current batch
-                        $soldQuantityFromBatch = 0;
-                        if ($store->capacity_qty_available >= $remainingQuantity) {
-                            // Decrement the full remaining quantity from the current batch
-                            $soldQuantityFromBatch = $remainingQuantity;
-                            $store->capacity_qty_available -= $remainingQuantity;
-                            $remainingQuantity = 0;
-                        } else {
-                            // Deplete the entire batch and move to the next one
-                            $soldQuantityFromBatch = $store->capacity_qty_available;
-                            $remainingQuantity -= $store->capacity_qty_available;
-                            $store->capacity_qty_available = 0;
-                        }
-
-                        if ($store->capacity_qty_available == 0) {
-                            // If the batch is depleted, mark it as inactive
-                            $store->status = 0;
-                        }
-
-                        $store->save();
-
-                        // Save the partial sale record for this batch
-                        $sale = new Sale();
-                        $sale->fill([
-                            'product_type_id' => $product['product_type_id'],
-                            'customer_id' => $data['customer_id'],
-                            'price_sold_at' => $product['price_sold_at'],
-                            'quantity' => $soldQuantityFromBatch, // Quantity sold from this batch
-                            'vat' => $product['vat'],
-                            'payment_method' => $data['payment_method'],
-                            'transaction_id' => $transactionId, // Same transaction ID for all partial sales
-                            'is_offline' => isset($data['is_offline']) ? $data['is_offline'] : 0,
-                            'old_price_id' => $oldPriceId,  // Set the old price ID for this batch
-                            'batch_no' => $store->batch_no,
-                        ]);
-                        $sale->price_id = $latestPrice->id;
-                        $sale->save();
-
-                        // Calculate the amount and VAT for this batch
-                        $amount = $product['price_sold_at'] * $soldQuantityFromBatch;
-                        $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0; // 7.5% VAT
-                        $amount += $vatValue;
-                        $totalPrice += $amount;
-
-                        $productDetails[] = [
-                            "productTypeName" => $latestPrice->productType->product_type_name,
-                            'price' => $product['price_sold_at'],
-                            "quantity" => $soldQuantityFromBatch,
-                            "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
-                            "amount" => $amount
-                        ];
-                    }
+                if ($totalAvailableQuantity < $remainingQuantity) {
+                    throw new \Exception("Insufficient stock for the requested quantity.", 400);
                 }
 
-                // Customer details for the email
-                $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
-                            ->where('id', $data['customer_id'])
-                            ->first();
-                if ($user) {
-                    $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
-
-                    // Generate email content
-                    $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId);
-                    if(!isset($data['is_offline'])) {
-                        $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
+                foreach ($stores as $store) {
+                    if ($remainingQuantity <= 0) {
+                        break;
                     }
+
+                    $oldPrice = Price::where('batch_no', $store->batch_no)
+                                     ->where('product_type_id', $product['product_type_id'])
+                                     ->where('purchase_unit_id', $product['purchase_unit_id'])
+                                     ->first();
+
+                    $oldPriceId = $oldPrice ? $oldPrice->id : null;
+
+                    $soldQuantityFromBatch = min($remainingQuantity, $store->capacity_qty_available);
+                    $store->capacity_qty_available -= $soldQuantityFromBatch;
+                    $remainingQuantity -= $soldQuantityFromBatch;
+
+                    if ($store->capacity_qty_available == 0) {
+                        $store->status = 0;
+                    }
+
+                    $store->save();
+
+                    $sale = new Sale();
+                    $sale->fill([
+                        'product_type_id' => $product['product_type_id'],
+                        'customer_id' => $data['customer_id'],
+                        'price_sold_at' => $product['price_sold_at'],
+                        'quantity' => $soldQuantityFromBatch,
+                        'vat' => $product['vat'],
+                        'payment_method' => $data['payment_method'],
+                        'transaction_id' => $transactionId,
+                        'is_offline' => $data['is_offline'] ?? 0,
+                        'old_price_id' => $oldPriceId,
+                        'batch_no' => $store->batch_no,
+                        'selling_unit_id' => $product['selling_unit_id'], // Added selling_unit_id
+                        'purchase_unit_id' => $product['purchase_unit_id'], // Added purchase_unit_id
+                    ]);
+                    $sale->price_id = $latestPrice->id;
+                    $sale->save();
+
+                    $amount = $product['price_sold_at'] * $soldQuantityFromBatch;
+                    $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0;
+                    $amount += $vatValue;
+                    $totalPrice += $amount;
+
+                    $productDetails[] = [
+                        "productTypeName" => $latestPrice->productType->product_type_name,
+                        'price' => $product['price_sold_at'],
+                        "quantity" => $soldQuantityFromBatch,
+                        "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
+                        "amount" => $amount,
+                        "selling_unit" => "",
+                        "purchase_unit" => "",
+                        // "selling_unit" => optional($latestPrice->sellingUnit)->selling_unit_name,
+                        // "purchase_unit" => optional($latestPrice->sellingUnit->purchaseUnit)->purchase_unit_name,
+                    ];
                 }
-
-                // Return the same response as downSalesReceipt after sale creation
-                $receiptData = $this->downSalesReceipt($transactionId, ['branch_id' => auth()->user()->branch_id]);
-
-                return $receiptData;
-            });
-
-            return response()->json(['success' => true, 'data' => $response, 'message' => 'Sales record was added successfully'], 201);
-        } catch (\Exception $e) {
-            // Check if the exception is due to insufficient stock
-            if ($e->getCode() === 400) {
-                return response()->json(['message' => $e->getMessage()], 400);
             }
 
-            // Handle other general exceptions
-            Log::channel('insertion_errors')->error('Error creating or updating sale: ' . $e->getMessage());
-            DB::rollBack();
-            return response()->json(['message' => 'Failed to create sales', 'error' => $e->getMessage()], 500);
-        }
+            $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
+                            ->where('id', $data['customer_id'])
+                            ->first();
+            // if ($user) {
+            //     $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
+
+            //     $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId);
+            //     if (!isset($data['is_offline'])) {
+            //         $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
+            //     }
+            // }
+
+            $receiptData = $this->downSalesReceipt($transactionId, ['branch_id' => auth()->user()->branch_id]);
+
+            return $receiptData;
+        });
+
+        return response()->json(['success' => true, 'data' => $response, 'message' => 'Sales record was added successfully'], 201);
+        // } catch (\Exception $e) {
+        //     if ($e->getCode() === 400) {
+        //         return response()->json(['message' => $e->getMessage()], 400);
+        //     }
+
+        //     Log::channel('insertion_errors')->error('Error creating or updating sale: ' . $e->getMessage());
+        //     DB::rollBack();
+        //     return response()->json(['message' => 'Failed to create sales', 'error' => $e->getMessage()], 500);
+        // }
     }
+
+    // public function create(array $data)
+    // {
+    //     $emailService = new EmailService();
+    //     $transactionId = time() . rand(1000, 9999);
+
+    //     try {
+    //         $response = DB::transaction(function () use ($data, $emailService, $transactionId) {
+    //             $productDetails = [];
+    //             $totalPrice = 0; // Initialize total price
+    //             $branch = null; // Initialize branch
+
+    //             foreach ($data['products'] as $product) {
+    //                 // Get latest price id for the product
+    //                 $latestPrice = Price::where([
+    //                         ['product_type_id', $product['product_type_id']],
+    //                         ['status', 1]
+    //                     ])->orderBy('created_at', 'desc')->firstOrFail();
+
+    //                 // Get all batches of the product in the specific branch, ordered by oldest first
+    //                 $stores = Store::where('product_type_id', $product['product_type_id'])
+    //                                ->where('branch_id', auth()->user()->branch_id) // Filter by authenticated user's branch
+    //                                ->where('status', 1)
+    //                                ->orderBy('created_at', 'asc')
+    //                                ->select("id", "capacity_qty_available", "branch_id", "batch_no")
+    //                                ->get();
+
+    //                 $remainingQuantity = $product['quantity'];
+    //                 $totalAvailableQuantity = $stores->sum('capacity_qty_available');
+
+    //                 // Check if there is enough stock across all batches in the branch
+    //                 if ($totalAvailableQuantity < $remainingQuantity) {
+    //                     throw new \Exception("Insufficient stock for the requested quantity.", 400);
+    //                 }
+
+    //                 foreach ($stores as $store) {
+    //                     if ($remainingQuantity <= 0) {
+    //                         break;
+    //                     }
+
+    //                     // Retrieve the old price id based on the batch number
+    //                     $oldPrice = Price::where('batch_no', $store->batch_no)
+    //                                     ->where('product_type_id', $product['product_type_id'])
+    //                                     ->first();
+    //                     $oldPriceId = $oldPrice ? $oldPrice->id : null; // Get the price id or null if not found
+
+    //                     // Determine how much quantity to deduct from the current batch
+    //                     $soldQuantityFromBatch = 0;
+    //                     if ($store->capacity_qty_available >= $remainingQuantity) {
+    //                         // Decrement the full remaining quantity from the current batch
+    //                         $soldQuantityFromBatch = $remainingQuantity;
+    //                         $store->capacity_qty_available -= $remainingQuantity;
+    //                         $remainingQuantity = 0;
+    //                     } else {
+    //                         // Deplete the entire batch and move to the next one
+    //                         $soldQuantityFromBatch = $store->capacity_qty_available;
+    //                         $remainingQuantity -= $store->capacity_qty_available;
+    //                         $store->capacity_qty_available = 0;
+    //                     }
+
+    //                     if ($store->capacity_qty_available == 0) {
+    //                         // If the batch is depleted, mark it as inactive
+    //                         $store->status = 0;
+    //                     }
+
+    //                     $store->save();
+
+    //                     // Save the partial sale record for this batch
+    //                     $sale = new Sale();
+    //                     $sale->fill([
+    //                         'product_type_id' => $product['product_type_id'],
+    //                         'customer_id' => $data['customer_id'],
+    //                         'price_sold_at' => $product['price_sold_at'],
+    //                         'quantity' => $soldQuantityFromBatch, // Quantity sold from this batch
+    //                         'vat' => $product['vat'],
+    //                         'payment_method' => $data['payment_method'],
+    //                         'transaction_id' => $transactionId, // Same transaction ID for all partial sales
+    //                         'is_offline' => isset($data['is_offline']) ? $data['is_offline'] : 0,
+    //                         'old_price_id' => $oldPriceId,  // Set the old price ID for this batch
+    //                         'batch_no' => $store->batch_no,
+    //                     ]);
+    //                     $sale->price_id = $latestPrice->id;
+    //                     $sale->save();
+
+    //                     // Calculate the amount and VAT for this batch
+    //                     $amount = $product['price_sold_at'] * $soldQuantityFromBatch;
+    //                     $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0; // 7.5% VAT
+    //                     $amount += $vatValue;
+    //                     $totalPrice += $amount;
+
+    //                     $productDetails[] = [
+    //                         "productTypeName" => $latestPrice->productType->product_type_name,
+    //                         'price' => $product['price_sold_at'],
+    //                         "quantity" => $soldQuantityFromBatch,
+    //                         "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
+    //                         "amount" => $amount
+    //                     ];
+    //                 }
+    //             }
+
+    //             // Customer details for the email
+    //             $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
+    //                         ->where('id', $data['customer_id'])
+    //                         ->first();
+    //             if ($user) {
+    //                 $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
+
+    //                 // Generate email content
+    //                 $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId);
+    //                 if(!isset($data['is_offline'])) {
+    //                     $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
+    //                 }
+    //             }
+
+    //             // Return the same response as downSalesReceipt after sale creation
+    //             $receiptData = $this->downSalesReceipt($transactionId, ['branch_id' => auth()->user()->branch_id]);
+
+    //             return $receiptData;
+    //         });
+
+    //         return response()->json(['success' => true, 'data' => $response, 'message' => 'Sales record was added successfully'], 201);
+    //     } catch (\Exception $e) {
+    //         // Check if the exception is due to insufficient stock
+    //         if ($e->getCode() === 400) {
+    //             return response()->json(['message' => $e->getMessage()], 400);
+    //         }
+
+    //         // Handle other general exceptions
+    //         Log::channel('insertion_errors')->error('Error creating or updating sale: ' . $e->getMessage());
+    //         DB::rollBack();
+    //         return response()->json(['message' => 'Failed to create sales', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
 
 
 

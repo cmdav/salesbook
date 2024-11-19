@@ -13,6 +13,7 @@ return new class () extends Migration {
         Schema::create('purchase_units', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('purchase_unit_name', 50)->unique();
+            $table->uuid('measurement_group_id')->nullable();
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();

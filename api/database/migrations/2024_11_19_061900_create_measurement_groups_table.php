@@ -10,13 +10,10 @@ return new class () extends Migration {
      */
     public function up(): void
     {
-        Schema::create('product_measurements', function (Blueprint $table) {
+        Schema::create('measurement_groups', function (Blueprint $table) {
 
             $table->uuid('id')->primary();
-            $table->uuid('product_type_id')->index();
-            $table->uuid('selling_unit_capacity_id')->nullable()->index();
-            $table->uuid('purchasing_unit_id')->nullable()->index();
-            $table->uuid('selling_unit_id')->nullable()->index();
+            $table->uuid('group_name')->index();
             $table->uuid('created_by', 32)->nullable();
             $table->uuid('updated_by', 32)->nullable();
             $table->timestamps();
@@ -28,6 +25,6 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_measurements');
+        Schema::dropIfExists('measurement_groups');
     }
 };

@@ -15,6 +15,7 @@ class PurchaseUnit extends Model
     protected $fillable = [
         'id',
         'purchase_unit_name',
+        'measurement_group_id',
         'created_by',
         'updated_by'
     ];
@@ -22,5 +23,9 @@ class PurchaseUnit extends Model
     public function sellingUnits()
     {
         return $this->hasMany(SellingUnit::class, 'purchase_unit_id', 'id');
+    }
+    public function measurementGroup()
+    {
+        return $this->belongsTo(MeasurementGroup::class, 'measurement_group_id', 'id');
     }
 }
