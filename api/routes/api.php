@@ -50,6 +50,10 @@ Route::middleware('auth:sanctum')->group(function () {
         route::resource('prices', App\Http\Controllers\Inventory\PriceController::class);
         route::resource('price-notifications', App\Http\Controllers\Inventory\PriceNotificationController::class);
         route::resource('purchases', App\Http\Controllers\Inventory\PurchaseController::class);
+        route::post('estimated-store', [App\Http\Controllers\Inventory\PurchaseController::class, 'store']);
+        route::get('estimated-store', [App\Http\Controllers\Inventory\PurchaseController::class, 'index']);
+
+
         //route::resource('inventories', App\Http\Controllers\Inventory\InventoryController::class);
         route::resource('product-categories', App\Http\Controllers\Product\ProductCategoryController::class);
         route::resource('products', App\Http\Controllers\Product\ProductController::class);
@@ -145,7 +149,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Search endpoints
         route::resource('search-currency', App\Http\Controllers\Inventory\SearchCurrencyController::class)->only('show');
-        route::resource('search-measurement', App\Http\Controllers\Inventory\SearchMeasurementController::class)->only('show');
+        // route::resource('search-measurement', App\Http\Controllers\Inventory\SearchMeasurementController::class)->only('show');
         route::resource('search-product-categories', App\Http\Controllers\Product\SearchProductCategoryController::class)->only('show');
         route::resource('search-product-sub-categories', App\Http\Controllers\Product\SearchProductSubCategoryController::class)->only('show');
         route::resource('search-product-types', App\Http\Controllers\Product\SearchProductTypeController::class)->only('show');
@@ -159,7 +163,8 @@ Route::middleware('auth:sanctum')->group(function () {
         route::resource('permissions', App\Http\Controllers\Security\PermissionController::class);
         Route::resource('subscriptions', App\Http\Controllers\Security\SubscriptionController::class);
         Route::resource('subscription-statuses', App\Http\Controllers\Security\SubscriptionStatusController::class);
-        Route::apiResource('search-purchase-units', App\Http\Controllers\SellingUnit\SearchPurchaseUnitController::class);
+        //Route::apiResource('search-purchase-units', App\Http\Controllers\SellingUnit\SearchPurchaseUnitController::class);
+        Route::apiResource('search-purchase-units', App\Http\Controllers\Products\SearchMeasurementGroupController::class);
         Route::apiResource('list-expired-products', App\Http\Controllers\Products\ListExpiredProductController::class);
         //Report API
         Route::apiResource('item-lists', App\Http\Controllers\Products\ItemListController::class);

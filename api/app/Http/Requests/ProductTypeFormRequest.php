@@ -16,7 +16,7 @@ class ProductTypeFormRequest extends FormRequest
         $productTypeRule = [
             'required',
             'string',
-            'max:50',
+            'max:250',
             Rule::unique('product_types')->ignore($this->route('product_type'))
         ];
 

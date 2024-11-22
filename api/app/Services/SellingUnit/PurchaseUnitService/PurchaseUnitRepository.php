@@ -3,83 +3,127 @@
 namespace App\Services\SellingUnit\PurchaseUnitService;
 
 use App\Models\PurchaseUnit;
-
 use Exception;
+use Illuminate\Support\Facades\Log;
+use App\Services\Security\LogService\LogRepository;
 
 class PurchaseUnitRepository
 {
-    // public function index()
-    // {
-    //     $model =  PurchaseUnit::paginate(20);
-    //     if($model) {
-    //         return response()->json([ 'success' => true, 'message' => 'Record retrieved successfully', 'data' => $model], 200);
-    //     }
-    //     return response()->json([ 'success' => false, 'message' => 'No record found', 'data' => $model], 404);
-    // }
+    protected $logRepository;
+    protected $username;
+
+    public function __construct(LogRepository $logRepository)
+    {
+        $this->logRepository = $logRepository;
+        $username = $this->logRepository->getUsername();
+    }
+
+    public function index()
+    {
+        $this->logRepository->logEvent(
+            'purchase_units',
+            'view',
+            null,
+            'PurchaseUnit',
+            "$this->username viewed all purchase units"
+        );
+
+        // Fetch the paginated data using the reusable query method
+        $purchaseUnits = $this->getPurchaseUnitsQuery()->paginate(6);
+
+        // Transform the paginated data
+        $purchaseUnits->getCollection()->transform(function ($purchaseUnit) {
+            return $this->transformPurchaseUnit($purchaseUnit);
+        });
+
+        return $purchaseUnits;
+    }
 
     public function show($id)
     {
+        $this->logRepository->logEvent(
+            'purchase_units',
+            'view',
+            $id,
+            'PurchaseUnit',
+            "$this->username viewed purchase unit with ID $id"
+        );
+
         $model = PurchaseUnit::where('id', $id)->first();
-        if($model) {
-            return response()->json([ 'success' => true, 'message' => 'Record retrieved successfully', 'data' => $model], 200);
+        if ($model) {
+            return response()->json(['success' => true, 'message' => 'Record retrieved successfully', 'data' => $model], 200);
         }
-        return response()->json([ 'success' => false, 'message' => 'No record found', 'data' => $model], 404);
+        return response()->json(['success' => false, 'message' => 'No record found', 'data' => $model], 404);
     }
 
     public function store($data)
     {
         try {
-            $model =  PurchaseUnit::create($data);
-            return response()->json([ 'success' => true, 'message' => 'Insertion successful', 'data' => $model], 200);
-        } catch (Exception $e) {
-            //Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
-            return response()->json([ 'success' => false, 'message' => 'Insertion error'], 500);
-        }
+            $model = PurchaseUnit::create($data);
 
+            $this->logRepository->logEvent(
+                'purchase_units',
+                'create',
+                $model->id,
+                'PurchaseUnit',
+                "$this->username created a new purchase unit: {$model->purchase_unit_name}",
+                $data
+            );
+
+            return response()->json(['success' => true, 'message' => 'Insertion successful', 'data' => $model], 200);
+        } catch (Exception $e) {
+            Log::error('Error creating Purchase Unit: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Insertion error'], 500);
+        }
     }
 
     public function update($data, $id)
     {
-        try {
-            $model = PurchaseUnit::where('id', $id)->first();
-            if($model) {
-                $model->update($data);
-                return response()->json([ 'success' => true, 'message' => 'Update successful', 'data' => $model], 200);
-            }
+        $model = PurchaseUnit::where('id', $id)->first();
+        if (!$model) {
+            return response()->json(['success' => false, 'message' => 'Record not found'], 404);
+        }
 
-            return response()->json([ 'success' => false, 'message' => 'Record not found', 'data' => $model], 404);
+        try {
+            $model->update($data);
+
+            $this->logRepository->logEvent(
+                'purchase_units',
+                'update',
+                $id,
+                'PurchaseUnit',
+                "$this->username updated purchase unit with ID $id",
+                $data
+            );
+
+            return response()->json(['success' => true, 'message' => 'Update successful', 'data' => $model], 200);
         } catch (Exception $e) {
-            //Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
-            return response()->json([ 'success' => false, 'message' => 'Insertion error'], 500);
+            Log::error('Error updating Purchase Unit: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Update error'], 500);
         }
     }
 
     public function destroy($id)
     {
         try {
-            // Find the model or throw a 404 error if not found
             $model = PurchaseUnit::findOrFail($id);
 
-            // Attempt to delete the model
+            $this->logRepository->logEvent(
+                'purchase_units',
+                'delete',
+                $id,
+                'PurchaseUnit',
+                "$this->username deleted purchase unit with ID $id"
+            );
+
             $model->delete();
 
-            // Return success response
-            return response()->json([
-                'success' => true,
-                'message' => 'Purchase Unit deleted successfully',
-            ], 200);
-        } catch (\Exception $e) {
-            // Log the error
-            // Log::channel('deletion_errors')->error('Error deleting Purchase Unit: ' . $e->getMessage());
-
-            // Return error response if deletion fails, particularly when it's in use
-            return response()->json([
-                'success' => false,
-                'message' => 'This Purchase Unit is already in use and cannot be deleted',
-            ], 500);
+            return response()->json(['success' => true, 'message' => 'Purchase Unit deleted successfully'], 200);
+        } catch (Exception $e) {
+            Log::error('Error deleting Purchase Unit: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Deletion error'], 500);
         }
     }
-
     public function listPurchaseUnit()
     {
         $purchaseUnits = PurchaseUnit::select("id", "purchase_unit_name")
@@ -111,21 +155,6 @@ class PurchaseUnitRepository
 
         return $data;
     }
-
-    public function index()
-    {
-        // Fetch the paginated data using the reusable query method
-        $purchaseUnits = $this->getPurchaseUnitsQuery()->paginate(6);
-
-        // Transform the paginated data
-        $purchaseUnits->getCollection()->transform(function ($purchaseUnit) {
-            return $this->transformPurchaseUnit($purchaseUnit);
-        });
-
-        return $purchaseUnits;
-    }
-
-
     public function getSearchPurchaseUnit($search)
     {
         // Fetch the filtered paginated data using the reusable query method

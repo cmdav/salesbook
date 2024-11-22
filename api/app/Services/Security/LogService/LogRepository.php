@@ -10,38 +10,39 @@ class LogRepository
 {
     public function index($request)
     {
-
-
         $activity = $request->query('search');
+        $startTime = $request->query('start_time');
+        $endTime = $request->query('end_time');
 
+        $query = Log::query();
 
+        // Filter by activity if provided
         if ($activity) {
-            $model = Log::where('activity', 'like', '%' . $activity . '%')->latest()->get();
-
-            if ($model->isNotEmpty()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Records retrieved successfully',
-                    'data' => $model
-                ], 200);
-            }
-
-            return response()->json([
-                'success' => false,
-                'message' => 'No records found',
-                'data' => []
-            ], 404);
-        } else {
-
-
-            /////////
-            $model =  Log::latest()->paginate(20);
-            if($model) {
-                return response()->json([ 'success' => true, 'message' => 'Record retrieved successfully', 'data' => $model], 200);
-            }
-            return response()->json([ 'success' => false, 'message' => 'No record found', 'data' => $model], 404);
+            $query->where('activity', 'like', '%' . $activity . '%');
         }
+
+        // Filter by start_time and end_time if provided
+        if ($startTime && $endTime) {
+            $query->whereBetween('created_at', [$startTime, $endTime]);
+        }
+
+        $model = $query->latest()->paginate(20);
+
+        if ($model->isNotEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Records retrieved successfully',
+                'data' => $model,
+            ], 200);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No records found',
+            'data' => [],
+        ], 404);
     }
+
 
     public function show($id)
     {
@@ -88,5 +89,12 @@ class LogRepository
 
         // Use the LogRepository to save the log
         return Log::create($logData);
+    }
+    public function getUsername()
+    {
+        $user = auth()->user();
+        return optional($user)->first_name
+            ? optional($user)->first_name . " " . optional($user)->last_name
+            : optional(optional($user)->organization)->organization_name ?? "System";
     }
 }

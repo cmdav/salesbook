@@ -9,17 +9,22 @@ use App\Models\Sale;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use App\Services\Security\LogService\LogRepository;
 use App\Services\GeneratePdf;
 use App\Services;
 
 class StoreRepository
 {
     protected GeneratePdf $generatePdf;
+    protected $logRepository;
+    protected $username;
 
 
-    public function __construct(GeneratePdf $generatePdf)
+    public function __construct(GeneratePdf $generatePdf, LogRepository $logRepository)
     {
         $this->generatePdf = $generatePdf;
+        $this->logRepository = $logRepository;
+        $this->username = $this->logRepository->getUsername();
 
     }
 
@@ -41,6 +46,13 @@ class StoreRepository
         } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
+        $this->logRepository->logEvent(
+            'store',
+            'view',
+            null,
+            'Store',
+            "$this->username viewed all stores"
+        );
         $store = $this->query($branchId)->paginate(20);
 
         $store->getCollection()->transform(function ($store) {
@@ -67,6 +79,13 @@ class StoreRepository
                 $q->where('product_type_name', 'like', '%' . $searchCriteria . '%');
             });
         })->get();
+        $this->logRepository->logEvent(
+            'store',
+            'search',
+            null,
+            'Store',
+            "$this->username searched stores with criteria: $searchCriteria"
+        );
 
         $store->transform(function ($store) {
 

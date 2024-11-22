@@ -36,7 +36,8 @@ class DatabaseSeeder extends Seeder
             'logs',
             'settings',
             'subscriptions',
-            'c-subscriptions' // for customer
+            'c-subscriptions',
+            'estimated-store'// for customer
         ];
 
         foreach ($pageNames as $pageName) {

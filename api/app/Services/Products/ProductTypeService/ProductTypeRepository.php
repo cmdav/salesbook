@@ -11,6 +11,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use App\Services\Email\EmailService;
 use App\Services\UserService\UserRepository;
+use App\Services\Security\LogService\LogRepository;
 use App\Services\GeneratePdf;
 use Carbon\Carbon;
 use Exception;
@@ -19,14 +20,15 @@ class ProductTypeRepository
 {
     protected UserRepository $userRepository;
     protected GeneratePdf $generatePdf;
+    protected $logRepository;
+    protected $username;
 
-
-    public function __construct(UserRepository $userRepository, GeneratePdf $generatePdf)
+    public function __construct(UserRepository $userRepository, GeneratePdf $generatePdf, LogRepository $logRepository)
     {
         $this->userRepository = $userRepository;
         $this->generatePdf = $generatePdf;
-
-
+        $this->logRepository = $logRepository;
+        $this->username = $this->logRepository->getUsername();
     }
     private function query()
     {
@@ -48,12 +50,26 @@ class ProductTypeRepository
 
     public function index()
     {
+        $this->logRepository->logEvent(
+            'product_types',
+            'view',
+            null,
+            'ProductType',
+            "$this->username viewed all product types"
+        );
 
         return $this->getProductTypes();
     }
     public function searchProductType($searchCriteria)
     {
 
+        $this->logRepository->logEvent(
+            'product_types',
+            'search',
+            null,
+            'ProductType',
+            "$this->username searched for product types with criteria: $searchCriteria"
+        );
         $query = $this->query()->where('product_type_name', 'like', '%' . $searchCriteria . '%');
 
 
@@ -377,6 +393,15 @@ class ProductTypeRepository
 
             DB::commit(); // Commit the transaction if all operations succeed
 
+            $this->logRepository->logEvent(
+                'product_types',
+                'create',
+                $productType->id,
+                'ProductType',
+                "$this->username created a new product type: {$productType->product_type_name}",
+                $data
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => 'Product has been created successfully',
@@ -402,26 +427,115 @@ class ProductTypeRepository
 
     public function update($id, array $data)
     {
+        // Begin a transaction
+        DB::beginTransaction();
+
         try {
-            $ProductType = $this->findById($id);
+            // Retrieve the existing product type
+            $productType = ProductType::find($id);
 
-            if ($ProductType) {
-
-                $data = $ProductType->update($data);
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Update successful',
-                    'data' => $data,
-                ], 200);
+            if (!$productType) {
+                return response()->json(['success' => false, 'message' => 'Product type not found'], 404);
             }
+
+            // Update the product type attributes
+            $productType->update([
+                'product_type_name' => $data['product_type_name'] ?? $productType->product_type_name,
+                'product_type_description' => $data['product_type_description'] ?? $productType->product_type_description,
+                'barcode' => $data['barcode'] ?? $productType->barcode,
+                'vat' => $data['vat'] ?? $productType->vat,
+                'sub_category_id' => $data['sub_category_id'] ?? $productType->sub_category_id,
+                'category_id' => $data['category_id'] ?? $productType->category_id,
+            ]);
+
+            // Process measurement units
+            $purchaseUnitIds = $data['purchase_unit_id'] ?? [];
+            $sellingUnitIds = $data['selling_unit_id'] ?? [];
+            $sellingUnitCapacityIds = $data['selling_unit_capacity_id'] ?? [];
+            $purchaseUnitNames = $data['purchase_unit_name'] ?? [];
+            $sellingUnitNames = $data['selling_unit_name'] ?? [];
+            $sellingUnitCapacities = $data['selling_unit_capacity'] ?? [];
+
+            foreach ($purchaseUnitIds as $index => $purchaseUnitId) {
+                $purchaseUnitName = $purchaseUnitNames[$index] ?? null;
+                $sellingUnitId = $sellingUnitIds[$index] ?? null;
+                $sellingUnitName = $sellingUnitNames[$index] ?? null;
+                $sellingUnitCapacityId = $sellingUnitCapacityIds[$index] ?? null;
+                $sellingUnitCapacityValue = $sellingUnitCapacities[$index] ?? null;
+
+                if ($purchaseUnitId && $purchaseUnitName) {
+                    // Check if the purchase unit already exists
+                    $purchaseUnit = PurchaseUnit::find($purchaseUnitId);
+
+                    if ($purchaseUnit) {
+                        // Update existing purchase unit
+                        $purchaseUnit->update([
+                            'purchase_unit_name' => $purchaseUnitName,
+                            'measurement_group_id' => $productType->id,
+                        ]);
+                    } else {
+                        // Create new purchase unit
+                        $purchaseUnit = PurchaseUnit::create([
+                            'id' => $purchaseUnitId,
+                            'purchase_unit_name' => $purchaseUnitName,
+                            'measurement_group_id' => $productType->id,
+                        ]);
+                    }
+
+                    if ($sellingUnitId && $sellingUnitName) {
+                        // Check if the selling unit already exists
+                        $sellingUnit = SellingUnit::find($sellingUnitId);
+
+                        if ($sellingUnit) {
+                            // Update existing selling unit
+                            $sellingUnit->update([
+                                'purchase_unit_id' => $purchaseUnit->id,
+                                'selling_unit_name' => $sellingUnitName,
+                            ]);
+                        } else {
+                            // Create new selling unit
+                            $sellingUnit = SellingUnit::create([
+                                'id' => $sellingUnitId,
+                                'purchase_unit_id' => $purchaseUnit->id,
+                                'selling_unit_name' => $sellingUnitName,
+                            ]);
+                        }
+
+                        if ($sellingUnitCapacityId && $sellingUnitCapacityValue) {
+                            // Check if the selling unit capacity already exists
+                            $sellingUnitCapacity = SellingUnitCapacity::find($sellingUnitCapacityId);
+
+                            if ($sellingUnitCapacity) {
+                                // Update existing selling unit capacity
+                                $sellingUnitCapacity->update([
+                                    'selling_unit_id' => $sellingUnit->id,
+                                    'selling_unit_capacity' => $sellingUnitCapacityValue,
+                                ]);
+                            } else {
+                                // Create new selling unit capacity
+                                SellingUnitCapacity::create([
+                                    'id' => $sellingUnitCapacityId,
+                                    'selling_unit_id' => $sellingUnit->id,
+                                    'selling_unit_capacity' => $sellingUnitCapacityValue,
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Commit the transaction
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Product type updated successfully'], 200);
         } catch (Exception $e) {
-            Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'This Product type could not be updated',
-            ], 500);
+            // Rollback the transaction in case of error
+            DB::rollBack();
+            Log::channel('insertion_errors')->error('Error updating product type: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'This product type could not be updated'], 500);
         }
     }
+
 
     public function delete($id)
     {
@@ -434,6 +548,13 @@ class ProductTypeRepository
                 ], 404);
             }
             $ProductType->delete();
+            $this->logRepository->logEvent(
+                'product_types',
+                'delete',
+                $id,
+                'ProductType',
+                "$this->username deleted product type with ID $id"
+            );
             return response()->json([
                 'success' => true,
                 'message' => "Deletion successful"

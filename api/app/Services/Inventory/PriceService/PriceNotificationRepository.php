@@ -8,11 +8,28 @@ use App\Models\Store;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use App\Services\Security\LogService\LogRepository;
 
 class PriceNotificationRepository
 {
+    protected $logRepository;
+    protected $username;
+
+    public function __construct(LogRepository $logRepository)
+    {
+        $this->logRepository = $logRepository;
+        $this->username = $this->logRepository->getUsername();
+    }
+
     public function index($request)
     {
+        $this->logRepository->logEvent(
+            'price_notifications',
+            'view',
+            null,
+            'PriceNotification',
+            "$this->username viewed all price notifications"
+        );
 
         $query = PriceNotification::select('id', 'product_type_id', 'supplier_id', 'cost_price', 'selling_price', 'status')
                                   ->with(
@@ -67,6 +84,14 @@ class PriceNotificationRepository
             $data
         );
 
+        $this->logRepository->logEvent(
+            'price_notifications',
+            'create',
+            $priceNotification->id,
+            'PriceNotification',
+            "$this->username created a price notification with ID {$priceNotification->id}",
+            $data
+        );
 
     }
 
@@ -83,6 +108,14 @@ class PriceNotificationRepository
         if ($priceNotification) {
             // Update the price notification
             $priceNotification->update($data);
+            $this->logRepository->logEvent(
+                'price_notifications',
+                'update',
+                $id,
+                'PriceNotification',
+                "$this->username updated the price notification with ID $id",
+                $data
+            );
             $batchNo = null;
             if ($data['status'] == 'accepted') {
                 // 1. get the last price detail

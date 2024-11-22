@@ -18,17 +18,22 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use App\Services\GeneratePdf;
 use Exception;
+use App\Services\Security\LogService\LogRepository;
 
 class SaleRepository
 {
     protected UserRepository $userRepository;
     protected GeneratePdf $generatePdf;
+    protected $logRepository;
+    protected $username;
 
 
-    public function __construct(UserRepository $userRepository, GeneratePdf $generatePdf)
+    public function __construct(UserRepository $userRepository, GeneratePdf $generatePdf, LogRepository $logRepository)
     {
         $this->userRepository = $userRepository;
         $this->generatePdf = $generatePdf;
+        $this->logRepository = $logRepository;
+        $this->username = $this->logRepository->getUsername();
 
 
     }
@@ -95,6 +100,14 @@ class SaleRepository
             $branchId = auth()->user()->branch_id;
         }
 
+        $this->logRepository->logEvent(
+            'sales',
+            'view',
+            null,
+            'Sale',
+            "$this->username viewed all sales"
+        );
+
         $sale = $this->query($branchId)->paginate(20);
         //return $sale;
 
@@ -116,6 +129,14 @@ class SaleRepository
         } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
+        $this->logRepository->logEvent(
+            'sales',
+            'search',
+            null,
+            'Sale',
+            "$this->username searched for sales with criteria: $searchCriteria"
+        );
+
         $sale = $this->query($branchId)->where(function ($query) use ($searchCriteria) {
             $query->whereHas('product', function ($q) use ($searchCriteria) {
                 $q->where('product_type_name', 'like', '%' . $searchCriteria . '%');
@@ -322,11 +343,29 @@ class SaleRepository
     public function delete($id)
     {
         $sale = $this->findById($id);
-        if ($sale) {
-            return $sale->delete();
+
+        if (!$sale) {
+            return response()->json(['success' => false, 'message' => 'Sale not found'], 404);
         }
-        return null;
+
+        try {
+            $sale->delete();
+
+            $this->logRepository->logEvent(
+                'sales',
+                'delete',
+                $id,
+                'Sale',
+                "$this->username deleted a sale with ID $id"
+            );
+
+            return response()->json(['success' => true, 'message' => 'Deletion successful'], 200);
+        } catch (Exception $e) {
+            Log::error('Error deleting sale: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error deleting sale'], 500);
+        }
     }
+
     public function create(array $data)
     {
         $emailService = new EmailService();
@@ -359,9 +398,9 @@ class SaleRepository
                 $remainingQuantity = $product['quantity'];
                 $totalAvailableQuantity = $stores->sum('capacity_qty_available');
 
-                if ($totalAvailableQuantity < $remainingQuantity) {
-                    throw new \Exception("Insufficient stock for the requested quantity.", 400);
-                }
+                // if ($totalAvailableQuantity < $remainingQuantity) {
+                //     throw new \Exception("Insufficient stock for the requested quantity.", 400);
+                // }
 
                 foreach ($stores as $store) {
                     if ($remainingQuantity <= 0) {
@@ -433,11 +472,20 @@ class SaleRepository
             //         $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
             //     }
             // }
+            $this->logRepository->logEvent(
+                'sales',
+                'create',
+                null,
+                'Sale',
+                "$this->username created a new sale with transaction ID $transactionId",
+                $data
+            );
 
             $receiptData = $this->downSalesReceipt($transactionId, ['branch_id' => auth()->user()->branch_id]);
 
             return $receiptData;
         });
+
 
         return response()->json(['success' => true, 'data' => $response, 'message' => 'Sales record was added successfully'], 201);
         // } catch (\Exception $e) {

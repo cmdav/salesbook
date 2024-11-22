@@ -21,7 +21,8 @@ class PurchaseUnitFormRequest extends FormRequest
                 'max:50',
                 Rule::unique('purchase_units')->ignore($this->route('purchase_unit')),
             ],
-           'measurement_group_id' => 'required'
+            'measurement_group_id' => 'nullable|uuid', // Corrected the typo from 'nullabe' to 'nullable' and added UUID validation
         ];
     }
+
 }

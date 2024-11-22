@@ -37,18 +37,28 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
         $subCategory = ProductSubCategory::where('sub_category_name', trim($row['sub_category_name']))->first();
 
         // Retrieve the selling unit capacity based on piece_name
-        $sellingUnitCapacity = SellingUnitCapacity::where('piece_name', trim($row['piece_name']))->first();
+        // if (isset($row['piece_name']) && !empty(trim($row['piece_name']))) {
+        //     $sellingUnitCapacity = SellingUnitCapacity::where('piece_name', trim($row['piece_name']))->first();
+        // } else {
+        //     $sellingUnitCapacity = null; // Or handle the case where 'piece_name' is not set
+        // }
+
         $newBatchNumber = $this->batchNumberService->generateBatchNumber();
         $supplier = User::select("id")->where('first_name', "No supplier")->first();
 
-        if (!$category || !$subCategory || !$sellingUnitCapacity) {
-            return null;
-        }
+        // if (!$category || !$subCategory || !$sellingUnitCapacity) {
+
+        //     return null;
+        // }
+
 
         // Retrieve the selling unit and purchase unit
-        $sellingUnit = $sellingUnitCapacity->sellingUnit;
-        $purchaseUnit = $sellingUnit->purchaseUnit;
+        // $sellingUnit = $sellingUnitCapacity->sellingUnit;
+        // $purchaseUnit = $sellingUnit->purchaseUnit;
 
+        $sellingUnitCapacity = 0;
+        $sellingUnit = 0;
+        $purchaseUnit = 0;
         // Convert VAT value to 0 or 1
         $vatValue = strtolower(trim($row['vat'])) === 'yes' ? 1 : 0;
         //check for batch no
@@ -57,6 +67,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
         $productType = null;
 
         DB::transaction(function () use ($row, $category, $subCategory, $sellingUnitCapacity, $sellingUnit, $purchaseUnit, $vatValue, $newBatchNumber, $supplier) {
+            //dd($row);
             try {
                 $productType = new ProductType([
                      'product_type_name' => Str::limit(trim($row['product_type_name']), 50),
@@ -65,9 +76,9 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
                      'vat' => $vatValue,
                      'sub_category_id' => $subCategory->id,
                      'category_id' => $category->id,
-                     'selling_unit_capacity_id' => $sellingUnitCapacity->id,
-                     'selling_unit_id' => $sellingUnit->id,
-                     'purchase_unit_id' => $purchaseUnit->id,
+                    //  'selling_unit_capacity_id' => 10,
+                    //  'selling_unit_id' => 10,
+                    //  'purchase_unit_id' => 10,
                      'barcode' => Str::limit(trim($row['barcode']), 200),
                      // 'created_by' and 'updated_by' fields should be set based on your application logic
                      // 'created_by' => ?,
@@ -79,8 +90,6 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
                     'product_type_id' => $productType->id,
                     'capacity_qty' => trim($row['capacity_qty']),
                     'expiry_date' => !empty($row['expiry_date']) ? \DateTime::createFromFormat('d/m/Y', trim($row['expiry_date']))->format('Y-m-d') : null,
-
-
                     'batch_no' => $newBatchNumber,
                     'supplier_id' => $supplier->id,
                     'product_identifier' => '',
@@ -130,16 +139,14 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
     public function rules(): array
     {
         return [
-            'product_type_name' => 'required|string|max:50|unique:product_types|regex:/^[^\s]/',
+            'product_type_name' => 'required|string|max:250|unique:product_types|regex:/^[^\s]/',
             'product_type_description' => 'required|string|max:200',
-            'piece_name' => 'required|string|exists:selling_unit_capacities,piece_name',
-            'category_name' => 'required|string|exists:product_categories,category_name',
-            'sub_category_name' => 'required|string|exists:product_sub_categories,sub_category_name',
+            'category_name' => 'nullable|string|exists:product_categories,category_name',
+            'sub_category_name' => 'nullable|string|exists:product_sub_categories,sub_category_name',
             'vat' => 'required|string|in:yes,no',
             'capacity_qty' => 'required|numeric|min:1',
-           'expiry_date' => 'nullable|regex:/^\d{2}\/\d{2}\/\d{4}$/',
-
-            'batch_no' => 'nullable|string|max:50',
+             'expiry_date' => 'nullable|regex:/^\d{1,2}\/\d{1,2}\/\d{2,4}$/',
+            'batch_no' => 'nullable|max:50',
             'cost_price' => 'required|integer|min:1',
             'selling_price' => 'required|integer|min:1',
         ];
@@ -150,7 +157,6 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
         return [
             'category_name.exists' => 'The specified product category does not exist.',
             'sub_category_name.exists' => 'The specified product subcategory does not exist.',
-            'piece_name.exists' => 'The specified piece name does not exist in the selling unit capacities.',
             'vat.in' => 'The VAT field must be either "yes" or "no".',
             'expiry_date' => 'Expiry date format should be dd/mm/year',
         ];
