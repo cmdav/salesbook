@@ -10,30 +10,32 @@ use Illuminate\Support\Facades\Auth;
 
 class Organization extends Model
 {
-    use  SetCreatedBy, HasUuids,HasFactory;
-    
+    use  SetCreatedBy;
+    use HasUuids;
+    use HasFactory;
+
     protected $fillable = [
 
         'organization_name',
         //'organization_url',
         'organization_type',
-        'organization_code', 
+        'organization_code',
         'organization_logo',
         'user_id',
         'id',
         'created_by',
         'updated_by',
-        //'company_name', 
-        'contact_person', 
-        'company_address', 
-        'company_email', 
-        'company_phone_number', 
+        //'company_name',
+        'contact_person',
+        'company_address',
+        'company_email',
+        'company_phone_number',
     ];
-   
+
 
     // public function getOrganizationLogoAttribute($value): string
     // {
-        
+
     //     return url('/') . $value;
     // }
     public function getOrganizationTypeAttribute($value): string
@@ -42,9 +44,13 @@ class Organization extends Model
     }
     public function setOrganizationTypeAttribute($value)
     {
-       
+
         $this->attributes['organization_type'] = $value == 'company' ? 2 : 1;
     }
-   
+    public function subscriptionStatuses()
+    {
+        return $this->hasMany(SubscriptionStatus::class);
+    }
+
 
 }

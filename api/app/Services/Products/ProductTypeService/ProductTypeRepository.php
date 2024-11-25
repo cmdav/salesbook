@@ -6,6 +6,7 @@ use App\Models\ProductType;
 use App\Models\SupplierRequest;
 use App\Models\Inventory;
 use App\Models\Sale;
+use App\Models\ProductMeasurement;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
@@ -385,8 +386,8 @@ class ProductTypeRepository
                     \App\Models\ProductMeasurement::create([
                         'product_type_id' => $productType->id,
                         'selling_unit_capacity_id' => $sellingUnitCapacity,
-                        //'purchasing_unit_id' => $purchaseUnitId,
-                        //'selling_unit_id' => $sellingUnitId,
+                        'purchasing_unit_id' => $purchaseUnitId,
+                        'selling_unit_id' => $sellingUnitId,
                     ]);
                 }
             }
@@ -449,80 +450,44 @@ class ProductTypeRepository
             ]);
 
             // Process measurement units
+            // Process measurement units
             $purchaseUnitIds = $data['purchase_unit_id'] ?? [];
             $sellingUnitIds = $data['selling_unit_id'] ?? [];
-            $sellingUnitCapacityIds = $data['selling_unit_capacity_id'] ?? [];
-            $purchaseUnitNames = $data['purchase_unit_name'] ?? [];
-            $sellingUnitNames = $data['selling_unit_name'] ?? [];
-            $sellingUnitCapacities = $data['selling_unit_capacity'] ?? [];
+            $sellingUnitCapacities = $data['selling_unit_capacity_id'] ?? [];
 
             foreach ($purchaseUnitIds as $index => $purchaseUnitId) {
-                $purchaseUnitName = $purchaseUnitNames[$index] ?? null;
                 $sellingUnitId = $sellingUnitIds[$index] ?? null;
-                $sellingUnitName = $sellingUnitNames[$index] ?? null;
-                $sellingUnitCapacityId = $sellingUnitCapacityIds[$index] ?? null;
-                $sellingUnitCapacityValue = $sellingUnitCapacities[$index] ?? null;
+                $sellingUnitCapacity = $sellingUnitCapacities[$index] ?? null;
 
-                if ($purchaseUnitId && $purchaseUnitName) {
-                    // Check if the purchase unit already exists
-                    $purchaseUnit = PurchaseUnit::find($purchaseUnitId);
+                if ($purchaseUnitId && $sellingUnitId && $sellingUnitCapacity) {
+                    // Check if an existing measurement exists
+                    $existingMeasurement = ProductMeasurement::where('product_type_id', $productType->id)
+    ->where('selling_unit_capacity_id', $sellingUnitCapacity)
+    ->where('purchasing_unit_id', $purchaseUnitId)
+    ->where('selling_unit_id', $sellingUnitId)
+    ->first();
 
-                    if ($purchaseUnit) {
-                        // Update existing purchase unit
-                        $purchaseUnit->update([
-                            'purchase_unit_name' => $purchaseUnitName,
-                            'measurement_group_id' => $productType->id,
+
+                    if ($existingMeasurement) {
+                        // Update the existing measurement
+                        $existingMeasurement->update([
+                            'product_type_id' => $productType->id,
+                            'selling_unit_capacity_id' => $sellingUnitCapacity,
+                            'purchasing_unit_id' => $purchaseUnitId,
+                            'selling_unit_id' => $sellingUnitId,
                         ]);
                     } else {
-                        // Create new purchase unit
-                        $purchaseUnit = PurchaseUnit::create([
-                            'id' => $purchaseUnitId,
-                            'purchase_unit_name' => $purchaseUnitName,
-                            'measurement_group_id' => $productType->id,
+                        // Insert a new measurement
+                        ProductMeasurement::create([
+                            'product_type_id' => $productType->id,
+                            'selling_unit_capacity_id' => $sellingUnitCapacity,
+                            'purchasing_unit_id' => $purchaseUnitId,
+                            'selling_unit_id' => $sellingUnitId,
                         ]);
-                    }
-
-                    if ($sellingUnitId && $sellingUnitName) {
-                        // Check if the selling unit already exists
-                        $sellingUnit = SellingUnit::find($sellingUnitId);
-
-                        if ($sellingUnit) {
-                            // Update existing selling unit
-                            $sellingUnit->update([
-                                'purchase_unit_id' => $purchaseUnit->id,
-                                'selling_unit_name' => $sellingUnitName,
-                            ]);
-                        } else {
-                            // Create new selling unit
-                            $sellingUnit = SellingUnit::create([
-                                'id' => $sellingUnitId,
-                                'purchase_unit_id' => $purchaseUnit->id,
-                                'selling_unit_name' => $sellingUnitName,
-                            ]);
-                        }
-
-                        if ($sellingUnitCapacityId && $sellingUnitCapacityValue) {
-                            // Check if the selling unit capacity already exists
-                            $sellingUnitCapacity = SellingUnitCapacity::find($sellingUnitCapacityId);
-
-                            if ($sellingUnitCapacity) {
-                                // Update existing selling unit capacity
-                                $sellingUnitCapacity->update([
-                                    'selling_unit_id' => $sellingUnit->id,
-                                    'selling_unit_capacity' => $sellingUnitCapacityValue,
-                                ]);
-                            } else {
-                                // Create new selling unit capacity
-                                SellingUnitCapacity::create([
-                                    'id' => $sellingUnitCapacityId,
-                                    'selling_unit_id' => $sellingUnit->id,
-                                    'selling_unit_capacity' => $sellingUnitCapacityValue,
-                                ]);
-                            }
-                        }
                     }
                 }
             }
+
 
             // Commit the transaction
             DB::commit();
