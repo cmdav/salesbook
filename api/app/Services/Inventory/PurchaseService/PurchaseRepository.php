@@ -14,6 +14,35 @@ use Illuminate\Support\Facades\Log;
 
 class PurchaseRepository
 {
+    //   public function update($id, array $data)
+    // {
+    //     $purchase = Purchase::find($id);
+
+    //     if ($purchase) {
+    //         $originalQuantity = $purchase->quantity;
+    //         $newQuantity = $data['quantity'];
+    //         $quantityDifference = $newQuantity - $originalQuantity;
+
+    //         $purchase->update($data);
+
+    //         // Update store quantity
+    //         $store = Store::where('product_type_id', $purchase->product_type_id)
+    //                       ->where('batch_no', $purchase->batch_no)
+    //                       ->first();
+
+    //         if ($store) {
+    //             $store->quantity_available += $quantityDifference;
+    //             if ($store->quantity_available < 0) {
+    //                 $store->quantity_available = 0;
+    //             }
+    //             $store->save();
+    //         }
+    //     }
+
+    //     return $purchase;
+    // }
+
+
     private function query($branchId)
     {
 
@@ -123,8 +152,7 @@ class PurchaseRepository
             'selling_price' => $formatted_selling_price,
             'supplier' => optional($purchase->suppliers)->first_name . " " . optional($purchase->suppliers)->last_name,
             'created_by' => optional($purchase->creator)->first_name ? optional($purchase->creator)->first_name . " " . optional($purchase->creator)->last_name : optional($purchase->creator->organization)->organization_name,
-
-            'updated_by' => optional($purchase->updater)->first_name ? optional($purchase->updater)->first_name . " " . optional($purchase->updater)->last_name : optional($purchase->updater->organization)->organization_name,
+             'updated_by' => optional($purchase->updater)->first_name ? optional($purchase->updater)->first_name . " " . optional($purchase->updater)->last_name : optional($purchase->updater->organization)->organization_name,
 
             //'updated_by' => optional($purchase->updater)->fullname,
         ];
@@ -224,7 +252,7 @@ class PurchaseRepository
                     },
 
                 ])->find($purchaseData['product_type_id']);
-
+                //dd($productType);
                 // Case-insensitive comparison for purchase unit name and selling unit name
                 //if (strcasecmp($productType->unitPurchase->purchase_unit_name, $productType->sellingUnit->selling_unit_name) !== 0) {
                 // Multiply the capacity quantity by selling unit capacity
