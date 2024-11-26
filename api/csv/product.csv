@@ -1,3 +1,6 @@
-product_type_name,product_type_description,piece_name,category_name,sub_category_name,vat,barcode
-Second products,testing product,small co,Food,sample sub category,yes,12345
-third products,testing product,big fanta,Food,sample sub category,no,
+product_type_name,product_type_description,category_name,sub_category_name,vat,barcode,capacity_qty,expiry_date,batch_no,cost_price, selling_price ,purchase_unit,selling_unit,no_of_pieces
+first,product,Cereals,Cereals,yes,6.15E+12,5,1/8/2025,260823,2117,2600,Carton,Piece,1
+second,product,Cereals,Cereals,yes,6.16E+12,4,1/3/2026,13024N,2384,2800,Carton,Small cartoon,2
+third,product,Cereals,Cereals,yes,6.15E+12,3,1/6/2026,21C624,1025,1500,Carton,Big Cartoon,3
+fourth,product,Cereals,Cereals,yes,7.14E+11,2,1/8/2026,120824,760,1000,Carton,Fanta,4
+fifth,product,Cereals,Cereals,yes,7.14E+11,1,1/8/2026,050824N,2145,2400,Carton,Coke,5
