@@ -166,12 +166,12 @@ class ProductTypeRepository
                 },
             ])
             ->get();
-
+        // return $response;
 
         if ($response) {
             $response = $response->map(function ($item) {
                 // Add latest price information to the response
-                $latestPrice = $item->activePrice->first(); // Assuming activePrice contains the latest price
+                //$latestPrice = $item->activePrice->first(); // Assuming activePrice contains the latest price
                 // $item->price_id = $latestPrice ? $latestPrice->id : null;
                 // $item->cost_price = $latestPrice ? $latestPrice->cost_price : null;
                 // $item->selling_price = $latestPrice ? $latestPrice->selling_price : null;
@@ -180,10 +180,11 @@ class ProductTypeRepository
                 // Combine purchase and selling unit details
                 $measurements = $item->productMeasurement->map(function ($measurement) {
                     return [
-                        'selling_unit_id' => optional($measurement->sellingUnitCapacity->sellingUnit)->id,
-                        'selling_unit_name' => optional($measurement->sellingUnitCapacity->sellingUnit)->selling_unit_name,
-                        'purchase_unit_id' => optional($measurement->sellingUnitCapacity->sellingUnit->purchaseUnit)->id,
-                        'selling_unit_capacity' => optional($measurement->sellingUnitCapacity)->selling_unit_capacity,
+                        'selling_unit_id' => optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->id,
+'selling_unit_name' => optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->selling_unit_name,
+'purchase_unit_id' => optional(optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->purchaseUnit)->id,
+'selling_unit_capacity' => optional($measurement->sellingUnitCapacity)->selling_unit_capacity,
+
                         'price_id' => "9d7de6b9-dcf3-4401-915c-c84f14206ba2",
                         'cost_price' => 50,
                         'selling_price' => 90,

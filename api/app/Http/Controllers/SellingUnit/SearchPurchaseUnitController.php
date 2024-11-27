@@ -24,6 +24,6 @@ class SearchPurchaseUnitController extends Controller
         if (!$data->isEmpty()) {
             return response()->json(['success' => true, 'message' => 'Record retrieved successfully', 'data' => $data], 200);
         }
-        return response()->json(['success' => false, 'message' => 'No record found'], 404);
+        return response()->json([], 200);
     }
 }

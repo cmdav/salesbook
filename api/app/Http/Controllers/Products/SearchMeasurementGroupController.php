@@ -23,6 +23,6 @@ class SearchMeasurementGroupController extends Controller
         if (!$data->isEmpty()) {
             return response()->json($data, 200);
         }
-        return response()->json(['success' => false, 'message' => 'No record found'], 404);
+        return response()->json([], 200);
     }
 }

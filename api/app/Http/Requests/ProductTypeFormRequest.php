@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 class ProductTypeFormRequest extends FormRequest
 {
@@ -36,6 +37,36 @@ class ProductTypeFormRequest extends FormRequest
             $barcodeRule[] = Rule::ignore($this->route('product_type'), 'barcode');
         }
 
+        $uniqueUnitCombinationRule = function ($attribute, $value, $fail) {
+            $purchaseUnitIds = $this->input('purchase_unit_id');
+            $sellingUnitIds = $this->input('selling_unit_id');
+
+            if (count($purchaseUnitIds) !== count($sellingUnitIds)) {
+                $fail('The number of purchase units and selling units must match.');
+                return;
+            }
+
+            // Combine the purchase_unit_id and selling_unit_id into a single array of pairs
+            $unitCombinations = [];
+            foreach ($purchaseUnitIds as $index => $purchaseUnitId) {
+                $unitCombinations[] = [
+                    'purchase_unit_id' => $purchaseUnitId,
+                    'selling_unit_id' => $sellingUnitIds[$index],
+                ];
+            }
+
+            // Check if there are any duplicate combinations within the array
+            $duplicates = collect($unitCombinations)
+                ->duplicates()
+                ->values()
+                ->all();
+
+            if (!empty($duplicates)) {
+                $fail('The combination of purchase unit and selling unit must be unique in the form submission.');
+            }
+        };
+
+
         return [
 
             'product_type_name' => $productTypeRule,
@@ -51,11 +82,13 @@ class ProductTypeFormRequest extends FormRequest
             'selling_unit_capacity_id' => 'required|array',
             'selling_unit_capacity_id.*' => 'integer|exists:selling_unit_capacities,id',
 
-            'purchase_unit_id' => 'required|array',
+
             'purchase_unit_id.*' => 'uuid|exists:purchase_units,id',
 
-            'selling_unit_id' => 'required|array',
+
             'selling_unit_id.*' => 'uuid|exists:selling_units,id',
+            'purchase_unit_id' => ['required', 'array', $uniqueUnitCombinationRule],
+            'selling_unit_id' => ['required', 'array', $uniqueUnitCombinationRule],
 
 
 
