@@ -307,30 +307,6 @@ class ProductTypeRepository
             'purchasing_price' => $activePrice ? $activePrice->cost_price : 'Not set',
             'selling_price' => $activePrice ? $activePrice->selling_price : 'Not set',
 
-            // 'product_measurement' => $productType->productMeasurement->map(function ($measurement) {
-            //     return [
-            //         // 'id' => $measurement->id,
-            //         // 'product_type_id' => $measurement->product_type_id,
-            //         // 'selling_unit_capacity_id' => optional($measurement->sellingUnitCapacity)->id,
-            //         // 'purchasing_unit_id' => $measurement->purchasing_unit_id,
-            //         // 'selling_unit_id' => $measurement->selling_unit_id,
-            //         'selling_unit_capacity' => [
-            //             //'id' => optional($measurement->sellingUnitCapacity)->id,
-            //             //'selling_unit_id' => optional($measurement->sellingUnitCapacity)->selling_unit_id,
-            //             'selling_unit_capacity' => optional($measurement->sellingUnitCapacity)->selling_unit_capacity,
-            //             'selling_unit' => [
-            //                // 'id' => optional($measurement->sellingUnitCapacity->sellingUnit)->id,
-            //                 'selling_unit_name' => optional($measurement->sellingUnitCapacity->sellingUnit)->selling_unit_name,
-            //                 //'purchase_unit_id' => optional($measurement->sellingUnitCapacity->sellingUnit)->purchase_unit_id,
-            //                 'purchase_unit' => [
-            //                    // 'id' => optional($measurement->sellingUnitCapacity->sellingUnit->purchaseUnit)->id,
-            //                     'purchase_unit_name' => optional($measurement->sellingUnitCapacity->sellingUnit->purchaseUnit)->purchase_unit_name,
-            //                 ]
-            //             ]
-            //         ]
-            //     ];
-            // })->toArray(),
-
             'selling_unit_capacity' => $productType->productMeasurement->map(function ($measurement) {
                 return optional($measurement->sellingUnitCapacity)->selling_unit_capacity;
             })->toArray(),
@@ -424,8 +400,43 @@ class ProductTypeRepository
 
     public function findById($id)
     {
-        return ProductType::find($id);
+
+        // Retrieve the product type with its related measurements and other details
+        $productType = ProductType::with([
+            'productMeasurement.sellingUnitCapacity.sellingUnit.purchaseUnit'
+        ])->find($id);
+
+        if (!$productType) {
+            return null; // Handle the case when the product is not found
+        }
+
+        // Transform the product type data into the desired format
+        $result = [
+            'product_type_name' => $productType->product_type_name,
+            'product_type_description' => $productType->product_type_description,
+            'barcode' => $productType->barcode ?? '', // Include barcode if available
+            'vat' => $productType->vat ?? '',
+            'sub_category_id' => optional($productType->subCategory)->id,
+            'category_id' => optional($productType->product_category)->id,
+        ];
+
+        // Transform related product measurements
+        $measurements = $productType->productMeasurement->map(function ($measurement, $index) {
+            return [
+                "purchase_unit_id[$index]" => optional($measurement->sellingUnitCapacity->sellingUnit->purchaseUnit)->id,
+                "purchase_unit_name[$index]" => optional($measurement->sellingUnitCapacity->sellingUnit->purchaseUnit)->purchase_unit_name,
+                "selling_unit_id[$index]" => optional($measurement->sellingUnitCapacity->sellingUnit)->id,
+                "selling_unit_name[$index]" => optional($measurement->sellingUnitCapacity->sellingUnit)->selling_unit_name,
+                "selling_unit_capacity_id[$index]" => optional($measurement->sellingUnitCapacity)->id,
+            ];
+        })->collapse()->toArray(); // Collapse the collection into a single array
+
+        // Merge measurements data into the result
+        $result = array_merge($result, $measurements);
+
+        return $result;
     }
+
 
     public function update($id, array $data)
     {
