@@ -53,7 +53,10 @@ class PriceRepository
                 return [
                     'selling_unit_id' => $price->selling_unit_id,
                     'cost_price' => $relatedPrice->cost_price,
+                    'is_cost_price_est' => 0,
                     'selling_price' => $price->selling_price ?? ($relatedPrice ? $relatedPrice->selling_price : null),
+                    'is_selling_price_est' => 1,
+                    'price_id' => $price->id,
                 ];
             }
 
@@ -61,7 +64,10 @@ class PriceRepository
             return [
                 'selling_unit_id' => $price->selling_unit_id,
                 'cost_price' => $price->cost_price,
+                'is_cost_price_est' => 0,
                 'selling_price' => $price->selling_price,
+                'is_selling_price_est' => 1,
+                'price_id' => $price->id,
             ];
         });
 

@@ -25,6 +25,8 @@ class Price extends Model
         'selling_unit_id',
         'purchase_unit_id',
          'is_new',
+         'is_selling_price_est',
+         'is_cost_price_est',
         //'auto_generated_selling_price',
         'currency_id',
         'discount',

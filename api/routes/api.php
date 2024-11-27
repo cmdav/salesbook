@@ -52,6 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
         route::resource('purchases', App\Http\Controllers\Inventory\PurchaseController::class);
         route::post('estimated-store', [App\Http\Controllers\Inventory\PurchaseController::class, 'store']);
         route::get('estimated-store', [App\Http\Controllers\Inventory\PurchaseController::class, 'index']);
+        route::put('estimated-stores/{product_id}', [App\Http\Controllers\Inventory\PurchaseController::class, 'updateEstimatedValue']);
 
 
         //route::resource('inventories', App\Http\Controllers\Inventory\InventoryController::class);
@@ -121,7 +122,7 @@ Route::middleware('auth:sanctum')->group(function () {
         route::get('latest-product-type-price/{id}', App\Http\Controllers\Inventory\LatestPriceByProductTypeController::class);
         route::get('all-product-type', App\Http\Controllers\Product\AllProductTypeController::class);//use in purchase to load product type
         //use in purchase page drop down when an item is selected from the all-product-type
-        route::get('latest-supplier-price/{product_type_id}/{supplier_id}/{product_measurement_id}', App\Http\Controllers\Inventory\LatestSupplierPriceController::class);
+        route::get('latest-supplier-price/{product_type_id}/{supplier_id}/{purchase_unit_id}', App\Http\Controllers\Inventory\LatestSupplierPriceController::class);
 
         //need modification
         route::get('get-suppliers-by-product-type-id/{product_type_id}', App\Http\Controllers\Inventory\SupplierByProductController::class);

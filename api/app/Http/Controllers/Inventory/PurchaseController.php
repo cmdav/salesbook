@@ -47,4 +47,50 @@ class PurchaseController extends Controller
         return $this->purchaseService->deletePurchase($id);
 
     }
+    public function updateEstimatedValue($id, Request $request)
+    {
+        // Ensure 'type' is present and valid
+        $validatedType = $request->validate([
+            'type' => 'required|in:cost_price,selling_price,quantity',
+        ]);
+
+        // Determine validation rules based on the request type
+        $rules = [
+            'type' => 'required|in:cost_price,selling_price,quantity',
+            'product_type_id' => 'required|exists:product_types,id',
+            'selling_unit_id' => 'required|exists:selling_units,id',
+        ];
+
+        if ($request['type'] === 'cost_price') {
+            $rules['cost_price'] = 'required|numeric';
+        } elseif ($request['type'] === 'selling_price') {
+            $rules['selling_price'] = 'required|numeric';
+        } elseif ($request['type'] === 'quantity') {
+            $rules['quantity'] = 'required|numeric';
+        }
+
+        // Validate the request based on the dynamically constructed rules
+        $validatedData = $request->validate($rules);
+
+        // Multiply specific values by 2 if they are provided
+        if (isset($validatedData['cost_price'])) {
+            $validatedData['cost_price'] *= 2;
+        }
+
+        if (isset($validatedData['selling_price'])) {
+            $validatedData['selling_price'] *= 2;
+        }
+
+        if (isset($validatedData['quantity'])) {
+            $validatedData['quantity'] *= 2;
+        }
+
+        // Update the purchase using the purchase service
+        // $purchase = $this->purchaseService->updatePurchase($id, $validatedData);
+
+        // Return the updated purchase as a JSON response
+        return response()->json($validatedData);
+    }
+
+
 }

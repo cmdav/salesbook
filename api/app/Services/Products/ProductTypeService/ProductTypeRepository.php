@@ -134,7 +134,7 @@ class ProductTypeRepository
         return response()->json(['data' => []], 200);
     }
 
-
+    //Use in sales pages
     public function saleProductDetail()
     {
 
@@ -153,7 +153,7 @@ class ProductTypeRepository
                 'productMeasurement.sellingUnitCapacity.sellingUnit.purchaseUnit:id,purchase_unit_name',
                 'subCategory:id,sub_category_name',
                 'activePrice' => function ($query) {
-                    $query->select('id', 'cost_price', 'selling_price', 'product_type_id');
+                    $query->select('id', 'cost_price', 'selling_price', 'product_type_id', 'is_cost_price_est', 'is_selling_price_est');
                 },
                 'store' => function ($query) use ($branchId) {
                     $query->selectRaw('product_type_id, SUM(capacity_qty_available) as total_quantity')
@@ -170,25 +170,22 @@ class ProductTypeRepository
 
         if ($response) {
             $response = $response->map(function ($item) {
-                // Add latest price information to the response
-                //$latestPrice = $item->activePrice->first(); // Assuming activePrice contains the latest price
-                // $item->price_id = $latestPrice ? $latestPrice->id : null;
-                // $item->cost_price = $latestPrice ? $latestPrice->cost_price : null;
-                // $item->selling_price = $latestPrice ? $latestPrice->selling_price : null;
-                // $item->quantity_available = optional($item->store)->total_quantity;
 
                 // Combine purchase and selling unit details
                 $measurements = $item->productMeasurement->map(function ($measurement) {
                     return [
                         'selling_unit_id' => optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->id,
-'selling_unit_name' => optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->selling_unit_name,
-'purchase_unit_id' => optional(optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->purchaseUnit)->id,
-'selling_unit_capacity' => optional($measurement->sellingUnitCapacity)->selling_unit_capacity,
+                        'selling_unit_name' => optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->selling_unit_name,
+                        'purchase_unit_id' => optional(optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->purchaseUnit)->id,
+                        'selling_unit_capacity' => optional($measurement->sellingUnitCapacity)->selling_unit_capacity,
 
                         'price_id' => "9d7de6b9-dcf3-4401-915c-c84f14206ba2",
                         'cost_price' => 50,
+                        'is_cost_price_est' => 0,
                         'selling_price' => 90,
+                        'is_selling_price_est' => 1,
                         'capacity_quantity_available' => 190,
+                        'is_capacity_quantity_est' => 1,
                     ];
                 });
 
@@ -308,22 +305,17 @@ class ProductTypeRepository
             'selling_price' => $activePrice ? $activePrice->selling_price : 'Not set',
 
             'selling_unit_capacity' => $productType->productMeasurement->map(function ($measurement) {
-                return optional($measurement->sellingUnitCapacity)->selling_unit_capacity;
-            })->toArray(),
+                return optional(optional($measurement->sellingUnitCapacity)->selling_unit_capacity)->toArray() ?? null;
+            }),
 
             'selling_unit_name' => $productType->productMeasurement->map(function ($measurement) {
-                return optional($measurement->sellingUnitCapacity->sellingUnit)->selling_unit_name;
+                return optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->selling_unit_name ?? null;
             })->toArray(),
 
             'purchase_unit_name' => $productType->productMeasurement->map(function ($measurement) {
-                return optional($measurement->sellingUnitCapacity->sellingUnit->purchaseUnit)->purchase_unit_name;
+                return optional(optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->purchaseUnit)->purchase_unit_name ?? null;
             })->toArray(),
-            // 'selling_unit_capacity' => optional($productType->productMeasurement->sellingUnitCapacity)->id,
-            // 'selling_unit_capacity_id' => optional($productType->sellingUnitCapacity)->id,
-            // 'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name,
-            // 'purchase_unit_id' => optional($productType->unitPurchase)->id,
-            // 'selling_unit_name' => optional($productType->sellingUnit)->selling_unit_name,
-            // 'selling_unit_id' => optional($productType->sellingUnit)->id,
+
 
 
             'supplier_name' => trim((optional($productType->suppliers)->first_name ?? '') . ' ' . (optional($productType->suppliers)->last_name ?? '')) ?: 'None',

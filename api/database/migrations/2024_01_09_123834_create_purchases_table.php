@@ -20,7 +20,6 @@ return new class () extends Migration {
             $table->integer('branch_id');
             $table->string('batch_no')->index();
             $table->integer('capacity_qty')->default(0);
-
             $table->string('product_identifier', 50)->nullable();
             $table->date('expiry_date')->nullable();
             $table->integer('status')->default(1);
