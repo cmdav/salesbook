@@ -14,6 +14,8 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
             $table->string('purchase_unit_name', 50)->unique();
             $table->uuid('measurement_group_id')->nullable();
+            $table->uuid('parent_purchase_unit_id')->nullable()->index();
+            $table->integer('unit')->default(0);
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->timestamps();

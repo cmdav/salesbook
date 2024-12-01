@@ -74,23 +74,6 @@ class SaleRepository
         return $query->latest();
     }
 
-
-    // private function query($branchId = '')
-    // {
-
-    //     $query = Sale::with(['product:id,product_type_name,product_type_image,product_type_description',
-    //                         'payment_details:id,payment_identifier',
-    //                      //'store:id,product_type_id,quantity_available',
-    //                      'branches:id,name,state_id,country_id,city,phone_number,email,address',
-    //                      'customers:id,first_name,last_name,contact_person,phone_number',
-    //                      'Price:id,selling_price,cost_price'
-    //                  ]);
-    //     if ($branchId !== 'all') {
-    //         // Apply the where clause if branch_id is not 'all' and the user is not admin
-    //         $query->where('branch_id', $branchId);
-    //     }
-    //     return $query->latest();
-    // }
     public function index($request)
     {
         $branchId = 'all';

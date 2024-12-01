@@ -22,7 +22,12 @@ class PurchaseUnitFormRequest extends FormRequest
                 Rule::unique('purchase_units')->ignore($this->route('purchase_unit')),
             ],
             'measurement_group_id' => 'nullable|uuid', // Corrected the typo from 'nullabe' to 'nullable' and added UUID validation
+
+            // Adding the new rules for parent_purchase_unit_id and unit
+            'parent_purchase_unit_id' => 'nullable|uuid|exists:purchase_units,id', // Ensures it's a valid UUID and exists in the 'purchase_units' table
+            'unit' => 'nullable|integer|min:0', // Ensures the unit is an integer and defaults to 0 if not provided
         ];
     }
+
 
 }

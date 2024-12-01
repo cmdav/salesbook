@@ -3,7 +3,6 @@
 namespace App\Services\Products\MeasurementGroupService;
 
 use App\Models\MeasurementGroup;
-
 use App\Services\Security\LogService\LogRepository;
 use Exception;
 
@@ -17,39 +16,96 @@ class MeasurementGroupRepository
         $this->logRepository = $logRepository;
         $this->username = $this->logRepository->getUsername();
     }
-    private function getMeasurementGroupsQuery()
+
+    protected function getMeasurementGroupsQuery()
     {
         return MeasurementGroup::select("id", "group_name")
             ->with([
-                'purchaseUnits:id,measurement_group_id,purchase_unit_name',
+                'purchaseUnits:id,measurement_group_id,purchase_unit_name,parent_purchase_unit_id,unit', // Added unit field here
                 'purchaseUnits.sellingUnits:id,purchase_unit_id,selling_unit_name',
-                'purchaseUnits.sellingUnits.sellingUnitCapacities:id,selling_unit_id,selling_unit_capacity'
+                'purchaseUnits.sellingUnits.sellingUnitCapacities:id,selling_unit_id,selling_unit_capacity',
+                'purchaseUnits.subPurchaseUnits:id,purchase_unit_name,parent_purchase_unit_id,unit', // Added unit field here
+                'purchaseUnits.subPurchaseUnits.sellingUnits:id,purchase_unit_id,selling_unit_name',
+                'purchaseUnits.subPurchaseUnits.sellingUnits.sellingUnitCapacities:id,selling_unit_id,selling_unit_capacity'
             ]);
     }
+
+    protected function getSubPurchaseUnits($purchaseUnit)
+    {
+        // Only process if there are sub-purchase units
+        if ($purchaseUnit->subPurchaseUnits->isEmpty()) {
+            return [];
+        }
+
+        // Process sub-purchase units recursively
+        return $purchaseUnit->subPurchaseUnits->map(function ($subPurchaseUnit) use ($purchaseUnit) {
+            // Recursively load sub-purchase units for this level
+            return [
+                'id' => $subPurchaseUnit->id,
+                'purchase_unit_name' => $subPurchaseUnit->purchase_unit_name,
+                'unit' => $subPurchaseUnit->unit, // Added unit here
+
+                'selling_units' => $subPurchaseUnit->sellingUnits->map(function ($sellingUnit) {
+                    return [
+                        'id' => $sellingUnit->id,
+                        'selling_unit_name' => $sellingUnit->selling_unit_name,
+                        'selling_unit_capacities' => $sellingUnit->sellingUnitCapacities->map(function ($capacity) {
+                            return [
+                                'id' => $capacity->id,
+                                'selling_unit_capacity' => $capacity->selling_unit_capacity,
+                            ];
+                        }),
+                    ];
+                }),
+                // Recursively load sub-purchase units for this level
+                'sub_purchase_units' => $this->getSubPurchaseUnits($subPurchaseUnit),
+            ];
+        });
+    }
+
     protected function transformMeasurementGroup($measurementGroup)
     {
+        // Group purchase units by parent-child relationships
+        $purchaseUnitsByParent = $measurementGroup->purchaseUnits->groupBy(function ($purchaseUnit) {
+            return $purchaseUnit->parent_purchase_unit_id ?? 'parent';
+        });
+
+        // Now build the structure by recursively nesting child units under their parents
         return [
             'id' => $measurementGroup->id,
             'group_name' => $measurementGroup->group_name,
-            'purchase_units' => $measurementGroup->purchaseUnits->map(function ($purchaseUnit) {
-                return [
-                    'id' => $purchaseUnit->id,
-                    'purchase_unit_name' => $purchaseUnit->purchase_unit_name,
-                    'selling_units' => $purchaseUnit->sellingUnits->map(function ($sellingUnit) {
-                        return [
-                            'id' => $sellingUnit->id,
-                            'selling_unit_name' => $sellingUnit->selling_unit_name,
-                            'selling_unit_capacities' => $sellingUnit->sellingUnitCapacities->map(function ($capacity) {
-                                return [
-                                    'id' => $capacity->id,
-                                    'selling_unit_capacity' => $capacity->selling_unit_capacity,
-                                ];
-                            }),
-                        ];
-                    }),
-                ];
-            }),
+            'purchase_units' => $this->buildPurchaseUnitHierarchy($purchaseUnitsByParent),
         ];
+    }
+
+    protected function buildPurchaseUnitHierarchy($purchaseUnitsByParent)
+    {
+        $parentUnits = $purchaseUnitsByParent->get('parent', collect());
+
+        return $parentUnits->map(function ($parentUnit) use ($purchaseUnitsByParent) {
+            // Get children of this parent unit
+            $children = $purchaseUnitsByParent->get($parentUnit->id, collect());
+
+            // Recursively build the structure for sub-purchase units and children
+            return [
+                'id' => $parentUnit->id,
+                'purchase_unit_name' => $parentUnit->purchase_unit_name,
+                'unit' => $parentUnit->unit, // Add unit field here
+                'selling_units' => $parentUnit->sellingUnits->map(function ($sellingUnit) {
+                    return [
+                        'id' => $sellingUnit->id,
+                        'selling_unit_name' => $sellingUnit->selling_unit_name,
+                        'selling_unit_capacities' => $sellingUnit->sellingUnitCapacities->map(function ($capacity) {
+                            return [
+                                'id' => $capacity->id,
+                                'selling_unit_capacity' => $capacity->selling_unit_capacity,
+                            ];
+                        }),
+                    ];
+                }),
+                'sub_purchase_units' => $this->getSubPurchaseUnits($parentUnit),
+            ];
+        });
     }
 
     public function index()
@@ -65,13 +121,12 @@ class MeasurementGroupRepository
         $measurementGroups = $this->getMeasurementGroupsQuery()->paginate(6);
 
         // Transform the paginated data
-        $measurementGroups->getCollection()->transform(function ($measurementGroup) {
-            return $this->transformMeasurementGroup($measurementGroup);
-        });
+        // $measurementGroups->getCollection()->transform(function ($measurementGroup) {
+        //     return $this->transformMeasurementGroup($measurementGroup);
+        // });
 
         return $measurementGroups;
     }
-
 
     public function show($id)
     {
@@ -92,7 +147,6 @@ class MeasurementGroupRepository
     public function store($data)
     {
         try {
-
             $model =  MeasurementGroup::create($data);
             $this->logRepository->logEvent(
                 'measurement_groups',
@@ -104,10 +158,8 @@ class MeasurementGroupRepository
             );
             return response()->json([ 'success' => true, 'message' => 'Insertion successful', 'data' => $model], 200);
         } catch (Exception $e) {
-            //Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
             return response()->json([ 'success' => false, 'message' => 'Insertion error'], 500);
         }
-
     }
 
     public function update($data, $id)
@@ -131,7 +183,6 @@ class MeasurementGroupRepository
 
             return response()->json(['success' => true, 'message' => 'Update successful', 'data' => $model], 200);
         } catch (Exception $e) {
-            Log::error('Error updating Measurement Group: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Update error'], 500);
         }
     }
@@ -146,7 +197,6 @@ class MeasurementGroupRepository
     public function getsearchMeasurementGroup($search)
     {
         // Fetch the filtered paginated data using the reusable query method
-
         $measurementGroups = $this->getMeasurementGroupsQuery()
         ->where('group_name', 'LIKE', '%' . $search . '%')
         ->orWhereHas('purchaseUnits', function ($query) use ($search) {

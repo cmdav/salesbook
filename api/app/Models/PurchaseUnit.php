@@ -16,6 +16,8 @@ class PurchaseUnit extends Model
         'id',
         'purchase_unit_name',
         'measurement_group_id',
+        'parent_purchase_unit_id',
+        'unit',
         'created_by',
         'updated_by'
     ];
@@ -28,4 +30,17 @@ class PurchaseUnit extends Model
     {
         return $this->belongsTo(MeasurementGroup::class, 'measurement_group_id', 'id');
     }
+    // In PurchaseUnit Model
+    // In the PurchaseUnit model
+    public function subPurchaseUnits()
+    {
+        return $this->hasMany(PurchaseUnit::class, 'parent_purchase_unit_id', 'id');
+    }
+
+    public function parentPurchaseUnit()
+    {
+        return $this->belongsTo(PurchaseUnit::class, 'parent_purchase_unit_id', 'id');
+    }
+
+
 }

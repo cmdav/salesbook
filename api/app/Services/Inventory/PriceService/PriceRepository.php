@@ -25,8 +25,9 @@ class PriceRepository
 
     }
     //use in  purchase page when a product is selected
-    public function getLatestSupplierPrice($product_type_id, $supplier_id, $purchase_unit_id)
+    public function getLatestSupplierPrice($product_type_id, $supplier_id, $purchase_unit_id, $request)
     {
+
         $branchId = auth()->user()->branch_id;
 
         // Fetch all price entries for the given conditions

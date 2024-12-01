@@ -85,7 +85,7 @@ class ProductType extends Model
     {
         // Add branch filtering here
         return $this->hasOne(Price::class)
-                    ->where('status', 1)
+                     ->where('status', 1)
                     ->where('branch_id', auth()->user()->branch_id)
                     ->latest('created_at');
     }

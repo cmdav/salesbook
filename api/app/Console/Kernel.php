@@ -12,11 +12,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
-        // $schedule->command('subscription:send-reminder')->daily();
+
         $schedule->command('app:send-subscription-reminder')
-        ->everyMinute()
-        ->appendOutputTo(storage_path('logs/schedule.log'));
+        ->everyMinute();
+        //->cron('*/3 * * * *');
 
 
 

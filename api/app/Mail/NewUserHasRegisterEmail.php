@@ -66,7 +66,26 @@ class NewUserHasRegisterEmail extends Mailable
             $this->second_paragraph = "Click the button to accept the invitation";
             $this->btn_label = "Join Company";
             $this->title = "Invitation from {$otherDetail['organization_name']}";
-        } elseif ($type == "sales-receipt") {
+        }
+        ///////////////
+        elseif ($type == "subscription_reminder") {
+            //$companyName =  optional(auth()->user()->organization)->organization_name;
+            $companyName =  "Test";
+            $this->first_paragraph = $otherDetail['msg'];
+            //$this->second_paragraph = $otherDetail['msg'];
+            //$this->btn_label = "Join Company";
+            $this->title = "Subscription Reminder";
+        }
+
+
+
+
+        ///////////
+
+
+
+
+        elseif ($type == "sales-receipt") {
 
 
             //$this->frontendUrl = env('FRONTEND_URL');

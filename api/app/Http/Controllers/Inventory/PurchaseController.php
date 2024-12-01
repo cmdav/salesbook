@@ -52,20 +52,24 @@ class PurchaseController extends Controller
         // Ensure 'type' is present and valid
         $validatedType = $request->validate([
             'type' => 'required|in:cost_price,selling_price,quantity',
+            'is_actual' => 'required',
         ]);
 
         // Determine validation rules based on the request type
         $rules = [
             'type' => 'required|in:cost_price,selling_price,quantity',
             'product_type_id' => 'required|exists:product_types,id',
-            'selling_unit_id' => 'required|exists:selling_units,id',
+
         ];
 
         if ($request['type'] === 'cost_price') {
             $rules['cost_price'] = 'required|numeric';
+            $rules['purchase_unit_id'] = 'required|uuid';
         } elseif ($request['type'] === 'selling_price') {
             $rules['selling_price'] = 'required|numeric';
+            $rules['selling_unit_id'] = 'required|uuid';
         } elseif ($request['type'] === 'quantity') {
+            $rules['purchase_unit_id'] = 'required|uuid';
             $rules['quantity'] = 'required|numeric';
         }
 

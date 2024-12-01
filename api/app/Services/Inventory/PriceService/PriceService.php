@@ -41,9 +41,9 @@ class PriceService
     {
         return $this->PriceRepository->getLatestPriceByProductType($id);
     }
-    public function getLatestSupplierPrice($product_type_id, $supplier_id, $product_measurement_id)
+    public function getLatestSupplierPrice($product_type_id, $supplier_id, $product_measurement_id, $request)
     {
-        return $this->PriceRepository->getLatestSupplierPrice($product_type_id, $supplier_id, $product_measurement_id);
+        return $this->PriceRepository->getLatestSupplierPrice($product_type_id, $supplier_id, $product_measurement_id, $request);
     }
     public function updatePrice($id, array $data)
     {
