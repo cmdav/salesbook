@@ -77,13 +77,19 @@ class LogRepository
     public function logEvent($route, $event, $modelId, $model, $activity, $payload = [])
     {
         // Define the log data in an array format
+        $user = auth()->user();
+        $username = optional($user)->first_name
+            ? optional($user)->first_name . " " . optional($user)->last_name
+            : optional(optional($user)->organization)->organization_name ?? "System";
+
+        //dd($username);
         $logData = [
             'route' => $route,
             'user_id' => auth()->check() ? auth()->user()->id : null,
             'event' => $event,
             'model_id' => $modelId,
             'model' => $model,
-            'activity' => $activity,
+            'activity' => $username." ".$activity,
             'payload' => json_encode($payload),
         ];
 
@@ -92,9 +98,10 @@ class LogRepository
     }
     public function getUsername()
     {
-        $user = auth()->user();
-        return optional($user)->first_name
-            ? optional($user)->first_name . " " . optional($user)->last_name
-            : optional(optional($user)->organization)->organization_name ?? "System";
+        return '';
+        // $user = auth()->user();
+        // return optional($user)->first_name
+        //     ? optional($user)->first_name . " " . optional($user)->last_name
+        //     : optional(optional($user)->organization)->organization_name ?? "System";
     }
 }

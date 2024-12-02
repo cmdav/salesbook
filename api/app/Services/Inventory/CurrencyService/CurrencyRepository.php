@@ -15,7 +15,6 @@ class CurrencyRepository
     public function __construct(LogRepository $logRepository)
     {
         $this->logRepository = $logRepository;
-        // dd($this->logRepository->getUsername());
         $username = $this->logRepository->getUsername();
     }
 
