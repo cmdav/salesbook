@@ -21,12 +21,8 @@ class MeasurementGroupRepository
     {
         return MeasurementGroup::select("id", "group_name")
             ->with([
-                'purchaseUnits:id,measurement_group_id,purchase_unit_name,parent_purchase_unit_id,unit', // Added unit field here
-                'purchaseUnits.sellingUnits:id,purchase_unit_id,selling_unit_name',
-                'purchaseUnits.sellingUnits.sellingUnitCapacities:id,selling_unit_id,selling_unit_capacity',
-                'purchaseUnits.subPurchaseUnits:id,purchase_unit_name,parent_purchase_unit_id,unit', // Added unit field here
-                'purchaseUnits.subPurchaseUnits.sellingUnits:id,purchase_unit_id,selling_unit_name',
-                'purchaseUnits.subPurchaseUnits.sellingUnits.sellingUnitCapacities:id,selling_unit_id,selling_unit_capacity'
+                'purchaseUnits:id,measurement_group_id,purchase_unit_name,parent_purchase_unit_id,unit', // Only load necessary fields for purchase units
+                'purchaseUnits.subPurchaseUnits:id,purchase_unit_name,parent_purchase_unit_id,unit', // Only load necessary fields for sub-purchase units
             ]);
     }
 
@@ -37,26 +33,13 @@ class MeasurementGroupRepository
             return [];
         }
 
-        // Process sub-purchase units recursively
+        // Process sub-purchase units recursively, without selling unit data
         return $purchaseUnit->subPurchaseUnits->map(function ($subPurchaseUnit) use ($purchaseUnit) {
-            // Recursively load sub-purchase units for this level
             return [
                 'id' => $subPurchaseUnit->id,
                 'purchase_unit_name' => $subPurchaseUnit->purchase_unit_name,
                 'unit' => $subPurchaseUnit->unit, // Added unit here
 
-                'selling_units' => $subPurchaseUnit->sellingUnits->map(function ($sellingUnit) {
-                    return [
-                        'id' => $sellingUnit->id,
-                        'selling_unit_name' => $sellingUnit->selling_unit_name,
-                        'selling_unit_capacities' => $sellingUnit->sellingUnitCapacities->map(function ($capacity) {
-                            return [
-                                'id' => $capacity->id,
-                                'selling_unit_capacity' => $capacity->selling_unit_capacity,
-                            ];
-                        }),
-                    ];
-                }),
                 // Recursively load sub-purchase units for this level
                 'sub_purchase_units' => $this->getSubPurchaseUnits($subPurchaseUnit),
             ];
@@ -86,24 +69,12 @@ class MeasurementGroupRepository
             // Get children of this parent unit
             $children = $purchaseUnitsByParent->get($parentUnit->id, collect());
 
-            // Recursively build the structure for sub-purchase units and children
+            // Recursively build the structure for sub-purchase units and children, excluding selling unit data
             return [
                 'id' => $parentUnit->id,
                 'purchase_unit_name' => $parentUnit->purchase_unit_name,
-                'unit' => $parentUnit->unit, // Add unit field here
-                'selling_units' => $parentUnit->sellingUnits->map(function ($sellingUnit) {
-                    return [
-                        'id' => $sellingUnit->id,
-                        'selling_unit_name' => $sellingUnit->selling_unit_name,
-                        'selling_unit_capacities' => $sellingUnit->sellingUnitCapacities->map(function ($capacity) {
-                            return [
-                                'id' => $capacity->id,
-                                'selling_unit_capacity' => $capacity->selling_unit_capacity,
-                            ];
-                        }),
-                    ];
-                }),
-                'sub_purchase_units' => $this->getSubPurchaseUnits($parentUnit),
+                'unit' => $parentUnit->unit, // Include unit field here
+                'sub_purchase_units' => $this->getSubPurchaseUnits($parentUnit), // Only sub-purchase units
             ];
         });
     }
@@ -120,13 +91,34 @@ class MeasurementGroupRepository
         );
         $measurementGroups = $this->getMeasurementGroupsQuery()->paginate(6);
 
-        // Transform the paginated data
-        // $measurementGroups->getCollection()->transform(function ($measurementGroup) {
-        //     return $this->transformMeasurementGroup($measurementGroup);
-        // });
+        // Transform the paginated data to return only the purchase unit and sub-purchase unit information
+        $measurementGroups->getCollection()->transform(function ($measurementGroup) {
+            return $this->transformMeasurementGroup($measurementGroup);
+        });
 
         return $measurementGroups;
     }
+
+
+    // public function index()
+    // {
+    //     // Fetch the paginated data using the reusable query method
+    //     $this->logRepository->logEvent(
+    //         'measurement_groups',
+    //         'view',
+    //         null,
+    //         'MeasurementGroup',
+    //         "{$this->username} viewed all measurement groups"
+    //     );
+    //     $measurementGroups = $this->getMeasurementGroupsQuery()->paginate(6);
+
+    //     // Transform the paginated data
+    //     // $measurementGroups->getCollection()->transform(function ($measurementGroup) {
+    //     //     return $this->transformMeasurementGroup($measurementGroup);
+    //     // });
+
+    //     return $measurementGroups;
+    // }
 
     public function show($id)
     {

@@ -5,18 +5,22 @@ namespace App\Services\AuthService;
 use App\Services\UserService\UserRepository;
 use App\Services\Security\SubscriptionStatusService\SubscriptionStatusRepository;
 use Illuminate\Support\Facades\Hash;
+use App\Services\Security\LogService\LogRepository; // Add LogRepository to handle logging
 
 class AuthService
 {
     protected UserRepository $userRepository;
     protected SubscriptionStatusRepository $subscriptionStatusRepository;
+    protected LogRepository $logRepository; // Add logRepository property
 
-
-    public function __construct(UserRepository $userRepository, SubscriptionStatusRepository $subscriptionStatusRepository)
-    {
+    public function __construct(
+        UserRepository $userRepository,
+        SubscriptionStatusRepository $subscriptionStatusRepository,
+        LogRepository $logRepository // Inject LogRepository in constructor
+    ) {
         $this->userRepository = $userRepository;
         $this->subscriptionStatusRepository = $subscriptionStatusRepository;
-
+        $this->logRepository = $logRepository; // Initialize LogRepository
     }
 
     private function passwordValidation($inputPassword, $savedPassword)
@@ -49,6 +53,15 @@ class AuthService
         }
 
         if($this->passwordValidation($request['password'], $user->password)) {
+
+            $this->logRepository->logEvent(
+                'users',
+                'login',
+                $user->id,
+                'User',
+                "{$user->first_name} logged in successfully",
+                $request // Optionally pass the request data to log
+            );
 
             return [
                 'token' => $user->createToken('api-token')->plainTextToken,
