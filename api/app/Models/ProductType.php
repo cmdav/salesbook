@@ -125,22 +125,9 @@ class ProductType extends Model
         // Return null if no price found
         return null;
     }
-    public function sellingUnitCapacity()
-    {
-        return $this->belongsTo(SellingUnitCapacity::class, 'selling_unit_capacity_id', 'id');
-    }
 
-    public function sellingUnit()
-    {
-        return $this->hasOneThrough(
-            SellingUnit::class,
-            SellingUnitCapacity::class,
-            'id', // Foreign key on SellingUnitCapacity
-            'id', // Foreign key on SellingUnit
-            'selling_unit_capacity_id', // Local key on ProductType
-            'selling_unit_id' // Local key on SellingUnitCapacity
-        )->select('selling_units.id as selling_unit_id', 'selling_units.purchase_unit_id', 'selling_units.selling_unit_name');
-    }
+
+
 
     public function purchaseUnit()
     {
@@ -158,11 +145,7 @@ class ProductType extends Model
 
         return $this->belongsTo(PurchaseUnit::class, "purchase_unit_id", "id");
     }
-    public function unitSelling()
-    {
 
-        return $this->belongsTo(SellingUnit::class, "selling_unit_id", "id");
-    }
     public function getVatAttribute($value)
     {
         switch ($value) {

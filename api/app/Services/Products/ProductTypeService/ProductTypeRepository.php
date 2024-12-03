@@ -358,17 +358,16 @@ class ProductTypeRepository
 
     public function findById($id)
     {
-
         // Retrieve the product type with its related measurements and other details
         $productType = ProductType::with([
-            'productMeasurement.sellingUnitCapacity.sellingUnit.purchaseUnit'
+            'productMeasurement.PurchaseUnit',
         ])->find($id);
 
         if (!$productType) {
             return null; // Handle the case when the product is not found
         }
 
-        // Transform the product type data into the desired format
+        // Initialize the result array with basic product details
         $result = [
             'product_type_name' => $productType->product_type_name,
             'product_type_description' => $productType->product_type_description,
@@ -379,13 +378,15 @@ class ProductTypeRepository
         ];
 
         // Transform related product measurements
-        $measurements = $productType->productMeasurement->map(function ($measurement, $index) {
+        $measurements = $productType->productMeasurement->map(function ($measurement, $index) use ($productType) {
+            // Get current purchase unit details
+            $purchaseUnit = optional($measurement->purchaseUnit);
+
             return [
-                "purchase_unit_id[$index]" => optional($measurement->sellingUnitCapacity->sellingUnit->purchaseUnit)->id,
-                "purchase_unit_name[$index]" => optional($measurement->sellingUnitCapacity->sellingUnit->purchaseUnit)->purchase_unit_name,
-                "selling_unit_id[$index]" => optional($measurement->sellingUnitCapacity->sellingUnit)->id,
-                "selling_unit_name[$index]" => optional($measurement->sellingUnitCapacity->sellingUnit)->selling_unit_name,
-                "selling_unit_capacity_id[$index]" => optional($measurement->sellingUnitCapacity)->id,
+                // Use the index in the keys to show them sequentially
+                "purchase_unit_id[$index]" => $purchaseUnit->id ?? null,
+                "purchase_unit_name[$index]" => $purchaseUnit->purchase_unit_name ?? 'unit',
+                "unit[$index]" =>  optional($measurement->purchaseUnit)->unit,
             ];
         })->collapse()->toArray(); // Collapse the collection into a single array
 
@@ -394,6 +395,7 @@ class ProductTypeRepository
 
         return $result;
     }
+
 
 
     public function update($id, array $data)
@@ -414,7 +416,7 @@ class ProductTypeRepository
                 'product_type_name' => $data['product_type_name'] ?? $productType->product_type_name,
                 'product_type_description' => $data['product_type_description'] ?? $productType->product_type_description,
                 'barcode' => $data['barcode'] ?? $productType->barcode,
-                'vat' => $data['vat'] ?? $productType->vat,
+                'vat' => $data['vat'],
                 'sub_category_id' => $data['sub_category_id'] ?? $productType->sub_category_id,
                 'category_id' => $data['category_id'] ?? $productType->category_id,
             ]);
@@ -422,37 +424,29 @@ class ProductTypeRepository
             // Process measurement units
             // Process measurement units
             $purchaseUnitIds = $data['purchase_unit_id'] ?? [];
-            $sellingUnitIds = $data['selling_unit_id'] ?? [];
-            $sellingUnitCapacities = $data['selling_unit_capacity_id'] ?? [];
+
 
             foreach ($purchaseUnitIds as $index => $purchaseUnitId) {
-                $sellingUnitId = $sellingUnitIds[$index] ?? null;
-                $sellingUnitCapacity = $sellingUnitCapacities[$index] ?? null;
 
-                if ($purchaseUnitId && $sellingUnitId && $sellingUnitCapacity) {
+
+                if ($purchaseUnitId) {
                     // Check if an existing measurement exists
-                    $existingMeasurement = ProductMeasurement::where('product_type_id', $productType->id)
-    ->where('selling_unit_capacity_id', $sellingUnitCapacity)
-    ->where('purchasing_unit_id', $purchaseUnitId)
-    ->where('selling_unit_id', $sellingUnitId)
-    ->first();
+                    $existingMeasurement = ProductMeasurement::where('product_type_id', $productType->id)->where('purchasing_unit_id', $purchaseUnitId)->first();
 
 
                     if ($existingMeasurement) {
                         // Update the existing measurement
                         $existingMeasurement->update([
                             'product_type_id' => $productType->id,
-                            'selling_unit_capacity_id' => $sellingUnitCapacity,
                             'purchasing_unit_id' => $purchaseUnitId,
-                            'selling_unit_id' => $sellingUnitId,
+
                         ]);
                     } else {
                         // Insert a new measurement
                         ProductMeasurement::create([
                             'product_type_id' => $productType->id,
-                            'selling_unit_capacity_id' => $sellingUnitCapacity,
                             'purchasing_unit_id' => $purchaseUnitId,
-                            'selling_unit_id' => $sellingUnitId,
+
                         ]);
                     }
                 }

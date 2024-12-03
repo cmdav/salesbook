@@ -25,7 +25,7 @@ class PurchaseUnitFormRequest extends FormRequest
 
             // Adding the new rules for parent_purchase_unit_id and unit
             'parent_purchase_unit_id' => 'nullable|uuid|exists:purchase_units,id', // Ensures it's a valid UUID and exists in the 'purchase_units' table
-            'unit' => 'nullable|integer|min:0', // Ensures the unit is an integer and defaults to 0 if not provided
+            'unit' => 'required|integer|min:0', // Ensures the unit is an integer and defaults to 0 if not provided
         ];
     }
 
