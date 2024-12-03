@@ -14,15 +14,13 @@ class ProductMeasurement extends Model
     use HasUuids;
     protected $fillable = [
         'product_type_id',
-        'selling_unit_capacity_id',
+
         'purchasing_unit_id',
-        'selling_unit_id'
 
     ];
-    public function sellingUnitCapacity()
+
+    public function purchaseUnit()
     {
-
-        return $this->belongsTo(SellingUnitCapacity::class, 'selling_unit_capacity_id', 'id');
+        return $this->belongsTo(PurchaseUnit::class, 'purchasing_unit_id', 'id')->select("id", "purchase_unit_name", "unit");
     }
-
 }

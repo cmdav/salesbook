@@ -62,7 +62,7 @@ class ProductType extends Model
     {
 
         return $this->hasMany(ProductMeasurement::class, 'product_type_id', 'id')
-            ->select('id', 'product_type_id', 'selling_unit_capacity_id', 'purchasing_unit_id', 'selling_unit_id');
+         ->select('id', 'product_type_id', 'purchasing_unit_id');
     }
     public function price()
     {

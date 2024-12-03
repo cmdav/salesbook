@@ -126,30 +126,13 @@ class PurchaseUnitRepository
     }
     public function listPurchaseUnit()
     {
-        $purchaseUnits = PurchaseUnit::select("id", "purchase_unit_name")
-            ->with([
-                'sellingUnits:id,purchase_unit_id,selling_unit_name',
-                'sellingUnits.sellingUnitCapacities:id,selling_unit_id,selling_unit_capacity'
-            ])->get();
+        $purchaseUnits = PurchaseUnit::select("id", "purchase_unit_name")->get();
 
         $data = $purchaseUnits->map(function ($purchaseUnit) {
             return [
                 'id' => $purchaseUnit->id,
                 'purchase_unit_name' => $purchaseUnit->purchase_unit_name,
-                'selling_units' => $purchaseUnit->sellingUnits->map(function ($sellingUnit) {
-                    return [
-                        'id' => $sellingUnit->id,
-                        //'purchase_unit_id' => $sellingUnit->purchase_unit_id,
-                        'selling_unit_name' => $sellingUnit->selling_unit_name,
-                        'selling_unit_capacities' => $sellingUnit->sellingUnitCapacities->map(function ($capacity) {
-                            return [
-                                'id' => $capacity->id,
-                               // 'selling_unit_id' => $capacity->selling_unit_id,
-                                'selling_unit_capacity' => $capacity->selling_unit_capacity,
-                            ];
-                        }),
-                    ];
-                }),
+
             ];
         });
 

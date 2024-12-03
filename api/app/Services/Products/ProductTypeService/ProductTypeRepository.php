@@ -35,12 +35,11 @@ class ProductTypeRepository
     {
 
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
-        return ProductType::with([
-            'productMeasurement','productMeasurement.sellingUnitCapacity:id,selling_unit_id,selling_unit_capacity',
-            'productMeasurement.sellingUnitCapacity.sellingUnit:id,selling_unit_name,purchase_unit_id',
-            'productMeasurement.sellingUnitCapacity.sellingUnit.purchaseUnit:id,purchase_unit_name',
-            'subCategory:id,sub_category_name',
 
+        return ProductType::with([
+            'productMeasurement',
+            'productMeasurement.PurchaseUnit',
+            'subCategory:id,sub_category_name',
             'suppliers:id,first_name,last_name,phone_number',
             'activePrice' => function ($query) {
                 $query->select('id', 'cost_price', 'selling_price', 'product_type_id');
@@ -212,46 +211,7 @@ class ProductTypeRepository
             return $this->saleProductDetail();
         }
 
-        // $branchId = auth()->user()->branch_id;
 
-        // // Base query for 'product_types'
-        // $query = DB::table('product_types')
-        //     ->select('product_types.id', 'product_types.product_type_name', 'product_types.vat')
-        //     ->addSelect(DB::raw("
-        //     (
-        //        SELECT JSON_OBJECT(
-        //             'product_type_id', stores.product_type_id,
-        //             'capacity_qty_available', SUM(stores.capacity_qty_available)
-        //         )
-        //         FROM stores
-        //         WHERE stores.product_type_id = product_types.id
-        //         AND stores.status = 1
-        //         " . ($branchId ? "AND stores.branch_id = $branchId " : "") . "
-        //         GROUP BY stores.product_type_id
-        //                 ) as store
-        //     "))
-        //     ->addSelect(DB::raw("
-        //     (
-        //         SELECT JSON_OBJECT(
-        //             'cost_price', prices.cost_price,
-        //             'selling_price', prices.selling_price
-        //         )
-        //         FROM prices
-        //         WHERE prices.product_type_id = product_types.id
-        //         AND
-        //         prices.status = 1
-        //         ORDER BY prices.created_at DESC
-        //         LIMIT 1
-        //     ) as latest_price
-        // "));
-
-        // // Execute the query and get the results
-        // $productTypes = $query->get();
-
-
-
-        // // Return the transformed product types
-        // return $productTypes;
     }
 
 
@@ -264,7 +224,7 @@ class ProductTypeRepository
         };
 
         $productTypes = $query->paginate(20);
-        //return $productTypes;
+
 
 
         $productTypes->getCollection()->transform(function ($productType) {
@@ -282,9 +242,9 @@ class ProductTypeRepository
         // Sum up all quantities available for the product type in the specified branch
         $quantityAvailable = \App\Models\Store::where('product_type_id', $productType->id)
             ->where('branch_id', $branchId)
-            ->sum('capacity_qty_available'); // Summing the total available quantity for that branch
+            ->sum('capacity_qty_available');
 
-        // Retrieve price data filtered by the branch ID
+
         $activePrice = $productType->activePrice()->where('branch_id', $branchId)->first();
 
         return [
@@ -303,17 +263,26 @@ class ProductTypeRepository
 
             'purchasing_price' => $activePrice ? $activePrice->cost_price : 'Not set',
             'selling_price' => $activePrice ? $activePrice->selling_price : 'Not set',
-
-            'selling_unit_capacity' => $productType->productMeasurement->map(function ($measurement) {
-                return optional(optional($measurement->sellingUnitCapacity)->selling_unit_capacity)->toArray() ?? null;
-            }),
-
-            'selling_unit_name' => $productType->productMeasurement->map(function ($measurement) {
-                return optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->selling_unit_name ?? null;
+            'purchase_unit_name' => $productType->productMeasurement->map(function ($measurement) {
+                return optional($measurement->purchaseUnit)->purchase_unit_name ?? null;
             })->toArray(),
 
-            'purchase_unit_name' => $productType->productMeasurement->map(function ($measurement) {
-                return optional(optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->purchaseUnit)->purchase_unit_name ?? null;
+
+            'unit' => $productType->productMeasurement->map(function ($measurement, $index) use ($productType) {
+                $unitValue = optional($measurement->purchaseUnit)->unit;
+                $purchaseUnitName = optional($measurement->purchaseUnit)->purchase_unit_name ?? 'unit';
+
+                // For the first measurement, return unit and purchase unit name as "unit of purchase_unit_name"
+                if ($index == 0) {
+                    return "$unitValue unit of $purchaseUnitName";
+                }
+
+                // For subsequent measurements, use the previous purchase unit name
+                $previousMeasurement = $productType->productMeasurement[$index - 1];
+                $previousPurchaseUnitName = optional($previousMeasurement->purchaseUnit)->purchase_unit_name ?? 'unit';
+
+                // Return the unit and the format "X unit_name in a previous_unit_name"
+                return "$unitValue $purchaseUnitName in a $previousPurchaseUnitName";
             })->toArray(),
 
 
@@ -336,27 +305,24 @@ class ProductTypeRepository
 
             // Remove array values from `$data` for `ProductType` insertion
             $productData = $data;
-            unset($productData['purchase_unit_id'], $productData['selling_unit_id'], $productData['selling_unit_capacity_id']);
+            unset($productData['purchase_unit_id']);
 
             // Insert into `product_types` table without the array fields
             $productType = ProductType::create($productData);
 
             // Use the original arrays for inserting into `ProductMeasurement`
             $purchaseUnitIds = $data['purchase_unit_id'];
-            $sellingUnitIds = $data['selling_unit_id'];
-            $sellingUnitCapacities = $data['selling_unit_capacity_id'];
+
 
             foreach ($purchaseUnitIds as $index => $purchaseUnitId) {
-                $sellingUnitId = $sellingUnitIds[$index] ?? null;
-                $sellingUnitCapacity = $sellingUnitCapacities[$index] ?? null;
+
 
                 // Insert each combination into `ProductMeasurement`
-                if ($purchaseUnitId && $sellingUnitId && $sellingUnitCapacity) {
+                if ($purchaseUnitId) {
                     \App\Models\ProductMeasurement::create([
                         'product_type_id' => $productType->id,
-                        'selling_unit_capacity_id' => $sellingUnitCapacity,
                         'purchasing_unit_id' => $purchaseUnitId,
-                        'selling_unit_id' => $sellingUnitId,
+
                     ]);
                 }
             }
