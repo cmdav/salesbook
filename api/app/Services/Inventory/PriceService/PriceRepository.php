@@ -31,7 +31,7 @@ class PriceRepository
         $branchId = auth()->user()->branch_id;
 
         // Fetch all price entries for the given conditions
-        $prices = Price::select('id', 'selling_price', 'cost_price', 'batch_no', 'price_id', 'selling_unit_id')
+        $prices = Price::select('id', 'selling_price', 'cost_price', 'batch_no', 'price_id')
                     ->where([
                         ['product_type_id', $product_type_id],
                         ['supplier_id', $supplier_id],
@@ -52,7 +52,7 @@ class PriceRepository
                                     ->first();
 
                 return [
-                    'selling_unit_id' => $price->selling_unit_id,
+                    'purchase_unit_id' => $price->purchase_unit_id,
                     'cost_price' => $relatedPrice->cost_price,
                     'is_cost_price_est' => 0,
                     'selling_price' => $price->selling_price ?? ($relatedPrice ? $relatedPrice->selling_price : null),
@@ -63,7 +63,7 @@ class PriceRepository
 
             // Return data directly if cost_price and selling_price are available
             return [
-                'selling_unit_id' => $price->selling_unit_id,
+                'purchase_unit_id' => $price->purchase_unit_id,
                 'cost_price' => $price->cost_price,
                 'is_cost_price_est' => 0,
                 'selling_price' => $price->selling_price,

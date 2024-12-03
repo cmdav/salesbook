@@ -86,52 +86,42 @@ class ProductTypeRepository
     {
         return $this->getProductTypes($id);
     }
-
+    //use in purchase to load all product
     public function onlyProductTypeName()
     {
+        // Retrieve the product types with their related measurements and purchase units
         $response = ProductType::select("id", "product_type_name")
-    ->with([
-        'productMeasurement' => function ($query) {
-            $query->select('id', 'product_type_id', 'selling_unit_capacity_id');
-        },
-        'productMeasurement.sellingUnitCapacity.sellingUnit.purchaseUnit' => function ($query) {
-            $query->select('id', 'purchase_unit_name');
-        },
-        'productMeasurement.sellingUnitCapacity.sellingUnit.purchaseUnit.sellingUnits' => function ($query) {
-            $query->select('id', 'purchase_unit_id', 'selling_unit_name');
-        }
-    ])
-    ->get()
-        ->transform(function ($productType) {
-            return [
-                'id' => $productType->id,
-                'product_type_name' => $productType->product_type_name,
-                'product_measurement' => $productType->productMeasurement->map(function ($measurement) {
-                    $purchaseUnit = optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->purchaseUnit;
+            ->with([
+                'productMeasurement' => function ($query) {
+                    $query->select('id', 'product_type_id', 'purchasing_unit_id');
+                },
+                'productMeasurement.purchaseUnit' => function ($query) {
+                    $query->select('id', 'purchase_unit_name', 'unit');
+                }
+            ])
+            ->get()
+            ->transform(function ($productType) {
+                return [
+                    'id' => $productType->id,
+                    'product_type_name' => $productType->product_type_name,
+                    'product_measurement' => $productType->productMeasurement->map(function ($measurement) {
+                        $purchaseUnit = optional($measurement->purchaseUnit);
 
-                    return [
-                        'purchase_unit_id' => optional($purchaseUnit)->id,
-                        'purchase_unit_name' => optional($purchaseUnit)->purchase_unit_name,
-                        'selling_units' => collect(optional($purchaseUnit)->sellingUnits)->map(function ($sellingUnit) {
-                            return [
-                                'id' => $sellingUnit->id,
-                                //'purchase_unit_id' => $sellingUnit->purchase_unit_id,
-                                'selling_unit_name' => $sellingUnit->selling_unit_name,
-                            ];
-                        })->values(),
-                    ];
-                })->unique('purchase_unit_name')->values(), // Ensures unique purchase units and resets array keys
-            ];
-        });
+                        return [
+                            'purchase_unit_id' => optional($purchaseUnit)->id,
+                            'purchase_unit_name' => optional($purchaseUnit)->purchase_unit_name,
+                            // Using the unit directly from purchase unit instead of selling units
+                            'unit' => optional($purchaseUnit)->unit,
+                        ];
+                    })->values(), // Reset array keys after transformation
+                ];
+            });
 
+        // Return the response as JSON
         return response()->json(['data' => $response]);
-
-        if ($response) {
-            return response()->json(['data' => $response], 200);
-        }
-
-        return response()->json(['data' => []], 200);
     }
+
+
 
     //Use in sales pages
     public function saleProductDetail()
