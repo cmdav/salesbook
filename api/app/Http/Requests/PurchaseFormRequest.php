@@ -15,19 +15,19 @@ class PurchaseFormRequest extends FormRequest
             'purchases.*.product_type_id' => 'required|string',
             'purchases.*.supplier_id' => 'nullable|uuid',
             'purchases.*.batch_no' => 'required|string|max:50',
-            'purchases.*.purchase_unit_id' => 'required|uuid|max:50',
+           // 'purchases.*.purchase_unit_id' => 'required|uuid|max:50',
             'purchases.*.product_identifier' => 'nullable|string|max:50',
             'purchases.*.expiry_date' => [
                 'nullable',
                 'date',
                 'after_or_equal:today'
             ],
-            'purchases.*.selling_unit_data' => 'required|array',
-            'purchases.*.selling_unit_data.*' => 'array',
-            'purchases.*.selling_unit_data.*.selling_unit_id' => 'required|uuid',
-            'purchases.*.selling_unit_data.*.cost_price' => 'nullable|numeric|min:0|required_without:purchases.*.selling_unit_data.*.price_id',
-            'purchases.*.selling_unit_data.*.selling_price' => 'nullable|numeric|min:0|required_without:purchases.*.selling_unit_data.*.price_id',
-            'purchases.*.selling_unit_data.*.price_id' => 'nullable|uuid|required_without_all:purchases.*.selling_unit_data.*.cost_price,purchases.*.selling_unit_data.*.selling_price'
+            'purchases.*.purchase_unit_data' => 'required|array',
+            'purchases.*.purchase_unit_data.*' => 'array',
+            'purchases.*.purchase_unit_data.*.capacity_qty' => 'required|numeric',
+            'purchases.*.purchase_unit_data.*.cost_price' => 'nullable|numeric|min:0|required_without:purchases.*.purchase_unit_data.*.price_id',
+            'purchases.*.purchase_unit_data.*.selling_price' => 'nullable|numeric|min:0|required_without:purchases.*.purchase_unit_data.*.price_id',
+            'purchases.*.purchase_unit_data.*.price_id' => 'nullable|uuid|required_without_all:purchases.*.purchase_unit_data.*.cost_price,purchases.*.selling_unit_data.*.selling_price'
         ];
     }
 
