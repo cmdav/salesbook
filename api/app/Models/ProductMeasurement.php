@@ -21,6 +21,6 @@ class ProductMeasurement extends Model
 
     public function purchaseUnit()
     {
-        return $this->belongsTo(PurchaseUnit::class, 'purchasing_unit_id', 'id')->select("id", "purchase_unit_name", "unit");
+        return $this->belongsTo(PurchaseUnit::class, 'purchasing_unit_id', 'id')->select("id", "purchase_unit_name", "unit", "parent_purchase_unit_id");
     }
 }

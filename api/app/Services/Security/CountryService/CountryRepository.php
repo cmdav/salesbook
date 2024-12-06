@@ -10,12 +10,14 @@ class CountryRepository
 {
     public function index()
     {
-        return Country::select('id','name')->get();
+        return Country::select('id', 'name')
+        ->orderBy('name', 'asc')  // Order alphabetically (A to Z)
+        ->get();
     }
 
     public function show($id)
     {
-        return Country::select('id','name')->where('id',$id)->with('states:id,country_id,name')->first();
+        return Country::select('id', 'name')->where('id', $id)->with('states:id,country_id,name')->first();
     }
 
     public function store($data)
@@ -29,14 +31,14 @@ class CountryRepository
                 'message' => 'Insertion error'
             ], 500);
         }
-        
+
     }
 
     public function update($data, $id)
     {
-        try {  
-        $model = Country::where('id',$id)->first();
-            if($model){
+        try {
+            $model = Country::where('id', $id)->first();
+            if($model) {
                 $model->update($data);
             }
             return $model;
@@ -47,12 +49,12 @@ class CountryRepository
                 'message' => 'Insertion error'
             ], 500);
         }
-    }   
+    }
 
     public function destroy($id)
     {
-        try { 
-            $model = Country::where('id',$id)->first();
+        try {
+            $model = Country::where('id', $id)->first();
             $model->delete();
             return $model;
         } catch (Exception $e) {

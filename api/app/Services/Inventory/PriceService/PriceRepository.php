@@ -52,7 +52,7 @@ class PriceRepository
                                     ->first();
 
                 return [
-                    'purchase_unit_id' => $price->purchase_unit_id,
+                    //'purchase_unit_id' => $price->purchase_unit_id,
                     'cost_price' => $relatedPrice->cost_price,
                     'is_cost_price_est' => 0,
                     'selling_price' => $price->selling_price ?? ($relatedPrice ? $relatedPrice->selling_price : null),
@@ -63,7 +63,7 @@ class PriceRepository
 
             // Return data directly if cost_price and selling_price are available
             return [
-                'purchase_unit_id' => $price->purchase_unit_id,
+               // 'purchase_unit_id' => $price->purchase_unit_id,
                 'cost_price' => $price->cost_price,
                 'is_cost_price_est' => 0,
                 'selling_price' => $price->selling_price,

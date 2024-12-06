@@ -21,8 +21,8 @@ class MeasurementGroupRepository
     {
         return MeasurementGroup::select("id", "group_name")
             ->with([
-                'purchaseUnits:id,measurement_group_id,purchase_unit_name,parent_purchase_unit_id,unit', // Only load necessary fields for purchase units
-                'purchaseUnits.subPurchaseUnits:id,purchase_unit_name,parent_purchase_unit_id,unit', // Only load necessary fields for sub-purchase units
+                'purchaseUnits:id,measurement_group_id,purchase_unit_name,parent_purchase_unit_id,unit',
+                'purchaseUnits.subPurchaseUnits:id,purchase_unit_name,parent_purchase_unit_id,unit',
             ]);
     }
 

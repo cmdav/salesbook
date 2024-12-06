@@ -121,11 +121,9 @@ class ProductTypeRepository
         return response()->json(['data' => $response]);
     }
 
-
-
-    //Use in sales pages
-    public function saleProductDetail()
+    public function getProductTypeByName($product_id)
     {
+        // Use in sales pages
 
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
 
@@ -135,38 +133,36 @@ class ProductTypeRepository
             'barcode',
             'vat'
         )
-            ->with([
-                'productMeasurement',
-                'productMeasurement.sellingUnitCapacity:id,selling_unit_id,selling_unit_capacity',
-                'productMeasurement.sellingUnitCapacity.sellingUnit:id,selling_unit_name,purchase_unit_id',
-                'productMeasurement.sellingUnitCapacity.sellingUnit.purchaseUnit:id,purchase_unit_name',
-                'subCategory:id,sub_category_name',
-                'activePrice' => function ($query) {
-                    $query->select('id', 'cost_price', 'selling_price', 'product_type_id', 'is_cost_price_est', 'is_selling_price_est');
-                },
-                'store' => function ($query) use ($branchId) {
-                    $query->selectRaw('product_type_id, SUM(capacity_qty_available) as total_quantity')
-                        ->where('status', 1);
+        ->with([
+            'productMeasurement',
+            'productMeasurement.PurchaseUnit:id,purchase_unit_name', // Load PurchaseUnit relationship
+            'subCategory:id,sub_category_name',
+            'suppliers:id,first_name,last_name,phone_number',
+            'activePrice' => function ($query) {
+                $query->select('id', 'cost_price', 'selling_price', 'product_type_id');
+            },
+            'store' => function ($query) use ($branchId) {
+                $query->selectRaw('product_type_id, SUM(capacity_qty_available) as total_quantity')
+                    ->where('status', 1);
 
-                    if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
-                        $query->where('branch_id', $branchId);
-                    }
-                    $query->groupBy('product_type_id');
-                },
-            ])
-            ->get();
+                if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
+                    $query->where('branch_id', $branchId);
+                }
+                $query->groupBy('product_type_id');
+            },
+        ])
+        //->where('id', $product_id)  // Assuming you're looking for a specific product by its ID
+        ->get();
         // return $response;
 
         if ($response) {
             $response = $response->map(function ($item) {
 
-                // Combine purchase and selling unit details
+                // Combine the necessary fields related to purchase units and prices
                 $measurements = $item->productMeasurement->map(function ($measurement) {
                     return [
-                        'selling_unit_id' => optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->id,
-                        'selling_unit_name' => optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->selling_unit_name,
-                        'purchase_unit_id' => optional(optional(optional($measurement->sellingUnitCapacity)->sellingUnit)->purchaseUnit)->id,
-                        'selling_unit_capacity' => optional($measurement->sellingUnitCapacity)->selling_unit_capacity,
+                        'purchase_unit_id' => optional(optional($measurement->PurchaseUnit))->id,
+                        'purchase_unit_name' => optional(optional($measurement->PurchaseUnit))->purchase_unit_name,
 
                         'price_id' => "9d7de6b9-dcf3-4401-915c-c84f14206ba2",
                         'cost_price' => 50,
@@ -178,31 +174,18 @@ class ProductTypeRepository
                     ];
                 });
 
-                $item->selling_units = $measurements;
+                $item->purchase_units = $measurements;
 
                 // Remove unnecessary relationships
                 unset($item->store, $item->productMeasurement, $item->activePrice);
 
                 return $item;
             });
-            // dd($response);
+
             return response()->json(['data' => $response], 200);
         }
-
-
-
-    }//use in sale page drop down
-    public function getProductTypeByName($product_id)
-    {
-
-        if(!$product_id) {
-
-            //currently in use in the sales page
-            return $this->saleProductDetail();
-        }
-
-
     }
+
 
 
 
@@ -257,23 +240,32 @@ class ProductTypeRepository
                 return optional($measurement->purchaseUnit)->purchase_unit_name ?? null;
             })->toArray(),
 
-
             'unit' => $productType->productMeasurement->map(function ($measurement, $index) use ($productType) {
+                // Get the current unit value
                 $unitValue = optional($measurement->purchaseUnit)->unit;
+
+                // Get the purchase unit name for the current unit
                 $purchaseUnitName = optional($measurement->purchaseUnit)->purchase_unit_name ?? 'unit';
 
-                // For the first measurement, return unit and purchase unit name as "unit of purchase_unit_name"
-                if ($index == 0) {
-                    return "$unitValue unit of $purchaseUnitName";
+                // Get the parent purchase unit
+                $parentPurchaseUnit = optional($measurement->purchaseUnit)->parentPurchaseUnit;
+
+                // If the unit has a parent, only reference the immediate parent
+                if ($parentPurchaseUnit) {
+                    $parentUnitName = $parentPurchaseUnit->purchase_unit_name ?? 'unit';
+                    // Construct the string as: "X unit_name in a parent_unit_name"
+                    $unitValue = "$unitValue $purchaseUnitName in a $parentUnitName";
+                } else {
+                    // If there's no parent, just return the unit and the unit name
+                    $unitValue = "$unitValue unit of $purchaseUnitName";
                 }
 
-                // For subsequent measurements, use the previous purchase unit name
-                $previousMeasurement = $productType->productMeasurement[$index - 1];
-                $previousPurchaseUnitName = optional($previousMeasurement->purchaseUnit)->purchase_unit_name ?? 'unit';
-
-                // Return the unit and the format "X unit_name in a previous_unit_name"
-                return "$unitValue $purchaseUnitName in a $previousPurchaseUnitName";
+                // Return the unit value, adding parent only if needed and avoiding chaining more than 1 level
+                return $unitValue;
             })->toArray(),
+
+
+
 
 
 

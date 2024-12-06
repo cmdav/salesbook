@@ -172,72 +172,107 @@ class PurchaseRepository
     public function create(array $data)
     {
 
+        //     $purchaseUnit = \App\Models\PurchaseUnit::with(['subPurchaseUnits:id,purchase_unit_name,unit,parent_purchase_unit_id'])
+        // ->select('id', 'purchase_unit_name', 'unit')  // Select only the required fields
+        // ->find("9da8684e-376e-44d5-8d2c-2b914e45f015");
+
+        //     return $purchaseUnit;
+
+        // $purchaseUnit = \App\Models\PurchaseUnit::with('subPurchaseUnits')->find("9da62389-4df0-438c-a3b5-9011559cd554");
+        // return  $purchaseUnit;s
         DB::beginTransaction();
 
-        //try {
-        $purchases = [];
+        try {
+            $purchases = [];
+
+            foreach ($data['purchases'] as $purchaseData) {
+                // Now process each purchase_unit_data, as each one needs its own Purchase record
+                foreach ($purchaseData['purchase_unit_data'] as $unitData) {
+
+                    // Create the Purchase instance for each purchase_unit_data
+                    $purchase = new Purchase();
+                    $purchase->product_type_id = $purchaseData['product_type_id'];
+                    $purchase->supplier_id = $purchaseData['supplier_id'];
+                    $purchase->batch_no = $purchaseData['batch_no'];
+                    $purchase->purchase_unit_id = $unitData['purchase_unit_id'];
+                    $purchase->product_identifier = $purchaseData['product_identifier'];
+                    $purchase->expiry_date = $purchaseData['expiry_date'] ?? null;
+                    $purchase->capacity_qty = $unitData['capacity_qty'] ?? 0; // Set the capacity_qty for each purchase unit
+
+                    // Create the Price instance for each purchase_unit_data
+                    $price = new Price();
+                    $price->product_type_id = $purchaseData['product_type_id'];
+                    $price->supplier_id = $purchaseData['supplier_id'];
+                    $price->batch_no = $purchaseData['batch_no'];
+                    $price->purchase_unit_id = $unitData['purchase_unit_id'];
+                    $price->status = 1;
+
+                    // If price_id exists, use it; otherwise, use cost_price and selling_price
+                    if (!empty($unitData['price_id'])) {
+                        $price->price_id = $unitData['price_id']; // Reference to existing price
+                    } else {
+                        $price->cost_price = $unitData['cost_price'] ?? null;
+                        $price->selling_price = $unitData['selling_price'] ?? null;
+                    }
+
+                    $price->save(); // Save the price instance
+
+                    $purchase->price_id = $price->id;
+                    $purchase->save();
+
+                    // Retrieve the purchase unit from the purchase_unit table
+
+                    $purchaseUnit = \App\Models\PurchaseUnit::with('subPurchaseUnits')->find($unitData['purchase_unit_id']);
 
 
-        foreach ($data['purchases'] as $purchaseData) {
-            // Now process each purchase_unit_data, as each one needs its own Purchase record
-            foreach ($purchaseData['purchase_unit_data'] as $unitData) {
+                    if ($purchaseUnit) {
+                        // Use the recursive function to get the total number of smallest units for this purchase unit
+                        $totalQuantity = $purchase->capacity_qty * $purchaseUnit->getTotalUnits();
 
-                //dd($purchaseData['purchase_unit_data']);
-                // Create the Purchase instance for each purchase_unit_data
-                $purchase = new Purchase();
-                $purchase->product_type_id = $purchaseData['product_type_id'];
-                $purchase->supplier_id = $purchaseData['supplier_id'];
-                $purchase->batch_no = $purchaseData['batch_no'];
-                $purchase->purchase_unit_id = $unitData['purchase_unit_id'];
-                $purchase->product_identifier = $purchaseData['product_identifier'];
-                $purchase->expiry_date = $purchaseData['expiry_date'] ?? null;
-                $purchase->capacity_qty = $unitData['capacity_qty'] ?? 0; // Set the capacity_qty for each purchase unit
+                        // Update or create the store entry
+                        $store = \App\Models\Store::where('product_type_id', $purchaseData['product_type_id'])
+                            ->where('batch_no', $purchaseData['batch_no'])
+                            ->where('purchase_unit_id', $unitData['purchase_unit_id'])
+                            ->where('branch_id', auth()->user()->branch_id)
+                            ->first();
 
+                        if (!$store) {
+                            // Create a new Store instance if it doesn't exist
+                            $store = new \App\Models\Store();
+                            $store->product_type_id = $purchaseData['product_type_id'];
+                            $store->batch_no = $purchaseData['batch_no'];
+                            $store->purchase_unit_id = $unitData['purchase_unit_id'];
+                            $store->branch_id = auth()->user()->branch_id;
+                            $store->capacity_qty_available = 0;  // Initialize the available quantity
+                        }
 
-                // Create the Price instance for each purchase_unit_data
-                $price = new Price();
-                $price->product_type_id = $purchaseData['product_type_id'];
-                $price->supplier_id = $purchaseData['supplier_id'];
-                $price->batch_no = $purchaseData['batch_no'];
-                $price->purchase_unit_id = $unitData['purchase_unit_id'];
-                $price->status = 1;
+                        // Update the store capacity with the adjusted quantity
+                        $store->capacity_qty_available += $totalQuantity;
+                        $store->save();
+                    }
 
-                // If price_id exists, use it; otherwise, use cost_price and selling_price
-                if (!empty($unitData['price_id'])) {
-                    $price->price_id = $unitData['price_id']; // Reference to existing price
-                } else {
-                    $price->cost_price = $unitData['cost_price'] ?? null;
-                    $price->selling_price = $unitData['selling_price'] ?? null;
+                    $purchases[] = $purchase;
                 }
-
-                $price->save(); // Save the price instance
-
-
-                $purchase->price_id = $price->id;
-                $purchase->save();
-
-                $purchases[] = $purchase;
             }
+
+            $this->logRepository->logEvent(
+                'purchases',
+                'create',
+                null,
+                'Purchase',
+                "$this->username created purchases",
+                $data
+            );
+
+            DB::commit();
+            return response()->json(['data' => $purchases, 'message' => 'Purchase record was added successfully'], 201);
+
+        } catch (\Exception $e) {
+            Log::channel('insertion_errors')->error('Error creating or updating purchase: ' . $e->getMessage());
+            DB::rollBack();
+            return response()->json(['message' => 'Failed to create purchases'], 500);
         }
-        $this->logRepository->logEvent(
-            'purchases',
-            'create',
-            null,
-            'Purchase',
-            "$this->username created purchases",
-            $data
-        );
-        DB::commit();
-        return response()->json(['data' => $purchases, 'message' => 'Purchase record was added successfully'], 201);
-        // } catch (\Exception $e) {
-        //     Log::channel('insertion_errors')->error('Error creating or updating user: ' . $e->getMessage());
-        //     DB::rollBack();
-        //     return response()->json(['message' => 'Failed to create purchases'], 500);
-        // }
     }
-
-
-
 
 
 
@@ -281,6 +316,8 @@ class PurchaseRepository
 
         }
     }
+
+
 
 
 

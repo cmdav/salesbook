@@ -17,7 +17,7 @@ return new class () extends Migration {
 
             // $table->uuid('store_owner');
             $table->integer('branch_id');
-            $table->uuid('selling_unit_id')->default(0);
+            // $table->uuid('selling_unit_id')->default(0);
             $table->uuid('purchase_unit_id')->default(0);
             $table->integer('capacity_qty_available')->default(0);
             $table->uuid('product_measurement_id')->nullable();
