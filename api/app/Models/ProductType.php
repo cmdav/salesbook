@@ -30,7 +30,8 @@ class ProductType extends Model
         'created_by',
         'updated_by',
         'barcode',
-        'is_container_type'
+        'is_container_type',
+        'is_capacity_quantity_est'
     ];
     protected $hidden = [
        // 'barcode',
@@ -74,7 +75,12 @@ class ProductType extends Model
 
         return $this->hasOne(PriceNotification::class);
     }
-
+    public function stores()
+    {
+        // Add branch filtering here
+        return $this->hasMany(Store::class, 'product_type_id', 'id')
+                    ->where('branch_id', auth()->user()->branch_id);
+    }
     public function store()
     {
         // Add branch filtering here

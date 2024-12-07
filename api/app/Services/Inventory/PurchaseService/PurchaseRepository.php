@@ -151,10 +151,8 @@ class PurchaseRepository
             $purchases = [];
 
             foreach ($data['purchases'] as $purchaseData) {
-                // Now process each purchase_unit_data, as each one needs its own Purchase record
                 foreach ($purchaseData['purchase_unit_data'] as $unitData) {
 
-                    // Create the Purchase instance for each purchase_unit_data
                     $purchase = new Purchase();
                     $purchase->product_type_id = $purchaseData['product_type_id'];
                     $purchase->supplier_id = $purchaseData['supplier_id'];
@@ -162,9 +160,8 @@ class PurchaseRepository
                     $purchase->purchase_unit_id = $unitData['purchase_unit_id'];
                     $purchase->product_identifier = $purchaseData['product_identifier'];
                     $purchase->expiry_date = $purchaseData['expiry_date'] ?? null;
-                    $purchase->capacity_qty = $unitData['capacity_qty'] ?? 0; // Set the capacity_qty for each purchase unit
+                    $purchase->capacity_qty = $unitData['capacity_qty'] ?? 0;
 
-                    // Create the Price instance for each purchase_unit_data
                     $price = new Price();
                     $price->product_type_id = $purchaseData['product_type_id'];
                     $price->supplier_id = $purchaseData['supplier_id'];
@@ -172,31 +169,24 @@ class PurchaseRepository
                     $price->purchase_unit_id = $unitData['purchase_unit_id'];
                     $price->status = 1;
 
-                    // If price_id exists, use it; otherwise, use cost_price and selling_price
                     if (!empty($unitData['price_id'])) {
-                        $price->price_id = $unitData['price_id']; // Reference to existing price
+                        $price->price_id = $unitData['price_id'];
                     } else {
                         $price->cost_price = $unitData['cost_price'] ?? null;
                         $price->selling_price = $unitData['selling_price'] ?? null;
                     }
 
-                    $price->save(); // Save the price instance
-
+                    $price->save();
                     $purchase->price_id = $price->id;
                     $purchase->save();
 
-                    // Retrieve the purchase unit from the purchase_unit
                     $purchaseUnit = \App\Models\PurchaseUnit::with(['subPurchaseUnits:id,purchase_unit_name,unit,parent_purchase_unit_id'])
-                        ->select('id', 'purchase_unit_name', 'unit')  // Select only the required fields
+                        ->select('id', 'purchase_unit_name', 'unit')
                         ->find($unitData['purchase_unit_id']);
 
                     if ($purchaseUnit) {
-                        // Get the total number of smallest units for this purchase unit (recursively)
-                        $totalUnit = $this->getTotalUnits($purchaseUnit);
-
-                        // Calculate the total quantity by multiplying total units with capacity_qty
-                        $totalQuantity = $purchase->capacity_qty * $totalUnit;
-
+                        // Calculate the smallest unit capacity for this purchase unit
+                        $totalSmallestUnits = $this->calculateSmallestUnits($purchaseUnit, $purchase->capacity_qty);
 
                         // Update or create the store entry
                         $store = \App\Models\Store::where('product_type_id', $purchaseData['product_type_id'])
@@ -205,21 +195,20 @@ class PurchaseRepository
                             ->where('branch_id', auth()->user()->branch_id)
                             ->first();
 
-
                         if (!$store) {
-                            // Create a new Store instance if it doesn't exist
                             $store = new \App\Models\Store();
                             $store->product_type_id = $purchaseData['product_type_id'];
                             $store->batch_no = $purchaseData['batch_no'];
                             $store->purchase_unit_id = $unitData['purchase_unit_id'];
                             $store->branch_id = auth()->user()->branch_id;
-                            $store->capacity_qty_available = 0;  // Initialize the available quantity
+                            $store->capacity_qty_available = 0;
                         }
 
-                        // Update the store capacity with the adjusted quantity
-                        $store->capacity_qty_available += $totalQuantity;
+                        // Add the calculated smallest unit quantity to the store
+                        $store->capacity_qty_available += $totalSmallestUnits;
                         $store->save();
                     }
+
 
                     $purchases[] = $purchase;
                 }
@@ -245,27 +234,31 @@ class PurchaseRepository
     }
 
     /**
-     * Recursive function to calculate the total unit by traversing through the hierarchy of purchase units
+     * Calculate the total number of smallest units for a purchase unit.
      *
      * @param \App\Models\PurchaseUnit $purchaseUnit
      * @return int
      */
-    private function getTotalUnits($purchaseUnit)
+    private function calculateSmallestUnits($purchaseUnit, $capacityQty)
     {
-        // Base case: If no subPurchaseUnits, return the unit itself
+        // If there are no sub-units, return the unit and adjusted capacity
         if ($purchaseUnit->subPurchaseUnits->isEmpty()) {
-            return $purchaseUnit->unit;
+            return $capacityQty;
         }
 
-        // Recursive case: Multiply the current unit with all the subPurchaseUnits' units
-        $total = $purchaseUnit->unit;
+        // Calculate the total quantity in terms of the smallest unit for each sub-unit
+        $totalSmallestUnits = 0;
 
         foreach ($purchaseUnit->subPurchaseUnits as $subUnit) {
-            $total *= $this->getTotalUnits($subUnit); // Recurse to get sub-units total
+            // Multiply the capacityQty with the sub-unit multiplier and recurse
+            $totalSmallestUnits += $this->calculateSmallestUnits($subUnit, $capacityQty * $subUnit->unit);
         }
 
-        return $total;
+        return $totalSmallestUnits;
     }
+
+
+
 
 
 

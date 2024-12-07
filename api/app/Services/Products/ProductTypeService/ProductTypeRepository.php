@@ -123,68 +123,80 @@ class ProductTypeRepository
 
     public function getProductTypeByName($product_id)
     {
-        // Use in sales pages
-
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
 
         $response = ProductType::select(
             'id',
             'product_type_name',
             'barcode',
-            'vat'
+            'vat',
+            'is_capacity_quantity_est'
         )
         ->with([
             'productMeasurement',
-            'productMeasurement.PurchaseUnit:id,purchase_unit_name', // Load PurchaseUnit relationship
-            'subCategory:id,sub_category_name',
-            'suppliers:id,first_name,last_name,phone_number',
-            'activePrice' => function ($query) {
-                $query->select('id', 'cost_price', 'selling_price', 'product_type_id');
+            'productMeasurement.PurchaseUnit:id,purchase_unit_name,unit', // Load PurchaseUnit relationship
+            'price' => function ($query) {
+                $query->select('id', 'cost_price', 'selling_price', 'product_type_id', 'is_cost_price_est', 'is_selling_price_est');
             },
-            'store' => function ($query) use ($branchId) {
-                $query->selectRaw('product_type_id, SUM(capacity_qty_available) as total_quantity')
+            'stores' => function ($query) use ($branchId) {
+                $query->selectRaw('product_type_id, purchase_unit_id, SUM(capacity_qty_available) as total_quantity')
                     ->where('status', 1);
 
                 if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
                     $query->where('branch_id', $branchId);
                 }
-                $query->groupBy('product_type_id');
+                $query->groupBy('product_type_id', 'purchase_unit_id');
             },
         ])
-        //->where('id', $product_id)  // Assuming you're looking for a specific product by its ID
         ->get();
-        // return $response;
 
         if ($response) {
             $response = $response->map(function ($item) {
+                // Calculate the total capacity_quantity_available across all stores
+                $totalCapacityQuantity = collect($item->stores)->sum('total_quantity');
 
-                // Combine the necessary fields related to purchase units and prices
-                $measurements = $item->productMeasurement->map(function ($measurement) {
+                $stores = collect($item->stores)->groupBy('purchase_unit_id'); // Group stores by purchase_unit_id
+
+                $measurements = $item->productMeasurement->map(function ($measurement) use ($stores, $item) {
+                    // Match the purchase_unit_id with the store data
+                    $store = $stores->get($measurement->purchasing_unit_id)?->first();
+
+                    // Find the corresponding price for this product type
+                    $price = $item->price->firstWhere('product_type_id', $item->id);
+
                     return [
-                        'purchase_unit_id' => optional(optional($measurement->PurchaseUnit))->id,
-                        'purchase_unit_name' => optional(optional($measurement->PurchaseUnit))->purchase_unit_name,
-
-                        'price_id' => "9d7de6b9-dcf3-4401-915c-c84f14206ba2",
-                        'cost_price' => 50,
-                        'is_cost_price_est' => 0,
-                        'selling_price' => 90,
-                        'is_selling_price_est' => 1,
-                        'capacity_quantity_available' => 190,
-                        'is_capacity_quantity_est' => 1,
+                        'purchase_unit_id' => optional($measurement->PurchaseUnit)->id,
+                        'purchase_unit_name' => optional($measurement->PurchaseUnit)->purchase_unit_name,
+                        'unit' => optional($measurement->PurchaseUnit)->unit,
+                        'price_id' => optional($price)->id,
+                        'cost_price' => optional($price)->cost_price,
+                        'is_cost_price_est' => optional($price)->is_cost_price_est,
+                        'selling_price' => optional($price)->selling_price,
+                        'is_selling_price_est' => optional($price)->is_selling_price_est,
+                        'capacity_quantity_available' => optional($store)->total_quantity, // Specific capacity quantity for the unit
                     ];
                 });
 
                 $item->purchase_units = $measurements;
 
+                // Add total capacity quantity after is_capacity_quantity_est
+                $item->total_capacity_quantity_available = $totalCapacityQuantity;
+
                 // Remove unnecessary relationships
-                unset($item->store, $item->productMeasurement, $item->activePrice);
+                unset($item->stores, $item->productMeasurement, $item->price);
 
                 return $item;
             });
 
             return response()->json(['data' => $response], 200);
         }
+
+        return response()->json(['data' => []], 404); // Return empty response if no data found
     }
+
+
+
+
 
 
 

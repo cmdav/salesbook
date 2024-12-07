@@ -28,6 +28,8 @@ return new class () extends Migration {
             // $table->string('type')->default(0)->comment('1=product 2 product_type');
             $table->uuid('organization_id', 32)->nullable();
             $table->uuid('supplier_id')->nullable();
+            $table->integer('is_capacity_quantity_est')->default(0);
+
             $table->uuid('created_by', 32)->nullable();
             $table->uuid('updated_by', 32)->nullable();
             $table->timestamps();

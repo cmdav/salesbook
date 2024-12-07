@@ -348,171 +348,154 @@ class SaleRepository
             return response()->json(['success' => false, 'message' => 'Error deleting sale'], 500);
         }
     }
-    private function getTotalUnits($purchaseUnit)
+    private function getSmallestUnitCapacity($purchaseUnit, $capacityQty)
     {
-        $totalUnits = $purchaseUnit->unit; // Start with the unit of the current purchase unit
-
-        // If the purchase unit has child units, calculate them recursively
-        if ($purchaseUnit->subPurchaseUnits) {
-            foreach ($purchaseUnit->subPurchaseUnits as $subUnit) {
-                $totalUnits *= $subUnit->unit; // Multiply by the unit value of the sub unit
-                // Recursively calculate sub-units of sub-units if any
-                $totalUnits *= $this->getTotalUnits($subUnit);
-            }
+        // If the purchase unit has no sub-units, return its capacity
+        if ($purchaseUnit->subPurchaseUnits->isEmpty()) {
+            return $capacityQty;
         }
 
-        return $totalUnits;
+        // Traverse through sub-units and calculate total smallest units
+        $totalSmallestUnits = 0;
+        foreach ($purchaseUnit->subPurchaseUnits as $subUnit) {
+            $totalSmallestUnits += $this->getSmallestUnitCapacity($subUnit, $capacityQty * $subUnit->unit);
+        }
+
+        return $totalSmallestUnits;
     }
+
     public function create(array $data)
     {
         $emailService = new EmailService();
         $transactionId = time() . rand(1000, 9999);
 
+        try {
+            $response = DB::transaction(function () use ($data, $emailService, $transactionId) {
+                $productDetails = [];
+                $totalPrice = 0;
 
-        //try {
-        $response = DB::transaction(function () use ($data, $emailService, $transactionId) {
-            $productDetails = [];
-            $totalPrice = 0;
+                foreach ($data['products'] as $product) {
+                    // Get the latest price for the product with purchase_unit_id
+                    $latestPrice = Price::where([
+                            ['product_type_id', $product['product_type_id']],
+                            ['purchase_unit_id', $product['purchase_unit_id']],
+                            ['status', 1]
+                        ])->orderBy('created_at', 'desc')->firstOrFail();
 
-            foreach ($data['products'] as $product) {
+                    // Get all batches of the product in the branch
+                    $stores = Store::where('product_type_id', $product['product_type_id'])
+                                   ->where('purchase_unit_id', $product['purchase_unit_id'])
+                                   ->where('branch_id', auth()->user()->branch_id)
+                                   ->where('status', 1)
+                                   ->orderBy('created_at', 'asc')
+                                   ->select("id", "capacity_qty_available", "branch_id", "batch_no")
+                                   ->get();
 
-                // Get the latest price for the product with purchase_unit_id
-                $latestPrice = Price::where([
-                        ['product_type_id', $product['product_type_id']],
-                        ['purchase_unit_id', $product['purchase_unit_id']],
-                        ['status', 1]
-                    ])->orderBy('created_at', 'desc')->firstOrFail();
-                //dd($latestPrice);
-                // Get all batches of the product in the branch
-                $stores = Store::where('product_type_id', $product['product_type_id'])
-                               ->where('purchase_unit_id', $product['purchase_unit_id'])
-                               ->where('branch_id', auth()->user()->branch_id)
-                               ->where('status', 1)
-                               ->orderBy('created_at', 'asc')
-                               ->select("id", "capacity_qty_available", "branch_id", "batch_no")
-                               ->get();
+                    // Get the purchase unit with its sub-units
+                    $purchaseUnit = \App\Models\PurchaseUnit::with(['subPurchaseUnits:id,purchase_unit_name,unit,parent_purchase_unit_id'])
+                        ->where('id', $product['purchase_unit_id'])
+                        ->first();
 
-                // Get the parent purchase unit for the current product
-                $purchaseUnit = \App\Models\PurchaseUnit::with(['subPurchaseUnits:id,purchase_unit_name,unit,parent_purchase_unit_id'])
-                ->where('id', $product['purchase_unit_id'])
-                ->first();
+                    // Calculate the smallest unit capacity
+                    $smallestUnitCapacity = $this->getSmallestUnitCapacity($purchaseUnit, $product['quantity']);
 
-                // Calculate the total units recursively
-                $totalUnit = $this->getTotalUnits($purchaseUnit);
+                    // Get the total available quantity across all stores
+                    $totalAvailableQuantity = $stores->sum('capacity_qty_available');
 
-
-
-
-                // Multiply the total units by the requested quantity to get the remaining quantity in capacity
-                $remainingQuantity = $product['quantity'] * $totalUnit;
-
-                // Get total available quantity across all stores
-                $totalAvailableQuantity = $stores->sum('capacity_qty_available');
-
-
-
-                if ($totalAvailableQuantity < $remainingQuantity) {
-                    throw new \Exception("Insufficient stock for the requested quantity.", 400);
-                }
-
-                foreach ($stores as $store) {
-                    if ($remainingQuantity <= 0) {
-                        break;
+                    if ($totalAvailableQuantity < $smallestUnitCapacity) {
+                        throw new \Exception("Insufficient stock for the requested quantity.", 400);
                     }
 
-                    $oldPrice = Price::where('batch_no', $store->batch_no)
-                                     ->where('product_type_id', $product['product_type_id'])
-                                     ->where('purchase_unit_id', $product['purchase_unit_id'])
-                                     ->first();
+                    foreach ($stores as $store) {
+                        if ($smallestUnitCapacity <= 0) {
+                            break;
+                        }
 
-                    $oldPriceId = $oldPrice ? $oldPrice->id : null;
+                        $oldPrice = Price::where('batch_no', $store->batch_no)
+                                         ->where('product_type_id', $product['product_type_id'])
+                                         ->where('purchase_unit_id', $product['purchase_unit_id'])
+                                         ->first();
 
-                    $soldQuantityFromBatch = min($remainingQuantity, $store->capacity_qty_available);
-                    $store->capacity_qty_available -= $soldQuantityFromBatch;
-                    $remainingQuantity -= $soldQuantityFromBatch;
+                        $oldPriceId = $oldPrice ? $oldPrice->id : null;
 
-                    if ($store->capacity_qty_available == 0) {
-                        $store->status = 0;
+                        $soldQuantityFromBatch = min($smallestUnitCapacity, $store->capacity_qty_available);
+                        $store->capacity_qty_available -= $soldQuantityFromBatch;
+                        $smallestUnitCapacity -= $soldQuantityFromBatch;
+
+                        if ($store->capacity_qty_available == 0) {
+                            $store->status = 0;
+                        }
+
+                        $store->save();
+
+                        $sale = new Sale();
+                        $sale->fill([
+                            'product_type_id' => $product['product_type_id'],
+                            'customer_id' => $data['customer_id'],
+                            'price_sold_at' => $product['price_sold_at'],
+                            'quantity' => $product['quantity'],
+                            'vat' => $product['vat'],
+                            'payment_method' => $data['payment_method'],
+                            'transaction_id' => $transactionId,
+                            'is_offline' => $data['is_offline'] ?? 0,
+                            'old_price_id' => $oldPriceId,
+                            'batch_no' => $store->batch_no,
+                            'purchase_unit_id' => $product['purchase_unit_id'], // Added purchase_unit_id
+                        ]);
+                        $sale->price_id = $latestPrice->id;
+                        $sale->save();
+
+                        $amount = $product['price_sold_at'] * $soldQuantityFromBatch;
+                        $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0;
+                        $amount += $vatValue;
+                        $totalPrice += $amount;
+
+                        $productDetails[] = [
+                            "productTypeName" => $latestPrice->productType->product_type_name,
+                            'price' => $product['price_sold_at'],
+                            "quantity" => $product['quantity'],
+                            "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
+                            "amount" => $amount,
+                        ];
                     }
-
-                    $store->save();
-
-                    $sale = new Sale();
-                    $sale->fill([
-                        'product_type_id' => $product['product_type_id'],
-                        'customer_id' => $data['customer_id'],
-                        'price_sold_at' => $product['price_sold_at'],
-                        'quantity' => 30,
-                        'vat' => $product['vat'],
-                        'payment_method' => $data['payment_method'],
-                        'transaction_id' => $transactionId,
-                        'is_offline' => $data['is_offline'] ?? 0,
-                        'old_price_id' => $oldPriceId,
-                        'batch_no' => $store->batch_no,
-
-                        'purchase_unit_id' => $product['purchase_unit_id'], // Added purchase_unit_id
-                    ]);
-                    $sale->price_id = $latestPrice->id;
-                    $sale->save();
-
-                    $amount = $product['price_sold_at'] * $soldQuantityFromBatch;
-                    $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0;
-                    $amount += $vatValue;
-                    $totalPrice += $amount;
-
-                    $productDetails[] = [
-                        "productTypeName" => $latestPrice->productType->product_type_name,
-                        'price' => $product['price_sold_at'],
-                        "quantity" => $soldQuantityFromBatch,
-                        "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
-                        "amount" => $amount,
-                        "selling_unit" => "",
-                        "purchase_unit" => "",
-                    "selling_unit" => "",
-                    "purchase_unit" => "",
-                    ];
-                    // "selling_unit" => optional($latestPrice->sellingUnit)->selling_unit_name,
-                    // "purchase_unit" => optional($latestPrice->sellingUnit->purchaseUnit)->purchase_unit_name,
                 }
+
+                $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
+                                ->where('id', $data['customer_id'])
+                                ->first();
+                if ($user) {
+                    $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
+
+                    $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId);
+                    if (!isset($data['is_offline'])) {
+                        $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
+                    }
+                }
+                $this->logRepository->logEvent(
+                    'sales',
+                    'create',
+                    null,
+                    'Sale',
+                    "$this->username created a new sale with transaction ID $transactionId",
+                    $data
+                );
+
+                $receiptData = $this->downSalesReceipt($transactionId, ['branch_id' => auth()->user()->branch_id]);
+
+                return $receiptData;
+            });
+
+            return response()->json(['success' => true, 'data' => $response, 'message' => 'Sales record was added successfully'], 201);
+        } catch (\Exception $e) {
+            if ($e->getCode() === 400) {
+                return response()->json(['message' => $e->getMessage()], 400);
             }
 
-            $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
-                            ->where('id', $data['customer_id'])
-                            ->first();
-            if ($user) {
-                $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
-
-                $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId);
-                if (!isset($data['is_offline'])) {
-                    $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
-                }
-            }
-            $this->logRepository->logEvent(
-                'sales',
-                'create',
-                null,
-                'Sale',
-                "$this->username created a new sale with transaction ID $transactionId",
-                $data
-            );
-
-            $receiptData = $this->downSalesReceipt($transactionId, ['branch_id' => auth()->user()->branch_id]);
-
-            return $receiptData;
-        });
-
-
-        return response()->json(['success' => true, 'data' => $response, 'message' => 'Sales record was added successfully'], 201);
-        // } catch (\Exception $e) {
-        //     if ($e->getCode() === 400) {
-        //         return response()->json(['message' => $e->getMessage()], 400);
-        //     }
-
-        //     Log::channel('insertion_errors')->error('Error creating or updating sale: ' . $e->getMessage());
-        //     DB::rollBack();
-        //     return response()->json(['message' => 'Failed to create sales', 'error' => $e->getMessage()], 500);
-        // }
+            Log::channel('insertion_errors')->error('Error creating or updating sale: ' . $e->getMessage());
+            return response()->json(['message' => 'Failed to create sales', 'error' => $e->getMessage()], 500);
+        }
     }
+
 
     // public function create(array $data)
     // {
