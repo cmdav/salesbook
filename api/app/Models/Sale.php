@@ -35,7 +35,7 @@ class Sale extends Model
         'is_offline',
         'new_price',
         'old_price_id',
-        'selling_unit_id',
+        'purchase_unit_id',
         'is_actual'
     ];
     public function payment_details()
@@ -88,6 +88,11 @@ class Sale extends Model
     {
 
         return $this->belongsTo(BusinessBranch::class, 'branch_id', 'id');
+    }
+    public function unitPurchase()
+    {
+
+        return $this->belongsTo(PurchaseUnit::class, "purchase_unit_id", "id")->select("id", "purchase_unit_name");
     }
 
 }

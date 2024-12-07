@@ -25,10 +25,10 @@ class SaleFormRequest extends FormRequest
                 'nullable',
                 'string',
             ],
-            // 'products.*.selling_unit_id' => [
-            //     'required',
-            //     'uuid',
-            // ],
+            'products.*.purchase_unit_id' => [
+                'required',
+                'uuid',
+            ],
             'products.*.purchase_unit_id' => [
                 'required',
                 'uuid',

@@ -6,6 +6,7 @@ use App\Models\Store;
 use App\Models\SupplierRequest;
 use App\Models\Inventory;
 use App\Models\Sale;
+use App\Models\PurchaseUnit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
@@ -31,7 +32,7 @@ class StoreRepository
     private function query($branchId)
     {
 
-        $query = Store::with('productType', 'branches:id,name');
+        $query = Store::select("id", "product_type_id", "batch_no", "branch_id", "purchase_unit_id", "capacity_qty_available", "status")->with('productType', 'branches:id,name');
         if ($branchId !== 'all') {
             // Apply the where clause if branch_id is not 'all' and the user is not admin
             $query->where('branch_id', $branchId);
@@ -41,11 +42,12 @@ class StoreRepository
     public function index($request)
     {
         $branchId = 'all';
-        if(isset($request['branch_id']) &&  auth()->user()->role->role_name == 'Admin') {
+        if (isset($request['branch_id']) && auth()->user()->role->role_name == 'Admin') {
             $branchId = $request['branch_id'];
         } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
+
         $this->logRepository->logEvent(
             'store',
             'view',
@@ -53,19 +55,103 @@ class StoreRepository
             'Store',
             "$this->username viewed all stores"
         );
+
         $store = $this->query($branchId)->paginate(20);
 
         $store->getCollection()->transform(function ($store) {
-
             return $this->transformProduct($store);
         });
 
-
         return $store;
-
-        //return Store::latest()->paginate(3);
-
     }
+
+    private function transformProduct($store, $isPdf = false)
+    {
+        // Get the purchase unit and the total quantity in the smallest unit
+        $purchaseUnit = PurchaseUnit::with(['subPurchaseUnits:id,purchase_unit_name,unit,parent_purchase_unit_id'])
+            ->where('id', $store->purchase_unit_id)
+            ->first();
+
+        // Calculate the breakdown of available quantity into the smallest unit
+        $quantityBreakdown = $this->getQuantityBreakdown($purchaseUnit, $store->capacity_qty_available);
+
+        return array_filter([
+            'id' => $isPdf ? null : $store->id, // Exclude id if isPdf is true
+            'product_name' => optional($store->productType)->product_type_name,
+            'product_description' => $isPdf ? null : optional($store->productType)->product_type_description, // Exclude product description if isPdf is true
+            'batch_no' => $store->batch_no,
+            'branch_name' => $isPdf ? null : optional($store->branches)->name,
+            'quantity_available' => $store->capacity_qty_available,
+            'status' => $store->capacity_qty_available > 0 ? 'Available' : 'Not Available',
+            'quantity_breakdown' => $quantityBreakdown, // Use the generated breakdown string
+        ], function ($value) {
+            return $value !== null;
+        });
+    }
+    private function getQuantityBreakdown($purchaseUnit, $quantityAvailable)
+    {
+        $breakdown = [];
+
+        // Get the unit hierarchy (from smallest to largest)
+        $units = $this->getUnitHierarchy($purchaseUnit);
+        \Log::info('Unit Hierarchy:', $units);
+        \Log::info('Original Quantity Available:', [$quantityAvailable]);
+
+        // Start with the smallest unit
+        $remainingQuantity = $quantityAvailable;
+
+        // Process the smallest unit first
+        for ($i = count($units) - 1; $i >= 0; $i--) {
+            $currentUnit = $units[$i];
+            $unitSize = $currentUnit['size'];
+            $unitName = $currentUnit['name'];
+
+            // Calculate the number of full units at this level
+            $unitCount = floor($remainingQuantity / $unitSize);
+
+            // Store the unit count in the breakdown if it's greater than 0
+            if ($unitCount > 0) {
+                $breakdown[] = "$unitCount $unitName" . ($unitCount > 1 ? 's' : '');
+            }
+
+            // Update the remaining quantity after dividing by the unit size
+            $remainingQuantity = $remainingQuantity % $unitSize;
+        }
+
+        // If there's any remaining quantity in the smallest unit, add it to the breakdown
+        if ($remainingQuantity > 0) {
+            $breakdown[] = "$remainingQuantity " . $units[0]['name'] . ($remainingQuantity > 1 ? 's' : '');
+        }
+
+        \Log::info('Final Breakdown:', $breakdown);
+
+        // Return the breakdown as a string (comma-separated)
+        return implode(', ', $breakdown);
+    }
+
+    private function getUnitHierarchy($purchaseUnit)
+    {
+        $units = [];
+        $currentUnit = $purchaseUnit;
+
+        // Traverse up the hierarchy and collect all units
+        while ($currentUnit) {
+            $units[] = [
+                'name' => $currentUnit->purchase_unit_name,
+                'size' => $currentUnit->unit,  // Unit size
+            ];
+
+            // Move to the parent unit
+            $currentUnit = $currentUnit->parentPurchaseUnit;
+        }
+
+        // Reverse the array so the smallest unit comes first
+        return array_reverse($units);
+    }
+
+
+
+
     public function searchStore($searchCriteria, $request)
     {
         $branchId = 'all';
@@ -98,22 +184,22 @@ class StoreRepository
         //return Store::latest()->paginate(3);
 
     }
-    private function transformProduct($store, $isPdf = false)
-    {
-        return array_filter([
-            'id' => $isPdf ? null : $store->id, // Exclude id if isPdf is true
-            'product_name' => optional($store->productType)->product_type_name,
-            'product_description' => $isPdf ? null : optional($store->productType)->product_type_description, // Exclude product description if isPdf is true
-            //'store_owner' => $store->store_owner,
-            'batch_no' => $store->batch_no,
-            'branch_name' =>  $isPdf ? null : optional($store->branches)->name,
-            'quantity_available' => $store->capacity_qty_available,
-            //'store_type' => $store->store_type,
-            'status' => $store->capacity_qty_available > 0 ? 'Available' : 'Not Available',
-        ], function ($value) {
-            return $value !== null;
-        });
-    }
+    // private function transformProduct($store, $isPdf = false)
+    // {
+    //     return array_filter([
+    //         'id' => $isPdf ? null : $store->id, // Exclude id if isPdf is true
+    //         'product_name' => optional($store->productType)->product_type_name,
+    //         'product_description' => $isPdf ? null : optional($store->productType)->product_type_description, // Exclude product description if isPdf is true
+    //         //'store_owner' => $store->store_owner,
+    //         'batch_no' => $store->batch_no,
+    //         'branch_name' =>  $isPdf ? null : optional($store->branches)->name,
+    //         'quantity_available' => $store->capacity_qty_available,
+    //         //'store_type' => $store->store_type,
+    //         'status' => $store->capacity_qty_available > 0 ? 'Available' : 'Not Available',
+    //     ], function ($value) {
+    //         return $value !== null;
+    //     });
+    // }
 
 
     public function create(array $data)
