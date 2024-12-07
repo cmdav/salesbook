@@ -65,5 +65,10 @@ class Purchase extends Model
 
         return $this->belongsTo(ContainerTypeCapacity::class, 'container_type_capacity_id', 'id');
     }
+    public function purchaseUnit()
+    {
+
+        return $this->belongsTo(PurchaseUnit::class, "purchase_unit_id", "id")->select("id", "purchase_unit_name", "unit");
+    }
 
 }

@@ -348,7 +348,21 @@ class SaleRepository
             return response()->json(['success' => false, 'message' => 'Error deleting sale'], 500);
         }
     }
+    private function getTotalUnits($purchaseUnit)
+    {
+        $totalUnits = $purchaseUnit->unit; // Start with the unit of the current purchase unit
 
+        // If the purchase unit has child units, calculate them recursively
+        if ($purchaseUnit->subPurchaseUnits) {
+            foreach ($purchaseUnit->subPurchaseUnits as $subUnit) {
+                $totalUnits *= $subUnit->unit; // Multiply by the unit value of the sub unit
+                // Recursively calculate sub-units of sub-units if any
+                $totalUnits *= $this->getTotalUnits($subUnit);
+            }
+        }
+
+        return $totalUnits;
+    }
     public function create(array $data)
     {
         $emailService = new EmailService();
@@ -361,14 +375,14 @@ class SaleRepository
             $totalPrice = 0;
 
             foreach ($data['products'] as $product) {
-                //dd('re');
+
                 // Get the latest price for the product with purchase_unit_id
                 $latestPrice = Price::where([
                         ['product_type_id', $product['product_type_id']],
                         ['purchase_unit_id', $product['purchase_unit_id']],
                         ['status', 1]
                     ])->orderBy('created_at', 'desc')->firstOrFail();
-
+                //dd($latestPrice);
                 // Get all batches of the product in the branch
                 $stores = Store::where('product_type_id', $product['product_type_id'])
                                ->where('purchase_unit_id', $product['purchase_unit_id'])
@@ -378,70 +392,86 @@ class SaleRepository
                                ->select("id", "capacity_qty_available", "branch_id", "batch_no")
                                ->get();
 
-                $remainingQuantity = $product['quantity'];
+                // Get the parent purchase unit for the current product
+                $purchaseUnit = \App\Models\PurchaseUnit::with(['subPurchaseUnits:id,purchase_unit_name,unit,parent_purchase_unit_id'])
+                ->where('id', $product['purchase_unit_id'])
+                ->first();
+
+                // Calculate the total units recursively
+                $totalUnit = $this->getTotalUnits($purchaseUnit);
+
+
+
+
+                // Multiply the total units by the requested quantity to get the remaining quantity in capacity
+                $remainingQuantity = $product['quantity'] * $totalUnit;
+
+                // Get total available quantity across all stores
                 $totalAvailableQuantity = $stores->sum('capacity_qty_available');
 
-                // if ($totalAvailableQuantity < $remainingQuantity) {
-                //     throw new \Exception("Insufficient stock for the requested quantity.", 400);
-                // }
 
-                // foreach ($stores as $store) {
-                //     if ($remainingQuantity <= 0) {
-                //         break;
-                //     }
 
-                //     $oldPrice = Price::where('batch_no', $store->batch_no)
-                //                      ->where('product_type_id', $product['product_type_id'])
-                //                      ->where('purchase_unit_id', $product['purchase_unit_id'])
-                //                      ->first();
+                if ($totalAvailableQuantity < $remainingQuantity) {
+                    throw new \Exception("Insufficient stock for the requested quantity.", 400);
+                }
 
-                //     $oldPriceId = $oldPrice ? $oldPrice->id : null;
+                foreach ($stores as $store) {
+                    if ($remainingQuantity <= 0) {
+                        break;
+                    }
 
-                //     $soldQuantityFromBatch = min($remainingQuantity, $store->capacity_qty_available);
-                //     $store->capacity_qty_available -= $soldQuantityFromBatch;
-                //     $remainingQuantity -= $soldQuantityFromBatch;
+                    $oldPrice = Price::where('batch_no', $store->batch_no)
+                                     ->where('product_type_id', $product['product_type_id'])
+                                     ->where('purchase_unit_id', $product['purchase_unit_id'])
+                                     ->first();
 
-                //     if ($store->capacity_qty_available == 0) {
-                //         $store->status = 0;
-                //     }
+                    $oldPriceId = $oldPrice ? $oldPrice->id : null;
 
-                //     $store->save();
+                    $soldQuantityFromBatch = min($remainingQuantity, $store->capacity_qty_available);
+                    $store->capacity_qty_available -= $soldQuantityFromBatch;
+                    $remainingQuantity -= $soldQuantityFromBatch;
 
-                $sale = new Sale();
-                $sale->fill([
-                    'product_type_id' => $product['product_type_id'],
-                    'customer_id' => $data['customer_id'],
-                    'price_sold_at' => $product['price_sold_at'],
-                    'quantity' => 30,
-                    'vat' => $product['vat'],
-                    'payment_method' => $data['payment_method'],
-                    'transaction_id' => $transactionId,
-                    'is_offline' => $data['is_offline'] ?? 0,
-                    'old_price_id' => '',
-                    'batch_no' => '',
+                    if ($store->capacity_qty_available == 0) {
+                        $store->status = 0;
+                    }
 
-                    'purchase_unit_id' => $product['purchase_unit_id'], // Added purchase_unit_id
-                ]);
-                $sale->price_id = $latestPrice->id;
-                $sale->save();
+                    $store->save();
 
-                // $amount = $product['price_sold_at'] * $soldQuantityFromBatch;
-                // $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0;
-                // $amount += $vatValue;
-                // $totalPrice += $amount;
+                    $sale = new Sale();
+                    $sale->fill([
+                        'product_type_id' => $product['product_type_id'],
+                        'customer_id' => $data['customer_id'],
+                        'price_sold_at' => $product['price_sold_at'],
+                        'quantity' => 30,
+                        'vat' => $product['vat'],
+                        'payment_method' => $data['payment_method'],
+                        'transaction_id' => $transactionId,
+                        'is_offline' => $data['is_offline'] ?? 0,
+                        'old_price_id' => $oldPriceId,
+                        'batch_no' => 'SYS/01',
 
-                // $productDetails[] = [
-                //     "productTypeName" => $latestPrice->productType->product_type_name,
-                //     'price' => $product['price_sold_at'],
-                //     "quantity" => $soldQuantityFromBatch,
-                //     "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
-                //     "amount" => $amount,
-                //     "selling_unit" => "",
-                //     "purchase_unit" => "",
-                // "selling_unit" => optional($latestPrice->sellingUnit)->selling_unit_name,
-                // "purchase_unit" => optional($latestPrice->sellingUnit->purchaseUnit)->purchase_unit_name,
-                // ];
-                //}
+                        'purchase_unit_id' => $product['purchase_unit_id'], // Added purchase_unit_id
+                    ]);
+                    $sale->price_id = $latestPrice->id;
+                    $sale->save();
+
+                    // $amount = $product['price_sold_at'] * $soldQuantityFromBatch;
+                    // $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0;
+                    // $amount += $vatValue;
+                    // $totalPrice += $amount;
+
+                    // $productDetails[] = [
+                    //     "productTypeName" => $latestPrice->productType->product_type_name,
+                    //     'price' => $product['price_sold_at'],
+                    //     "quantity" => $soldQuantityFromBatch,
+                    //     "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
+                    //     "amount" => $amount,
+                    //     "selling_unit" => "",
+                    //     "purchase_unit" => "",
+                    // "selling_unit" => optional($latestPrice->sellingUnit)->selling_unit_name,
+                    // "purchase_unit" => optional($latestPrice->sellingUnit->purchaseUnit)->purchase_unit_name,
+                    // ];
+                }
             }
 
             $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')

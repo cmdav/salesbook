@@ -30,8 +30,7 @@ class PurchaseRepository
             'suppliers:id,first_name,last_name',
             //'currency',
             'productType:id,product_type_name,product_type_image,product_type_description',
-            'productType.productMeasurement:id,product_type_id,purchasing_unit_id',  // Updated relation
-            'productType.productMeasurement.PurchaseUnit:id,purchase_unit_name,id',  // Updated relation
+            'PurchaseUnit',
             'productType.subCategory:id,sub_category_name',
             'branches:id,name',
             'productType.suppliers:id,first_name,last_name,phone_number',
@@ -117,29 +116,6 @@ class PurchaseRepository
         // Get the product type and product measurements
         $productType = $purchase->productType;
 
-        // Map purchase unit names using the provided logic
-        $purchaseUnitNames = $productType->productMeasurement->map(function ($measurement) {
-            return optional($measurement->purchaseUnit)->purchase_unit_name ?? null;
-        })->toArray();
-
-        // Get unit information, formatted as "unit_value unit_of_purchase_unit_name" with previous context
-        $unitInfo = $productType->productMeasurement->map(function ($measurement, $index) use ($productType) {
-            $unitValue = optional($measurement->purchaseUnit)->unit;
-            $purchaseUnitName = optional($measurement->purchaseUnit)->purchase_unit_name ?? 'unit';
-
-            // For the first measurement, return unit and purchase unit name as "unit of purchase_unit_name"
-            if ($index == 0) {
-                return "$unitValue unit of $purchaseUnitName";
-            }
-
-            // For subsequent measurements, use the previous purchase unit name
-            $previousMeasurement = $productType->productMeasurement[$index - 1];
-            $previousPurchaseUnitName = optional($previousMeasurement->purchaseUnit)->purchase_unit_name ?? 'unit';
-
-            // Return the unit and the format "X unit_name in a previous_unit_name"
-            return "$unitValue $purchaseUnitName in a $previousPurchaseUnitName";
-        })->toArray();
-
         return [
             'id' => $purchase->id,
             'product_type_name' => optional($purchase->productType)->product_type_name,
@@ -147,8 +123,8 @@ class PurchaseRepository
             'product_type_description' => optional($purchase->productType)->product_type_description,
 
             // Use the new logic for purchase_unit_name and unit related info
-            'purchase_unit_name' => $purchaseUnitNames,
-            'unit' => $unitInfo,
+            'purchase_unit_name' => [optional($purchase->purchaseUnit)->purchase_unit_name],
+           // 'unit' => 4,
 
             'capacity_qty' => $purchase->capacity_qty,
             'branch_name' => optional($purchase->branches)->name,
@@ -167,19 +143,8 @@ class PurchaseRepository
                 : optional($purchase->updater->organization)->organization_name,
         ];
     }
-
-
     public function create(array $data)
     {
-
-        //     $purchaseUnit = \App\Models\PurchaseUnit::with(['subPurchaseUnits:id,purchase_unit_name,unit,parent_purchase_unit_id'])
-        // ->select('id', 'purchase_unit_name', 'unit')  // Select only the required fields
-        // ->find("9da8684e-376e-44d5-8d2c-2b914e45f015");
-
-        //     return $purchaseUnit;
-
-        // $purchaseUnit = \App\Models\PurchaseUnit::with('subPurchaseUnits')->find("9da62389-4df0-438c-a3b5-9011559cd554");
-        // return  $purchaseUnit;s
         DB::beginTransaction();
 
         try {
@@ -220,14 +185,18 @@ class PurchaseRepository
                     $purchase->price_id = $price->id;
                     $purchase->save();
 
-                    // Retrieve the purchase unit from the purchase_unit table
-
-                    $purchaseUnit = \App\Models\PurchaseUnit::with('subPurchaseUnits')->find($unitData['purchase_unit_id']);
-
+                    // Retrieve the purchase unit from the purchase_unit
+                    $purchaseUnit = \App\Models\PurchaseUnit::with(['subPurchaseUnits:id,purchase_unit_name,unit,parent_purchase_unit_id'])
+                        ->select('id', 'purchase_unit_name', 'unit')  // Select only the required fields
+                        ->find($unitData['purchase_unit_id']);
 
                     if ($purchaseUnit) {
-                        // Use the recursive function to get the total number of smallest units for this purchase unit
-                        $totalQuantity = $purchase->capacity_qty * $purchaseUnit->getTotalUnits();
+                        // Get the total number of smallest units for this purchase unit (recursively)
+                        $totalUnit = $this->getTotalUnits($purchaseUnit);
+
+                        // Calculate the total quantity by multiplying total units with capacity_qty
+                        $totalQuantity = $purchase->capacity_qty * $totalUnit;
+
 
                         // Update or create the store entry
                         $store = \App\Models\Store::where('product_type_id', $purchaseData['product_type_id'])
@@ -235,6 +204,7 @@ class PurchaseRepository
                             ->where('purchase_unit_id', $unitData['purchase_unit_id'])
                             ->where('branch_id', auth()->user()->branch_id)
                             ->first();
+
 
                         if (!$store) {
                             // Create a new Store instance if it doesn't exist
@@ -273,6 +243,32 @@ class PurchaseRepository
             return response()->json(['message' => 'Failed to create purchases'], 500);
         }
     }
+
+    /**
+     * Recursive function to calculate the total unit by traversing through the hierarchy of purchase units
+     *
+     * @param \App\Models\PurchaseUnit $purchaseUnit
+     * @return int
+     */
+    private function getTotalUnits($purchaseUnit)
+    {
+        // Base case: If no subPurchaseUnits, return the unit itself
+        if ($purchaseUnit->subPurchaseUnits->isEmpty()) {
+            return $purchaseUnit->unit;
+        }
+
+        // Recursive case: Multiply the current unit with all the subPurchaseUnits' units
+        $total = $purchaseUnit->unit;
+
+        foreach ($purchaseUnit->subPurchaseUnits as $subUnit) {
+            $total *= $this->getTotalUnits($subUnit); // Recurse to get sub-units total
+        }
+
+        return $total;
+    }
+
+
+
 
 
 
