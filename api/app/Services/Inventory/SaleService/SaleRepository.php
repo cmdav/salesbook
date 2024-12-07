@@ -656,22 +656,6 @@ class SaleRepository
         $transactionTime = Carbon::now()->format('Y-m-d H:i:s');
         $branch = $this->userRepository->getuserOrgAndBranchDetail();
 
-
-
-
-        // Include branch details
-        $centeredInfo = "
-            <div style='text-align: center; margin-bottom: 20px;'>
-                <p><strong>Transaction Time</strong>: {$transactionTime}<br>
-                <strong>Branch Name</strong>: {$branch['branch_name']}<br>
-                <strong>State</strong>: {$branch['state_name']}<br>
-                <strong>Email</strong>: {$branch['branch_email']}<br>
-                <strong>Phone Number</strong>: {$branch['branch_phone_number']}<br>
-                <strong>Address</strong>: {$branch['branch_address']}</p>
-            </div>
-        ";
-
-        // $tableHtml = "{$centeredInfo}
         $tableHtml = "
 <table style='width: 100%; max-width: 100%; border-collapse: collapse; border: 1px solid black;'>
     <tr>
