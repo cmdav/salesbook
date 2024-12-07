@@ -448,43 +448,45 @@ class SaleRepository
                         'transaction_id' => $transactionId,
                         'is_offline' => $data['is_offline'] ?? 0,
                         'old_price_id' => $oldPriceId,
-                        'batch_no' => 'SYS/01',
+                        'batch_no' => $store->batch_no,
 
                         'purchase_unit_id' => $product['purchase_unit_id'], // Added purchase_unit_id
                     ]);
                     $sale->price_id = $latestPrice->id;
                     $sale->save();
 
-                    // $amount = $product['price_sold_at'] * $soldQuantityFromBatch;
-                    // $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0;
-                    // $amount += $vatValue;
-                    // $totalPrice += $amount;
+                    $amount = $product['price_sold_at'] * $soldQuantityFromBatch;
+                    $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0;
+                    $amount += $vatValue;
+                    $totalPrice += $amount;
 
-                    // $productDetails[] = [
-                    //     "productTypeName" => $latestPrice->productType->product_type_name,
-                    //     'price' => $product['price_sold_at'],
-                    //     "quantity" => $soldQuantityFromBatch,
-                    //     "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
-                    //     "amount" => $amount,
-                    //     "selling_unit" => "",
-                    //     "purchase_unit" => "",
+                    $productDetails[] = [
+                        "productTypeName" => $latestPrice->productType->product_type_name,
+                        'price' => $product['price_sold_at'],
+                        "quantity" => $soldQuantityFromBatch,
+                        "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
+                        "amount" => $amount,
+                        "selling_unit" => "",
+                        "purchase_unit" => "",
+                    "selling_unit" => "",
+                    "purchase_unit" => "",
+                    ];
                     // "selling_unit" => optional($latestPrice->sellingUnit)->selling_unit_name,
                     // "purchase_unit" => optional($latestPrice->sellingUnit->purchaseUnit)->purchase_unit_name,
-                    // ];
                 }
             }
 
             $user = Customer::select('id', 'first_name', 'last_name', 'email', 'contact_person', 'phone_number')
                             ->where('id', $data['customer_id'])
                             ->first();
-            // if ($user) {
-            //     $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
+            if ($user) {
+                $customerDetail = trim($user->first_name . ' ' . $user->last_name . ' ' . $user->contact_person);
 
-            //     $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId);
-            //     if (!isset($data['is_offline'])) {
-            //         $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
-            //     }
-            // }
+                $tableDetail = $this->generateProductDetailsTable($productDetails, $totalPrice, $transactionId);
+                if (!isset($data['is_offline'])) {
+                    $emailService->sendEmail(['email' => $user->email, 'first_name' => $customerDetail], "sales-receipt", $tableDetail);
+                }
+            }
             $this->logRepository->logEvent(
                 'sales',
                 'create',
@@ -658,16 +660,16 @@ class SaleRepository
 
 
         // Include branch details
-        //         $centeredInfo = "
-        //     <div style='text-align: center; margin-bottom: 20px;'>
-        //         <p><strong>Transaction Time</strong>: {$transactionTime}<br>
-        //         <strong>Branch Name</strong>: {$branch['branch_name']}<br>
-        //         <strong>State</strong>: {$branch['state_name']}<br>
-        //         <strong>Email</strong>: {$branch['branch_email']}<br>
-        //         <strong>Phone Number</strong>: {$branch['branch_phone_number']}<br>
-        //         <strong>Address</strong>: {$branch['branch_address']}</p>
-        //     </div>
-        // ";
+        $centeredInfo = "
+            <div style='text-align: center; margin-bottom: 20px;'>
+                <p><strong>Transaction Time</strong>: {$transactionTime}<br>
+                <strong>Branch Name</strong>: {$branch['branch_name']}<br>
+                <strong>State</strong>: {$branch['state_name']}<br>
+                <strong>Email</strong>: {$branch['branch_email']}<br>
+                <strong>Phone Number</strong>: {$branch['branch_phone_number']}<br>
+                <strong>Address</strong>: {$branch['branch_address']}</p>
+            </div>
+        ";
 
         // $tableHtml = "{$centeredInfo}
         $tableHtml = "
