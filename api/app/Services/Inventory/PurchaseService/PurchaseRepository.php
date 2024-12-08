@@ -184,6 +184,8 @@ class PurchaseRepository
                         ->select('id', 'purchase_unit_name', 'unit')
                         ->find($unitData['purchase_unit_id']);
 
+
+
                     if ($purchaseUnit) {
                         // Calculate the smallest unit capacity for this purchase unit
                         $totalSmallestUnits = $this->calculateSmallestUnits($purchaseUnit, $purchase->capacity_qty);

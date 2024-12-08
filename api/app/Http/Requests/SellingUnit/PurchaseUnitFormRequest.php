@@ -21,6 +21,7 @@ class PurchaseUnitFormRequest extends FormRequest
                 'max:50',
                 Rule::unique('purchase_units')
                     ->where('parent_purchase_unit_id', $this->input('parent_purchase_unit_id'))
+                    ->where('measurement_group_id', $this->input('measurement_group_id')) // Ensure uniqueness within the group and level
                     ->ignore($this->route('purchase_unit')), // Ignore current entry during update
             ],
             'measurement_group_id' => [
@@ -33,6 +34,7 @@ class PurchaseUnitFormRequest extends FormRequest
                         $existingParent = \DB::table('purchase_units')
                             ->whereNull('parent_purchase_unit_id') // parent_purchase_unit_id is NULL
                             ->where('measurement_group_id', $this->input('measurement_group_id'))
+                            ->where('id', '!=', $this->route('purchase_unit')) // Ignore the current record during update
                             ->exists();
 
                         if ($existingParent) {
@@ -44,7 +46,7 @@ class PurchaseUnitFormRequest extends FormRequest
 
             // Custom validation for parent_purchase_unit_id (ensure only one NULL parent per group)
             'parent_purchase_unit_id' => [
-                'nullable', // The field can be missing or null
+                'nullable',
                 'uuid',
                 'exists:purchase_units,id', // Ensure the provided parent ID exists in the purchase_units table
                 function ($attribute, $value, $fail) {
