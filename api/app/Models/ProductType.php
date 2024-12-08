@@ -87,6 +87,14 @@ class ProductType extends Model
         return $this->hasOne(Store::class, 'product_type_id', 'id')
                     ->where('branch_id', auth()->user()->branch_id);
     }
+    public function activePrices()
+    {
+        // Add branch filtering here
+        return $this->hasMany(Price::class)
+                     ->where('status', 1)
+                    ->where('branch_id', auth()->user()->branch_id)
+                    ->latest('created_at');
+    }
     public function activePrice()
     {
         // Add branch filtering here

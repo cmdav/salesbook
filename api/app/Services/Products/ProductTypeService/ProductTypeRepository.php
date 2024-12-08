@@ -41,8 +41,8 @@ class ProductTypeRepository
             'productMeasurement.PurchaseUnit',
             'subCategory:id,sub_category_name',
             'suppliers:id,first_name,last_name,phone_number',
-            'activePrice' => function ($query) {
-                $query->select('id', 'cost_price', 'selling_price', 'product_type_id');
+            'activePrices' => function ($query) {
+                $query->select('id', 'cost_price', 'selling_price', 'product_type_id', 'purchase_unit_id');
             },
 
         ])->latest();
@@ -60,6 +60,98 @@ class ProductTypeRepository
 
         return $this->getProductTypes();
     }
+    private function getProductTypes($productId = null)
+    {
+        $query = $this->query();
+        if ($productId) {
+            $query->where('id', $productId);
+        };
+
+        $productTypes = $query->paginate(20);
+
+
+
+        $productTypes->getCollection()->transform(function ($productType) {
+            return $this->transformProductType($productType);
+        });
+
+        return $productTypes;
+    }
+
+    private function transformProductType($productType)
+    {
+        // Get the authenticated user's branch ID
+        $branchId = auth()->user()->branch_id;
+
+        // Sum up all quantities available for the product type in the specified branch
+        $quantityAvailable = \App\Models\Store::where('product_type_id', $productType->id)
+            ->where('branch_id', $branchId)
+            ->sum('capacity_qty_available');
+
+        $activePrices = $productType->activePrices()->get();
+
+        // Map purchase units with purchasing and selling prices
+        $purchasingPrices = [];
+        $sellingPrices = [];
+
+        foreach ($productType->productMeasurement as $measurement) {
+            $purchaseUnitName = optional($measurement->purchaseUnit)->purchase_unit_name;
+
+            if ($purchaseUnitName) {
+                $matchingPrice = $activePrices->firstWhere('purchase_unit_id', $measurement->purchasing_unit_id);
+
+                $purchasingPrices[] = $purchaseUnitName . ': ' .
+                    ($matchingPrice ? $matchingPrice->cost_price . ' Ngn' : 'Not set');
+
+                $sellingPrices[] = $purchaseUnitName . ': ' .
+                    ($matchingPrice ? $matchingPrice->selling_price . ' Ngn' : 'Not set');
+            }
+        }
+
+        return [
+            'id' => $productType->id,
+            'product_sub_category' => optional($productType->subCategory)->sub_category_name,
+            'product_sub_category_id' => optional($productType->subCategory)->id,
+            'product_name' => $productType->product_type_name,
+            'product_image' => $productType->product_type_image,
+            'product_description' => $productType->product_type_description,
+            'vat' => $productType->vat,
+            'product_category' => optional($productType->product_category)->category_name,
+            'product_category_id' => optional($productType->product_category)->id,
+
+            // Using the sum of all quantities available
+            'quantity_available' => $quantityAvailable > 0 ? $quantityAvailable : 'Not available',
+
+            'purchasing_price' => $purchasingPrices,
+            'selling_price' => $sellingPrices,
+            'purchase_unit_name' => $productType->productMeasurement->map(function ($measurement) {
+                return optional($measurement->purchaseUnit)->purchase_unit_name ?? null;
+            })->toArray(),
+
+            'unit' => $productType->productMeasurement->map(function ($measurement) {
+                $unitValue = optional($measurement->purchaseUnit)->unit;
+                $purchaseUnitName = optional($measurement->purchaseUnit)->purchase_unit_name ?? 'unit';
+
+                $parentPurchaseUnit = optional($measurement->purchaseUnit)->parentPurchaseUnit;
+
+                if ($parentPurchaseUnit) {
+                    $parentUnitName = $parentPurchaseUnit->purchase_unit_name ?? 'unit';
+                    $unitValue = "$unitValue $purchaseUnitName in a $parentUnitName";
+                } else {
+                    $unitValue = "$unitValue unit of $purchaseUnitName";
+                }
+
+                return $unitValue;
+            })->toArray(),
+
+            'supplier_name' => trim((optional($productType->suppliers)->first_name ?? '') . ' ' . (optional($productType->suppliers)->last_name ?? '')) ?: 'None',
+            'supplier_phone_number' => optional($productType->suppliers)->phone_number ?? 'None',
+            'date_created' => $productType->created_at,
+            'created_by' => optional($productType->creator)->first_name . " " . optional($productType->creator)->last_name,
+            'updated_by' => optional($productType->updater)->first_name . " " . optional($productType->updater)->last_name,
+        ];
+    }
+
     public function searchProductType($searchCriteria)
     {
 
@@ -201,93 +293,8 @@ class ProductTypeRepository
 
 
 
-    private function getProductTypes($productId = null)
-    {
-        $query = $this->query();
-        if ($productId) {
-            $query->where('id', $productId);
-        };
-
-        $productTypes = $query->paginate(20);
 
 
-
-        $productTypes->getCollection()->transform(function ($productType) {
-            return $this->transformProductType($productType);
-        });
-
-        return $productTypes;
-    }
-
-    private function transformProductType($productType)
-    {
-        // Get the authenticated user's branch ID
-        $branchId = auth()->user()->branch_id;
-
-        // Sum up all quantities available for the product type in the specified branch
-        $quantityAvailable = \App\Models\Store::where('product_type_id', $productType->id)
-            ->where('branch_id', $branchId)
-            ->sum('capacity_qty_available');
-
-
-        $activePrice = $productType->activePrice()->where('branch_id', $branchId)->first();
-
-        return [
-            'id' => $productType->id,
-            'product_sub_category' => optional($productType->subCategory)->sub_category_name,
-            'product_sub_category_id' => optional($productType->subCategory)->id,
-            'product_name' => $productType->product_type_name,
-            'product_image' => $productType->product_type_image,
-            'product_description' => $productType->product_type_description,
-            'vat' => $productType->vat,
-            'product_category' => optional($productType->product_category)->category_name,
-            'product_category_id' => optional($productType->product_category)->id,
-
-            // Using the sum of all quantities available
-            'quantity_available' => $quantityAvailable > 0 ? $quantityAvailable : 'Not available',
-
-            'purchasing_price' => $activePrice ? $activePrice->cost_price : 'Not set',
-            'selling_price' => $activePrice ? $activePrice->selling_price : 'Not set',
-            'purchase_unit_name' => $productType->productMeasurement->map(function ($measurement) {
-                return optional($measurement->purchaseUnit)->purchase_unit_name ?? null;
-            })->toArray(),
-
-            'unit' => $productType->productMeasurement->map(function ($measurement, $index) use ($productType) {
-                // Get the current unit value
-                $unitValue = optional($measurement->purchaseUnit)->unit;
-
-                // Get the purchase unit name for the current unit
-                $purchaseUnitName = optional($measurement->purchaseUnit)->purchase_unit_name ?? 'unit';
-
-                // Get the parent purchase unit
-                $parentPurchaseUnit = optional($measurement->purchaseUnit)->parentPurchaseUnit;
-
-                // If the unit has a parent, only reference the immediate parent
-                if ($parentPurchaseUnit) {
-                    $parentUnitName = $parentPurchaseUnit->purchase_unit_name ?? 'unit';
-                    // Construct the string as: "X unit_name in a parent_unit_name"
-                    $unitValue = "$unitValue $purchaseUnitName in a $parentUnitName";
-                } else {
-                    // If there's no parent, just return the unit and the unit name
-                    $unitValue = "$unitValue unit of $purchaseUnitName";
-                }
-
-                // Return the unit value, adding parent only if needed and avoiding chaining more than 1 level
-                return $unitValue;
-            })->toArray(),
-
-
-
-
-
-
-            'supplier_name' => trim((optional($productType->suppliers)->first_name ?? '') . ' ' . (optional($productType->suppliers)->last_name ?? '')) ?: 'None',
-            'supplier_phone_number' => optional($productType->suppliers)->phone_number ?? 'None',
-            'date_created' => $productType->created_at,
-            'created_by' => optional($productType->creator)->first_name . " " . optional($productType->creator)->last_name,
-            'updated_by' => optional($productType->updater)->first_name . " " . optional($productType->updater)->last_name,
-        ];
-    }
 
     public function create(array $data)
     {
