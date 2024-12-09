@@ -94,6 +94,9 @@ class ProductTypeRepository
         $purchasingPrices = [];
         $sellingPrices = [];
 
+        $no_of_smallestUnit_in_each_unit = $this->calculatePurchaseUnits($productType->productMeasurement);
+        $quantityBreakdown = $this->calculateQuantityBreakdown($quantityAvailable, $no_of_smallestUnit_in_each_unit);
+
         foreach ($productType->productMeasurement as $measurement) {
             $purchaseUnitName = optional($measurement->purchaseUnit)->purchase_unit_name;
 
@@ -109,7 +112,7 @@ class ProductTypeRepository
         }
 
         // Function to calculate the quantity breakdown
-        $quantityBreakdown = $this->breakdownQuantityByMeasurement($productType->productMeasurement, $quantityAvailable);
+
 
         return [
             'id' => $productType->id,
@@ -123,7 +126,8 @@ class ProductTypeRepository
             'product_category_id' => optional($productType->product_category)->id,
 
             // Using the quantity breakdown function
-            'quantity_available' => $quantityAvailable,
+            'quantity_available' => $quantityBreakdown,
+
 
             'purchasing_price' => $purchasingPrices,
             'selling_price' => $sellingPrices,
@@ -155,36 +159,7 @@ class ProductTypeRepository
         ];
     }
 
-    private function breakdownQuantityByMeasurement($productMeasurements, $quantityCapacity)
-    {
-        // Step 1: Sort the product measurements by unit in descending order
-        $sortedMeasurements = collect($productMeasurements)->sortByDesc(function ($measurement) {
-            return $measurement['purchase_unit']['unit'] ?? 0;
-        })->values()->toArray();
 
-        $result = [];
-        $remainingQuantity = $quantityCapacity;
-
-        // Step 2: Loop through each measurement and calculate how many units fit
-        foreach ($sortedMeasurements as $measurement) {
-            $unitSize = $measurement['purchase_unit']['unit'] ?? 0;
-            $unitName = $measurement['purchase_unit']['purchase_unit_name'] ?? 'Unknown';
-
-            if ($unitSize > 0) {
-                // Calculate the number of full units that fit in the remaining quantity
-                $unitCount = intdiv($remainingQuantity, $unitSize);
-                $remainingQuantity %= $unitSize;
-
-                // Add the result to the breakdown if there are any units
-                if ($unitCount > 0) {
-                    $result[] = "$unitCount $unitName ($unitSize units)";
-                }
-            }
-        }
-
-        // Step 3: Return the breakdown as a string
-        return implode(', ', $result);
-    }
 
 
 
@@ -249,13 +224,57 @@ class ProductTypeRepository
         return response()->json(['data' => $response]);
     }
 
+    private function calculateSmallestUnit($unitId, $unitsMap, &$cache)
+    {
+        // If the unit is not found, default to 1
+        if (!isset($unitsMap[$unitId])) {
+            return 1; // Base case
+        }
+
+        // Prevent recalculating already computed units
+        if (isset($cache[$unitId])) {
+            return $cache[$unitId];
+        }
+
+        $currentUnit = $unitsMap[$unitId];
+
+        // If no parent exists, return this unit's value
+        if (!isset($currentUnit['parent_purchase_unit_id']) || $currentUnit['parent_purchase_unit_id'] === null) {
+            $cache[$unitId] = $currentUnit['unit'] ?? 1;
+            return $cache[$unitId];
+        }
+
+        // Recursively calculate the parent's unit value
+        $parentValue = $this->calculateSmallestUnit($currentUnit['parent_purchase_unit_id'], $unitsMap, $cache);
+
+        // Multiply the current unit's value by its parent's value
+        $cache[$unitId] = $parentValue / ($currentUnit['unit'] ?? 1);
+        return $cache[$unitId];
+    }
+    private function calculateQuantityBreakdown($quantityAvailable, $quantityBreakdown)
+    {
+        $result = [];
+        arsort($quantityBreakdown); // Sort the breakdown values in descending order
+
+        foreach ($quantityBreakdown as $unit => $value) {
+            if ($quantityAvailable >= $value) {
+                $count = intdiv($quantityAvailable, $value); // Calculate how many units can be used
+                $quantityAvailable %= $value; // Update the remaining quantity
+                $result[] = "{$count} {$unit}"; // Store the result
+            }
+        }
+
+        return implode(', ', $result); // Combine the breakdown into a single string
+    }
 
     /////////end it here
     public function calculatePurchaseUnits($measurements)
     {
+
+
         $result = [];
-        // Flatten the nested array structure if needed
-        $measurements = isset($measurements[0]) ? $measurements[0] : $measurements;
+
+        // $measurements = isset($measurements[0]) ? $measurements[0] : $measurements;
 
         // Create a map of purchase units by ID for easy lookup
         $unitsMap = [];
@@ -265,36 +284,7 @@ class ProductTypeRepository
             }
         }
 
-        // Function to calculate units relative to the smallest unit
-        function calculateSmallestUnit($unitId, $unitsMap, &$cache)
-        {
-            // If the unit is not found, default to 1
-            if (!isset($unitsMap[$unitId])) {
-                return 1; // Base case
-            }
 
-            // Prevent recalculating already computed units
-            if (isset($cache[$unitId])) {
-                return $cache[$unitId];
-            }
-
-            $currentUnit = $unitsMap[$unitId];
-
-            // If no parent exists, return this unit's value
-            if (!isset($currentUnit['parent_purchase_unit_id']) || $currentUnit['parent_purchase_unit_id'] === null) {
-                $cache[$unitId] = $currentUnit['unit'] ?? 1;
-                return $cache[$unitId];
-            }
-
-            // Recursively calculate the parent's unit value
-            $parentValue = calculateSmallestUnit($currentUnit['parent_purchase_unit_id'], $unitsMap, $cache);
-
-            // Multiply the current unit's value by its parent's value
-            $cache[$unitId] = $parentValue / ($currentUnit['unit'] ?? 1);
-            return $cache[$unitId];
-        }
-
-        // Cache for storing calculated unit values
         $cache = [];
 
         // Iterate through the measurements to calculate each purchase unit's value
@@ -307,7 +297,7 @@ class ProductTypeRepository
             $unitName = strtolower($measurement['purchaseUnit']['purchase_unit_name'] ?? 'Unknown');
 
             // Calculate the total number of smallest units for this purchase unit
-            $result[$unitName] = calculateSmallestUnit($unitId, $unitsMap, $cache);
+            $result[$unitName] = $this->calculateSmallestUnit($unitId, $unitsMap, $cache);
         }
 
         // Reverse the result to start with the smallest unit
@@ -355,19 +345,14 @@ class ProductTypeRepository
             },
         ])
         ->get();
-        // return $response;
-        $transformedResponse = $response->map(function ($product) {
-
-            return $product->productMeasurement;
-        });
-        $no_of_smallestUnit_in_each_unit = $this->calculatePurchaseUnits($transformedResponse);
 
         if ($response) {
-            $response = $response->map(function ($item) use ($no_of_smallestUnit_in_each_unit) {
+            $response = $response->map(function ($item) {
                 // Calculate the total capacity_quantity_available across all stores
                 $totalCapacityQuantity = collect($item->stores)->sum('total_quantity');
 
                 $stores = collect($item->stores)->groupBy('purchase_unit_id'); // Group stores by purchase_unit_id
+                $no_of_smallestUnit_in_each_unit = $this->calculatePurchaseUnits($item->productMeasurement);
 
                 $measurements = $item->productMeasurement->map(function ($measurement) use ($stores, $item) {
                     // Match the purchase_unit_id with the store data
