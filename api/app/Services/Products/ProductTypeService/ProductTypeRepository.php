@@ -108,6 +108,9 @@ class ProductTypeRepository
             }
         }
 
+        // Function to calculate the quantity breakdown
+        $quantityBreakdown = $this->breakdownQuantityByMeasurement($productType->productMeasurement, $quantityAvailable);
+
         return [
             'id' => $productType->id,
             'product_sub_category' => optional($productType->subCategory)->sub_category_name,
@@ -119,8 +122,8 @@ class ProductTypeRepository
             'product_category' => optional($productType->product_category)->category_name,
             'product_category_id' => optional($productType->product_category)->id,
 
-            // Using the sum of all quantities available
-            'quantity_available' => $quantityAvailable > 0 ? $quantityAvailable : 'Not available',
+            // Using the quantity breakdown function
+            'quantity_available' => $quantityAvailable,
 
             'purchasing_price' => $purchasingPrices,
             'selling_price' => $sellingPrices,
@@ -151,6 +154,39 @@ class ProductTypeRepository
             'updated_by' => optional($productType->updater)->first_name . " " . optional($productType->updater)->last_name,
         ];
     }
+
+    private function breakdownQuantityByMeasurement($productMeasurements, $quantityCapacity)
+    {
+        // Step 1: Sort the product measurements by unit in descending order
+        $sortedMeasurements = collect($productMeasurements)->sortByDesc(function ($measurement) {
+            return $measurement['purchase_unit']['unit'] ?? 0;
+        })->values()->toArray();
+
+        $result = [];
+        $remainingQuantity = $quantityCapacity;
+
+        // Step 2: Loop through each measurement and calculate how many units fit
+        foreach ($sortedMeasurements as $measurement) {
+            $unitSize = $measurement['purchase_unit']['unit'] ?? 0;
+            $unitName = $measurement['purchase_unit']['purchase_unit_name'] ?? 'Unknown';
+
+            if ($unitSize > 0) {
+                // Calculate the number of full units that fit in the remaining quantity
+                $unitCount = intdiv($remainingQuantity, $unitSize);
+                $remainingQuantity %= $unitSize;
+
+                // Add the result to the breakdown if there are any units
+                if ($unitCount > 0) {
+                    $result[] = "$unitCount $unitName ($unitSize units)";
+                }
+            }
+        }
+
+        // Step 3: Return the breakdown as a string
+        return implode(', ', $result);
+    }
+
+
 
     public function searchProductType($searchCriteria)
     {
@@ -213,6 +249,84 @@ class ProductTypeRepository
         return response()->json(['data' => $response]);
     }
 
+
+    /////////end it here
+    public function calculatePurchaseUnits($measurements)
+    {
+        $result = [];
+        // Flatten the nested array structure if needed
+        $measurements = isset($measurements[0]) ? $measurements[0] : $measurements;
+
+        // Create a map of purchase units by ID for easy lookup
+        $unitsMap = [];
+        foreach ($measurements as $measurement) {
+            if (isset($measurement['purchaseUnit'])) {
+                $unitsMap[$measurement['purchasing_unit_id']] = $measurement['purchaseUnit'];
+            }
+        }
+
+        // Function to calculate units relative to the smallest unit
+        function calculateSmallestUnit($unitId, $unitsMap, &$cache)
+        {
+            // If the unit is not found, default to 1
+            if (!isset($unitsMap[$unitId])) {
+                return 1; // Base case
+            }
+
+            // Prevent recalculating already computed units
+            if (isset($cache[$unitId])) {
+                return $cache[$unitId];
+            }
+
+            $currentUnit = $unitsMap[$unitId];
+
+            // If no parent exists, return this unit's value
+            if (!isset($currentUnit['parent_purchase_unit_id']) || $currentUnit['parent_purchase_unit_id'] === null) {
+                $cache[$unitId] = $currentUnit['unit'] ?? 1;
+                return $cache[$unitId];
+            }
+
+            // Recursively calculate the parent's unit value
+            $parentValue = calculateSmallestUnit($currentUnit['parent_purchase_unit_id'], $unitsMap, $cache);
+
+            // Multiply the current unit's value by its parent's value
+            $cache[$unitId] = $parentValue / ($currentUnit['unit'] ?? 1);
+            return $cache[$unitId];
+        }
+
+        // Cache for storing calculated unit values
+        $cache = [];
+
+        // Iterate through the measurements to calculate each purchase unit's value
+        foreach ($measurements as $measurement) {
+            if (!isset($measurement['purchaseUnit'])) {
+                continue;
+            }
+
+            $unitId = $measurement['purchasing_unit_id'];
+            $unitName = strtolower($measurement['purchaseUnit']['purchase_unit_name'] ?? 'Unknown');
+
+            // Calculate the total number of smallest units for this purchase unit
+            $result[$unitName] = calculateSmallestUnit($unitId, $unitsMap, $cache);
+        }
+
+        // Reverse the result to start with the smallest unit
+        $result = array_reverse($result, true);
+
+        // Find the smallest non-zero value to use as a scaling factor
+        $minValue = min(array_filter($result, function ($value) { return $value > 0; }));
+
+        // Scale up the values to whole numbers
+        $scaledResult = [];
+        foreach ($result as $unitName => $value) {
+            $scaledResult[$unitName] = round($value / $minValue);
+        }
+
+        return $scaledResult;
+    }
+    //*************************** */
+
+
     public function getProductTypeByName($product_id)
     {
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
@@ -226,7 +340,7 @@ class ProductTypeRepository
         )
         ->with([
             'productMeasurement',
-            'productMeasurement.PurchaseUnit:id,purchase_unit_name,unit', // Load PurchaseUnit relationship
+            'productMeasurement.PurchaseUnit:id,purchase_unit_name,unit,parent_purchase_unit_id', // Load PurchaseUnit relationship
             'price' => function ($query) {
                 $query->select('id', 'cost_price', 'selling_price', 'product_type_id', 'is_cost_price_est', 'is_selling_price_est');
             },
@@ -241,9 +355,15 @@ class ProductTypeRepository
             },
         ])
         ->get();
+        // return $response;
+        $transformedResponse = $response->map(function ($product) {
+
+            return $product->productMeasurement;
+        });
+        $no_of_smallestUnit_in_each_unit = $this->calculatePurchaseUnits($transformedResponse);
 
         if ($response) {
-            $response = $response->map(function ($item) {
+            $response = $response->map(function ($item) use ($no_of_smallestUnit_in_each_unit) {
                 // Calculate the total capacity_quantity_available across all stores
                 $totalCapacityQuantity = collect($item->stores)->sum('total_quantity');
 
@@ -272,7 +392,7 @@ class ProductTypeRepository
                 $item->purchase_units = $measurements;
 
                 // Add total capacity quantity after is_capacity_quantity_est
-                $item->total_capacity_quantity_available = $totalCapacityQuantity;
+                $item->no_of_smallestUnit_in_each_unit =  $no_of_smallestUnit_in_each_unit;
 
                 // Remove unnecessary relationships
                 unset($item->stores, $item->productMeasurement, $item->price);
