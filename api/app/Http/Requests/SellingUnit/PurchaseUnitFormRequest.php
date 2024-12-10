@@ -64,7 +64,23 @@ class PurchaseUnitFormRequest extends FormRequest
                 }
             ],
 
-            'unit' => 'required|integer|min:0', // Ensure the unit is an integer and defaults to 0 if not provided
+            'unit' => [
+                // Conditionally apply validation rules
+                function ($attribute, $value, $fail) {
+                    if (is_null($this->input('parent_purchase_unit_id'))) {
+                        // If parent_purchase_unit_id is nullable, make unit nullable
+                        if (!is_null($value) && !is_int($value)) {
+                            $fail('The unit field must be an integer if specified.');
+                        }
+                    } else {
+                        // If parent_purchase_unit_id is not nullable, apply required and integer rules
+                        if (is_null($value)) {
+                            $fail('The unit field is required when parent_purchase_unit_id is not null.');
+                        }
+                    }
+                },
+                'min:1,integer' // Ensure the value is greater than or equal to 0 if provided
+            ]
         ];
     }
 }

@@ -14,6 +14,7 @@ use App\Services\Email\EmailService;
 use App\Services\UserService\UserRepository;
 use App\Services\Security\LogService\LogRepository;
 use App\Services\GeneratePdf;
+use App\Services\CalculatePurchaseUnit;
 use Carbon\Carbon;
 use Exception;
 
@@ -23,13 +24,15 @@ class ProductTypeRepository
     protected GeneratePdf $generatePdf;
     protected $logRepository;
     protected $username;
+    protected $processPurchaseUnit;
 
-    public function __construct(UserRepository $userRepository, GeneratePdf $generatePdf, LogRepository $logRepository)
+    public function __construct(UserRepository $userRepository, GeneratePdf $generatePdf, LogRepository $logRepository, CalculatePurchaseUnit $calculatePurchaseUnit)
     {
         $this->userRepository = $userRepository;
         $this->generatePdf = $generatePdf;
         $this->logRepository = $logRepository;
         $this->username = $this->logRepository->getUsername();
+        $this->processPurchaseUnit = $calculatePurchaseUnit;
     }
     private function query()
     {
@@ -94,8 +97,13 @@ class ProductTypeRepository
         $purchasingPrices = [];
         $sellingPrices = [];
 
-        $no_of_smallestUnit_in_each_unit = $this->calculatePurchaseUnits($productType->productMeasurement);
-        $quantityBreakdown = $this->calculateQuantityBreakdown($quantityAvailable, $no_of_smallestUnit_in_each_unit);
+        $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($productType->productMeasurement);
+
+        //dd($no_of_smallestUnit_in_each_unit);
+        $quantityBreakdown = $this->processPurchaseUnit->calculateQuantityBreakdown($quantityAvailable, $no_of_smallestUnit_in_each_unit);
+        // dd($quantityBreakdown);
+        $formattedBreakdown = $this->processPurchaseUnit->formatQuantityBreakdown($quantityBreakdown);
+        //dd($formattedBreakdown);
 
         foreach ($productType->productMeasurement as $measurement) {
             $purchaseUnitName = optional($measurement->purchaseUnit)->purchase_unit_name;
@@ -126,7 +134,7 @@ class ProductTypeRepository
             'product_category_id' => optional($productType->product_category)->id,
 
             // Using the quantity breakdown function
-            'quantity_available' => $quantityBreakdown,
+            'quantity_available' => $formattedBreakdown,
 
 
             'purchasing_price' => $purchasingPrices,
@@ -224,96 +232,7 @@ class ProductTypeRepository
         return response()->json(['data' => $response]);
     }
 
-    private function calculateSmallestUnit($unitId, $unitsMap, &$cache)
-    {
-        // If the unit is not found, default to 1
-        if (!isset($unitsMap[$unitId])) {
-            return 1; // Base case
-        }
 
-        // Prevent recalculating already computed units
-        if (isset($cache[$unitId])) {
-            return $cache[$unitId];
-        }
-
-        $currentUnit = $unitsMap[$unitId];
-
-        // If no parent exists, return this unit's value
-        if (!isset($currentUnit['parent_purchase_unit_id']) || $currentUnit['parent_purchase_unit_id'] === null) {
-            $cache[$unitId] = $currentUnit['unit'] ?? 1;
-            return $cache[$unitId];
-        }
-
-        // Recursively calculate the parent's unit value
-        $parentValue = $this->calculateSmallestUnit($currentUnit['parent_purchase_unit_id'], $unitsMap, $cache);
-
-        // Multiply the current unit's value by its parent's value
-        $cache[$unitId] = $parentValue / ($currentUnit['unit'] ?? 1);
-        return $cache[$unitId];
-    }
-    private function calculateQuantityBreakdown($quantityAvailable, $quantityBreakdown)
-    {
-        $result = [];
-        arsort($quantityBreakdown); // Sort the breakdown values in descending order
-
-        foreach ($quantityBreakdown as $unit => $value) {
-            if ($quantityAvailable >= $value) {
-                $count = intdiv($quantityAvailable, $value); // Calculate how many units can be used
-                $quantityAvailable %= $value; // Update the remaining quantity
-                $result[] = "{$count} {$unit}"; // Store the result
-            }
-        }
-
-        return implode(', ', $result); // Combine the breakdown into a single string
-    }
-
-    /////////end it here
-    public function calculatePurchaseUnits($measurements)
-    {
-
-
-        $result = [];
-
-        // $measurements = isset($measurements[0]) ? $measurements[0] : $measurements;
-
-        // Create a map of purchase units by ID for easy lookup
-        $unitsMap = [];
-        foreach ($measurements as $measurement) {
-            if (isset($measurement['purchaseUnit'])) {
-                $unitsMap[$measurement['purchasing_unit_id']] = $measurement['purchaseUnit'];
-            }
-        }
-
-
-        $cache = [];
-
-        // Iterate through the measurements to calculate each purchase unit's value
-        foreach ($measurements as $measurement) {
-            if (!isset($measurement['purchaseUnit'])) {
-                continue;
-            }
-
-            $unitId = $measurement['purchasing_unit_id'];
-            $unitName = strtolower($measurement['purchaseUnit']['purchase_unit_name'] ?? 'Unknown');
-
-            // Calculate the total number of smallest units for this purchase unit
-            $result[$unitName] = $this->calculateSmallestUnit($unitId, $unitsMap, $cache);
-        }
-
-        // Reverse the result to start with the smallest unit
-        $result = array_reverse($result, true);
-
-        // Find the smallest non-zero value to use as a scaling factor
-        $minValue = min(array_filter($result, function ($value) { return $value > 0; }));
-
-        // Scale up the values to whole numbers
-        $scaledResult = [];
-        foreach ($result as $unitName => $value) {
-            $scaledResult[$unitName] = round($value / $minValue);
-        }
-
-        return $scaledResult;
-    }
     //*************************** */
 
 
@@ -352,7 +271,7 @@ class ProductTypeRepository
                 $totalCapacityQuantity = collect($item->stores)->sum('total_quantity');
 
                 $stores = collect($item->stores)->groupBy('purchase_unit_id'); // Group stores by purchase_unit_id
-                $no_of_smallestUnit_in_each_unit = $this->calculatePurchaseUnits($item->productMeasurement);
+                $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($item->productMeasurement);
 
                 $measurements = $item->productMeasurement->map(function ($measurement) use ($stores, $item) {
                     // Match the purchase_unit_id with the store data

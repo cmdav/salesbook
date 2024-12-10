@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use App\Services\Security\LogService\LogRepository;
+use App\Services\CalculatePurchaseUnit;
 use App\Services\GeneratePdf;
 use App\Services;
 
@@ -19,20 +20,23 @@ class StoreRepository
     protected GeneratePdf $generatePdf;
     protected $logRepository;
     protected $username;
+    protected $processPurchaseUnit;
 
 
-    public function __construct(GeneratePdf $generatePdf, LogRepository $logRepository)
+    public function __construct(GeneratePdf $generatePdf, LogRepository $logRepository, CalculatePurchaseUnit $calculatePurchaseUnit)
     {
         $this->generatePdf = $generatePdf;
         $this->logRepository = $logRepository;
         $this->username = $this->logRepository->getUsername();
+        $this->processPurchaseUnit = $calculatePurchaseUnit;
 
     }
 
     private function query($branchId)
     {
 
-        $query = Store::select("id", "product_type_id", "batch_no", "branch_id", "purchase_unit_id", "capacity_qty_available", "status")->with('productType', 'branches:id,name');
+        $query = Store::select("id", "product_type_id", "batch_no", "branch_id", "purchase_unit_id", "capacity_qty_available", "status")
+                ->with('productType', 'branches:id,name', 'productType.productMeasurement.PurchaseUnit');
         if ($branchId !== 'all') {
             // Apply the where clause if branch_id is not 'all' and the user is not admin
             $query->where('branch_id', $branchId);
@@ -67,13 +71,11 @@ class StoreRepository
 
     private function transformProduct($store, $isPdf = false)
     {
-        // Get the purchase unit and the total quantity in the smallest unit
-        $purchaseUnit = PurchaseUnit::with(['subPurchaseUnits:id,purchase_unit_name,unit,parent_purchase_unit_id'])
-            ->where('id', $store->purchase_unit_id)
-            ->first();
 
         // Calculate the breakdown of available quantity into the smallest unit
-        $quantityBreakdown = $this->getQuantityBreakdown($purchaseUnit, $store->capacity_qty_available);
+        $quantityBreakdown = "";
+        $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($store->productType->productMeasurement);
+        $quantityBreakdown = $this->processPurchaseUnit->calculateQuantityBreakdown($store->capacity_qty_available, $no_of_smallestUnit_in_each_unit);
 
         return array_filter([
             'id' => $isPdf ? null : $store->id, // Exclude id if isPdf is true
@@ -81,73 +83,14 @@ class StoreRepository
             'product_description' => $isPdf ? null : optional($store->productType)->product_type_description, // Exclude product description if isPdf is true
             'batch_no' => $store->batch_no,
             'branch_name' => $isPdf ? null : optional($store->branches)->name,
-            'quantity_available' => $store->capacity_qty_available,
+            'quantity_available' =>  $quantityBreakdown,
             'status' => $store->capacity_qty_available > 0 ? 'Available' : 'Not Available',
             'quantity_breakdown' => $quantityBreakdown, // Use the generated breakdown string
         ], function ($value) {
             return $value !== null;
         });
     }
-    private function getQuantityBreakdown($purchaseUnit, $quantityAvailable)
-    {
-        $breakdown = [];
 
-        // Get the unit hierarchy (from smallest to largest)
-        $units = $this->getUnitHierarchy($purchaseUnit);
-        \Log::info('Unit Hierarchy:', $units);
-        \Log::info('Original Quantity Available:', [$quantityAvailable]);
-
-        // Start with the smallest unit
-        $remainingQuantity = $quantityAvailable;
-
-        // Process the smallest unit first
-        for ($i = count($units) - 1; $i >= 0; $i--) {
-            $currentUnit = $units[$i];
-            $unitSize = $currentUnit['size'];
-            $unitName = $currentUnit['name'];
-
-            // Calculate the number of full units at this level
-            $unitCount = floor($remainingQuantity / $unitSize);
-
-            // Store the unit count in the breakdown if it's greater than 0
-            if ($unitCount > 0) {
-                $breakdown[] = "$unitCount $unitName" . ($unitCount > 1 ? 's' : '');
-            }
-
-            // Update the remaining quantity after dividing by the unit size
-            $remainingQuantity = $remainingQuantity % $unitSize;
-        }
-
-        // If there's any remaining quantity in the smallest unit, add it to the breakdown
-        if ($remainingQuantity > 0) {
-            $breakdown[] = "$remainingQuantity " . $units[0]['name'] . ($remainingQuantity > 1 ? 's' : '');
-        }
-
-        \Log::info('Final Breakdown:', $breakdown);
-
-        // Return the breakdown as a string (comma-separated)
-        return implode(', ', $breakdown);
-    }
-
-    private function getUnitHierarchy($purchaseUnit)
-    {
-        $units = [];
-        $currentUnit = $purchaseUnit;
-
-        // Traverse up the hierarchy and collect all units
-        while ($currentUnit) {
-            $units[] = [
-                'name' => $currentUnit->purchase_unit_name,
-                'size' => $currentUnit->unit,  // Unit size
-            ];
-
-            // Move to the parent unit
-            $currentUnit = $currentUnit->parentPurchaseUnit;
-        }
-
-        // Reverse the array so the smallest unit comes first
-        return array_reverse($units);
-    }
 
 
 
