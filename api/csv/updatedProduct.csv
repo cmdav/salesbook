@@ -1,0 +1,2 @@
+product_type_name,product_type_description,category_name,sub_category_name,vat,barcode,expiry_date,batch_no,purchase_unit,group,unit,cost_price,quantity
+First Product,product,Calcium,sample sub category,yes,,1/11/2025,GH502,"bag, cup,paint",Calcuim,"1,4,6",50,90

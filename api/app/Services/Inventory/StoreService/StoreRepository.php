@@ -77,13 +77,15 @@ class StoreRepository
         $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($store->productType->productMeasurement);
         $quantityBreakdown = $this->processPurchaseUnit->calculateQuantityBreakdown($store->capacity_qty_available, $no_of_smallestUnit_in_each_unit);
 
+        $formattedBreakdown = $this->processPurchaseUnit->formatQuantityBreakdown($quantityBreakdown);
+
         return array_filter([
             'id' => $isPdf ? null : $store->id, // Exclude id if isPdf is true
             'product_name' => optional($store->productType)->product_type_name,
             'product_description' => $isPdf ? null : optional($store->productType)->product_type_description, // Exclude product description if isPdf is true
             'batch_no' => $store->batch_no,
             'branch_name' => $isPdf ? null : optional($store->branches)->name,
-            'quantity_available' =>  $quantityBreakdown,
+            'quantity_available' =>  $formattedBreakdown,
             'status' => $store->capacity_qty_available > 0 ? 'Available' : 'Not Available',
             'quantity_breakdown' => $quantityBreakdown, // Use the generated breakdown string
         ], function ($value) {

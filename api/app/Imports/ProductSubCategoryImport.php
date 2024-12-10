@@ -16,11 +16,14 @@ class ProductSubcategoryImport implements ToModel, WithHeadingRow, WithValidatio
 {
     private $validationErrors = [];
 
+
+
     public function model(array $row)
     {
         // Validate and fetch the category name
+
         $category = ProductCategory::where('category_name', trim($row['category_name']))->first();
-        
+
         if (!$category) {
             // If category does not exist, record the error and skip the model creation
             $this->validationErrors[] = ['Category does not exist for ' => $row['category_name']];
@@ -43,7 +46,7 @@ class ProductSubcategoryImport implements ToModel, WithHeadingRow, WithValidatio
 
     public function rules(): array
     {
-        
+
         return [
             'category_name' => 'required|string|exists:product_categories,category_name',
             'sub_category_name' => 'required|string|max:50|unique:product_sub_categories',

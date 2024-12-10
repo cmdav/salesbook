@@ -31,7 +31,8 @@ class ProductType extends Model
         'updated_by',
         'barcode',
         'is_container_type',
-        'is_capacity_quantity_est'
+        'is_capacity_quantity_est',
+        'is_estimated'
     ];
     protected $hidden = [
        // 'barcode',

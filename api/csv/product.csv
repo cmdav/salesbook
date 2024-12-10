@@ -1,3 +1,2 @@
-product_type_name,product_type_description,piece_name,category_name,sub_category_name,vat,barcode,capacity_qty,expiry_date,batch_no,cost_price,selling_price
-Second products,testing product,small co,Food,sample sub category,yes,12345,50,10/12/2024,,50,3000
-third products,testing product,big fanta,Food,sample sub category,no,,50,,,50,455
+product_type_name,product_type_description,category_name,sub_category_name,vat,barcode,capacity_qty,expiry_date,batch_no,cost_price,selling_price,purchase_unit,selling_unit
+Storm for Men King Kong Perfumed Deodorant Body Spray 250ML,product,Cosmetics,Deodorants,yes,,2,1/11/2025,GH502,,3200,,

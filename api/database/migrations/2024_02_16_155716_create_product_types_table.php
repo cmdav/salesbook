@@ -12,19 +12,14 @@ return new class () extends Migration {
     {
         Schema::create('product_types', function (Blueprint $table) {
             $table->uuid('id')->primary();
-
             $table->string('product_type_name', 255);
             $table->string('product_type_image', 255)->nullable();
-            $table->text('product_type_description');
+            $table->text('product_type_description')->nullable();
             $table->string('barcode')->nullable();
-            // $table->uuid('selling_unit_capacity_id')->nullable()->index();
-            // $table->uuid('purchase_unit_id')->nullable()->index();
-            // $table->uuid('selling_unit_id')->nullable()->index();
             $table->uuid('sub_category_id')->nullable()->index();
             $table->uuid('category_id')->nullable()->index();
-
             $table->boolean('vat')->default(0)->nullable();
-            // $table->boolean('is_container_type')->default(1);
+            $table->boolean('is_estimated')->default(1);
             // $table->string('type')->default(0)->comment('1=product 2 product_type');
             $table->uuid('organization_id', 32)->nullable();
             $table->uuid('supplier_id')->nullable();

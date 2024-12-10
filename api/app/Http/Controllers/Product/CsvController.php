@@ -10,12 +10,13 @@ use App\Imports\CurrencyImport;
 use App\Imports\ProductCategoryImport;
 use App\Imports\ProductSubCategoryImport;
 use App\Imports\ProductImport;
-use App\Imports\SaleImport;
-use App\Imports\PurchaseImport;
-use App\Imports\PriceImport;
-use App\Imports\PurchaseUnitImport;
+// use App\Imports\SaleImport;
+// use App\Imports\PurchaseImport;
+// use App\Imports\PriceImport;
+// use App\Imports\PurchaseUnitImport;
 use App\Services\BatchNumberService;
 use App\Services\Inventory\PurchaseService\PurchaseRepository;
+use App\Services\CalculatePurchaseUnit;
 
 class CsvController extends Controller
 {
@@ -24,13 +25,13 @@ class CsvController extends Controller
         'ProductCategory' => ProductCategoryImport::class,
         'ProductSubCategory' => ProductSubCategoryImport::class,
         'Product' => ProductImport::class,
-        'Sale' => SaleImport::class,
-        'Purchase' => PurchaseImport::class,
-        'Price' => PriceImport::class,
-        'PurchaseUnit' => PurchaseUnitImport::class,
+        // 'Sale' => SaleImport::class,
+        // 'Purchase' => PurchaseImport::class,
+        // 'Price' => PriceImport::class,
+        // 'PurchaseUnit' => PurchaseUnitImport::class,
     ];
 
-    public function __invoke(Request $request, BatchNumberService $batchNumberService, PurchaseRepository $purchaseRepository)
+    public function __invoke(Request $request, BatchNumberService $batchNumberService, PurchaseRepository $purchaseRepository, CalculatePurchaseUnit $calculatePurchaseUnit)
     {
         // Validate the request
         $request->validate([
@@ -40,7 +41,7 @@ class CsvController extends Controller
 
         // Create an instance of the appropriate import class, injecting necessary dependencies
         if ($request->type === 'Product') {
-            $importClass = new ProductImport($batchNumberService, $purchaseRepository);
+            $importClass = new ProductImport($batchNumberService, $purchaseRepository, $calculatePurchaseUnit);
         } else {
             $importClass = new $this->importClasses[$request->type]();
         }
