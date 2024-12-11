@@ -23,132 +23,120 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
 {
     protected $batchNumberService;
     protected $purchaseRepository;
-    protected $responses = [];
-    protected $processPurchaseUnit;
+    protected $responses;
 
-    public function __construct(BatchNumberService $batchNumberService, PurchaseRepository $purchaseRepository, CalculatePurchaseUnit $calculatePurchaseUnit)
+    public function __construct(BatchNumberService $batchNumberService, PurchaseRepository $purchaseRepository)
     {
         $this->batchNumberService = $batchNumberService;
         $this->purchaseRepository = $purchaseRepository;
-        $this->processPurchaseUnit = $calculatePurchaseUnit;
     }
 
     public function model(array $row)
     {
-        $category = ProductCategory::where('category_name', trim($row['category_name']))->first();
-        $subCategory = ProductSubCategory::where('sub_category_name', trim($row['sub_category_name']))->first();
+        DB::beginTransaction(); // Start the transaction
 
-        $groupName = trim($row['group']);
-        $measurementGroup = MeasurementGroup::firstOrCreate(['group_name' => $groupName], ['created_by' => auth()->id()]);
+        try {
+            $category = ProductCategory::where('category_name', trim($row['category_name']))->first();
+            $subCategory = ProductSubCategory::where('sub_category_name', trim($row['sub_category_name']))->first();
 
-        $purchaseUnits = array_map('trim', explode(',', $row['purchase_unit']));
-        $units = array_map('trim', explode(',', $row['unit']));
+            $groupName = trim($row['group']);
+            $measurementGroup = MeasurementGroup::firstOrCreate(['group_name' => $groupName], ['created_by' => auth()->id()]);
 
-        if (count($purchaseUnits) !== count($units)) {
-            throw new \Exception('The number of purchase units does not match the number of unit values.');
-        }
+            $purchaseUnits = array_map('trim', explode(',', $row['purchase_unit']));
+            $units = array_map('trim', explode(',', $row['unit']));
 
-        $previousUnitId = null;
-        $purchaseUnitData = [];
-
-        foreach ($purchaseUnits as $index => $unitName) {
-            $existingPurchaseUnit = PurchaseUnit::where('purchase_unit_name', $unitName)->first();
-
-            if ($existingPurchaseUnit) {
-                $purchaseUnitId = $existingPurchaseUnit->id;
-            } else {
-                $purchaseUnit = PurchaseUnit::create([
-                    'purchase_unit_name' => $unitName,
-                    'unit' => $units[$index],
-                    'parent_purchase_unit_id' => $previousUnitId,
-                    'measurement_group_id' => $measurementGroup->id,
-                ]);
-
-                $purchaseUnitId = $purchaseUnit->id;
-                $previousUnitId = $purchaseUnitId;
+            if (count($purchaseUnits) !== count($units)) {
+                throw new \Exception('The number of purchase units does not match the number of unit values.');
             }
 
-            $purchaseUnitData[] = [
-                'purchase_unit_id' => $purchaseUnitId,
-                'capacity_qty' => $units[$index],
-            ];
-        }
+            $previousUnitId = null;
 
-        $newBatchNumber = isset($row['batch_no']) && !empty(trim($row['batch_no'])) ? trim($row['batch_no']) : $this->batchNumberService->generateBatchNumber();
-        $vatValue = strtolower(trim($row['vat'])) === 'yes' ? 1 : 0;
+            foreach ($purchaseUnits as $index => $unitName) {
+                $existingPurchaseUnit = PurchaseUnit::where('purchase_unit_name', $unitName)->first();
 
-        $productType = ProductType::create([
-            'product_type_name' => Str::limit(trim($row['product_type_name']), 50),
-            'product_type_description' => Str::limit(trim($row['product_type_description']), 200),
-            'vat' => $vatValue,
-            'sub_category_id' => optional($subCategory)->id,
-            'category_id' => optional($category)->id,
-            'barcode' => Str::limit(trim($row['barcode']), 200),
-        ]);
+                if (!$existingPurchaseUnit) {
+                    $purchaseUnit = PurchaseUnit::create([
+                        'purchase_unit_name' => $unitName,
+                        'unit' => $units[$index],
+                        'parent_purchase_unit_id' => $previousUnitId,
+                        'measurement_group_id' => $measurementGroup->id,
+                    ]);
 
-        foreach ($purchaseUnits as $unitName) {
-            $unitId = PurchaseUnit::where('purchase_unit_name', $unitName)->first()->id;
+                    $previousUnitId = $purchaseUnit->id;
+                }
+            }
 
-            ProductMeasurement::create([
-                'product_type_id' => $productType->id,
-                'purchasing_unit_id' => $unitId,
+            $newBatchNumber = isset($row['batch_no']) && !empty(trim($row['batch_no'])) ? trim($row['batch_no']) : $this->batchNumberService->generateBatchNumber();
+            $vatValue = strtolower(trim($row['vat'])) === 'yes' ? 1 : 0;
+
+            $productType = ProductType::create([
+                'product_type_name' => Str::limit(trim($row['product_type_name']), 50),
+                'product_type_description' => Str::limit(trim($row['product_type_description']), 200),
+                'vat' => $vatValue,
+                'sub_category_id' => optional($subCategory)->id,
+                'category_id' => optional($category)->id,
+                'barcode' => Str::limit(trim($row['barcode']), 200),
             ]);
-        }
 
-        // Retrieve product measurements to process quantity breakdown
-        $productMeasurements = $productType->productMeasurement()->with('purchaseUnit')->get();
+            foreach ($purchaseUnits as $index => $unitName) {
+                $unitId = PurchaseUnit::where('purchase_unit_name', $unitName)->first()->id;
 
-        // dd(  $productMeasurements);
-        // Get the quantity breakdown
-        $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($productMeasurements);
+                ProductMeasurement::create([
+                    'product_type_id' => $productType->id,
+                    'purchasing_unit_id' => $unitId,
+                ]);
+            }
 
-        // dd($no_of_smallestUnit_in_each_unit);
-        $quantityBreakdown = $this->processPurchaseUnit->calculateQuantityBreakdown($row['quantity'], $no_of_smallestUnit_in_each_unit);
+            // Calculate purchase and selling prices based on the provided logic
+            $costPrice = (float) trim($row['cost_price']); // Cost price for the highest unit
+            $quantityBreakdown = [];
 
+            foreach ($units as $index => $unitCount) {
+                if ($index === 0) {
+                    // Highest unit retains the original cost price
+                    $pricePerUnit = $costPrice;
+                } else {
+                    // Divide the previous price by the current unit count
+                    $pricePerUnit = $quantityBreakdown[$index - 1]['cost_price'] / $unitCount;
+                }
 
+                $sellingPrice = round($pricePerUnit * 1.1, 2); // Add 10% for selling price and round to 2 decimals
 
-        // Calculate the purchase and selling prices
+                $quantityBreakdown[] = [
+                    'unit' => $purchaseUnits[$index],
+                    'count' => $unitCount,
+                    'purchase_unit_id' => PurchaseUnit::where('purchase_unit_name', $purchaseUnits[$index])->first()->id,
+                    'cost_price' => round($pricePerUnit, 2), // Round to 2 decimals for clarity
+                    'selling_price' => $sellingPrice,
+                    'capacity_qty' => $row['quantity'],
+                ];
+            }
 
+            $supplier = User::where('first_name', 'No supplier')->firstOrFail();
 
-
-        $highestUnit = collect($no_of_smallestUnit_in_each_unit)->sortByDesc('value')->first();
-        $highestUnitCount = $highestUnit['value'];
-        $highestUnitCost = trim($row['cost_price']);
-        $pricePerUnit = $highestUnitCost / $highestUnit['value'];
-
-        // Prepare the quantity breakdown based on the no_of_smallestUnit_in_each_unit structure
-        $quantityBreakdown = [];
-        foreach ($no_of_smallestUnit_in_each_unit as $unitName => $data) {
-            $unitCount = $data['value'];
-            $costPrice = $pricePerUnit * $unitCount;
-            $sellingPrice = $costPrice * 1.1; // Add 10% for selling price
-
-            $quantityBreakdown[] = [
-                'unit' => $unitName,
-                'count' => $unitCount,
-                'purchase_unit_id' => $data['purchase_unit_id'],
-                'cost_price' => $costPrice,
-                'selling_price' => $sellingPrice,
+            $purchaseData = [
+                'product_type_id' => $productType->id,
+                'batch_no' => $newBatchNumber,
+                'supplier_id' => $supplier->id,
+                'product_identifier' => '',
+                'expiry_date' => !empty($row['expiry_date']) ? \DateTime::createFromFormat('d/m/Y', trim($row['expiry_date']))->format('Y-m-d') : null,
+                'purchase_unit_data' => array_reverse($quantityBreakdown), // Reverse back to match the hierarchy
             ];
-        }
-        $supplier = User::where('first_name', 'No supplier')->firstOrFail();
 
-        $purchaseData = [
-            'product_type_id' => $productType->id,
-            'batch_no' => $newBatchNumber,
-            'supplier_id' => $supplier->id,
-            'product_identifier' => '',
-            'expiry_date' => !empty($row['expiry_date']) ? \DateTime::createFromFormat('d/m/Y', trim($row['expiry_date']))->format('Y-m-d') : null,
-            'purchase_unit_data' => $quantityBreakdown, // Includes cost_price and selling_price
-        ];
+            // Save purchase data using repository
+            $this->purchaseRepository->create(['purchases' => [$purchaseData]]);
 
-        $response = $this->purchaseRepository->create(['purchases' => [$purchaseData]]);
+            DB::commit(); // Commit the transaction
+        } catch (\Exception $e) {
+            DB::rollBack(); // Rollback the transaction in case of error
+            // Log the error for debugging purposes
+            \Log::error('Product import failed: ' . $e->getMessage(), [
+                'row' => $row,
+                'stack' => $e->getTraceAsString(),
+            ]);
 
-        $responseContent = $response->getContent();
-        $responseData = json_decode($responseContent, true);
-
-        if (!$responseData['message']) {
-            throw new \Exception('Purchase creation failed.');
+            // Optionally, rethrow the exception if needed
+            throw new \Exception('Product import failed: ' . $e->getMessage());
         }
     }
 

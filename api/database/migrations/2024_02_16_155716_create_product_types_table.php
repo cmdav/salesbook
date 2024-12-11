@@ -29,8 +29,8 @@ return new class () extends Migration {
             $table->uuid('updated_by', 32)->nullable();
             $table->timestamps();
 
-            $table->foreign('sub_category_id')->references('id')->on('product_sub_categories')->onDelete('restrict');
-            $table->foreign('category_id')->references('id')->on('product_categories')->onDelete('restrict');
+            // $table->foreign('sub_category_id')->references('id')->on('product_sub_categories')->onDelete('restrict');
+            // $table->foreign('category_id')->references('id')->on('product_categories')->onDelete('restrict');
             // $table->foreign('purchase_unit_id')->references('id')->on('purchase_units')->onDelete('restrict');
             // $table->foreign('selling_unit_id')->references('id')->on('selling_units')->onDelete('restrict');
         });

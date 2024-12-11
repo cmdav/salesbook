@@ -51,7 +51,10 @@ class CalculatePurchaseUnit
         // Create a map of purchase units by ID for easy lookup
         $unitsMap = [];
         foreach ($measurements as $measurement) {
+
             if (isset($measurement['purchaseUnit'])) {
+
+                \Log::info($measurement['purchaseUnit']);
                 $unitsMap[$measurement['purchasing_unit_id']] = $measurement['purchaseUnit'];
             }
         }

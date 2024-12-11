@@ -31,51 +31,58 @@ class CsvController extends Controller
         // 'PurchaseUnit' => PurchaseUnitImport::class,
     ];
 
-    public function __invoke(Request $request, BatchNumberService $batchNumberService, PurchaseRepository $purchaseRepository, CalculatePurchaseUnit $calculatePurchaseUnit)
-    {
+    public function __invoke(
+        Request $request,
+        BatchNumberService $batchNumberService,
+        PurchaseRepository $purchaseRepository,
+        CalculatePurchaseUnit $calculatePurchaseUnit
+    ) {
         // Validate the request
         $request->validate([
             'file' => 'required|file|mimes:csv,txt',
             'type' => ['required', Rule::in(array_keys($this->importClasses))],
         ]);
 
-        // Create an instance of the appropriate import class, injecting necessary dependencies
-        if ($request->type === 'Product') {
-            $importClass = new ProductImport($batchNumberService, $purchaseRepository, $calculatePurchaseUnit);
-        } else {
-            $importClass = new $this->importClasses[$request->type]();
-        }
+        try {
+            // Create an instance of the appropriate import class, injecting necessary dependencies
+            if ($request->type === 'Product') {
+                $importClass = new ProductImport($batchNumberService, $purchaseRepository);
+            } else {
+                $importClass = new $this->importClasses[$request->type]();
+            }
 
-        // Import the file
-        Excel::import($importClass, $request->file('file'));
+            // Import the file
+            Excel::import($importClass, $request->file('file'));
 
-        // Retrieve the actual responses after the import
-        $responses = method_exists($importClass, 'getResponses') ? $importClass->getResponses() : [];
+            // Retrieve the actual responses after the import
+            $responses = method_exists($importClass, 'getResponses') ? $importClass->getResponses() : [];
 
-        // return response()->json([
-        //     'message' => empty($responses) ? 'File uploaded successfully' : 'File uploaded with responses.',
-        //     'responses' => $responses,
-        // ], 200);
-        if (empty($responses)) {
+            if (empty($responses)) {
+                return response()->json([
+                    'message' => 'File uploaded successfully',
+                    'success' => true,
+                ], 201);
+            }
+
+            if ($responses['success']) {
+                return response()->json([
+                    'message' => 'File uploaded successfully',
+                    'success' => true,
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => $responses['message'],
+                    'success' => false,
+                ], 500);
+            }
+        } catch (\Throwable $e) {
+            // Catch any exceptions or errors during the import process
             return response()->json([
-                'message' => 'File uploaded successfully',
-                'success' => true
-            ], 201);
-        }
+                'message' => 'Error in file upload' . $e->getMessage(),
+                'success' => false,
 
-
-
-        if ($responses['success']) {
-            return response()->json([
-                'message' => 'File uploaded successfully',
-                'success' => true
-            ], 200);
-        } else {
-            return response()->json([
-                'message' => $responses['message'],
-                'success' => false
             ], 500);
         }
-
     }
+
 }
