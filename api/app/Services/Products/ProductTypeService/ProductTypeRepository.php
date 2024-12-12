@@ -197,35 +197,43 @@ class ProductTypeRepository
         return $this->getProductTypes($id);
     }
     //use in purchase to load all product
-    public function onlyProductTypeName()
+    public function onlyProductTypeName($mode)
     {
         // Retrieve the product types with their related measurements and purchase units
         $response = ProductType::select("id", "product_type_name")
-            ->with([
-                'productMeasurement' => function ($query) {
-                    $query->select('id', 'product_type_id', 'purchasing_unit_id');
-                },
-                'productMeasurement.purchaseUnit' => function ($query) {
-                    $query->select('id', 'purchase_unit_name', 'unit');
-                }
-            ])
-            ->get()
-            ->transform(function ($productType) {
-                return [
-                    'id' => $productType->id,
-                    'product_type_name' => $productType->product_type_name,
-                    'product_measurement' => $productType->productMeasurement->map(function ($measurement) {
-                        $purchaseUnit = optional($measurement->purchaseUnit);
+    ->when($mode === "actual", function ($query) {
+        $query->where('is_estimated', '=', 0);
+    })
+    ->with([
+        'productMeasurement' => function ($query) {
+            $query->select('id', 'product_type_id', 'purchasing_unit_id');
+        },
+        'productMeasurement.purchaseUnit' => function ($query) {
+            $query->select('id', 'purchase_unit_name', 'unit', 'parent_purchase_unit_id');
+        },
+    ])
+    ->get()
+    ->transform(function ($productType) use ($mode) {
+        $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($productType->productMeasurement);
 
-                        return [
-                            'purchase_unit_id' => optional($purchaseUnit)->id,
-                            'purchase_unit_name' => optional($purchaseUnit)->purchase_unit_name,
-                            // Using the unit directly from purchase unit instead of selling units
-                            'unit' => optional($purchaseUnit)->unit,
-                        ];
-                    })->values(), // Reset array keys after transformation
+        return [
+            'id' => $productType->id,
+            'product_type_name' => $productType->product_type_name,
+            'product_measurement' => $productType->productMeasurement->map(function ($measurement) {
+                $purchaseUnit = optional($measurement->purchaseUnit);
+
+                return [
+                    'purchase_unit_id' => optional($purchaseUnit)->id,
+                    'purchase_unit_name' => optional($purchaseUnit)->purchase_unit_name,
+                    'parent_purchase_unit_id' => optional($purchaseUnit)->parent_purchase_unit_id,
+                    // Using the unit directly from purchase unit instead of selling units
+                    'unit' => optional($purchaseUnit)->unit,
                 ];
-            });
+            })->values(), // Reset array keys after transformation
+            // Conditionally include `no_of_smallestUnit_in_each_unit`
+        ] + ($mode === "actual" ? ['no_of_smallestUnit_in_each_unit' => $no_of_smallestUnit_in_each_unit] : []);
+    });
+
 
         // Return the response as JSON
         return response()->json(['data' => $response]);

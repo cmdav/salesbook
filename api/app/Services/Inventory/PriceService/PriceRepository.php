@@ -6,12 +6,23 @@ use App\Models\Price;
 use App\Models\SupplierRequest;
 use App\Models\Inventory;
 use App\Models\Sale;
+use App\Models\Store;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use App\Services\CalculatePurchaseUnit;
 
 class PriceRepository
 {
+    protected $processPurchaseUnit;
+
+
+    public function __construct(CalculatePurchaseUnit $calculatePurchaseUnit)
+    {
+
+        $this->processPurchaseUnit = $calculatePurchaseUnit;
+
+    }
     public function index()
     {
         $Price = $this->queryCommon()->paginate(20);
@@ -24,57 +35,83 @@ class PriceRepository
 
 
     }
-    //use in  purchase page when a product is selected
+    // Used in the purchase page when a product is selected
     public function getLatestSupplierPrice($product_type_id, $supplier_id, $purchase_unit_id, $request)
     {
-
         $branchId = auth()->user()->branch_id;
 
-        // Fetch all price entries for the given conditions
-        $prices = Price::select('id', 'selling_price', 'cost_price', 'batch_no', 'price_id')
-                    ->where([
-                        ['product_type_id', $product_type_id],
-                        ['supplier_id', $supplier_id],
-                        ['purchase_unit_id', $purchase_unit_id],
-                        ['status', 1],
-                        ['branch_id', $branchId]
-                    ])
-                    ->get();
+        // Build the base query
+        $query = Price::select(
+            'id',
+            'product_type_id',
+            'selling_price',
+            'cost_price',
+            'batch_no',
+            'price_id',
+            'is_cost_price_est',
+            'is_selling_price_est',
+            'purchase_unit_id'
+        )
+        ->with('productType.productMeasurement.PurchaseUnit')
+        ->where([
+            ['product_type_id', $product_type_id],
+            ['supplier_id', $supplier_id],
+            ['purchase_unit_id', $purchase_unit_id],
+            ['status', 1],
+            ['branch_id', $branchId],
+        ])
+        ->latest('created_at');
 
-        // Initialize selling_unit_data array
-        $sellingUnitData = $prices->map(function ($price) {
-            // If selling_price or cost_price is null, retrieve from related price record using price_id
-            if (is_null($price->selling_price) || is_null($price->cost_price)) {
+        // Fetch prices
+        $prices = $query->get();
 
-                // Fetch related price using price_id if cost_price or selling_price is null
-                $relatedPrice = Price::select('cost_price', 'selling_price')
-                                    ->where('id', $price->price_id)
-                                    ->first();
+        // Process and map prices
+        $sellingUnitData = $prices->map(function ($price) use ($branchId, $request, $query, $purchase_unit_id) {
+            $capacityQtyAvailable = null;
+            $quantity = 0;
 
-                return [
-                    //'purchase_unit_id' => $price->purchase_unit_id,
-                    'cost_price' => $relatedPrice->cost_price,
-                    'is_cost_price_est' => 0,
-                    'selling_price' => $price->selling_price ?? ($relatedPrice ? $relatedPrice->selling_price : null),
-                    'is_selling_price_est' => 1,
-                    'price_id' => $price->id,
-                ];
+            // Fetch capacity_qty_available if mode is 'estimate'
+            if ($request->mode === 'estimate') {
+                $capacityQtyAvailable = Store::where([
+                    ['product_type_id', $price->product_type_id],
+                    ['purchase_unit_id', $price->purchase_unit_id],
+                    ['batch_no', $price->batch_no],
+                    ['branch_id', $branchId],
+                    ['status', 1],
+                ])->value('capacity_qty_available');
             }
 
-            // Return data directly if cost_price and selling_price are available
+            // Initialize cost_price and selling_price
+            $costPrice = $price->cost_price;
+            $sellingPrice = $price->selling_price;
+
+            // Fetch related price if cost_price or selling_price is null
+            if (is_null($costPrice) || is_null($sellingPrice)) {
+                $relatedPrice = $query->where('id', $price->price_id)->first();
+                $costPrice = $relatedPrice?->cost_price;
+                $sellingPrice = $sellingPrice ?? $relatedPrice?->selling_price;
+            }
+            if ($request->mode === 'estimate') {
+                $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($price->productType->productMeasurement);
+                $quantity = $this->processPurchaseUnit->calculateQuantityInAPurchaseUnit($capacityQtyAvailable, $purchase_unit_id, $no_of_smallestUnit_in_each_unit);
+
+            }
+            // Return the processed price data
             return [
-               // 'purchase_unit_id' => $price->purchase_unit_id,
-                'cost_price' => $price->cost_price,
-                'is_cost_price_est' => 0,
-                'selling_price' => $price->selling_price,
-                'is_selling_price_est' => 1,
+                'cost_price' => $costPrice,
+                'is_cost_price_est' => $price->is_cost_price_est,
+                'selling_price' => $sellingPrice,
+                'is_selling_price_est' => $price->is_selling_price_est,
                 'price_id' => $price->id,
+                'quantity' => $quantity,
+
             ];
         });
 
-        // Prepare response with selling_unit_data
+        // Return the response
         return response()->json($sellingUnitData, 200);
     }
+
 
 
     public function getLatestPriceByProductType($id)

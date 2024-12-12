@@ -117,7 +117,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
 
             $purchaseData = [
                 'product_type_id' => $productType->id,
-                'batch_no' => $newBatchNumber,
+                'batch_no' => 'estimated',
                 'is_price_est' => 'yes',
                 'supplier_id' => $supplier->id,
                 'product_identifier' => '',

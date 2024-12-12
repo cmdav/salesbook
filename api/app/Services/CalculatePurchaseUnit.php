@@ -140,6 +140,23 @@ class CalculatePurchaseUnit
         // Combine the results into a comma-separated string
         return implode(', ', $result);
     }
+    public function calculateQuantityInAPurchaseUnit($capacityQtyAvailable, $purchase_unit_id, $no_of_smallestUnit_in_each_unit)
+    {
+        // Extract the value that matches the purchase_unit_id
+        $value = collect($no_of_smallestUnit_in_each_unit)->firstWhere('purchase_unit_id', $purchase_unit_id)['value'] ?? null;
+
+        // If no matching value is found, return 0
+        if (!$value) {
+            return 0;
+        }
+
+        // Calculate the result
+        $result = $capacityQtyAvailable / $value;
+
+        // If the result is less than 1, return 0; otherwise, return the result
+        return $result < 1 ? 0 : $result;
+    }
+
 
 
 

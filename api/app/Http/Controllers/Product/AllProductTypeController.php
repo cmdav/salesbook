@@ -17,7 +17,8 @@ class AllProductTypeController extends Controller
           'mode' => ['required', 'in:actual,estimate']
      ]);
 
-        return $this->ProductTypeService->onlyProductTypeName();
+
+        return $this->ProductTypeService->onlyProductTypeName($request->mode);
     }
 
 
