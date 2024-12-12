@@ -100,26 +100,6 @@ class MeasurementGroupRepository
     }
 
 
-    // public function index()
-    // {
-    //     // Fetch the paginated data using the reusable query method
-    //     $this->logRepository->logEvent(
-    //         'measurement_groups',
-    //         'view',
-    //         null,
-    //         'MeasurementGroup',
-    //         "{$this->username} viewed all measurement groups"
-    //     );
-    //     $measurementGroups = $this->getMeasurementGroupsQuery()->paginate(6);
-
-    //     // Transform the paginated data
-    //     // $measurementGroups->getCollection()->transform(function ($measurementGroup) {
-    //     //     return $this->transformMeasurementGroup($measurementGroup);
-    //     // });
-
-    //     return $measurementGroups;
-    // }
-
     public function show($id)
     {
         $this->logRepository->logEvent(
@@ -192,10 +172,8 @@ class MeasurementGroupRepository
         $measurementGroups = $this->getMeasurementGroupsQuery()
         ->where('group_name', 'LIKE', '%' . $search . '%')
         ->orWhereHas('purchaseUnits', function ($query) use ($search) {
-            $query->where('purchase_unit_name', 'LIKE', '%' . $search . '%')
-                ->orWhereHas('sellingUnits', function ($query) use ($search) {
-                    $query->where('selling_unit_name', 'LIKE', '%' . $search . '%');
-                });
+            $query->where('purchase_unit_name', 'LIKE', '%' . $search . '%');
+
         })
         ->paginate(6);
 
