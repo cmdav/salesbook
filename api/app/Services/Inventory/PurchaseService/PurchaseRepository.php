@@ -29,7 +29,7 @@ class PurchaseRepository
         $query = Purchase::with([
             'suppliers:id,first_name,last_name',
             //'currency',
-            'productType:id,product_type_name,product_type_image,product_type_description',
+            'productType:id,product_type_name,product_type_image,product_type_description,is_estimated',
             'PurchaseUnit',
             'productType.subCategory:id,sub_category_name',
             'branches:id,name',
@@ -64,10 +64,25 @@ class PurchaseRepository
         } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
-        if($routeName == 'estimated') {
+        $purchase = $this->query($branchId);
+
+        if($routeName == "estimated") {
+
+            $purchase->where(function ($query) {
+                $query->whereHas('productType', function ($q) {
+                    $q->where('is_estimated', '>', 0);
+                });
+            });
+        } else {
+
+            $purchase->where(function ($query) {
+                $query->whereHas('productType', function ($q) {
+                    $q->where('is_estimated', '=', 0);
+                });
+            });
 
         }
-        $purchases = $this->query($branchId)->paginate(20);
+        $purchases = $purchase->paginate(20);
 
         // Transform the purchases data
         $purchases->getCollection()->transform(function ($purchase) {
