@@ -20,8 +20,8 @@ return new class () extends Migration {
             $table->uuid('purchase_unit_id')->nullable();
             $table->integer('branch_id')->default(0);
             $table->integer('cost_price')->nullable();
-            $table->integer('is_cost_price_est')->default(0);
             $table->integer('selling_price')->nullable();
+            $table->integer('is_cost_price_est')->default(0);
             $table->integer('is_selling_price_est')->default(0);
             $table->string('batch_no')->nullable();
             $table->integer('new_cost_price')->nullable();

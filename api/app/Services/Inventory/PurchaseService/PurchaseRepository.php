@@ -46,8 +46,10 @@ class PurchaseRepository
         return $query->latest();
     }
 
-    public function index($request)
+    public function index($request, $routeName)
     {
+
+
         $this->logRepository->logEvent(
             'purchases',
             'view',
@@ -62,7 +64,9 @@ class PurchaseRepository
         } elseif (!in_array(auth()->user()->role->role_name, ['Admin', 'Super Admin'])) {
             $branchId = auth()->user()->branch_id;
         }
+        if($routeName == 'estimated') {
 
+        }
         $purchases = $this->query($branchId)->paginate(20);
 
         // Transform the purchases data
@@ -162,12 +166,17 @@ class PurchaseRepository
                     $purchase->expiry_date = $purchaseData['expiry_date'] ?? null;
                     $purchase->capacity_qty = $unitData['capacity_qty'] ?? 0;
 
+
                     $price = new Price();
                     $price->product_type_id = $purchaseData['product_type_id'];
                     $price->supplier_id = $purchaseData['supplier_id'];
                     $price->batch_no = $purchaseData['batch_no'];
                     $price->purchase_unit_id = $unitData['purchase_unit_id'];
                     $price->status = 1;
+                    if(isset($purchaseData['is_price_est'])) {
+                        $price->is_cost_price_est = 1;
+                        $price->is_selling_price_est = 1;
+                    }
 
                     if (!empty($unitData['price_id'])) {
                         $price->price_id = $unitData['price_id'];

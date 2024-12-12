@@ -19,19 +19,19 @@ return new class () extends Migration {
             $table->uuid('sub_category_id')->nullable()->index();
             $table->uuid('category_id')->nullable()->index();
             $table->boolean('vat')->default(0)->nullable();
-            $table->boolean('is_estimated')->default(1);
             // $table->string('type')->default(0)->comment('1=product 2 product_type');
             $table->uuid('organization_id', 32)->nullable();
             $table->uuid('supplier_id')->nullable();
+            $table->integer('is_estimated')->default(0)->comment("0 not esti 1 esti cp,2 esti sp,3 esti qty");
             $table->integer('is_capacity_quantity_est')->default(0);
 
             $table->uuid('created_by', 32)->nullable();
             $table->uuid('updated_by', 32)->nullable();
             $table->timestamps();
 
-            // $table->foreign('sub_category_id')->references('id')->on('product_sub_categories')->onDelete('restrict');
-            // $table->foreign('category_id')->references('id')->on('product_categories')->onDelete('restrict');
-            // $table->foreign('purchase_unit_id')->references('id')->on('purchase_units')->onDelete('restrict');
+            //$table->foreign('sub_category_id')->references('id')->on('product_sub_categories')->onDelete('restrict');
+            //$table->foreign('category_id')->references('id')->on('product_categories')->onDelete('restrict');
+            //$table->foreign('id')->references('product_type_id')->on('purchases')->onDelete('restrict');
             // $table->foreign('selling_unit_id')->references('id')->on('selling_units')->onDelete('restrict');
         });
     }

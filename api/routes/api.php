@@ -51,7 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
         route::resource('price-notifications', App\Http\Controllers\Inventory\PriceNotificationController::class);
         route::resource('purchases', App\Http\Controllers\Inventory\PurchaseController::class);
         route::post('estimated-store', [App\Http\Controllers\Inventory\PurchaseController::class, 'store']);
-        route::get('estimated-store', [App\Http\Controllers\Inventory\PurchaseController::class, 'index']);
+        route::get('estimated-store', [App\Http\Controllers\Inventory\PurchaseController::class, 'index'])->name('estimated');
         route::put('estimated-stores/{product_id}', [App\Http\Controllers\Inventory\PurchaseController::class, 'updateEstimatedValue']);
 
 

@@ -98,7 +98,7 @@ class ProductTypeRepository
         $sellingPrices = [];
 
         $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($productType->productMeasurement);
-        dd($no_of_smallestUnit_in_each_unit);
+        //dd($no_of_smallestUnit_in_each_unit);
         $quantityBreakdown = $this->processPurchaseUnit->calculateQuantityBreakdown($quantityAvailable, $no_of_smallestUnit_in_each_unit);
         // dd($quantityBreakdown);
         $formattedBreakdown = $this->processPurchaseUnit->formatQuantityBreakdown($quantityBreakdown);

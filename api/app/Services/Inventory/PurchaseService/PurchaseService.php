@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Services\Inventory\PurchaseService;
+
 use App\Services\Inventory\PurchaseService\PurchaseRepository;
 
-
-class PurchaseService 
+class PurchaseService
 {
     protected $PurchaseRepository;
 
@@ -15,14 +15,14 @@ class PurchaseService
 
     public function createPurchase(array $data)
     {
-       
+
         return $this->PurchaseRepository->create($data);
     }
 
-    public function getAllPurchase($request)
+    public function getAllPurchase($request, $routeName)
     {
-       
-        return $this->PurchaseRepository->index($request);
+
+        return $this->PurchaseRepository->index($request, $routeName);
     }
 
     public function getPurchaseById($id)

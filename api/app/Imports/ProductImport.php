@@ -76,6 +76,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
                 'sub_category_id' => optional($subCategory)->id,
                 'category_id' => optional($category)->id,
                 'barcode' => Str::limit(trim($row['barcode']), 200),
+                'is_estimated' => 3,
             ]);
 
             foreach ($purchaseUnits as $index => $unitName) {
@@ -117,6 +118,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
             $purchaseData = [
                 'product_type_id' => $productType->id,
                 'batch_no' => $newBatchNumber,
+                'is_price_est' => 'yes',
                 'supplier_id' => $supplier->id,
                 'product_identifier' => '',
                 'expiry_date' => !empty($row['expiry_date']) ? \DateTime::createFromFormat('d/m/Y', trim($row['expiry_date']))->format('Y-m-d') : null,

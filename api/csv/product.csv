@@ -1,2 +1,2 @@
 product_type_name,product_type_description,category_name,sub_category_name,vat,barcode,expiry_date,batch_no,purchase_unit,group,unit,cost_price,quantity
-First Product,product,Calcium,sample sub category,yes,,1/11/2025,GH502,"bag,paint,cup, small cup",Calcuim," 20, 10,5,2",300000,32
+First Product,product,Calcium,sample sub category,yes,,1/11/2025,GH502,"bag,paint,cup, small cup",Calcuim," 1, 10,5,2",300000,32

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PurchaseFormRequest;
 use App\Services\Inventory\PurchaseService\PurchaseService;
+use Illuminate\Support\Facades\Route;
 use App\Models\Purchase;
 use Illuminate\Http\Request;
 
@@ -18,8 +19,9 @@ class PurchaseController extends Controller
     }
     public function index(Request $request)
     {
+        $routeName = Route::currentRouteName();
 
-        $purchase = $this->purchaseService->getAllPurchase($request->all());
+        $purchase = $this->purchaseService->getAllPurchase($request->all(), $routeName);
         return response()->json($purchase);
     }
 
