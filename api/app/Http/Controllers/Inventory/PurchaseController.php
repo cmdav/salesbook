@@ -8,6 +8,7 @@ use App\Services\Inventory\PurchaseService\PurchaseService;
 use Illuminate\Support\Facades\Route;
 use App\Models\Purchase;
 use App\Models\Price;
+use App\Models\ProductType;
 
 use Illuminate\Http\Request;
 
@@ -91,9 +92,18 @@ class PurchaseController extends Controller
 
         if ($latestPrice) {
             $newPriceData = $latestPrice->replicate()->toArray();
+
+            // Update cost price and estimation status
             $newPriceData['cost_price'] = $validatedData['cost_price'];
             $newPriceData['is_cost_price_est'] = $request->is_actual ? 0 : 1;
 
+            // Ensure the status field has a valid integer value
+            $newPriceData['status'] = 1; // Set status to 'Active' (assuming 1 means active)
+
+            // Remove any fields that should not be replicated or cause issues
+            unset($newPriceData['id'], $newPriceData['created_at'], $newPriceData['updated_at']);
+
+            // Create the new price record
             Price::create($newPriceData);
 
             // Update the product_types table
@@ -104,6 +114,7 @@ class PurchaseController extends Controller
 
         return response()->json(['message' => 'No price record found'], 404);
     }
+
 
     private function updateSellingPrice(Request $request)
     {
@@ -124,9 +135,18 @@ class PurchaseController extends Controller
 
         if ($latestPrice) {
             $newPriceData = $latestPrice->replicate()->toArray();
+
+            // Update selling price and estimation status
             $newPriceData['selling_price'] = $validatedData['selling_price'];
             $newPriceData['is_selling_price_est'] = $request->is_actual ? 0 : 1;
 
+            // Ensure the status field has a valid integer value
+            $newPriceData['status'] = 1; // Set status to 'Active' (assuming 1 means active)
+
+            // Remove any fields that should not be replicated or cause issues
+            unset($newPriceData['id'], $newPriceData['created_at'], $newPriceData['updated_at']);
+
+            // Create the new price record
             Price::create($newPriceData);
 
             // Update the product_types table
