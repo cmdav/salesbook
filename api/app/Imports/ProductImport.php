@@ -36,8 +36,25 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
         DB::beginTransaction(); // Start the transaction
 
         try {
-            $category = ProductCategory::where('category_name', trim($row['category_name']))->first();
-            $subCategory = ProductSubCategory::where('sub_category_name', trim($row['sub_category_name']))->first();
+            // Retrieve category if provided, otherwise leave null
+            $category = !empty(trim($row['category_name'] ?? ''))
+                ? ProductCategory::where('category_name', trim($row['category_name']))->first()
+                : null;
+
+            // Validate category existence
+            if (!empty($row['category_name']) && !$category) {
+                throw new \Exception("Category '{$row['category_name']}' does not exist.");
+            }
+
+            // Retrieve subcategory if provided, otherwise leave null
+            $subCategory = !empty(trim($row['sub_category_name'] ?? ''))
+                ? ProductSubCategory::where('sub_category_name', trim($row['sub_category_name']))->first()
+                : null;
+
+            // Validate subcategory existence
+            if (!empty($row['sub_category_name']) && !$subCategory) {
+                throw new \Exception("Subcategory '{$row['sub_category_name']}' does not exist.");
+            }
 
             $groupName = trim($row['group']);
             $measurementGroup = MeasurementGroup::firstOrCreate(['group_name' => $groupName], ['created_by' => auth()->id()]);
@@ -160,6 +177,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
             'group' => 'required|string',
         ];
     }
+
 
     public function customValidationMessages()
     {
