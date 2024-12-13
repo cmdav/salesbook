@@ -433,6 +433,7 @@ class ProductTypeRepository
     public function update($id, array $data)
     {
         // Begin a transaction
+
         DB::beginTransaction();
 
         try {
@@ -501,7 +502,9 @@ class ProductTypeRepository
     public function delete($id)
     {
         try {
-            $ProductType = $this->findById($id);
+            $ProductType = ProductType::find($id);
+
+
             if (!$ProductType) {
                 return response()->json([
                     'success' => false,

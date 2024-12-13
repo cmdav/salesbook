@@ -12,8 +12,6 @@ class ProductTypeFormRequest extends FormRequest
 {
     public function rules(Request $request): array
     {
-
-
         $productTypeRule = [
             'required',
             'string',
@@ -22,7 +20,6 @@ class ProductTypeFormRequest extends FormRequest
         ];
 
         if ($this->getMethod() === 'PUT') {
-            // When updating, exclude the current product's ID and product type
             $productTypeRule[] = Rule::ignore($this->route('product_type'));
         }
 
@@ -33,37 +30,38 @@ class ProductTypeFormRequest extends FormRequest
         ];
 
         if ($this->getMethod() === 'PUT') {
-            // When updating, exclude the current product's barcode from the uniqueness check
             $barcodeRule[] = Rule::ignore($this->route('product_type'), 'barcode');
         }
 
-
-
-
         return [
-
             'product_type_name' => $productTypeRule,
             'product_type_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'vat' => 'required',
             'product_type_description' => 'required|string|max:65535',
-
             'barcode' => $barcodeRule,
             'organization_id' => 'nullable|uuid|exists:organizations,id',
             'supplier_id' => 'nullable|uuid|exists:suppliers,id',
             'category_id' => 'nullable|uuid|exists:product_categories,id',
             'sub_category_id' => 'nullable|uuid|exists:product_sub_categories,id',
-
-            // 'selling_unit_capacity_id' => 'required|array',
-            // 'selling_unit_capacity_id.*' => 'integer|exists:selling_unit_capacities,id',
-
-
-            'purchase_unit_id.*' => 'uuid|exists:purchase_units,id',
-
-
-
             'purchase_unit_id' => ['required', 'array'],
+            'purchase_unit_id.*' => [
+                'uuid',
+                'exists:purchase_units,id',
+                function ($attribute, $value, $fail) use ($request) {
+                    $purchaseUnitIds = $request->input('purchase_unit_id');
+                    if (!empty($purchaseUnitIds)) {
+                        $measurementGroups = DB::table('purchase_units')
+                            ->whereIn('id', $purchaseUnitIds)
+                            ->pluck('measurement_group_id')
+                            ->unique();
 
-
-
+                        if ($measurementGroups->count() > 1) {
+                            $fail('All purchase units must belong to the same measurement group.');
+                        }
+                    }
+                },
+            ],
         ];
     }
+
 }
