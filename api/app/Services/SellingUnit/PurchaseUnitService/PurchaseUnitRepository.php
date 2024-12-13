@@ -126,12 +126,13 @@ class PurchaseUnitRepository
     }
     public function listPurchaseUnit()
     {
-        $purchaseUnits = PurchaseUnit::select("id", "purchase_unit_name")->get();
+        $purchaseUnits = PurchaseUnit::select("id", "purchase_unit_name", "measurement_group_id")->get();
 
         $data = $purchaseUnits->map(function ($purchaseUnit) {
             return [
                 'id' => $purchaseUnit->id,
                 'purchase_unit_name' => $purchaseUnit->purchase_unit_name,
+                'measurement_group_id' => $purchaseUnit->measurement_group_id,
 
             ];
         });

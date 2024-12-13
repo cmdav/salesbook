@@ -18,7 +18,7 @@
         </div>
     </div>
 	<div style="background-color:#fff;width:70%;margin:0 auto;padding:2em;color:black;">
-		<h3>Hello {{ isset($user['first_name']) ? $user['first_name'] : '' }}</h3>
+		<h3>Hello {{ $user['first_name'] ?? ' ' }}</h3>
 		
 		<p>
 			{!! isset($first_paragraph) ? $first_paragraph : '' !!}

@@ -54,7 +54,7 @@ class PurchaseUnitController extends Controller
                 'uuid',
                 'exists:purchase_units,id', // Ensure the provided parent ID exists in the purchase_units table
             ],
-            'unit' => 'required|integer|min:0', // Ensure the unit is an integer and defaults to 0 if not provided
+            'unit' => 'nullable|integer|min:0', // Ensure the unit is an integer and defaults to 0 if not provided
         ];
 
         $request->validate($rule);
