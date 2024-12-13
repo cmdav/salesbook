@@ -27,4 +27,17 @@ class Handler extends ExceptionHandler
             //
         });
     }
+    protected function unauthenticated($request, \Illuminate\Auth\AuthenticationException $exception)
+    {
+        return $request->expectsJson()
+            ? response()->json([
+                'success' => true,
+                'message' => 'Log out successfully.', // Custom message
+            ], 201)
+            : response()->json([
+                'success' => false,
+                'message' => 'Access denied. Please login.', // Fallback for non-JSON requests
+            ], 201);
+    }
+
 }

@@ -33,11 +33,11 @@ class Organization extends Model
     ];
 
 
-    // public function getOrganizationLogoAttribute($value): string
-    // {
+    public function getOrganizationLogoAttribute($value): string
+    {
 
-    //     return url('/') . $value;
-    // }
+        return url('/') . $value;
+    }
     public function getOrganizationTypeAttribute($value): string
     {
         return $value == 2 ? 'company' : 'sole_proprietor';

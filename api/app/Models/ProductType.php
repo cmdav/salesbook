@@ -39,6 +39,11 @@ class ProductType extends Model
 
 
     ];
+    public function getProductTypeImageAttribute($value): ?string
+    {
+        return $value ? url($value) : null;
+    }
+
 
     public function getCreatedAtAttribute($value)
     {

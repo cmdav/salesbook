@@ -35,18 +35,20 @@ return [
             'root' => storage_path('app'),
             'throw' => false,
         ],
-        
+
         'root' => [
             'driver' => 'local',
-            'root' => base_path('../../uploads'),
-            'url' => env('APP_URL').'/uploads',
+              'root' => base_path('../uploads'),
+            'url' => '/uploads',
+            // 'root' => base_path('../../uploads'),
+            // 'url' => env('APP_URL').'/uploads',
             'visibility' => 'public',
             'throw' => false,
         ],
 
         'public' => [
             'driver' => 'local',
-            'root' => public_path('uploads'), 
+            'root' => public_path('uploads'),
             'url' => env('APP_URL').'/uploads',
             // 'root' => storage_path('app/public'),
             // 'url' => env('APP_URL').'/storage',
