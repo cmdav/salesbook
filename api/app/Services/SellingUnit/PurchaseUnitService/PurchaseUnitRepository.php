@@ -126,18 +126,24 @@ class PurchaseUnitRepository
     }
     public function listPurchaseUnit()
     {
-        $purchaseUnits = PurchaseUnit::select("id", "purchase_unit_name", "measurement_group_id")->get();
+        // $purchaseUnits = PurchaseUnit::select("id", "purchase_unit_name", "measurement_group_id")->get();
 
-        $data = $purchaseUnits->map(function ($purchaseUnit) {
-            return [
-                'id' => $purchaseUnit->id,
-                'purchase_unit_name' => $purchaseUnit->purchase_unit_name,
-                'measurement_group_id' => $purchaseUnit->measurement_group_id,
+        // $data = $purchaseUnits->map(function ($purchaseUnit) {
+        //     return [
+        //         'id' => $purchaseUnit->id,
+        //         'purchase_unit_name' => $purchaseUnit->purchase_unit_name,
+        //         'measurement_group_id' => $purchaseUnit->measurement_group_id,
 
-            ];
-        });
+        //     ];
+        // });
 
-        return $data;
+        // return $data;
+        return \App\Models\MeasurementGroup::select("id", "group_name")
+        ->with([
+            'purchaseUnits:id,measurement_group_id,purchase_unit_name',
+
+        ])->get();
+
     }
     public function getSearchPurchaseUnit($search)
     {

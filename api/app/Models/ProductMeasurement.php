@@ -23,4 +23,8 @@ class ProductMeasurement extends Model
     {
         return $this->belongsTo(PurchaseUnit::class, 'purchasing_unit_id', 'id')->select("id", "purchase_unit_name", "unit", "parent_purchase_unit_id");
     }
+    public function prices()
+    {
+        return $this->hasMany(Price::class, 'purchase_unit_id', 'purchasing_unit_id');
+    }
 }

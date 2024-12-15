@@ -247,18 +247,11 @@ class ProductTypeRepository
     {
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
 
-        $response = ProductType::select(
-            'id',
-            'product_type_name',
-            'barcode',
-            'vat',
-            'is_capacity_quantity_est'
-        )
-        ->with([
+        $response = ProductType::select('id', 'product_type_name', 'barcode', 'vat', 'is_capacity_quantity_est')->with([
             'productMeasurement',
-            'productMeasurement.PurchaseUnit:id,purchase_unit_name,unit,parent_purchase_unit_id', // Load PurchaseUnit relationship
-            'price' => function ($query) {
-                $query->select('id', 'cost_price', 'selling_price', 'product_type_id', 'is_cost_price_est', 'is_selling_price_est');
+            'productMeasurement.PurchaseUnit:id,purchase_unit_name,unit,parent_purchase_unit_id',
+            'productMeasurement.prices' => function ($query) {
+                $query->select('id', 'cost_price', 'selling_price', 'product_type_id', 'purchase_unit_id', 'is_cost_price_est', 'is_selling_price_est');
             },
             'stores' => function ($query) use ($branchId) {
                 $query->selectRaw('product_type_id, purchase_unit_id, SUM(capacity_qty_available) as total_quantity')
@@ -269,52 +262,56 @@ class ProductTypeRepository
                 }
                 $query->groupBy('product_type_id', 'purchase_unit_id');
             },
-        ])
-        ->get();
+        ])->get();
 
-        if ($response) {
-            $response = $response->map(function ($item) {
-                // Calculate the total capacity_quantity_available across all stores
-                $totalCapacityQuantity = collect($item->stores)->sum('total_quantity');
+        $transformedData = $response->map(function ($item) {
+            // Group stores by purchase_unit_id for easy access
+            $stores = collect($item->stores)->groupBy('purchase_unit_id');
 
-                $stores = collect($item->stores)->groupBy('purchase_unit_id'); // Group stores by purchase_unit_id
-                $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($item->productMeasurement);
+            // Process product measurements into purchase_units
+            $purchaseUnits = collect($item->productMeasurement ?? [])->map(function ($measurement) use ($stores) {
+                $store = $stores->get(optional($measurement->PurchaseUnit)->id ?? null)?->first();
 
-                $measurements = $item->productMeasurement->map(function ($measurement) use ($stores, $item) {
-                    // Match the purchase_unit_id with the store data
-                    $store = $stores->get($measurement->purchasing_unit_id)?->first();
+                // Find the corresponding price for this purchase unit
+                $price = optional($measurement->prices->firstWhere('purchase_unit_id', optional($measurement->PurchaseUnit)->id));
 
-                    // Find the corresponding price for this product type
-                    $price = $item->price->firstWhere('product_type_id', $item->id);
-
-                    return [
-                        'purchase_unit_id' => optional($measurement->PurchaseUnit)->id,
-                        'purchase_unit_name' => optional($measurement->PurchaseUnit)->purchase_unit_name,
-                        'unit' => optional($measurement->PurchaseUnit)->unit,
-                        'price_id' => optional($price)->id,
-                        'cost_price' => optional($price)->cost_price,
-                        'is_cost_price_est' => optional($price)->is_cost_price_est,
-                        'selling_price' => optional($price)->selling_price,
-                        'is_selling_price_est' => optional($price)->is_selling_price_est,
-                        'capacity_quantity_available' => optional($store)->total_quantity, // Specific capacity quantity for the unit
-                    ];
-                });
-
-                $item->purchase_units = $measurements;
-
-                // Add total capacity quantity after is_capacity_quantity_est
-                $item->no_of_smallestUnit_in_each_unit =  $no_of_smallestUnit_in_each_unit;
-
-                // Remove unnecessary relationships
-                unset($item->stores, $item->productMeasurement, $item->price);
-
-                return $item;
+                return [
+                    'purchase_unit_id' => optional($measurement->PurchaseUnit)->id,
+                    'purchase_unit_name' => optional($measurement->PurchaseUnit)->purchase_unit_name,
+                    'unit' => optional($measurement->PurchaseUnit)->unit,
+                    'price_id' => optional($price)->id,
+                    'cost_price' => optional($price)->cost_price,
+                    'is_cost_price_est' => optional($price)->is_cost_price_est,
+                    'selling_price' => optional($price)->selling_price,
+                    'is_selling_price_est' => optional($price)->is_selling_price_est,
+                    'capacity_quantity_available' => optional($store)->total_quantity,
+                ];
             });
 
-            return response()->json(['data' => $response], 200);
-        }
+            // Calculate no_of_smallestUnit_in_each_unit
+            $noOfSmallestUnitInEachUnit = collect($item->productMeasurement)->mapWithKeys(function ($measurement) {
+                $purchaseUnitName = strtolower(optional($measurement->PurchaseUnit)->purchase_unit_name);
+                return [
+                    $purchaseUnitName => [
+                        'value' => optional($measurement->PurchaseUnit)->unit ?? 1,
+                        'purchase_unit_id' => optional($measurement->PurchaseUnit)->parent_purchase_unit_id,
+                    ],
+                ];
+            });
 
-        return response()->json(['data' => []], 404); // Return empty response if no data found
+            return [
+                'id' => $item->id,
+                'product_type_name' => $item->product_type_name,
+                'barcode' => $item->barcode,
+                'vat' => $item->vat,
+                'is_capacity_quantity_est' => $item->is_capacity_quantity_est,
+                'purchase_units' => $purchaseUnits,
+                'no_of_smallestUnit_in_each_unit' => $noOfSmallestUnitInEachUnit,
+            ];
+        });
+
+        return response()->json(['data' => $transformedData], 200);
+
     }
 
 
