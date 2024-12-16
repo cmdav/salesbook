@@ -170,6 +170,19 @@ class PurchaseRepository
             $purchases = [];
 
             foreach ($data['purchases'] as $purchaseData) {
+
+                if (!empty($purchaseData['supplier_id'])) {
+                    $existingRecord = \App\Models\SupplierProduct::where('product_type_id', $purchaseData['product_type_id'])
+                        ->where('supplier_id', $purchaseData['supplier_id'])
+                        ->first();
+                    if (!$existingRecord) {
+                        $supplierProduct = new \App\Models\SupplierProduct();
+                        $supplierProduct->product_type_id = $purchaseData['product_type_id'];
+                        $supplierProduct->supplier_id = $purchaseData['supplier_id'];
+                        $supplierProduct->save();
+                    }
+                }
+
                 foreach ($purchaseData['purchase_unit_data'] as $unitData) {
 
                     $purchase = new Purchase();
