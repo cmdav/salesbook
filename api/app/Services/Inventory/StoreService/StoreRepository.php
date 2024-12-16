@@ -74,6 +74,7 @@ class StoreRepository
 
         // Calculate the breakdown of available quantity into the smallest unit
         $quantityBreakdown = "";
+        //return $store->productType->productMeasurement;
         $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($store->productType->productMeasurement);
         $quantityBreakdown = $this->processPurchaseUnit->calculateQuantityBreakdown($store->capacity_qty_available, $no_of_smallestUnit_in_each_unit);
 

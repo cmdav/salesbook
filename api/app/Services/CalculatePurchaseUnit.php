@@ -54,7 +54,7 @@ class CalculatePurchaseUnit
 
             if (isset($measurement['purchaseUnit'])) {
 
-                \Log::info($measurement['purchaseUnit']);
+
                 $unitsMap[$measurement['purchasing_unit_id']] = $measurement['purchaseUnit'];
             }
         }

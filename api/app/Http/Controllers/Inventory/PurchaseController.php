@@ -83,6 +83,7 @@ class PurchaseController extends Controller
         // Retrieve the latest price record
         $latestPrice = Price::where('product_type_id', $request->product_type_id)
             ->where('purchase_unit_id', $request->purchase_unit_id)
+            ->where('batch_no', 'estimated')
             ->latest('id')
             ->first();
 
@@ -126,6 +127,7 @@ class PurchaseController extends Controller
         // Retrieve the latest price record
         $latestPrice = Price::where('product_type_id', $request->product_type_id)
             ->where('purchase_unit_id', $request->purchase_unit_id)
+            ->where('batch_no', 'estimated')
             ->latest('id')
             ->first();
 

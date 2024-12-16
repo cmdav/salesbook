@@ -96,7 +96,7 @@ class ProductTypeRepository
         // Map purchase units with purchasing and selling prices
         $purchasingPrices = [];
         $sellingPrices = [];
-
+        //return $productType->productMeasurement;
         $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($productType->productMeasurement);
         //dd($no_of_smallestUnit_in_each_unit);
         $quantityBreakdown = $this->processPurchaseUnit->calculateQuantityBreakdown($quantityAvailable, $no_of_smallestUnit_in_each_unit);
@@ -536,13 +536,6 @@ class ProductTypeRepository
 
         //$branchId = 'all';
         $branchId = auth()->user()->branch_id;
-        //dd($branchId);
-        // Admin can specify the branch; others use their own branch
-        // if (isset($request['branch_id']) && auth()->user()->role->role_name == 'Admin') {
-        //     $branchId = $request['branch_id'];
-        // } elseif (auth()->user()->role->role_name != 'Admin') {
-        //     $branchId = auth()->user()->branch_id;
-        // }
 
         // Query for expired products with branch filtering
         $expiredProducts = \App\Models\Purchase::whereBetween('expiry_date', [$today, $nextWeek])
@@ -552,11 +545,10 @@ class ProductTypeRepository
             })
             ->with([
                 'productType' => function ($query) {
-                    $query->select('id', 'product_type_name', 'sub_category_id', 'purchase_unit_id', 'selling_unit_id', 'created_at');
+                    $query->select('id', 'product_type_name', 'sub_category_id', 'created_at');
                 },
                 'productType.subCategory:id,sub_category_name',
-                'productType.unitPurchase:id,purchase_unit_name',
-                'productType.unitSelling:id,selling_unit_name',
+                'productType.productMeasurement.purchaseUnit:id,purchase_unit_name,unit,parent_purchase_unit_id',
                 'productType.store' => function ($query) {
                     $query->select('product_type_id', 'batch_no', 'capacity_qty_available');
                 }
@@ -569,6 +561,8 @@ class ProductTypeRepository
         $response = $expiredProducts->map(function ($purchase) {
             $productType = $purchase->productType;
             $store = $productType->store->where('batch_no', $purchase->batch_no)->first();
+            $purchaseMeasurement = $productType->productMeasurement->first(); // Assuming the first measurement is used
+            $purchaseUnit = $purchaseMeasurement ? $purchaseMeasurement->purchaseUnit : null;
 
             return [
                 'product_sub_category' => optional($productType->subCategory)->sub_category_name,
@@ -576,14 +570,11 @@ class ProductTypeRepository
                 'quantity_available' => $store->capacity_qty_available ?? 0,
                 'batch_no' => $purchase->batch_no ?? '',
                 'expiry_date' => $purchase->expiry_date,
-                'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name,
-                'selling_unit_name' => optional($productType->unitSelling)->selling_unit_name,
-                //'branch_id' => $purchase->branch_id // Include branch_id in the response
+                'purchase_unit_name' => $purchaseUnit->purchase_unit_name ?? '',
             ];
         });
 
         $responseMsg = "Record retrieved successfully";
-
 
         // Check if the request has download set to true
         if (!isset($request['download'])) {
@@ -591,8 +582,6 @@ class ProductTypeRepository
             $isPdf = false;
             $emailService = new EmailService();
             $responseData = $this->userRepository->getuserOrgAndBranchDetail();
-
-
 
             // Generate the email table content
             $tableDetail = $this->generateExpiredProductTable($responseData, $response);
@@ -605,23 +594,17 @@ class ProductTypeRepository
                 $tableDetail
             );
         } else {
-
             $pdf = $this->generatePdf->generatePdf($response, "Products that about to expire in 7 days");
             $isPdf = true;
             return ["data" => $pdf, "responseMsg" => $responseMsg, "isPdf" => $isPdf];
         }
 
-
         return ["data" => $response, "responseMsg" => $responseMsg, "isPdf" => $isPdf];
     }
-
-
 
     private function generateExpiredProductTable($responseData, $productDetails)
     {
         // Organization and branch details table (header)
-        // <strong>State:</strong> {$responseData['state_name']}<br>
-        //<strong>Country:</strong> {$responseData['country_name']}
         $headerTable = "
         <table style='width: 100%; border-collapse: collapse;'>
             <tr>
@@ -629,10 +612,8 @@ class ProductTypeRepository
                     <strong>Branch Name:</strong> {$responseData['branch_name']}<br>
                     <strong>Branch Email:</strong> {$responseData['branch_email']}<br>
                     <strong>Branch Phone:</strong> {$responseData['branch_phone_number']}<br>
-                   
                 </td>
                 <td style='padding: 8px; text-align: right;'>
-                  
                     <strong>Organization Name:</strong> {$responseData['organization_name']}<br>
                     <strong>Email:</strong> {$responseData['company_email']}<br>
                     <strong>Phone:</strong> {$responseData['company_phone_number']}<br>
@@ -653,7 +634,6 @@ class ProductTypeRepository
                     <th style='border: 1px solid black; padding: 8px;'>Batch No</th>
                     <th style='border: 1px solid black; padding: 8px;'>Expiry Date</th>
                     <th style='border: 1px solid black; padding: 8px;'>Purchase Unit</th>
-                    <th style='border: 1px solid black; padding: 8px;'>Selling Unit</th>
                 </tr>
             </thead>
             <tbody>
@@ -669,7 +649,6 @@ class ProductTypeRepository
                 <td style='border: 1px solid black; padding: 8px;'>{$product['batch_no']}</td>
                 <td style='border: 1px solid black; padding: 8px;'>{$product['expiry_date']}</td>
                 <td style='border: 1px solid black; padding: 8px;'>{$product['purchase_unit_name']}</td>
-                <td style='border: 1px solid black; padding: 8px;'>{$product['selling_unit_name']}</td>
             </tr>
         ";
         }
@@ -683,31 +662,21 @@ class ProductTypeRepository
     }
 
 
+
     public function getexpiredProductByDate($request)
     {
-
-
-
         $startDate = Carbon::parse($request['start_date'])->startOfDay();
         $endDate = Carbon::parse($request['end_date'])->endOfDay();
 
-        //Log::info('Start Date:', ['startDate' => $startDate->toDateTimeString()]);
-        //Log::info('End Date:', ['endDate' => $endDate->toDateTimeString()]);
-
-
-
         $branchId = auth()->user()->branch_id;
-
-
 
         $expiredProductsQuery = \App\Models\Purchase::whereBetween('expiry_date', [$startDate, $endDate])
             ->with([
                 'productType' => function ($query) {
-                    $query->select('id', 'product_type_name', 'sub_category_id', 'purchase_unit_id', 'selling_unit_id', 'created_at');
+                    $query->select('id', 'product_type_name', 'sub_category_id', 'created_at');
                 },
                 'productType.subCategory:id,sub_category_name',
-                'productType.unitPurchase:id,purchase_unit_name',
-                'productType.unitSelling:id,selling_unit_name',
+                'productType.productMeasurement.purchaseUnit:id,purchase_unit_name,unit,parent_purchase_unit_id',
                 'productType.store' => function ($query) use ($branchId) {
                     $query->select('product_type_id', 'batch_no', 'capacity_qty_available');
                     // Filter by branch ID if it's not 'all'
@@ -719,9 +688,7 @@ class ProductTypeRepository
             ->select('product_type_id', 'expiry_date', 'batch_no')
             ->groupBy('product_type_id', 'expiry_date', 'batch_no');
 
-
         if (isset($request['all']) && $request['all'] == true) {
-
             $expiredProducts = $expiredProductsQuery->get();
             $response = $expiredProducts->map(function ($purchase) {
                 $productType = $purchase->productType;
@@ -731,6 +698,8 @@ class ProductTypeRepository
                     $store = $productType->store->where('batch_no', $purchase->batch_no)->first();
                 }
 
+                $purchaseMeasurement = $productType->productMeasurement->first(); // Assuming the first measurement is used
+                $purchaseUnit = $purchaseMeasurement ? $purchaseMeasurement->purchaseUnit : null;
 
                 return [
                     'product_sub_category' => optional($productType->subCategory)->sub_category_name,
@@ -738,24 +707,19 @@ class ProductTypeRepository
                     'quantity_available' => $store->capacity_qty_available ?? 0,
                     'batch_no' => $purchase->batch_no ?? '',
                     'expiry_date' => $purchase->expiry_date,
-                    'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name,
-                    'selling_unit_name' => optional($productType->unitSelling)->selling_unit_name,
+                    'purchase_unit_name' => $purchaseUnit->purchase_unit_name ?? '',
                 ];
             });
 
             $startDateFormatted = date('d-m-y', strtotime($startDate));
             $endDateFormatted = date('d-m-y', strtotime($endDate));
 
-            $pdf = $this->generatePdf->generatePdf($response, " Expired Products ($startDateFormatted - $endDateFormatted)");
-
-
+            $pdf = $this->generatePdf->generatePdf($response, "Expired Products ($startDateFormatted - $endDateFormatted)");
 
             return ["data" => $pdf, "isPdf" => true];
-
         }
 
         $expiredProducts = $expiredProductsQuery->paginate(20);
-        //log::info($expiredProducts);
         $response = $expiredProducts->getCollection()->map(function ($purchase) {
             $productType = $purchase->productType;
             $store = null;
@@ -764,6 +728,8 @@ class ProductTypeRepository
                 $store = $productType->store->where('batch_no', $purchase->batch_no)->first();
             }
 
+            $purchaseMeasurement = $productType->productMeasurement->first(); // Assuming the first measurement is used
+            $purchaseUnit = $purchaseMeasurement ? $purchaseMeasurement->purchaseUnit : null;
 
             return [
                 'product_sub_category' => optional($productType->subCategory)->sub_category_name,
@@ -771,13 +737,14 @@ class ProductTypeRepository
                 'quantity_available' => $store->capacity_qty_available ?? 0,
                 'batch_no' => $purchase->batch_no ?? '',
                 'expiry_date' => $purchase->expiry_date,
-                'purchase_unit_name' => optional($productType->unitPurchase)->purchase_unit_name,
-                'selling_unit_name' => optional($productType->unitSelling)->selling_unit_name,
+                'purchase_unit_name' => $purchaseUnit->purchase_unit_name ?? '',
             ];
         });
+
         $expiredProducts->setCollection($response);
         return ["data" => $expiredProducts, "isPdf" => false];
     }
+
 
     public function getproductPriceList($request)
     {
@@ -840,77 +807,6 @@ class ProductTypeRepository
         // return $products;
     }
 
-
-    // public function getproductPriceList($request)
-    // {
-    //     // Query for unique products with their latest active price
-    //     $branchId = 'all';
-    //     $branchId = auth()->user()->branch_id;
-
-    //     if (isset($request['branch_id']) && auth()->user()->role->role_name == 'Admin') {
-    //         $branchId = $request['branch_id'];
-    //     } elseif (auth()->user()->role->role_name != 'Admin') {
-    //         $branchId = auth()->user()->branch_id;
-    //     }
-
-
-    //     $productsQuery = ProductType::with(['activePrice' => function ($query) {
-    //         $query->select('product_type_id', 'cost_price', 'selling_price', 'new_cost_price', 'new_selling_price', 'is_new', 'status', 'created_at');
-    //     }]);
-
-    //     // Check if the request has 'all' == true, and return all results without pagination
-    //     if (isset($request['all']) && $request['all'] == true) {
-    //         // Get all results without pagination
-    //         $products = $productsQuery->get();
-
-    //         // Transform each product to include the required data
-    //         $response = $products->map(function ($product) {
-    //             $activePrice = $product->activePrice;
-
-    //             if ($activePrice) {
-    //                 $costPrice = $activePrice->is_new ? $activePrice->new_cost_price : $activePrice->cost_price;
-    //                 $sellingPrice = $activePrice->is_new ? $activePrice->new_selling_price : $activePrice->selling_price;
-    //             } else {
-    //                 $costPrice = 'No price available';
-    //                 $sellingPrice = 'No price available';
-    //             }
-
-    //             return [
-    //                 'product_type_name' => $product->product_type_name,
-    //                 'product_description' => $product->product_type_description,
-    //                 'cost_price' => $costPrice,
-    //                 'selling_price' => $sellingPrice,
-    //             ];
-    //         });
-
-    //         return $response;
-    //     }
-
-    //     // Otherwise, paginate the results
-    //     $products = $productsQuery->paginate(20); // Paginate 20 per page
-
-    //     // Transform each product to include the required data
-    //     $products->getCollection()->transform(function ($product) {
-    //         $activePrice = $product->activePrice;
-
-    //         if ($activePrice) {
-    //             $costPrice = $activePrice->is_new ? $activePrice->new_cost_price : $activePrice->cost_price;
-    //             $sellingPrice = $activePrice->is_new ? $activePrice->new_selling_price : $activePrice->selling_price;
-    //         } else {
-    //             $costPrice = 'No price available';
-    //             $sellingPrice = 'No price available';
-    //         }
-
-    //         return [
-    //             'product_type_name' => $product->product_type_name,
-    //             'product_description' => $product->product_type_description,
-    //             'cost_price' => $costPrice,
-    //             'selling_price' => $sellingPrice,
-    //         ];
-    //     });
-
-    //     return $products;
-    // }
 
 
 

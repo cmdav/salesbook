@@ -22,10 +22,7 @@ class PurchaseUnit extends Model
         'updated_by'
     ];
 
-    // public function sellingUnits()
-    // {
-    //     return $this->hasMany(SellingUnit::class, 'purchase_unit_id', 'id');
-    // }
+
     public function measurementGroup()
     {
         return $this->belongsTo(MeasurementGroup::class, 'measurement_group_id', 'id');
