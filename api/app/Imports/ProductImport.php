@@ -127,6 +127,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
                     'cost_price' => round($pricePerUnit, 2), // Round to 2 decimals for clarity
                     'selling_price' => $sellingPrice,
                     'capacity_qty' => $row['quantity'],
+                    'is_actual' => 1,
                 ];
             }
 
@@ -137,6 +138,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
                 'batch_no' => 'estimated',
                 'is_price_est' => 'yes',
                 'supplier_id' => $supplier->id,
+                'is_actual' => 1,
                 'product_identifier' => '',
                 'expiry_date' => !empty($row['expiry_date']) ? \DateTime::createFromFormat('d/m/Y', trim($row['expiry_date']))->format('Y-m-d') : null,
                 'purchase_unit_data' => array_reverse($quantityBreakdown), // Reverse back to match the hierarchy

@@ -9,16 +9,20 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Purchase;
 use App\Models\Price;
 use App\Models\ProductType;
+use App\Models\Store;
+use App\Services\CalculatePurchaseUnit;
 
 use Illuminate\Http\Request;
 
 class PurchaseController extends Controller
 {
     protected $purchaseService;
+    protected $processPurchaseUnit;
 
-    public function __construct(PurchaseService $purchaseService)
+    public function __construct(PurchaseService $purchaseService, CalculatePurchaseUnit $calculatePurchaseUnit)
     {
         $this->purchaseService = $purchaseService;
+        $this->processPurchaseUnit = $calculatePurchaseUnit;
     }
     public function index(Request $request)
     {
@@ -165,10 +169,57 @@ class PurchaseController extends Controller
         $rules = [
             'quantity' => 'required|numeric',
         ];
-        $validatedData = $request->validate($rules);
 
-        return response()->json(['quantity' => $validatedData['quantity']]);
+        $validatedData = $request->validate($rules);
+        $purchaseUnitId = $request['purchase_unit_id'];
+        $quantity = $validatedData['quantity'];
+
+        // Retrieve the product type with related product measurements
+        $productType = ProductType::with(['productMeasurement', 'productMeasurement.PurchaseUnit'])
+            ->where('id', $request['product_type_id'])
+            ->first();
+
+        if (!$productType) {
+            return response()->json(['error' => 'Product type not found.'], 404);
+        }
+
+        // Calculate the number of smallest units in each purchase unit
+        $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($productType->productMeasurement);
+
+        // Find the matching purchase unit value
+        $unitValue = null;
+        foreach ($no_of_smallestUnit_in_each_unit as $unit) {
+            if ($unit['purchase_unit_id'] === $purchaseUnitId) {
+                $unitValue = $unit['value'];
+                break;
+            }
+        }
+
+        if ($unitValue === null) {
+            return response()->json(['error' => 'Invalid purchase unit ID.'], 400);
+        }
+
+        // Multiply the unit value by the requested quantity
+        $updatedQuantity = $unitValue * $quantity;
+
+        // Update the store capacity_qty_available
+
+        $updated = Store::where('product_type_id', $request['product_type_id'])
+    ->where('purchase_unit_id', $purchaseUnitId)
+    ->where('batch_no', 'estimated')
+    ->increment('capacity_qty_available', $updatedQuantity);
+
+        if ($updated) {
+            return response()->json(['quantity' => $validatedData['quantity']]);
+        } else {
+            return response()->json(['error' => 'Failed to update store capacity.'], 500);
+        }
     }
+
+
+
+
+
 
     private function decrementProductTypeEstimation($productTypeId)
     {

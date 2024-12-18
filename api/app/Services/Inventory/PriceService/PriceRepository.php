@@ -66,7 +66,7 @@ class PriceRepository
         if (!$query) {
             return response()->json(['message' => 'No prices found'], 404);
         }
-
+        // return $query;
         // Initialize variables
         $capacityQtyAvailable = null;
         $quantity = 0;
@@ -81,11 +81,12 @@ class PriceRepository
                 ['status', 1],
             ])->value('capacity_qty_available');
         }
-
+        //return $capacityQtyAvailable;
         // Initialize cost_price and selling_price
         $costPrice = $query->cost_price;
         $sellingPrice = $query->selling_price;
 
+        //return $query->productType->productMeasurement;
         // Fetch related price if cost_price or selling_price is null
         if (is_null($costPrice) || is_null($sellingPrice)) {
             $relatedPrice = Price::where('id', $query->price_id)->first();
@@ -95,8 +96,10 @@ class PriceRepository
 
         if ($request->mode === 'estimate') {
             $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($query->productType->productMeasurement);
+
             $quantity = $this->processPurchaseUnit->calculateQuantityInAPurchaseUnit($capacityQtyAvailable, $purchase_unit_id, $no_of_smallestUnit_in_each_unit);
         }
+        //return $no_of_smallestUnit_in_each_unit;
 
         // Transform and return the data in the frontend-expected format
         $transformedData = [

@@ -202,9 +202,9 @@ class ProductTypeRepository
     {
         // Retrieve the product types with their related measurements and purchase units
         $response = ProductType::select("id", "product_type_name")
-    // ->when($mode === "actual", function ($query) {
-    //     $query->where('is_estimated', '=', 0);
-    // })
+    ->when($mode === "estimate", function ($query) {
+        $query->where('is_estimated', '!=', 0);
+    })
     ->with([
         'productMeasurement' => function ($query) {
             $query->select('id', 'product_type_id', 'purchasing_unit_id');
