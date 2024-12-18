@@ -9,16 +9,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 use App\Services\Security\LogService\LogRepository;
+use App\Services\CalculatePurchaseUnit;
 
 class PriceNotificationRepository
 {
     protected $logRepository;
     protected $username;
+    protected $processPurchaseUnit;
 
-    public function __construct(LogRepository $logRepository)
+    public function __construct(LogRepository $logRepository, CalculatePurchaseUnit $calculatePurchaseUnit)
     {
         $this->logRepository = $logRepository;
         $this->username = $this->logRepository->getUsername();
+        $this->processPurchaseUnit = $calculatePurchaseUnit;
     }
 
     public function index($request)
@@ -38,10 +41,7 @@ class PriceNotificationRepository
                                       'branches:id,name'
                                   );
 
-        //  if ($branchId !== 'all') {
-        //     // Apply the where clause if branch_id is not 'all' and the user is not admin
-        //     $query->where('branch_id', $branchId);
-        // }
+
         $priceNotification = $query->latest()->paginate(20);
 
         $priceNotification->getCollection()->transform(function ($Price) {
@@ -106,8 +106,6 @@ class PriceNotificationRepository
         $priceNotification = PriceNotification::find($id);
 
         if ($priceNotification) {
-            // Update the price notification
-            $priceNotification->update($data);
             $this->logRepository->logEvent(
                 'price_notifications',
                 'update',
@@ -116,60 +114,79 @@ class PriceNotificationRepository
                 "$this->username updated the price notification with ID $id",
                 $data
             );
-            $batchNo = null;
-            if ($data['status'] == 'accepted') {
-                // 1. get the last price detail
-                $lastPrice = Price::where('supplier_id', $priceNotification->supplier_id)
-                ->where('product_type_id', $priceNotification->product_type_id)
-                ->orderBy('created_at', 'desc')
-                ->first();
 
-                // check qty left
-                $store = DB::table('stores')
-                    ->where('product_type_id', $priceNotification->product_type_id)
-                    ->where('batch_no', $lastPrice->batch_no)
+            if ($data['status'] == 'accepted') {
+                // Fetch all stores and calculate unit values
+                $productType = \App\Models\ProductType::select("id", "product_type_name")
+                    ->with(['productMeasurement' => function ($query) {
+                        $query->select('id', 'product_type_id', 'purchasing_unit_id');
+                    }])
+                    ->where('id', $priceNotification->product_type_id)
                     ->first();
 
+                // Calculate units and max unit
+                $units = $this->processPurchaseUnit->calculatePurchaseUnits($productType->productMeasurement);
+                $maxUnit = collect($units)->sortByDesc('value')->first();
+                $maxValue = $maxUnit['value'];
+                $maxPurchaseUnitId = $maxUnit['purchase_unit_id'];
 
-                if ($store && $store->capacity_qty_available > 1) {
-                    $newCostPrice = $lastPrice->cost_price ?? $priceNotification->cost_price;
-                    $newSellingPrice = $priceNotification->selling_price;
-                    $isNew = 1;
-                    $batchNo = $lastPrice->batch_no;
-                } else {
-                    $newCostPrice = null;
-                    $newSellingPrice = null;
-                    $isNew = 0;
+                $baseCostPrice = $priceNotification->cost_price;
+                $baseSellingPrice = $data['selling_price'];
+
+                // Process each product measurement
+                foreach ($productType->productMeasurement as $measurement) {
+                    $purchaseUnitId = $measurement->purchasing_unit_id;
+
+                    // Find the value of the current unit
+                    $unitValue = collect($units)->firstWhere('purchase_unit_id', $purchaseUnitId)['value'] ?? 1;
+
+                    // Fetch the old price record
+                    $oldPrice = Price::where('supplier_id', $priceNotification->supplier_id)
+                        ->where('product_type_id', $priceNotification->product_type_id)
+                        ->where('purchase_unit_id', $purchaseUnitId)
+                        ->first();
+
+                    if ($oldPrice) {
+                        // Deactivate the old price record
+                        $oldPrice->update(['status' => 0, 'is_new' => 0]);
+
+                        // Determine new prices
+                        if ($purchaseUnitId == $maxPurchaseUnitId) {
+                            $newCostPrice = $baseCostPrice;
+                            $newSellingPrice = $baseSellingPrice;
+                        } else {
+                            // Scale prices based on unit value ratio
+                            $ratio = $unitValue / $maxValue;
+                            $newCostPrice = round($baseCostPrice * $ratio, 2);
+                            $newSellingPrice = round($baseSellingPrice * $ratio, 2);
+                        }
+
+                        // Insert new price for this purchase unit
+                        Price::create([
+                            'supplier_id' => $priceNotification->supplier_id,
+                            'product_type_id' => $priceNotification->product_type_id,
+                            'purchase_unit_id' => $purchaseUnitId,
+                            'status' => 1,
+                            'cost_price' => $newCostPrice,
+                            'selling_price' => $newSellingPrice,
+                            'new_cost_price' => $newCostPrice,
+                            'new_selling_price' => $newSellingPrice,
+                            'is_new' => 1,
+                            'price_id' => $oldPrice->id, // Pass old price ID
+                            'batch_no' => $oldPrice->batch_no, // Pass old batch number
+                            'currency_id' => $data['currency_id'] ?? null,
+                            'organization_id' => $data['organization_id'] ?? null,
+                            'created_by' => $data['created_by'] ?? auth()->id(),
+                            'updated_by' => $data['updated_by'] ?? auth()->id(),
+                        ]);
+                    }
                 }
-
-                // Set previous prices to inactive
-                Price::where('supplier_id', $priceNotification->supplier_id)
-                    ->where('product_type_id', $priceNotification->product_type_id)
-                    ->update(['status' => 0,'is_new' => 0]);
-
-                // create a new active price
-                Price::create([
-                    'supplier_id' => $priceNotification->supplier_id,
-                    'product_type_id' => $priceNotification->product_type_id,
-                    'status' => 1,
-                    'cost_price' => $priceNotification->cost_price,
-                    'selling_price' => $priceNotification->selling_price,
-                    'new_cost_price' => $newCostPrice,
-                    'new_selling_price' => $newSellingPrice,
-                    'is_new' => $isNew,
-                    'batch_no' => $batchNo,
-                    'currency_id' => $data['currency_id'] ?? null,
-                    'organization_id' => $data['organization_id'] ?? null,
-                    'created_by' => $data['created_by'] ?? auth()->id(),
-                    'updated_by' => $data['updated_by'] ?? auth()->id()
-                ]);
             }
         }
 
         return $priceNotification;
-        // Update the price notification
-
     }
+
 
 
 

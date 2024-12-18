@@ -60,56 +60,60 @@ class PriceRepository
             ['status', 1],
             ['branch_id', $branchId],
         ])
-        ->latest('created_at');
+        ->latest('created_at')
+        ->first(); // Fetch only the latest price
 
-        // Fetch prices
-        $prices = $query->get();
+        if (!$query) {
+            return response()->json(['message' => 'No prices found'], 404);
+        }
 
-        // Process and map prices
-        $sellingUnitData = $prices->map(function ($price) use ($branchId, $request, $query, $purchase_unit_id) {
-            $capacityQtyAvailable = null;
-            $quantity = 0;
+        // Initialize variables
+        $capacityQtyAvailable = null;
+        $quantity = 0;
 
-            // Fetch capacity_qty_available if mode is 'estimate'
-            if ($request->mode === 'estimate') {
-                $capacityQtyAvailable = Store::where([
-                    ['product_type_id', $price->product_type_id],
-                    ['purchase_unit_id', $price->purchase_unit_id],
-                    ['batch_no', $price->batch_no],
-                    ['branch_id', $branchId],
-                    ['status', 1],
-                ])->value('capacity_qty_available');
-            }
+        // Fetch capacity_qty_available if mode is 'estimate'
+        if ($request->mode === 'estimate') {
+            $capacityQtyAvailable = Store::where([
+                ['product_type_id', $query->product_type_id],
+                ['purchase_unit_id', $query->purchase_unit_id],
+                ['batch_no', $query->batch_no],
+                ['branch_id', $branchId],
+                ['status', 1],
+            ])->value('capacity_qty_available');
+        }
 
-            // Initialize cost_price and selling_price
-            $costPrice = $price->cost_price;
-            $sellingPrice = $price->selling_price;
+        // Initialize cost_price and selling_price
+        $costPrice = $query->cost_price;
+        $sellingPrice = $query->selling_price;
 
-            // Fetch related price if cost_price or selling_price is null
-            if (is_null($costPrice) || is_null($sellingPrice)) {
-                $relatedPrice = $query->where('id', $price->price_id)->first();
-                $costPrice = $relatedPrice?->cost_price;
-                $sellingPrice = $sellingPrice ?? $relatedPrice?->selling_price;
-            }
-            if ($request->mode === 'estimate') {
-                $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($price->productType->productMeasurement);
-                $quantity = $this->processPurchaseUnit->calculateQuantityInAPurchaseUnit($capacityQtyAvailable, $purchase_unit_id, $no_of_smallestUnit_in_each_unit);
+        // Fetch related price if cost_price or selling_price is null
+        if (is_null($costPrice) || is_null($sellingPrice)) {
+            $relatedPrice = Price::where('id', $query->price_id)->first();
+            $costPrice = $relatedPrice?->cost_price;
+            $sellingPrice = $sellingPrice ?? $relatedPrice?->selling_price;
+        }
 
-            }
-            // Return the processed price data
-            return [
-                'cost_price' => $costPrice,
-                'is_cost_price_est' => $price->is_cost_price_est,
-                'selling_price' => $sellingPrice,
-                'is_selling_price_est' => $price->is_selling_price_est,
-                'price_id' => $price->id,
-                'quantity' => $quantity,
+        if ($request->mode === 'estimate') {
+            $no_of_smallestUnit_in_each_unit = $this->processPurchaseUnit->calculatePurchaseUnits($query->productType->productMeasurement);
+            $quantity = $this->processPurchaseUnit->calculateQuantityInAPurchaseUnit($capacityQtyAvailable, $purchase_unit_id, $no_of_smallestUnit_in_each_unit);
+        }
 
-            ];
-        });
+        // Transform and return the data in the frontend-expected format
+        $transformedData = [
+            'cost_price' => $costPrice,
+            'is_cost_price_est' => $query->is_cost_price_est,
+            'selling_price' => $sellingPrice,
+            'is_selling_price_est' => $query->is_selling_price_est,
+            'price_id' => $query->id,
+            'purchase_unit_id' => $query->purchase_unit_id,
+            'batch_no' => $query->batch_no,
+            'product_type_id' => $query->product_type_id,
+            'quantity' => $quantity,
+            'created_at' => $query->created_at,
+            'updated_at' => $query->updated_at,
+        ];
 
-        // Return the response
-        return response()->json($sellingUnitData, 200);
+        return response()->json([$transformedData], 200); // Return as an array for consistency with previous structure
     }
 
 

@@ -68,18 +68,17 @@ class PurchaseRepository
 
         if($routeName == "estimated") {
 
-            $purchase->where(function ($query) {
-                $query->whereHas('productType', function ($q) {
-                    $q->where('is_estimated', '>', 0);
-                });
-            });
+            // $purchase->where(['is_actual', "!=", 0]);
+            $purchase->where('is_actual', "!=", 0);
         } else {
+            $purchase->where('is_actual', '=', 0);
 
-            $purchase->where(function ($query) {
-                $query->whereHas('productType', function ($q) {
-                    $q->where('is_estimated', '=', 0);
-                });
-            });
+
+            // $purchase->where(function ($query) {
+            //     $query->whereHas('productType', function ($q) {
+            //         $q->where('is_estimated', '=', 0);
+            //     });
+            // });
 
         }
         $purchases = $purchase->paginate(20);
@@ -126,14 +125,20 @@ class PurchaseRepository
     private function transformProduct($purchase)
     {
         // Get cost price and selling price
-        $cost_price = $purchase->price ? $purchase->price->cost_price : 0;
+        $price = $purchase->price;
+
+        // If price_id exists and current cost_price or selling_price are null, fetch referenced price
+        if ($price && $price->price_id && (is_null($price->cost_price) || is_null($price->selling_price))) {
+            $referencePrice = Price::find($price->price_id);
+            $cost_price = $referencePrice ? $referencePrice->cost_price : 0;
+            $selling_price = $referencePrice ? $referencePrice->selling_price : 0;
+        } else {
+            $cost_price = $price ? $price->cost_price : 0;
+            $selling_price = $price ? $price->selling_price : 0;
+        }
+
         $formatted_cost_price = number_format($cost_price, 2, '.', ',');
-
-        $selling_price = $purchase->price ? $purchase->price->selling_price : 0;
         $formatted_selling_price = number_format($selling_price, 2, '.', ',');
-
-        // Get the product type and product measurements
-        $productType = $purchase->productType;
 
         return [
             'id' => $purchase->id,

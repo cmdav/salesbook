@@ -15,11 +15,10 @@ class Store extends Model
 
     protected $fillable = [
         'product_type_id',
-       // 'store_owner',
+
         'batch_no',
         'capacity_qty_available',
-        //'container_qty_available',
-        //'store_type',
+
         'product_measurement_id',
         'selling_unit_id',
         'purchase_unit_id',
@@ -60,5 +59,10 @@ class Store extends Model
     {
         return $this->belongsTo(ProductMeasurement::class, 'product_measurement_id', 'id');
     }
+    public function purchaseUnit()
+    {
+        return $this->belongsTo(PurchaseUnit::class, 'purchase_unit_id', 'id');
+    }
+
 
 }
