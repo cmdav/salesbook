@@ -116,6 +116,11 @@ class PriceNotificationRepository
             );
 
             if ($data['status'] == 'accepted') {
+
+                $priceNotification->update([
+                    'selling_price' => $data['selling_price'],
+                    'status' => 'accepted', // Set status to 2
+                ]);
                 // Fetch all stores and calculate unit values
                 $productType = \App\Models\ProductType::select("id", "product_type_name")
                     ->with(['productMeasurement' => function ($query) {

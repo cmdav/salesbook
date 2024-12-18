@@ -6,6 +6,7 @@ use App\Models\ProductType;
 use App\Models\SupplierRequest;
 use App\Models\Inventory;
 use App\Models\Sale;
+use App\Models\Price;
 use App\Models\ProductMeasurement;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
@@ -239,10 +240,7 @@ class ProductTypeRepository
         return response()->json(['data' => $response]);
     }
 
-
-    //*************************** */
-
-
+    //use in sales
     public function getProductTypeByName($product_id)
     {
         $branchId = isset($request['branch_id']) ? $request['branch_id'] : auth()->user()->branch_id;
@@ -250,17 +248,21 @@ class ProductTypeRepository
         $response = ProductType::select('id', 'product_type_name', 'barcode', 'vat', 'is_capacity_quantity_est')->with([
             'productMeasurement',
             'productMeasurement.PurchaseUnit:id,purchase_unit_name,unit,parent_purchase_unit_id',
-            'productMeasurement.prices' => function ($query) {
-                $query->select('id', 'cost_price', 'selling_price', 'product_type_id', 'purchase_unit_id', 'is_cost_price_est', 'is_selling_price_est');
+            'productMeasurement.prices' => function ($query) use ($branchId) {
+                $query->select('id', 'cost_price', 'selling_price', 'product_type_id', 'purchase_unit_id', 'is_cost_price_est', 'is_selling_price_est', 'price_id', 'created_at')
+                    ->where('status', 1)
+                    ->when($branchId !== 'all' && auth()->user()->role->role_name != 'Admin', function ($q) use ($branchId) {
+                        $q->where('branch_id', $branchId);
+                    })
+                    ->latest('created_at'); // Ensure latest prices are fetched
             },
             'stores' => function ($query) use ($branchId) {
                 $query->selectRaw('product_type_id, purchase_unit_id, SUM(capacity_qty_available) as total_quantity')
-                    ->where('status', 1);
-
-                if ($branchId !== 'all' && auth()->user()->role->role_name != 'Admin') {
-                    $query->where('branch_id', $branchId);
-                }
-                $query->groupBy('product_type_id', 'purchase_unit_id');
+                    ->where('status', 1)
+                    ->when($branchId !== 'all' && auth()->user()->role->role_name != 'Admin', function ($q) use ($branchId) {
+                        $q->where('branch_id', $branchId);
+                    })
+                    ->groupBy('product_type_id', 'purchase_unit_id');
             },
         ])->get();
 
@@ -272,18 +274,29 @@ class ProductTypeRepository
             $purchaseUnits = collect($item->productMeasurement ?? [])->map(function ($measurement) use ($stores) {
                 $store = $stores->get(optional($measurement->PurchaseUnit)->id ?? null)?->first();
 
-                // Find the corresponding price for this purchase unit
-                $price = optional($measurement->prices->firstWhere('purchase_unit_id', optional($measurement->PurchaseUnit)->id));
+                // Find the latest price for this purchase unit
+                $latestPrice = optional($measurement->prices->sortByDesc('created_at')->first());
+
+                // Initialize cost_price and selling_price
+                $costPrice = optional($latestPrice)->cost_price;
+                $sellingPrice = optional($latestPrice)->selling_price;
+
+                // If cost_price or selling_price is null, fetch from the referenced price
+                if (is_null($costPrice) || is_null($sellingPrice)) {
+                    $referencedPrice = Price::find(optional($latestPrice)->price_id);
+                    $costPrice = $costPrice ?? optional($referencedPrice)->cost_price;
+                    $sellingPrice = $sellingPrice ?? optional($referencedPrice)->selling_price;
+                }
 
                 return [
                     'purchase_unit_id' => optional($measurement->PurchaseUnit)->id,
                     'purchase_unit_name' => optional($measurement->PurchaseUnit)->purchase_unit_name,
                     'unit' => optional($measurement->PurchaseUnit)->unit,
-                    'price_id' => optional($price)->id,
-                    'cost_price' => optional($price)->cost_price,
-                    'is_cost_price_est' => optional($price)->is_cost_price_est,
-                    'selling_price' => optional($price)->selling_price,
-                    'is_selling_price_est' => optional($price)->is_selling_price_est,
+                    'price_id' => optional($latestPrice)->id,
+                    'cost_price' => $costPrice,
+                    'is_cost_price_est' => optional($latestPrice)->is_cost_price_est,
+                    'selling_price' => $sellingPrice,
+                    'is_selling_price_est' => optional($latestPrice)->is_selling_price_est,
                     'capacity_quantity_available' => optional($store)->total_quantity,
                 ];
             });
@@ -311,16 +324,7 @@ class ProductTypeRepository
         });
 
         return response()->json(['data' => $transformedData], 200);
-
     }
-
-
-
-
-
-
-
-
 
 
 

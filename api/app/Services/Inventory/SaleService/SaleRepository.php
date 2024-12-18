@@ -387,7 +387,6 @@ class SaleRepository
 
                     // Get all batches of the product in the branch
                     $stores = Store::where('product_type_id', $product['product_type_id'])
-                                  // ->where('purchase_unit_id', $product['purchase_unit_id'])
                                    ->where('branch_id', auth()->user()->branch_id)
                                    ->where('status', 1)
                                    ->orderBy('created_at', 'asc')
@@ -421,7 +420,10 @@ class SaleRepository
 
                         $oldPriceId = $oldPrice ? $oldPrice->id : null;
 
+                        // Calculate the quantity sold from the current batch
                         $soldQuantityFromBatch = min($smallestUnitCapacity, $store->capacity_qty_available);
+
+                        // Deduct the sold quantity from the batch
                         $store->capacity_qty_available -= $soldQuantityFromBatch;
                         $smallestUnitCapacity -= $soldQuantityFromBatch;
 
@@ -431,12 +433,13 @@ class SaleRepository
 
                         $store->save();
 
+                        // Create a sale record for the quantity sold from this batch
                         $sale = new Sale();
                         $sale->fill([
                             'product_type_id' => $product['product_type_id'],
                             'customer_id' => $data['customer_id'],
                             'price_sold_at' => $product['price_sold_at'],
-                            'quantity' => $product['quantity'],
+                            'quantity' => $soldQuantityFromBatch, // Use the specific batch quantity
                             'vat' => $product['vat'],
                             'payment_method' => $data['payment_method'],
                             'transaction_id' => $transactionId,
@@ -448,7 +451,7 @@ class SaleRepository
                         $sale->price_id = $latestPrice->id;
                         $sale->save();
 
-                        $amount = $product['price_sold_at'] * $soldQuantityFromBatch;
+                        $amount = $product['price_sold_at'] * $soldQuantityFromBatch; // Calculate amount for this batch
                         $vatValue = $product['vat'] == "yes" ? ($amount * 0.075) : 0;
                         $amount += $vatValue;
                         $totalPrice += $amount;
@@ -456,7 +459,7 @@ class SaleRepository
                         $productDetails[] = [
                             "productTypeName" => $latestPrice->productType->product_type_name,
                             'price' => $product['price_sold_at'],
-                            "quantity" => $product['quantity'],
+                            "quantity" => $soldQuantityFromBatch, // Store the batch quantity
                             "vat" => $product['vat'] == 'yes' ? 'yes' : 'no',
                             "amount" => $amount,
                         ];
@@ -498,6 +501,7 @@ class SaleRepository
             return response()->json(['message' => 'Failed to create sales', 'error' => $e->getMessage()], 500);
         }
     }
+
 
 
 
