@@ -26,7 +26,7 @@ class Store extends Model
         'created_by',
         'updated_by',
         'branch_id',
-        'is_actual'
+        'is_displayed'
     ];
 
 

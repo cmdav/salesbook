@@ -128,7 +128,7 @@ class DatabaseSeeder extends Seeder
 
         $user = \App\Models\User::factory()->create([
             'first_name' => 'Test',
-            'email' => 'admin@yopmail.com',
+            'email' => 'rdas@yopmail.com',
             'password' => bcrypt('test123'),
             'type_id' => 2,
             'token'  => 2671234,

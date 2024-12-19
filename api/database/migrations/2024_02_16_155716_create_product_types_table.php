@@ -22,7 +22,7 @@ return new class () extends Migration {
             // $table->string('type')->default(0)->comment('1=product 2 product_type');
             $table->uuid('organization_id', 32)->nullable();
             $table->uuid('supplier_id')->nullable();
-            $table->integer('is_estimated')->default(0)->comment("0 not esti 1 esti cp,2 esti sp,3 esti qty");
+            $table->integer('is_estimated')->default(0)->comment("0 not estimate");
             $table->integer('is_capacity_quantity_est')->default(0);
 
             $table->uuid('created_by', 32)->nullable();

@@ -36,7 +36,9 @@ class StoreRepository
     {
 
         $query = Store::select("id", "product_type_id", "batch_no", "branch_id", "purchase_unit_id", "capacity_qty_available", "status")
-                ->with('productType', 'branches:id,name', 'productType.productMeasurement.PurchaseUnit');
+                ->with('productType', 'branches:id,name', 'productType.productMeasurement.PurchaseUnit')
+                ->where('is_displayed', 1);
+
         if ($branchId !== 'all') {
             // Apply the where clause if branch_id is not 'all' and the user is not admin
             $query->where('branch_id', $branchId);

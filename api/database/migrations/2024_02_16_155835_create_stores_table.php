@@ -25,7 +25,7 @@ return new class () extends Migration {
             $table->integer('status')->default(1);
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
-            $table->integer('is_actual')->default(0);
+            $table->integer('is_displayed')->default(1);
             $table->timestamps();
 
             $table->foreign('product_type_id')->references('id')->on('product_types')->onDelete('restrict');

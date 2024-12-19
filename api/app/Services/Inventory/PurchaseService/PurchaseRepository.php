@@ -37,7 +37,7 @@ class PurchaseRepository
             'productType.activePrice' => function ($query) {
                 $query->select('id', 'cost_price', 'selling_price', 'product_type_id');
             }
-        ]);
+        ])->where('is_displayed', 1);
 
         if ($branchId !== 'all') {
             $query->where('branch_id', $branchId);
