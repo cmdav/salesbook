@@ -131,7 +131,6 @@ class PurchaseController extends Controller
         return response()->json(['message' => 'No price record found'], 404);
     }
 
-
     private function updateSellingPrice(Request $request)
     {
         $rules = [
@@ -187,6 +186,20 @@ class PurchaseController extends Controller
         ];
 
         $validatedData = $request->validate($rules);
+
+        foreach ($validatedData['purchase_unit_data'] as $unitData) {
+            $purchaseUnitId = $unitData['purchase_unit_id'];
+
+            $price = Price::where('product_type_id', $validatedData['product_type_id'])
+                ->where('purchase_unit_id', $purchaseUnitId)
+                ->where('batch_no', 'estimated')
+                ->latest('id')
+                ->first();
+
+            if (!$price || $price->is_cost_price_est !== 0 || $price->is_selling_price_est !== 0) {
+                return response()->json(['message' => 'Ensure both cost price and selling price are updated for all purchase unit IDs before updating quantity.'], 400);
+            }
+        }
 
         $productType = ProductType::with(['productMeasurement', 'productMeasurement.PurchaseUnit'])
             ->where('id', $validatedData['product_type_id'])
@@ -244,12 +257,11 @@ class PurchaseController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
     private function createActualPurchase($validatedData, $unitData, $quantity, $batchNo)
     {
         // Fetch the supplier with the name 'No supplier'
         $supplier = \App\Models\User::where('first_name', 'No supplier')->firstOrFail();
-
-
 
         // Get the latest cost and selling price
         $price = Price::where('product_type_id', $validatedData['product_type_id'])
@@ -313,6 +325,7 @@ class PurchaseController extends Controller
             ->where('batch_no', 'estimated')
             ->update(['is_displayed' => 0]);
     }
+
 
 
 

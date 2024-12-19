@@ -69,9 +69,9 @@ class PurchaseRepository
         if($routeName == "estimated") {
 
             // $purchase->where(['is_actual', "!=", 0]);
-            $purchase->where('is_actual', "!=", 0);
+            $purchase->where('is_actual', "=", 0);
         } else {
-            $purchase->where('is_actual', '=', 0);
+            $purchase->where('is_actual', '!=', 0);
 
 
             // $purchase->where(function ($query) {
@@ -194,7 +194,7 @@ class PurchaseRepository
                     $purchase->product_type_id = $purchaseData['product_type_id'];
                     $purchase->supplier_id = $purchaseData['supplier_id'];
                     $purchase->batch_no = $purchaseData['batch_no'];
-                    $purchase->is_actual = isset($purchaseData['is_actual']) ? $purchaseData['is_actual'] : 0;
+                    $purchase->is_actual = isset($purchaseData['is_actual']) ? $purchaseData['is_actual'] : 1;
                     $purchase->purchase_unit_id = $unitData['purchase_unit_id'];
                     $purchase->product_identifier = $purchaseData['product_identifier'];
                     $purchase->expiry_date = $purchaseData['expiry_date'] ?? null;

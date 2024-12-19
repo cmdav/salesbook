@@ -86,6 +86,9 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
             $newBatchNumber = isset($row['batch_no']) && !empty(trim($row['batch_no'])) ? trim($row['batch_no']) : $this->batchNumberService->generateBatchNumber();
             $vatValue = strtolower(trim($row['vat'])) === 'yes' ? 1 : 0;
 
+            // Calculate is_estimated value
+            $isEstimated = (count($purchaseUnits) * 2) + 1;
+
             $productType = ProductType::create([
                 'product_type_name' => Str::limit(trim($row['product_type_name']), 50),
                 'product_type_description' => Str::limit(trim($row['product_type_description']), 200),
@@ -93,7 +96,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
                 'sub_category_id' => optional($subCategory)->id,
                 'category_id' => optional($category)->id,
                 'barcode' => Str::limit(trim($row['barcode']), 200),
-                'is_estimated' => 3,
+                'is_estimated' => $isEstimated, // Updated calculation
             ]);
 
             foreach ($purchaseUnits as $index => $unitName) {
@@ -127,7 +130,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
                     'cost_price' => round($pricePerUnit, 2), // Round to 2 decimals for clarity
                     'selling_price' => $sellingPrice,
                     'capacity_qty' => $row['quantity'],
-                    'is_actual' => 1,
+                    'is_actual' => 0,
                 ];
             }
 
@@ -138,7 +141,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
                 'batch_no' => 'estimated',
                 'is_price_est' => 'yes',
                 'supplier_id' => $supplier->id,
-                'is_actual' => 1,
+                'is_actual' => 0,
                 'product_identifier' => '',
                 'expiry_date' => !empty($row['expiry_date']) ? \DateTime::createFromFormat('d/m/Y', trim($row['expiry_date']))->format('Y-m-d') : null,
                 'purchase_unit_data' => array_reverse($quantityBreakdown), // Reverse back to match the hierarchy
@@ -161,7 +164,6 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
         }
     }
 
-
     public function rules(): array
     {
         return [
@@ -179,7 +181,6 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmp
             'group' => 'required|string',
         ];
     }
-
 
     public function customValidationMessages()
     {

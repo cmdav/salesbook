@@ -26,7 +26,7 @@ return new class () extends Migration {
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->integer('is_displayed')->default(1);
-            $table->integer('is_actual')->default(0);
+            $table->integer('is_actual')->default(1);
             $table->timestamps();
 
             // $table->foreign('price_id')->references('id')->on('prices')->onDelete('restrict');
