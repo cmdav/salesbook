@@ -236,6 +236,7 @@ class PurchaseController extends Controller
             }
 
             DB::commit();
+            $this->decrementProductTypeEstimation($request->product_type_id);
             return response()->json(['message' => 'Quantities updated successfully.']);
 
         } catch (\Exception $e) {
