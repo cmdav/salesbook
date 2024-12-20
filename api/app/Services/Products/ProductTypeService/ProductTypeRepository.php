@@ -546,16 +546,18 @@ class ProductTypeRepository
             ->when($branchId !== 'all', function ($query) use ($branchId) {
                 // Filter by branch ID if it's not 'all'
                 $query->where('branch_id', $branchId);
+            }) ->whereHas('productType', function ($query) {
+                $query->where('is_estimated', 0);
             })
             ->with([
-                'productType' => function ($query) {
-                    $query->select('id', 'product_type_name', 'sub_category_id', 'created_at');
-                },
-                'productType.subCategory:id,sub_category_name',
-                'productType.productMeasurement.purchaseUnit:id,purchase_unit_name,unit,parent_purchase_unit_id',
-                'productType.store' => function ($query) {
-                    $query->select('product_type_id', 'batch_no', 'capacity_qty_available');
-                }
+              'productType' => function ($query) {
+                  $query->select('id', 'product_type_name', 'sub_category_id', 'created_at');
+              },
+              'productType.subCategory:id,sub_category_name',
+              'productType.productMeasurement.purchaseUnit:id,purchase_unit_name,unit,parent_purchase_unit_id',
+              'productType.store' => function ($query) {
+                  $query->select('product_type_id', 'batch_no', 'capacity_qty_available');
+              }
             ])
             ->select('product_type_id', 'expiry_date', 'batch_no', 'branch_id') // Include branch_id in the selection
             ->groupBy('product_type_id', 'expiry_date', 'batch_no', 'branch_id') // Group by branch_id as well
@@ -675,6 +677,9 @@ class ProductTypeRepository
         $branchId = auth()->user()->branch_id;
 
         $expiredProductsQuery = \App\Models\Purchase::whereBetween('expiry_date', [$startDate, $endDate])
+        ->whereHas('productType', function ($query) {
+            $query->where('is_estimated', 0);
+        })
             ->with([
                 'productType' => function ($query) {
                     $query->select('id', 'product_type_name', 'sub_category_id', 'created_at');
@@ -756,19 +761,15 @@ class ProductTypeRepository
         // $branchId = 'all'; // Default branch
         $branchId = auth()->user()->branch_id; // Get the authenticated user's branch
 
-        // If the user is an admin and has provided a branch_id, use that branch
-        // if (isset($request['branch_id']) && auth()->user()->role->role_name == 'Admin') {
-        //     $branchId = $request['branch_id'];
-        // } elseif (auth()->user()->role->role_name != 'Admin') {
-        //     $branchId = auth()->user()->branch_id;
-        // }
+
 
         // Filter the products by the active price in the selected branch
         $productsQuery = ProductType::with(['activePrice' => function ($query) use ($branchId) {
             // Filter the activePrice based on the branch_id
             $query->select('product_type_id', 'cost_price', 'selling_price', 'new_cost_price', 'new_selling_price', 'is_new', 'status', 'created_at')
                   ->where('branch_id', $branchId); // Filter by branch_id
-        }]);
+        }])->where('is_estimated', 0);
+
 
         // Check if the request has 'all' == true, and return all results without pagination
         if (isset($request['all']) && $request['all'] == true) {

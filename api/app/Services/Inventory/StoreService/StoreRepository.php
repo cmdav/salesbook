@@ -90,7 +90,7 @@ class StoreRepository
             'branch_name' => $isPdf ? null : optional($store->branches)->name,
             'quantity_available' =>  $formattedBreakdown,
             'status' => $store->capacity_qty_available > 0 ? 'Available' : 'Not Available',
-            'quantity_breakdown' => $quantityBreakdown, // Use the generated breakdown string
+           // 'quantity_breakdown' => $quantityBreakdown, // Use the generated breakdown string
         ], function ($value) {
             return $value !== null;
         });
@@ -132,23 +132,6 @@ class StoreRepository
         //return Store::latest()->paginate(3);
 
     }
-    // private function transformProduct($store, $isPdf = false)
-    // {
-    //     return array_filter([
-    //         'id' => $isPdf ? null : $store->id, // Exclude id if isPdf is true
-    //         'product_name' => optional($store->productType)->product_type_name,
-    //         'product_description' => $isPdf ? null : optional($store->productType)->product_type_description, // Exclude product description if isPdf is true
-    //         //'store_owner' => $store->store_owner,
-    //         'batch_no' => $store->batch_no,
-    //         'branch_name' =>  $isPdf ? null : optional($store->branches)->name,
-    //         'quantity_available' => $store->capacity_qty_available,
-    //         //'store_type' => $store->store_type,
-    //         'status' => $store->capacity_qty_available > 0 ? 'Available' : 'Not Available',
-    //     ], function ($value) {
-    //         return $value !== null;
-    //     });
-    // }
-
 
     public function create(array $data)
     {
@@ -192,7 +175,12 @@ class StoreRepository
         $endDate = isset($request['end_date']) ? $request['end_date'] : null;
 
         // Create the query and apply filters
-        $storeQuery = $this->query($branchId);
+
+        $storeQuery = $this->query($branchId)->where(function ($query) {
+            $query->whereHas('productType', function ($q) {
+                $q->where('is_estimated', '=', 0);
+            });
+        });
 
         if ($startDate && $endDate) {
             // Apply date filters on 'created_at' or any other date column you want to filter on
